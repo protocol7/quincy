@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 public enum Version {
@@ -9,7 +10,7 @@ public enum Version {
   DRAFT_09(0xff000000 + 9);
 
   public static Version read(final ByteBuf bb) {
-    long l = bb.readLong();
+    long l = bb.readInt();
 
     if (l == VERSION_NEGOTIATION.version) {
       return VERSION_NEGOTIATION;
@@ -30,7 +31,8 @@ public enum Version {
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeLong(version);
+    bb.writeInt(version);
+    Bytes.debug("Wrote version ", bb);
   }
 
 

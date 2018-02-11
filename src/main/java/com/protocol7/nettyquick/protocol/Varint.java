@@ -1,12 +1,19 @@
 package com.protocol7.nettyquick.protocol;
 
 import java.util.Arrays;
+import java.util.Random;
 
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 public class Varint {
+
+  public static Varint random() {
+    // TODO ensure max 4611686018427387903
+    return new Varint(Rnd.rndLong());
+  }
 
   public static Varint read(ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);
@@ -25,6 +32,7 @@ public class Varint {
   }
 
   public Varint(final long value) {
+    // TODO validate value
     this.value = value;
   }
 
@@ -32,6 +40,22 @@ public class Varint {
 
   public long getValue() {
     return value;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    final Varint varint = (Varint) o;
+
+    return value == varint.value;
+
+  }
+
+  @Override
+  public int hashCode() {
+    return (int) (value ^ (value >>> 32));
   }
 
   public void write(ByteBuf bb) {

@@ -1,17 +1,29 @@
 package com.protocol7.nettyquick.protocol;
 
-import com.protocol7.nettyquick.utils.Rnd;
+import io.netty.buffer.ByteBuf;
 
 public class StreamId {
 
   public static StreamId create() {
-    return new StreamId(Rnd.rndLong());
+    return new StreamId(Varint.random());
   }
 
-  private final long id;
+  public static StreamId parse(ByteBuf bb) {
+    return new StreamId(Varint.read(bb));
+  }
+
+  private final Varint id;
+
+  public StreamId(final Varint id) {
+    this.id = id;
+  }
 
   public StreamId(final long id) {
-    this.id = id;
+    this.id = new Varint(id);
+  }
+
+  public void write(ByteBuf bb) {
+    id.write(bb);
   }
 
   @Override
@@ -27,6 +39,6 @@ public class StreamId {
 
   @Override
   public int hashCode() {
-    return (int) (id ^ (id >>> 32));
+    return (int) (id.getValue() ^ (id.getValue() >>> 32));
   }
 }

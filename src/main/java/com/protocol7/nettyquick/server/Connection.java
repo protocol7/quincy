@@ -8,6 +8,8 @@ import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
@@ -51,9 +53,13 @@ public class Connection {
   }
 
   public void onPacket(Packet packet) {
-    // TODO if stream frame
-    ServerStream stream = streams.getOrCreate(new StreamId(1), this, handler); // TODO get stream ID from frame
-    stream.onData(new byte[0]);
+    for (Frame frame : packet.getPayload().getFrames()) {
+      if (frame instanceof StreamFrame) {
+        StreamFrame sf = (StreamFrame) frame;
+        ServerStream stream = streams.getOrCreate(sf.getStreamId(), this, handler); // TODO get stream ID from frame
+        stream.onData(sf.getData());
+      }
+    }
   }
 
   public PacketNumber nextPacketNumber() {

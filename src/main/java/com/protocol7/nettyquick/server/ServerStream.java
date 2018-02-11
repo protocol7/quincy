@@ -5,6 +5,7 @@ import com.protocol7.nettyquick.protocol.LongPacketType;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.StreamId;
+import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 
 public class ServerStream {
 
@@ -19,8 +20,10 @@ public class ServerStream {
   }
 
   public void write(byte[] b) {
-    // TODO create stream frame
-    Packet p = new LongPacket(LongPacketType.Zero_RTT_Protected, connection.getConnectionId(), connection.getVersion(), connection.nextPacketNumber(), Payload.EMPTY);
+    StreamFrame sf = new StreamFrame(id, 0, true, b);
+    Payload payload = new Payload(sf);
+
+    Packet p = new LongPacket(LongPacketType.Zero_RTT_Protected, connection.getConnectionId(), connection.getVersion(), connection.nextPacketNumber(), payload);
 
     connection.sendPacket(p);
   }

@@ -1,9 +1,11 @@
 package com.protocol7.nettyquick.protocol;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
 
 public class Payload {
@@ -22,6 +24,14 @@ public class Payload {
 
   public Payload(final List<Frame> frames) {
     this.frames = frames;
+  }
+
+  public Payload(final Frame... frames) {
+    this.frames = Arrays.asList(frames);
+  }
+
+  public List<Frame> getFrames() {
+    return frames;
   }
 
   public void write(ByteBuf bb) {

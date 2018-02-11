@@ -2,6 +2,8 @@ package com.protocol7.nettyquick.server;
 
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
+import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -22,6 +24,8 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram) throws Exception {
     System.out.println("s got packet");
     final ByteBuf bb = datagram.content();
+
+    Bytes.debug("Server got ", bb);
 
     Packet packet = packetParser.parse(bb);
 
