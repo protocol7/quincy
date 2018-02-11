@@ -6,50 +6,47 @@ import java.net.UnknownHostException;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
+import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.StreamId;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 
 public class QuicClient {
 
-  public static QuicClient connect(InetSocketAddress serverAddress) throws InterruptedException, SocketException, UnknownHostException {
-    QuicClient client = new QuicClient(serverAddress);
+  public static QuicClient connect(InetSocketAddress serverAddress, StreamListener streamListener) throws InterruptedException, SocketException, UnknownHostException {
+    QuicClient client = new QuicClient(serverAddress, streamListener);
 
     return client;
   }
 
-  private final InetSocketAddress serverAddress;
-  private final Channel channel;
-  private final Map<StreamId, Stream.StreamListener> listeners = Maps.newConcurrentMap();
+  private final ClientConnection connection;
   private final EventLoopGroup group;
 
-  private QuicClient(final InetSocketAddress serverAddress) throws InterruptedException, SocketException, UnknownHostException {
-    this.serverAddress = serverAddress;
-
+  private QuicClient(final InetSocketAddress serverAddress, StreamListener streamListener) throws InterruptedException, SocketException, UnknownHostException {
     this.group = new NioEventLoopGroup();
 
+    ClientHandler handler = new ClientHandler();
     Bootstrap b = new Bootstrap();
     b.group(group)
             .channel(NioDatagramChannel.class)
-            .handler(new ClientHandler(listeners));
+            .handler(handler);
 
-    this.channel = b.bind(0).sync().await().channel();
+    this.connection = new ClientConnection(ConnectionId.create(),
+                                           b.bind(0).sync().await().channel(),
+                                           serverAddress, streamListener);
+    handler.setConnection(connection); // TODO fix cyclic creation
   }
 
-  public Stream openStream(Stream.StreamListener listener) {
-    StreamId streamId = StreamId.create();
-
-    listeners.put(streamId, listener);
-
-    return new Stream(channel, serverAddress);
+  public ClientStream openStream() {
+    return connection.openStream();
   }
 
   public void close() {
     // TODO fix
-    channel.close().syncUninterruptibly().awaitUninterruptibly();
+    connection.close();
+
     group.shutdownGracefully().syncUninterruptibly().awaitUninterruptibly();
   }
 }

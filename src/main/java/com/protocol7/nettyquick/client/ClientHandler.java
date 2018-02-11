@@ -1,9 +1,7 @@
 package com.protocol7.nettyquick.client;
 
-import java.util.Map;
-
-import com.protocol7.nettyquick.protocol.StreamId;
-import io.netty.buffer.ByteBuf;
+import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
@@ -11,19 +9,17 @@ import io.netty.channel.socket.DatagramPacket;
 public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
 
-  private final Map<StreamId, Stream.StreamListener> listeners;
+  private ClientConnection connection;
+  private final PacketParser parser = new PacketParser();
 
-  public ClientHandler(final Map<StreamId, Stream.StreamListener> listeners) {
-    this.listeners = listeners;
+  public void setConnection(final ClientConnection connection) {
+    this.connection = connection;
   }
 
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) throws Exception {
-    ByteBuf content = msg.content();
-    byte[] b = new byte[content.readableBytes()];
-    content.readBytes(b);
-    for (Stream.StreamListener listener : listeners.values()) {
-      listener.onData(b);
-    }
+    Packet p = parser.parse(msg.content());
+
+    connection.onPacket(p);
   }
 }
