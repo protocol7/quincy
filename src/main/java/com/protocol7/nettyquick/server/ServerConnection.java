@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.server;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
@@ -8,20 +9,18 @@ import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 
-public class Connection {
+public class ServerConnection {
 
-  public static Connection create(StreamHandler handler, Channel channel, InetSocketAddress clientAddress) {
-    return new Connection(ConnectionId.create(), handler, channel, clientAddress);
+  public static ServerConnection create(StreamHandler handler, Channel channel, InetSocketAddress clientAddress) {
+    return new ServerConnection(handler, channel, clientAddress);
   }
 
-  private final ConnectionId connId;
+  private Optional<ConnectionId> connectionId = Optional.empty();
   private final StreamHandler handler;
   private final Channel channel;
   private final InetSocketAddress clientAddress;
@@ -29,16 +28,21 @@ public class Connection {
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(new PacketNumber(2));
   private final ServerStreams streams = new ServerStreams();
   private final PacketParser packetParser = new PacketParser();
+  private final ServerStateMachine stateMachine;
 
-  public Connection(final ConnectionId connId, final StreamHandler handler, final Channel channel, final InetSocketAddress clientAddress) {
-    this.connId = connId;
+  public ServerConnection(final StreamHandler handler, final Channel channel, final InetSocketAddress clientAddress) {
     this.handler = handler;
     this.channel = channel;
     this.clientAddress = clientAddress;
+    this.stateMachine = new ServerStateMachine(this);
   }
 
-  public ConnectionId getConnectionId() {
-    return connId;
+  public Optional<ConnectionId> getConnectionId() {
+    return connectionId;
+  }
+
+  public void setConnectionId(ConnectionId connectionId) {
+    this.connectionId = Optional.of(connectionId);
   }
 
   public Version getVersion() {
@@ -53,14 +57,13 @@ public class Connection {
   }
 
   public void onPacket(Packet packet) {
-    for (Frame frame : packet.getPayload().getFrames()) {
-      if (frame instanceof StreamFrame) {
-        StreamFrame sf = (StreamFrame) frame;
-        ServerStream stream = streams.getOrCreate(sf.getStreamId(), this, handler); // TODO get stream ID from frame
-        stream.onData(sf.getData());
-      }
-    }
+    stateMachine.processPacket(packet);
   }
+
+  public ServerStream getOrCreateStream(StreamId streamId) {
+    return streams.getOrCreate(streamId, this, handler);
+  }
+
 
   public PacketNumber nextPacketNumber() {
     return lastPacketNumber.getAndUpdate(packetNumber -> packetNumber.next());

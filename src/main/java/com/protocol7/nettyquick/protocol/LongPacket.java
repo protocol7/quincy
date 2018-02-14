@@ -2,13 +2,13 @@ package com.protocol7.nettyquick.protocol;
 
 public class LongPacket implements Packet {
 
-  private final LongPacketType packetType;
+  private final PacketType packetType;
   private final ConnectionId connectionId;
   private final Version version;
   private final PacketNumber packetNumber;
   private final Payload payload;
 
-  public LongPacket(final LongPacketType packetType, final ConnectionId connectionId, final Version version, final PacketNumber packetNumber, final Payload payload) {
+  public LongPacket(final PacketType packetType, final ConnectionId connectionId, final Version version, final PacketNumber packetNumber, final Payload payload) {
     this.packetType = packetType;
     this.connectionId = connectionId;
     this.version = version;
@@ -16,7 +16,7 @@ public class LongPacket implements Packet {
     this.payload = payload;
   }
 
-  public LongPacketType getPacketType() {
+  public PacketType getPacketType() {
     return packetType;
   }
 

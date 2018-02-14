@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.server;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -29,7 +28,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     Packet packet = packetParser.parse(bb);
 
-    Connection conn = connections.getOrCreate(packet.getConnectionId(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
+    ServerConnection conn = connections.getOrCreate(packet.getConnectionId(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
 
     conn.onPacket(packet);
 

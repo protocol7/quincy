@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.client;
 
 import java.net.InetSocketAddress;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
@@ -8,14 +9,16 @@ import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientConnection {
+
+  private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
   private final ConnectionId connectionId;
   private final Channel channel;
@@ -25,6 +28,7 @@ public class ClientConnection {
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(new PacketNumber(1)); // TODO fix
   private final PacketParser packetParser = new PacketParser();
+  private final ClientStateMachine stateMachine;
 
   private final ClientStreams streams = new ClientStreams();
 
@@ -33,6 +37,11 @@ public class ClientConnection {
     this.channel = channel;
     this.serverAddress = serverAddress;
     this.streamListener = streamListener;
+    this.stateMachine = new ClientStateMachine(this);
+  }
+
+  public CompletionStage<Void> handshake() {
+    return stateMachine.handshake();
   }
 
   public void sendPacket(Packet p) {
@@ -42,14 +51,7 @@ public class ClientConnection {
   }
 
   public void onPacket(Packet p) {
-    for (Frame frame : p.getPayload().getFrames()) {
-      if (frame instanceof StreamFrame) {
-        StreamFrame sf = (StreamFrame) frame;
-
-        ClientStream stream = streams.getOrCreate(sf.getStreamId(), this, streamListener); // TODO get stream ID from frame
-        stream.onData(sf.getData());
-      }
-    }
+    stateMachine.processPacket(p);
   }
 
   public ConnectionId getConnectionId() {
@@ -66,6 +68,10 @@ public class ClientConnection {
 
   public ClientStream openStream() {
     StreamId streamId = StreamId.create();
+    return streams.getOrCreate(streamId, this, streamListener);
+  }
+
+  public ClientStream getOrCreateStream(StreamId streamId) {
     return streams.getOrCreate(streamId, this, streamListener);
   }
 

@@ -18,6 +18,16 @@ public class VersionTest {
     assertByteBufExhusted(bb);
   }
 
+  @Test
+  public void roundtrip() {
+    ByteBuf bb = Unpooled.buffer();
+    Version.DRAFT_09.write(bb);
+
+    Version parsed = Version.read(bb);
+
+    assertEquals(Version.DRAFT_09, parsed);
+  }
+
   private void assertByteBuf(ByteBuf actual, String hexExpected) {
     assertByteBuf(actual, Hex.dehex(hexExpected));
   }

@@ -1,7 +1,7 @@
 package com.protocol7.nettyquick.client;
 
 import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.LongPacketType;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.StreamId;
@@ -20,11 +20,11 @@ public class ClientStream {
   }
 
   public void write(byte[] b) {
-    // TODO create stream frame
+    // TODO random stream frame
     StreamFrame sf = new StreamFrame(streamId, 0, true, b);
     Payload payload = new Payload(sf);
 
-    Packet p = new LongPacket(LongPacketType.Zero_RTT_Protected, connection.getConnectionId(), connection.getVersion(), connection.nextPacketNumber(), payload);
+    Packet p = new LongPacket(PacketType.Zero_RTT_Protected, connection.getConnectionId(), connection.getVersion(), connection.nextPacketNumber(), payload);
 
     connection.sendPacket(p);
   }

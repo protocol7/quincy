@@ -1,12 +1,13 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.google.common.primitives.Longs;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 public class PacketNumber {
 
-  public static PacketNumber init() {
-    return new PacketNumber(0);
+  public static PacketNumber random() {
+    return new PacketNumber(Rnd.rndLong()); // TODO ensure random boundary
   }
 
   public static PacketNumber read(final ByteBuf bb) {

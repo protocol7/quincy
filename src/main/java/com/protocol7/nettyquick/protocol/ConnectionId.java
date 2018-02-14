@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 
 public class ConnectionId {
 
-  public static ConnectionId create() {
+  public static ConnectionId random() {
     return new ConnectionId(Rnd.rndLong());
   }
 
@@ -37,5 +37,10 @@ public class ConnectionId {
   @Override
   public int hashCode() {
     return (int) (id ^ (id >>> 32));
+  }
+
+  @Override
+  public String toString() {
+    return Long.toString(id);
   }
 }

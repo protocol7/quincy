@@ -25,8 +25,6 @@ public class Runner {
     Thread.sleep(100);
 
     client.close(); //.sync().await();
-    System.out.println("Client closed");
     server.close(); //.sync().await();
-    System.out.println("Server closed");
   }
 }

@@ -10,6 +10,8 @@ public abstract class Frame {
 
     if (type == FrameType.STREAM) {
       return StreamFrame.parse(bb);
+    } else if (type == FrameType.PADDING) {
+      return PaddingFrame.parse(bb);
     }
 
     return null;
@@ -24,6 +26,8 @@ public abstract class Frame {
   public FrameType getType() {
     return type;
   }
+
+  public abstract int getLength();
 
   public abstract void write(ByteBuf bb);
 }

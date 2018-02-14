@@ -9,13 +9,13 @@ import io.netty.channel.Channel;
 
 public class Connections {
 
-  private final Map<ConnectionId, Connection> connections = Maps.newConcurrentMap();
+  private final Map<ConnectionId, ServerConnection> connections = Maps.newConcurrentMap();
 
-  public Connection getOrCreate(ConnectionId connId, StreamHandler streamHandler, Channel channel, InetSocketAddress clientAddress) {
-    Connection conn = connections.get(connId);
+  public ServerConnection getOrCreate(ConnectionId connId, StreamHandler streamHandler, Channel channel, InetSocketAddress clientAddress) {
+    ServerConnection conn = connections.get(connId);
     if (conn == null) {
-      conn = Connection.create(streamHandler, channel, clientAddress);
-      Connection existingConn = connections.putIfAbsent(connId, conn);
+      conn = ServerConnection.create(streamHandler, channel, clientAddress);
+      ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;
       }

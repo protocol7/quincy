@@ -4,7 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.LongPacketType;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.Version;
@@ -15,9 +15,9 @@ public class PacketParserTest {
 
   @Test
   public void roundtripLongPacket() {
-    LongPacketType packetType = LongPacketType.Initial;
-    ConnectionId connId = ConnectionId.create();
-    PacketNumber pn = PacketNumber.init();
+    PacketType packetType = PacketType.Initial;
+    ConnectionId connId = ConnectionId.random();
+    PacketNumber pn = PacketNumber.random();
     Version version = Version.DRAFT_09;
     Payload payload = Payload.EMPTY;
     LongPacket lp = new LongPacket(packetType, connId, version, pn, payload);

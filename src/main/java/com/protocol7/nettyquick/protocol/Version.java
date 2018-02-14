@@ -9,6 +9,8 @@ public enum Version {
   FINAL(0x00000001),
   DRAFT_09(0xff000000 + 9);
 
+  public static final Version CURRENT = Version.DRAFT_09;
+
   public static Version read(final ByteBuf bb) {
     long l = bb.readInt();
 

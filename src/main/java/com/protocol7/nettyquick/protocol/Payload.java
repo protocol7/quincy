@@ -15,7 +15,9 @@ public class Payload {
   public static Payload parse(ByteBuf bb) {
     List<Frame> frames = Lists.newArrayList();
     while (bb.isReadable()) {
-      frames.add(Frame.parse(bb));
+      Frame frame = Frame.parse(bb);
+      // TODO ignore padding frames?
+      frames.add(frame);
     }
     return new Payload(frames);
   }

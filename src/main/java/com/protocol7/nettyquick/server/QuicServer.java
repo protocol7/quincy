@@ -38,8 +38,6 @@ public class QuicServer {
 
 
     // Bind and start to accept incoming connections.
-    System.out.println("Binding to " + address);
-    //b.bind(address).sync().channel().closeFuture().await();
     this.channel = b.bind(address).syncUninterruptibly().awaitUninterruptibly().channel();
   }
 

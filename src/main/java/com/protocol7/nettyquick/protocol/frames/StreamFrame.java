@@ -4,6 +4,7 @@ import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class StreamFrame extends Frame {
 
@@ -65,6 +66,14 @@ public class StreamFrame extends Frame {
   }
 
   @Override
+  public int getLength() {
+    // TODO improve
+    ByteBuf bb = Unpooled.buffer();
+    write(bb);
+    return bb.writerIndex();
+  }
+
+  @Override
   public void write(final ByteBuf bb) {
     // TODO handle length and fin flag somehow
 
@@ -75,8 +84,6 @@ public class StreamFrame extends Frame {
     // TODO len
     // TODO fin
 
-    System.out.println(type);
-    System.out.println(Hex.hex(type));
     bb.writeByte(type);
     streamId.write(bb);
     if (offset > 0) {

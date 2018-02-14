@@ -6,12 +6,12 @@ public class ShortPacket implements Packet {
 
   private final boolean omitConnectionId;
   private final boolean keyPhase;
-  private final ShortPacketType packetType;
+  private final PacketType packetType;
   private final Optional<ConnectionId> connectionId;
   private final PacketNumber packetNumber;
   private final Payload payload;
 
-  public ShortPacket(final boolean omitConnectionId, final boolean keyPhase, final ShortPacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
+  public ShortPacket(final boolean omitConnectionId, final boolean keyPhase, final PacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
     this.omitConnectionId = omitConnectionId;
     this.keyPhase = keyPhase;
     this.packetType = packetType;
@@ -28,7 +28,7 @@ public class ShortPacket implements Packet {
     return keyPhase;
   }
 
-  public ShortPacketType getPacketType() {
+  public PacketType getPacketType() {
     return packetType;
   }
 
