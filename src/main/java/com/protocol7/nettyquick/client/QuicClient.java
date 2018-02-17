@@ -1,54 +1,60 @@
 package com.protocol7.nettyquick.client;
 
 import java.net.InetSocketAddress;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.EventLoopGroup;
+import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class QuicClient {
 
-  public static QuicClient connect(InetSocketAddress serverAddress, StreamListener streamListener) throws InterruptedException, SocketException, UnknownHostException, ExecutionException, TimeoutException {
-    QuicClient client = new QuicClient(serverAddress, streamListener);
-
-    return client;
+  public static Future<QuicClient> connect(InetSocketAddress serverAddress, StreamListener streamListener) {
+    return Futures.thenSync(GlobalEventExecutor.INSTANCE,
+                            connectImpl(serverAddress, streamListener),
+                            v -> new QuicClient(v));
   }
 
-  private final ClientConnection connection;
-  private final EventLoopGroup group;
-
-  private QuicClient(final InetSocketAddress serverAddress, StreamListener streamListener) throws InterruptedException, SocketException, UnknownHostException, ExecutionException, TimeoutException {
-    this.group = new NioEventLoopGroup();
-
+  private static Future<ClientConnection> connectImpl(final InetSocketAddress serverAddress, StreamListener streamListener) {
+    NioEventLoopGroup group = new NioEventLoopGroup();
     ClientHandler handler = new ClientHandler();
     Bootstrap b = new Bootstrap();
     b.group(group)
             .channel(NioDatagramChannel.class)
             .handler(handler);
 
-    this.connection = new ClientConnection(ConnectionId.random(),
-                                           b.bind(0).sync().await().channel(),
-                                           serverAddress, streamListener);
-    handler.setConnection(connection); // TODO fix cyclic creation
+    Future<Channel> channelFuture = Futures.thenChannel(GlobalEventExecutor.INSTANCE, b.bind(0));
 
-    connection.handshake().toCompletableFuture().get(1000, TimeUnit.MILLISECONDS);
+    Future<ClientConnection> conn = Futures.thenSync(GlobalEventExecutor.INSTANCE,
+                                                     channelFuture,
+                                                     channel -> {
+                                                       ClientConnection connection = new ClientConnection(ConnectionId.random(),
+                                                                                                          group, channel,
+                                                                                                          serverAddress, streamListener);
+                                                       handler.setConnection(connection); // TODO fix cyclic creation
+                                                       return connection;
+                                                     });
+
+    return Futures.thenAsync(GlobalEventExecutor.INSTANCE,
+                             conn,
+                             clientConnection -> Futures.thenSync(GlobalEventExecutor.INSTANCE, clientConnection.handshake(), aVoid -> clientConnection));
+  }
+
+  private final ClientConnection connection;
+
+  private QuicClient(final ClientConnection connection) {
+    this.connection = connection;
   }
 
   public ClientStream openStream() {
     return connection.openStream();
   }
 
-  public void close() {
-    // TODO fix
-    connection.close();
-
-    group.shutdownGracefully().syncUninterruptibly().awaitUninterruptibly();
+  public Future<?> close() {
+    return connection.close();
   }
 }

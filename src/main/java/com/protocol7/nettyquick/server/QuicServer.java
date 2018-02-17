@@ -2,28 +2,26 @@ package com.protocol7.nettyquick.server;
 
 import java.net.InetSocketAddress;
 
+import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.Channel;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class QuicServer {
 
-  public static QuicServer bind(final InetSocketAddress address, StreamHandler streamHandler) {
-    return new QuicServer(address, streamHandler);
+  public static Future<QuicServer> bind(final InetSocketAddress address, StreamHandler streamHandler) {
+    return Futures.thenSync(GlobalEventExecutor.INSTANCE,
+                            bindImpl(address, streamHandler),
+                            group1 -> new QuicServer(group1));
   }
 
-  private final InetSocketAddress address;
-  private final Channel channel;
-  private final NioEventLoopGroup group;
-
-  private QuicServer(final InetSocketAddress address, final StreamHandler streamHandler) {
-    this.address = address;
-
-    this.group = new NioEventLoopGroup();
+  private static Future<NioEventLoopGroup> bindImpl(final InetSocketAddress address, final StreamHandler streamHandler) {
+    NioEventLoopGroup group = new NioEventLoopGroup();
 
     final Bootstrap b = new Bootstrap();
     b.group(group).channel(NioDatagramChannel.class)
@@ -36,14 +34,17 @@ public class QuicServer {
               }
             });
 
-
     // Bind and start to accept incoming connections.
-    this.channel = b.bind(address).syncUninterruptibly().awaitUninterruptibly().channel();
+    return Futures.thenSync(GlobalEventExecutor.INSTANCE, b.bind(address), aVoid -> group);
   }
 
-  public void close() {
-    // TODO fix
-    channel.close().syncUninterruptibly().awaitUninterruptibly();
-    group.shutdownGracefully().syncUninterruptibly().awaitUninterruptibly();
+  private final NioEventLoopGroup group;
+
+  private QuicServer(final NioEventLoopGroup group) {
+    this.group = group;
+  }
+
+  public Future<?> close() {
+    return group.shutdownGracefully();
   }
 }

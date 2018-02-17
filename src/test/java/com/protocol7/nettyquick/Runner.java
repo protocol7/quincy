@@ -14,9 +14,9 @@ public class Runner {
     QuicServer server = QuicServer.bind(address, (stream, data) -> {
       System.out.println("s got " + new String(data));
       stream.write("Pong".getBytes());
-    });
+    }).sync().get();
 
-    QuicClient client = QuicClient.connect(address, data -> System.out.println("c got " + new String(data)));
+    QuicClient client = QuicClient.connect(address, data -> System.out.println("c got " + new String(data))).awaitUninterruptibly().get();
 
     ClientStream stream = client.openStream();
 
@@ -24,7 +24,7 @@ public class Runner {
 
     Thread.sleep(100);
 
-    client.close(); //.sync().await();
-    server.close(); //.sync().await();
+    client.close().sync().await();
+    server.close().sync().await();
   }
 }

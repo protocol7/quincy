@@ -1,14 +1,15 @@
 package com.protocol7.nettyquick.client;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionStage;
-
-import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
+import io.netty.util.concurrent.DefaultEventExecutor;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,13 +25,13 @@ public class ClientStateMachine {
 
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
-  private final CompletableFuture<Void> handshakeFuture = new CompletableFuture();
+  private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
 
   public ClientStateMachine(final ClientConnection connection) {
     this.connection = connection;
   }
 
-  public CompletionStage<Void> handshake() {
+  public Future<Void> handshake() {
     synchronized (this) {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
@@ -52,7 +53,7 @@ public class ClientStateMachine {
       if (packet.getPacketType() == PacketType.Handshake) {
         if (state == ClientState.InitialSent) {
           state = ClientState.Ready;
-          handshakeFuture.complete(null);
+          handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
         } else {
           log.warn("Got Handshake packet in an unexpected state");

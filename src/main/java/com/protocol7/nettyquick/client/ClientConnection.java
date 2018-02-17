@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.client;
 
 import java.net.InetSocketAddress;
-import java.util.concurrent.CompletionStage;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
@@ -12,7 +11,9 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
+import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,6 +22,7 @@ public class ClientConnection {
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
   private final ConnectionId connectionId;
+  private final NioEventLoopGroup group;
   private final Channel channel;
   private final InetSocketAddress serverAddress;
   private final StreamListener streamListener;
@@ -32,15 +34,16 @@ public class ClientConnection {
 
   private final ClientStreams streams = new ClientStreams();
 
-  public ClientConnection(final ConnectionId connectionId, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
+  public ClientConnection(final ConnectionId connectionId, final NioEventLoopGroup group, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
     this.connectionId = connectionId;
+    this.group = group;
     this.channel = channel;
     this.serverAddress = serverAddress;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
   }
 
-  public CompletionStage<Void> handshake() {
+  public Future<Void> handshake() {
     return stateMachine.handshake();
   }
 
@@ -75,7 +78,7 @@ public class ClientConnection {
     return streams.getOrCreate(streamId, this, streamListener);
   }
 
-  public void close() {
-    channel.close().syncUninterruptibly().awaitUninterruptibly();
+  public Future<?> close() {
+    return group.shutdownGracefully();
   }
 }

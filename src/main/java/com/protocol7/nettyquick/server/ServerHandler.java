@@ -31,16 +31,5 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     ServerConnection conn = connections.getOrCreate(packet.getConnectionId(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
 
     conn.onPacket(packet);
-
-/*    ByteBuf bb = Unpooled.copiedBuffer("World".getBytes());
-
-    InetSocketAddress respAddr = new InetSocketAddress(srcAddr, packet.sender().getPort());
-
-    DatagramPacket resp = new DatagramPacket(bb, respAddr);
-
-    ctx.writeAndFlush(resp);
-
-    System.out.println(respAddr);
-    */
   }
 }
