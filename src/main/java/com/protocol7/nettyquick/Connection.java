@@ -13,4 +13,6 @@ public interface Connection {
   Optional<ConnectionId> getConnectionId();
 
   PacketNumber nextPacketNumber();
+
+  void onPacket(Packet packet);
 }

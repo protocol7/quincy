@@ -125,4 +125,12 @@ public class AckFrame extends Frame {
     result = 31 * result + blocks.hashCode();
     return result;
   }
+
+  @Override
+  public String toString() {
+    return "AckFrame{" +
+            "ackDelay=" + ackDelay +
+            ", blocks=" + blocks +
+            '}';
+  }
 }

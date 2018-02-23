@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import java.util.Arrays;
+
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.utils.Hex;
@@ -85,5 +87,15 @@ public class StreamFrame extends Frame {
     // TODO length
 
     bb.writeBytes(data);
+  }
+
+  @Override
+  public String toString() {
+    return "StreamFrame{" +
+            "streamId=" + streamId +
+            ", offset=" + offset +
+            ", fin=" + fin +
+            ", data=" + Arrays.toString(data) +
+            '}';
   }
 }

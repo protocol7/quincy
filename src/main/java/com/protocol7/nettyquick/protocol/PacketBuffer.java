@@ -13,16 +13,26 @@ import com.google.common.collect.Queues;
 import com.protocol7.nettyquick.Connection;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO resends
 public class PacketBuffer {
 
+  private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
+
   private final Map<PacketNumber, Packet> buffer = Maps.newConcurrentMap();
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final Connection connection;
+  private final Sender sender;
 
-  public PacketBuffer(final Connection connection) {
+  public interface Sender {
+    void send(Packet packet);
+  }
+
+  public PacketBuffer(final Connection connection, final Sender sender) {
     this.connection = connection;
+    this.sender = sender;
   }
 
   @VisibleForTesting
@@ -32,33 +42,39 @@ public class PacketBuffer {
 
   public void send(Packet packet) {
     buffer.put(packet.getPacketNumber(), packet);
-    connection.sendPacket(packet);
+    log.debug("Buffered packet {}", packet.getPacketNumber());
+    sender.send(packet);
   }
 
   public void onPacket(Packet packet) {
     ackQueue.add(packet.getPacketNumber());
+    log.debug("Acked packet {}", packet.getPacketNumber());
 
-    ack(packet);
+    handleAcks(packet);
 
     if (!acksOnly(packet)) {
       flushAcks();
     }
   }
 
-  private void ack(Packet packet) {
-    packet.getPayload().getFrames().stream().filter(frame -> frame instanceof AckFrame).forEach(frame -> ack((AckFrame) frame));
+  private void handleAcks(Packet packet) {
+    packet.getPayload().getFrames().stream().filter(frame -> frame instanceof AckFrame).forEach(frame -> handleAcks((AckFrame) frame));
   }
 
-  private void ack(AckFrame frame) {
-    frame.getBlocks().forEach(this::ack);
+  private void handleAcks(AckFrame frame) {
+    frame.getBlocks().forEach(this::handleAcks);
   }
 
-  private void ack(AckBlock block) {
+  private void handleAcks(AckBlock block) {
     // TODO optimize
     long smallest = block.getSmallest().asLong();
     long largest = block.getLargest().asLong();
     for (long i = smallest; i<=largest; i++) {
-      buffer.remove(new PacketNumber(i));
+      PacketNumber pn = new PacketNumber(i);
+      if (buffer.containsKey(pn)) {
+        log.debug("Acked packet {}", pn);
+        buffer.remove(pn);
+      }
     }
   }
 
@@ -71,6 +87,8 @@ public class PacketBuffer {
                                     connection.getConnectionId(),
                                     connection.nextPacketNumber(),
                                     new Payload(ackFrame));
+
+    log.debug("Flushed acks {}", blocks);
 
     send(packet);
   }

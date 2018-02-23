@@ -23,7 +23,7 @@ public class Runner {
 
     stream.write("Ping".getBytes());
 
-    Thread.sleep(100);
+    Thread.sleep(500);
 
     client.close().sync().await();
     server.close().sync().await();

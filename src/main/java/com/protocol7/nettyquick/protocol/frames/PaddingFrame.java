@@ -25,4 +25,9 @@ public class PaddingFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
   }
+
+  @Override
+  public String toString() {
+    return "PaddingFrame";
+  }
 }

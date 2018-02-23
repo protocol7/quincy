@@ -7,6 +7,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import com.protocol7.nettyquick.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
@@ -18,6 +19,7 @@ import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class ClientConnection implements Connection {
 
@@ -32,6 +34,7 @@ public class ClientConnection implements Connection {
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(new PacketNumber(1)); // TODO fix
   private final PacketParser packetParser = new PacketParser();
+  private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
   private final ClientStreams streams = new ClientStreams();
@@ -43,20 +46,33 @@ public class ClientConnection implements Connection {
     this.serverAddress = serverAddress;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
   }
 
   public Future<Void> handshake() {
+    MDC.put("actor", "client");
     return stateMachine.handshake();
   }
 
   public void sendPacket(Packet p) {
-    ByteBuf bb = packetParser.serialize(p);
-    channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
-    System.out.println("c sent packet to " + serverAddress);
+    packetBuffer.send(p);
   }
 
-  public void onPacket(Packet p) {
-    stateMachine.processPacket(p);
+  private void sendPacketUnbuffered(Packet packet) {
+    ByteBuf bb = packetParser.serialize(packet);
+    channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
+    log.debug("Client send {}", packet);
+  }
+
+  public void onPacket(Packet packet) {
+    log.debug("Client got {}", packet);
+
+    lastPacketNumber.getAndAccumulate(packet.getPacketNumber(), (pn1, pn2) -> pn1.compareTo(pn2) > 0 ? pn1 : pn2);
+
+    log.debug("Update packet number {}", lastPacketNumber.get());
+
+    packetBuffer.onPacket(packet);
+    stateMachine.processPacket(packet);
   }
 
   public Optional<ConnectionId> getConnectionId() {
@@ -68,7 +84,7 @@ public class ClientConnection implements Connection {
   }
 
   public PacketNumber nextPacketNumber() {
-    return lastPacketNumber.getAndUpdate(packetNumber -> packetNumber.next());
+    return lastPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 
   public ClientStream openStream() {

@@ -7,6 +7,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
+import org.slf4j.MDC;
 
 
 public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
@@ -21,12 +22,13 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram) throws Exception {
-    System.out.println("s got packet");
     final ByteBuf bb = datagram.content();
 
-    Bytes.debug("Server got ", bb);
-
     Packet packet = packetParser.parse(bb);
+
+    MDC.put("actor", "server");
+    MDC.put("packetnumber", packet.getPacketNumber().toString());
+    MDC.put("connectionid", packet.getConnectionId().toString());
 
     ServerConnection conn = connections.getOrCreate(packet.getConnectionId(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
 

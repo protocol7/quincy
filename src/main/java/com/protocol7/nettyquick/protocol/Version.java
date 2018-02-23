@@ -34,8 +34,5 @@ public enum Version {
 
   public void write(final ByteBuf bb) {
     bb.writeInt(version);
-    Bytes.debug("Wrote version ", bb);
   }
-
-
 }

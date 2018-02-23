@@ -57,4 +57,9 @@ public class Payload {
   public int hashCode() {
     return frames != null ? frames.hashCode() : 0;
   }
+
+  @Override
+  public String toString() {
+    return "Payload{" + frames + '}';
+  }
 }

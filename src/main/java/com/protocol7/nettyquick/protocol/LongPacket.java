@@ -35,4 +35,14 @@ public class LongPacket implements Packet {
   public Payload getPayload() {
     return payload;
   }
+
+  @Override
+  public String toString() {
+    return "LongPacket{" +
+            "packetNumber=" + packetNumber +
+            ", packetType=" + packetType +
+            ", connectionId=" + connectionId +
+            ", payload=" + payload +
+            '}';
+  }
 }

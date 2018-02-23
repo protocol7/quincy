@@ -1,30 +1,29 @@
 package com.protocol7.nettyquick.protocol;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 import com.protocol7.nettyquick.Connection;
+import com.protocol7.nettyquick.protocol.PacketBuffer.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.sun.xml.internal.bind.v2.runtime.reflect.Lister;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 public class PacketBufferTest {
 
-  @Mock
-  private Connection connection;
+  @Mock private Connection connection;
+  @Mock private Sender sender;
 
   private PacketBuffer buffer;
 
@@ -35,7 +34,7 @@ public class PacketBufferTest {
     when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextPacketNumber()).thenReturn(new PacketNumber(3));
 
-    buffer = new PacketBuffer(connection);
+    buffer = new PacketBuffer(connection, sender);
   }
 
   private Packet packet(long pn, Frame... frames) {
@@ -61,15 +60,19 @@ public class PacketBufferTest {
 
     buffer.onPacket(pingPacket);
 
-    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
-    verify(connection).sendPacket(captor.capture());
-
-    Packet actual = captor.getValue();
+    Packet actual = verifySent();
 
     AckFrame actualFrame = (AckFrame) actual.getPayload().getFrames().get(0);
     assertEquals(AckBlock.fromLongs(1, 2), actualFrame.getBlocks().get(0));
 
     assertBuffered(3);
+  }
+
+  private Packet verifySent() {
+    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
+    verify(sender).send(captor.capture());
+
+    return captor.getValue();
   }
 
   @Test
@@ -78,10 +81,7 @@ public class PacketBufferTest {
 
     buffer.onPacket(pingPacket);
 
-    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
-    verify(connection).sendPacket(captor.capture());
-
-    Packet actual = captor.getValue();
+    Packet actual = verifySent();
 
     AckFrame actualFrame = (AckFrame) actual.getPayload().getFrames().get(0);
     assertEquals(AckBlock.fromLongs(2, 2), actualFrame.getBlocks().get(0));
@@ -95,10 +95,7 @@ public class PacketBufferTest {
 
     buffer.send(pingPacket);
 
-    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
-    verify(connection).sendPacket(captor.capture());
-
-    Packet actual = captor.getValue();
+    Packet actual = verifySent();
 
     assertEquals(pingPacket, actual);
 

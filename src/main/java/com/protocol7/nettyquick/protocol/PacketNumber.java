@@ -15,6 +15,8 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return new PacketNumber(bb.readLong());
   }
 
+  public static final PacketNumber MIN = new PacketNumber(Long.MIN_VALUE);
+
   private final long number;
 
   public PacketNumber(final long number) {
@@ -64,8 +66,6 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   @Override
   public String toString() {
-    return "PacketNumber(" +
-            number +
-            ')';
+    return Long.toString(number);
   }
 }

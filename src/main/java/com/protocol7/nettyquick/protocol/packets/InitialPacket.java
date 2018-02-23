@@ -16,7 +16,7 @@ public class InitialPacket extends LongPacket {
 
   public static InitialPacket create(ConnectionId connectionId) { // TODO take crypto params
     Version version = Version.CURRENT;
-    PacketNumber packetNumber = PacketNumber.random();
+    PacketNumber packetNumber = new PacketNumber(123); // TODO PacketNumber.random();
 
     List<Frame> frames = Lists.newArrayList();
     int length = 0; // TODO handshake stream frame

@@ -44,4 +44,14 @@ public class ShortPacket implements Packet {
   public Payload getPayload() {
     return payload;
   }
+
+  @Override
+  public String toString() {
+    return "ShortPacket{" +
+            "packetType=" + packetType +
+            ", connectionId=" + connectionId +
+            ", packetNumber=" + packetNumber +
+            ", payload=" + payload +
+            '}';
+  }
 }
