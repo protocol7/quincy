@@ -66,14 +66,6 @@ public class StreamFrame extends Frame {
   }
 
   @Override
-  public int getLength() {
-    // TODO improve
-    ByteBuf bb = Unpooled.buffer();
-    write(bb);
-    return bb.writerIndex();
-  }
-
-  @Override
   public void write(final ByteBuf bb) {
     // TODO handle length and fin flag somehow
 

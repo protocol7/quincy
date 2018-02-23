@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.protocol.frames;
 
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public abstract class Frame {
 
@@ -12,6 +13,8 @@ public abstract class Frame {
       return StreamFrame.parse(bb);
     } else if (type == FrameType.PADDING) {
       return PaddingFrame.parse(bb);
+    } else if (type == FrameType.ACK) {
+      return AckFrame.parse(bb);
     }
 
     return null;
@@ -27,7 +30,16 @@ public abstract class Frame {
     return type;
   }
 
-  public abstract int getLength();
+  public int getLength() {
+    // TODO improve
+    ByteBuf bb = Unpooled.buffer();
+    try {
+      write(bb);
+      return bb.writerIndex();
+    } finally {
+      bb.release();
+    }
+  }
 
   public abstract void write(ByteBuf bb);
 }

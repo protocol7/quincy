@@ -24,7 +24,7 @@ public class ClientStream {
     StreamFrame sf = new StreamFrame(streamId, 0, true, b);
     Payload payload = new Payload(sf);
 
-    Packet p = new LongPacket(PacketType.Zero_RTT_Protected, connection.getConnectionId(), connection.getVersion(), connection.nextPacketNumber(), payload);
+    Packet p = new LongPacket(PacketType.Zero_RTT_Protected, connection.getConnectionId().get(), connection.getVersion(), connection.nextPacketNumber(), payload);
 
     connection.sendPacket(p);
   }

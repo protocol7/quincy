@@ -4,6 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.protocol7.nettyquick.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
@@ -14,7 +15,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 
-public class ServerConnection {
+public class ServerConnection implements Connection {
 
   public static ServerConnection create(StreamHandler handler, Channel channel, InetSocketAddress clientAddress) {
     return new ServerConnection(handler, channel, clientAddress);

@@ -5,11 +5,9 @@ import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
-import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import io.netty.util.concurrent.ImmediateEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -35,7 +33,7 @@ public class ClientStateMachine {
     synchronized (this) {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
-        connection.sendPacket(InitialPacket.create(connection.getConnectionId()));
+        connection.sendPacket(InitialPacket.create(connection.getConnectionId().get()));
         state = ClientState.InitialSent;
         log.info("Client connection state inital sent");
       } else {

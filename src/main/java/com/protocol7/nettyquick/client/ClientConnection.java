@@ -1,8 +1,10 @@
 package com.protocol7.nettyquick.client;
 
 import java.net.InetSocketAddress;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
+import com.protocol7.nettyquick.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
@@ -17,7 +19,7 @@ import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ClientConnection {
+public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
@@ -57,8 +59,8 @@ public class ClientConnection {
     stateMachine.processPacket(p);
   }
 
-  public ConnectionId getConnectionId() {
-    return connectionId;
+  public Optional<ConnectionId> getConnectionId() {
+    return Optional.of(connectionId);
   }
 
   public Version getVersion() {
