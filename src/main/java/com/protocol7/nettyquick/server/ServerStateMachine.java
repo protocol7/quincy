@@ -6,6 +6,7 @@ import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquick.streams.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,7 +50,7 @@ public class ServerStateMachine {
         for (Frame frame : packet.getPayload().getFrames()) {
           if (frame instanceof StreamFrame) {
             StreamFrame sf = (StreamFrame) frame;
-            ServerStream stream = connection.getOrCreateStream(sf.getStreamId());
+            Stream stream = connection.getOrCreateStream(sf.getStreamId());
             stream.onData(sf.getData());
           }
         }

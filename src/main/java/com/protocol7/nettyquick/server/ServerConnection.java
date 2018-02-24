@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.Connection;
+import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketBuffer;
@@ -12,6 +13,8 @@ import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
+import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.streams.Streams;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
@@ -20,24 +23,24 @@ import org.slf4j.LoggerFactory;
 
 public class ServerConnection implements Connection {
 
-  public static ServerConnection create(StreamHandler handler, Channel channel, InetSocketAddress clientAddress) {
+  public static ServerConnection create(StreamListener handler, Channel channel, InetSocketAddress clientAddress) {
     return new ServerConnection(handler, channel, clientAddress);
   }
 
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
   private Optional<ConnectionId> connectionId = Optional.empty();
-  private final StreamHandler handler;
+  private final StreamListener handler;
   private final Channel channel;
   private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(PacketNumber.MIN);
-  private final ServerStreams streams = new ServerStreams();
+  private final Streams streams = new Streams();
   private final PacketParser packetParser = new PacketParser();
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  public ServerConnection(final StreamHandler handler, final Channel channel, final InetSocketAddress clientAddress) {
+  public ServerConnection(final StreamListener handler, final Channel channel, final InetSocketAddress clientAddress) {
     this.handler = handler;
     this.channel = channel;
     this.clientAddress = clientAddress;
@@ -80,7 +83,7 @@ public class ServerConnection implements Connection {
     stateMachine.processPacket(packet);
   }
 
-  public ServerStream getOrCreateStream(StreamId streamId) {
+  public Stream getOrCreateStream(StreamId streamId) {
     return streams.getOrCreate(streamId, this, handler);
   }
 

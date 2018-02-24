@@ -12,6 +12,9 @@ import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
+import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.streams.StreamListener;
+import com.protocol7.nettyquick.streams.Streams;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -37,7 +40,7 @@ public class ClientConnection implements Connection {
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
-  private final ClientStreams streams = new ClientStreams();
+  private final Streams streams = new Streams();
 
   public ClientConnection(final ConnectionId connectionId, final NioEventLoopGroup group, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
     this.connectionId = connectionId;
@@ -87,12 +90,12 @@ public class ClientConnection implements Connection {
     return lastPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 
-  public ClientStream openStream() {
+  public Stream openStream() {
     StreamId streamId = StreamId.create();
     return streams.getOrCreate(streamId, this, streamListener);
   }
 
-  public ClientStream getOrCreateStream(StreamId streamId) {
+  public Stream getOrCreateStream(StreamId streamId) {
     return streams.getOrCreate(streamId, this, streamListener);
   }
 

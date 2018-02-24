@@ -5,6 +5,7 @@ import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
+import com.protocol7.nettyquick.streams.Stream;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -61,7 +62,7 @@ public class ClientStateMachine {
           if (frame instanceof StreamFrame) {
             StreamFrame sf = (StreamFrame) frame;
 
-            ClientStream stream = connection.getOrCreateStream(sf.getStreamId());
+            Stream stream = connection.getOrCreateStream(sf.getStreamId());
             stream.onData(sf.getData());
           }
         }

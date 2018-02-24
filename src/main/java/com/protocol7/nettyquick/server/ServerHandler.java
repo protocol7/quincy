@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.server;
 
+import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.buffer.ByteBuf;
@@ -13,9 +14,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   private final PacketParser packetParser = new PacketParser();
   private final Connections connections = new Connections();
-  private final StreamHandler streamHandler;
+  private final StreamListener streamHandler;
 
-  public ServerHandler(final StreamHandler streamHandler) {
+  public ServerHandler(final StreamListener streamHandler) {
     this.streamHandler = streamHandler;
   }
 

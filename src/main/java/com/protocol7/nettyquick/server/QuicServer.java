@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.server;
 
 import java.net.InetSocketAddress;
 
+import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -14,13 +15,13 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 
 public class QuicServer {
 
-  public static Future<QuicServer> bind(final InetSocketAddress address, StreamHandler streamHandler) {
+  public static Future<QuicServer> bind(final InetSocketAddress address, StreamListener streamHandler) {
     return Futures.thenSync(GlobalEventExecutor.INSTANCE,
                             bindImpl(address, streamHandler),
                             group1 -> new QuicServer(group1));
   }
 
-  private static Future<NioEventLoopGroup> bindImpl(final InetSocketAddress address, final StreamHandler streamHandler) {
+  private static Future<NioEventLoopGroup> bindImpl(final InetSocketAddress address, final StreamListener streamHandler) {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
     final Bootstrap b = new Bootstrap();

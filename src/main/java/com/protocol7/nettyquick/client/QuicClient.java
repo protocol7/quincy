@@ -3,6 +3,8 @@ package com.protocol7.nettyquick.client;
 import java.net.InetSocketAddress;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -50,7 +52,7 @@ public class QuicClient {
     this.connection = connection;
   }
 
-  public ClientStream openStream() {
+  public Stream openStream() {
     return connection.openStream();
   }
 

@@ -3,9 +3,9 @@ package com.protocol7.nettyquick;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 
-import com.protocol7.nettyquick.client.ClientStream;
 import com.protocol7.nettyquick.client.QuicClient;
 import com.protocol7.nettyquick.server.QuicServer;
+import com.protocol7.nettyquick.streams.Stream;
 
 public class Runner {
 
@@ -17,9 +17,9 @@ public class Runner {
       stream.write("Pong".getBytes());
     }).sync().get();
 
-    QuicClient client = QuicClient.connect(address, data -> System.out.println("c got " + new String(data))).sync().get();
+    QuicClient client = QuicClient.connect(address, (stream, data) -> System.out.println("c got " + new String(data))).sync().get();
 
-    ClientStream stream = client.openStream();
+    Stream stream = client.openStream();
 
     stream.write("Ping".getBytes());
 
