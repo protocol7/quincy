@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.server;
 
 import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;

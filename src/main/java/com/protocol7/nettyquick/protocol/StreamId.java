@@ -32,13 +32,17 @@ public class StreamId {
     if (o == null || getClass() != o.getClass()) return false;
 
     final StreamId streamId = (StreamId) o;
-
-    return id == streamId.id;
+    return id.equals(streamId.id);
 
   }
 
   @Override
   public int hashCode() {
     return (int) (id.getValue() ^ (id.getValue() >>> 32));
+  }
+
+  @Override
+  public String toString() {
+    return id.toString();
   }
 }

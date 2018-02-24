@@ -5,8 +5,8 @@ import java.util.List;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.PacketNumber;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
@@ -16,7 +16,7 @@ public class InitialPacket extends LongPacket {
 
   public static InitialPacket create(ConnectionId connectionId) { // TODO take crypto params
     Version version = Version.CURRENT;
-    PacketNumber packetNumber = new PacketNumber(123); // TODO PacketNumber.random();
+    PacketNumber packetNumber = PacketNumber.random();
 
     List<Frame> frames = Lists.newArrayList();
     int length = 0; // TODO handshake stream frame

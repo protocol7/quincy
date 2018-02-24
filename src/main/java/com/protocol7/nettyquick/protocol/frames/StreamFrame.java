@@ -4,9 +4,7 @@ import java.util.Arrays;
 
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
-import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 public class StreamFrame extends Frame {
 
@@ -69,14 +67,15 @@ public class StreamFrame extends Frame {
 
   @Override
   public void write(final ByteBuf bb) {
-    // TODO handle length and fin flag somehow
-
     byte type = getType().getType();
     if (offset > 0) {
       type = (byte)(type | 0x04);
     }
-    // TODO len
-    // TODO fin
+    if (isFin()) {
+      type = (byte)(type | 0x01);
+    }
+    // TODO only set len when needed
+    type = (byte)(type | 0x02);
 
     bb.writeByte(type);
     streamId.write(bb);
@@ -84,9 +83,32 @@ public class StreamFrame extends Frame {
       new Varint(offset).write(bb);
     }
 
-    // TODO length
+    new Varint(data.length).write(bb);
 
     bb.writeBytes(data);
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    final StreamFrame that = (StreamFrame) o;
+
+    if (offset != that.offset) return false;
+    if (fin != that.fin) return false;
+    if (!streamId.equals(that.streamId)) return false;
+    return Arrays.equals(data, that.data);
+
+  }
+
+  @Override
+  public int hashCode() {
+    int result = streamId.hashCode();
+    result = 31 * result + (int) (offset ^ (offset >>> 32));
+    result = 31 * result + (fin ? 1 : 0);
+    result = 31 * result + Arrays.hashCode(data);
+    return result;
   }
 
   @Override

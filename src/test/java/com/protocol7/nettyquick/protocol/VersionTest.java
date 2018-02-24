@@ -1,6 +1,8 @@
 package com.protocol7.nettyquick.protocol;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;

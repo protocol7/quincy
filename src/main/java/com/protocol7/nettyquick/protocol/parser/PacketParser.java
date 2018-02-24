@@ -2,12 +2,11 @@ package com.protocol7.nettyquick.protocol.parser;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
+import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.apache.commons.lang.NotImplementedException;

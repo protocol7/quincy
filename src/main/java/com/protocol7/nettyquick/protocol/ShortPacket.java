@@ -2,7 +2,18 @@ package com.protocol7.nettyquick.protocol;
 
 import java.util.Optional;
 
+import com.protocol7.nettyquick.protocol.frames.Frame;
+
 public class ShortPacket implements Packet {
+
+  public static ShortPacket addFrame(ShortPacket packet, Frame frame) {
+    return new ShortPacket(packet.omitConnectionId,
+                           packet.keyPhase,
+                           packet.packetType,
+                           packet.connectionId,
+                           packet.packetNumber,
+                           Payload.addFrame(packet.payload, frame));
+  }
 
   private final boolean omitConnectionId;
   private final boolean keyPhase;

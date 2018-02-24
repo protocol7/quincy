@@ -1,14 +1,13 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.google.common.primitives.Longs;
-import com.google.common.primitives.UnsignedLong;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 public class PacketNumber implements Comparable<PacketNumber> {
 
   public static PacketNumber random() {
-    return new PacketNumber(Rnd.rndLong()); // TODO ensure random boundary
+    return new PacketNumber(Rnd.rndLong(0, 4611686018427387903L));
   }
 
   public static PacketNumber read(final ByteBuf bb) {

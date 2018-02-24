@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
 import java.util.Arrays;
-import java.util.Random;
 
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
@@ -12,7 +11,7 @@ public class Varint {
 
   public static Varint random() {
     // TODO ensure max 4611686018427387903
-    return new Varint(Rnd.rndLong());
+    return new Varint(Rnd.rndLong(0, 4611686018427387903L));
   }
 
   public static Varint read(ByteBuf bb) {
@@ -79,5 +78,10 @@ public class Varint {
     b[0] = (byte)(b[0] | mask);
 
     bb.writeBytes(b);
+  }
+
+  @Override
+  public String toString() {
+    return Long.toString(value);
   }
 }

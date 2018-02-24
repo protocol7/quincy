@@ -41,6 +41,17 @@ public class PacketBuffer {
   }
 
   public void send(Packet packet) {
+    List<AckBlock> ackBlocks = drainAcks(ackQueue);
+    if (!ackBlocks.isEmpty()) {
+      // add to packet
+      AckFrame ackFrame = new AckFrame(123, ackBlocks);
+      sendImpl(Packet.addFrame(packet, ackFrame));
+    } else {
+      sendImpl(packet);
+    }
+  }
+
+  private void sendImpl(Packet packet) {
     buffer.put(packet.getPacketNumber(), packet);
     log.debug("Buffered packet {}", packet.getPacketNumber());
     sender.send(packet);
@@ -52,8 +63,19 @@ public class PacketBuffer {
 
     handleAcks(packet);
 
-    if (!acksOnly(packet)) {
+    if (shouldFlush(packet)) {
+      log.debug("Directly acking packet");
       flushAcks();
+    }
+  }
+
+  private boolean shouldFlush(Packet packet) {
+    if (packet.getPacketType() == PacketType.Initial) {
+      return false;
+    } else if (acksOnly(packet)) {
+      return false;
+    } else {
+      return true;
     }
   }
 
@@ -71,32 +93,37 @@ public class PacketBuffer {
     long largest = block.getLargest().asLong();
     for (long i = smallest; i<=largest; i++) {
       PacketNumber pn = new PacketNumber(i);
-      if (buffer.containsKey(pn)) {
+      if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
-        buffer.remove(pn);
       }
     }
   }
 
   private void flushAcks() {
-    List<AckBlock> blocks = toBlocks(ackQueue);
-    AckFrame ackFrame = new AckFrame(123, blocks);
-    Packet packet = new ShortPacket(false,
-                                    false,
-                                    PacketType.Four_octets,
-                                    connection.getConnectionId(),
-                                    connection.nextPacketNumber(),
-                                    new Payload(ackFrame));
+    List<AckBlock> blocks = drainAcks(ackQueue);
+    if (!blocks.isEmpty()) {
+      AckFrame ackFrame = new AckFrame(123, blocks);
+      Packet packet = new ShortPacket(false,
+                                      false,
+                                      PacketType.Four_octets,
+                                      connection.getConnectionId(),
+                                      connection.nextPacketNumber(),
+                                      new Payload(ackFrame));
 
-    log.debug("Flushed acks {}", blocks);
+      log.debug("Flushed acks {}", blocks);
 
-    send(packet);
+      sendImpl(packet);
+    }
   }
 
   // TODO break out and test directly
-  private List<AckBlock> toBlocks(BlockingQueue<PacketNumber> queue) {
+  private List<AckBlock> drainAcks(BlockingQueue<PacketNumber> queue) {
     List<PacketNumber> pns = Lists.newArrayList();
     ackQueue.drainTo(pns);
+    if (pns.isEmpty()) {
+      return Collections.emptyList();
+    }
+
     List<Long> pnsLong = pns.stream().map(packetNumber -> packetNumber.asLong()).collect(Collectors.toList());
     Collections.sort(pnsLong);
 
@@ -118,6 +145,7 @@ public class PacketBuffer {
       }
     }
     blocks.add(AckBlock.fromLongs(lower, upper));
+
     return blocks;
   }
 

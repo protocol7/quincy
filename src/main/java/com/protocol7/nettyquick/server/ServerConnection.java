@@ -3,8 +3,6 @@ package com.protocol7.nettyquick.server;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BinaryOperator;
-import java.util.function.UnaryOperator;
 
 import com.protocol7.nettyquick.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;

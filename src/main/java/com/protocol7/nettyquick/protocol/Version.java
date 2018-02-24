@@ -1,6 +1,5 @@
 package com.protocol7.nettyquick.protocol;
 
-import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 public enum Version {

@@ -1,6 +1,16 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.protocol7.nettyquick.protocol.frames.Frame;
+
 public class LongPacket implements Packet {
+
+  public static LongPacket addFrame(LongPacket packet, Frame frame) {
+    return new LongPacket(packet.packetType,
+                          packet.connectionId,
+                          packet.version,
+                          packet.packetNumber,
+                          Payload.addFrame(packet.payload, frame));
+  }
 
   private final PacketType packetType;
   private final ConnectionId connectionId;

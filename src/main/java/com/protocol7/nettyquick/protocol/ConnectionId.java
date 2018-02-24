@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 public class ConnectionId {
 
   public static ConnectionId random() {
-    return new ConnectionId(Rnd.rndLong());
+    return new ConnectionId(Rnd.rndLong(0, Long.MAX_VALUE)); // TODO use full unsigned range
   }
 
   public static ConnectionId read(final ByteBuf bb) {

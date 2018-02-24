@@ -22,6 +22,12 @@ public class Payload {
     return new Payload(frames);
   }
 
+  public static Payload addFrame(Payload payload, Frame frame) {
+    List<Frame> newFrames = Lists.newArrayList(payload.frames);
+    newFrames.add(frame);
+    return new Payload(newFrames);
+  }
+
   private final List<Frame> frames;
 
   public Payload(final List<Frame> frames) {
