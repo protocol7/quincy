@@ -1,6 +1,9 @@
 package com.protocol7.nettyquick.protocol;
 
+import java.util.Arrays;
+
 import com.google.common.primitives.Longs;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
@@ -12,6 +15,28 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   public static PacketNumber read(final ByteBuf bb) {
     return new PacketNumber(bb.readLong());
+  }
+
+  private static byte[] pad(byte[] b) {
+    return Bytes.concat(new byte[8-b.length], b);
+  }
+
+  public static PacketNumber read4(final ByteBuf bb) {
+    return readn(bb, 4);
+  }
+
+  public static PacketNumber read2(final ByteBuf bb) {
+    return readn(bb, 2);
+  }
+
+  public static PacketNumber read1(final ByteBuf bb) {
+    return readn(bb, 1);
+  }
+
+  private static PacketNumber readn(final ByteBuf bb, int len) {
+    byte[] b = new byte[len];
+    bb.readBytes(b);
+    return new PacketNumber(Longs.fromByteArray(pad(b)));
   }
 
   public static final PacketNumber MIN = new PacketNumber(0);
@@ -40,6 +65,21 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   public void write(final ByteBuf bb) {
     bb.writeBytes(Longs.toByteArray(number.getValue()));
+  }
+
+  public void write4(final ByteBuf bb) {
+    byte[] b = Longs.toByteArray(number.getValue());
+    bb.writeBytes(Arrays.copyOfRange(b, 4, 8));
+  }
+
+  public void write2(final ByteBuf bb) {
+    byte[] b = Longs.toByteArray(number.getValue());
+    bb.writeBytes(Arrays.copyOfRange(b, 6, 8));
+  }
+
+  public void write1(final ByteBuf bb) {
+    byte[] b = Longs.toByteArray(number.getValue());
+    bb.writeBytes(Arrays.copyOfRange(b, 7, 8));
   }
 
   public void writeVarint(final ByteBuf bb) {

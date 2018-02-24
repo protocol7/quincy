@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import java.util.Arrays;
+
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 
@@ -19,7 +21,7 @@ public class PingFrame extends Frame {
   private final byte[] data;
 
   public PingFrame(final byte[] data) {
-    super(FrameType.PADDING);
+    super(FrameType.PING);
 
     Preconditions.checkArgument(data.length < 256);
 
@@ -41,5 +43,21 @@ public class PingFrame extends Frame {
 
     bb.writeByte(data.length);
     bb.writeBytes(data);
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+
+    final PingFrame pingFrame = (PingFrame) o;
+
+    return Arrays.equals(data, pingFrame.data);
+
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(data);
   }
 }

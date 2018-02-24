@@ -1,8 +1,7 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.Packet;
-import com.protocol7.nettyquick.protocol.parser.PacketParser;
+import com.protocol7.nettyquick.streams.StreamListener;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -12,7 +11,6 @@ import org.slf4j.MDC;
 
 public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-  private final PacketParser packetParser = new PacketParser();
   private final Connections connections = new Connections();
   private final StreamListener streamHandler;
 
@@ -24,7 +22,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram) throws Exception {
     final ByteBuf bb = datagram.content();
 
-    Packet packet = packetParser.parse(bb);
+    Packet packet = Packet.parse(bb);
 
     MDC.put("actor", "server");
     MDC.put("packetnumber", packet.getPacketNumber().toString());

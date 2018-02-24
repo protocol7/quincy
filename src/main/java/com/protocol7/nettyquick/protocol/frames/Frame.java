@@ -15,9 +15,11 @@ public abstract class Frame {
       return PaddingFrame.parse(bb);
     } else if (type == FrameType.ACK) {
       return AckFrame.parse(bb);
+    } else if (type == FrameType.PING) {
+      return PingFrame.parse(bb);
+    } else {
+      throw new RuntimeException("Unknown frame type " + type);
     }
-
-    return null;
   }
 
   private final FrameType type;

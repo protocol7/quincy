@@ -1,8 +1,22 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import io.netty.buffer.ByteBuf;
 
 public interface Packet {
+
+  int PACKET_TYPE_MASK = 0b10000000;
+
+  static Packet parse(ByteBuf bb) {
+    byte firstByte = bb.getByte(bb.readerIndex());
+
+    if ((PACKET_TYPE_MASK & firstByte) == PACKET_TYPE_MASK) {
+      return LongPacket.parse(bb);
+    } else {
+      // short packet
+      return ShortPacket.parse(bb);
+    }
+  }
 
   static Packet addFrame(Packet packet, Frame frame) {
     if (packet instanceof ShortPacket) {
@@ -20,4 +34,6 @@ public interface Packet {
   PacketType getPacketType();
 
   Payload getPayload();
+
+  void write(ByteBuf bb);
 }

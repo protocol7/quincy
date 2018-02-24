@@ -5,17 +5,17 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import org.slf4j.Logger;
@@ -36,7 +36,6 @@ public class ServerConnection implements Connection {
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(PacketNumber.MIN);
   private final Streams streams;
-  private final PacketParser packetParser = new PacketParser();
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
@@ -66,7 +65,8 @@ public class ServerConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    ByteBuf bb = packetParser.serialize(packet);
+    ByteBuf bb = Unpooled.buffer();
+    packet.write(bb);
     channel.writeAndFlush(new DatagramPacket(bb, clientAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("c sent packet to " + clientAddress);
 

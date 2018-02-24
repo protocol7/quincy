@@ -20,6 +20,12 @@ public enum PacketType {
       return Handshake;
     } else if (b == Zero_RTT_Protected.type) {
       return Zero_RTT_Protected;
+    } else if (b == One_octet.type) {
+      return One_octet;
+    } else if (b == Two_octets.type) {
+      return Two_octets;
+    } else if (b == Four_octets.type) {
+      return Four_octets;
     } else {
       throw new RuntimeException("Unknown long packet type");
     }

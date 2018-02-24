@@ -16,8 +16,10 @@ public class Payload {
     List<Frame> frames = Lists.newArrayList();
     while (bb.isReadable()) {
       Frame frame = Frame.parse(bb);
+      System.out.println(frame);
       // TODO ignore padding frames?
       frames.add(frame);
+      System.out.println(bb.writerIndex() + "  - " +  bb.readerIndex()) ;
     }
     return new Payload(frames);
   }

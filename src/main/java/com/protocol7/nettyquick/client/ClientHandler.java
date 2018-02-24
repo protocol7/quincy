@@ -12,7 +12,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
 
   private Connection connection;
-  private final PacketParser parser = new PacketParser();
 
   public void setConnection(final ClientConnection connection) {
     this.connection = connection;
@@ -20,7 +19,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) throws Exception {
-    Packet packet = parser.parse(msg.content());
+    Packet packet = Packet.parse(msg.content());
 
     MDC.put("actor", "client");
     MDC.put("packetnumber", packet.getPacketNumber().toString());

@@ -1,32 +1,28 @@
-package com.protocol7.nettyquick.protocol.parser;
+package com.protocol7.nettyquick.protocol;
 
 import static org.junit.Assert.assertEquals;
 
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-public class PacketParserTest {
+public class LongPacketTest {
+
+  public static final byte[] DATA = "hello".getBytes();
 
   @Test
-  public void roundtripLongPacket() {
+  public void roundtrip() {
     PacketType packetType = PacketType.Initial;
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = PacketNumber.random();
     Version version = Version.DRAFT_09;
-    Payload payload = Payload.EMPTY;
+    Payload payload = new Payload(new PingFrame(DATA));
     LongPacket lp = new LongPacket(packetType, connId, version, pn, payload);
 
-    PacketParser parser = new PacketParser();
-
-    ByteBuf bb = parser.serialize(lp);
-
-    LongPacket parsed = (LongPacket) parser.parse(bb);
+    ByteBuf bb = Unpooled.buffer();
+    lp.write(bb);
+    LongPacket parsed = (LongPacket) Packet.parse(bb);
 
     assertEquals(packetType, parsed.getPacketType());
     assertEquals(connId, parsed.getConnectionId());
@@ -34,5 +30,6 @@ public class PacketParserTest {
     assertEquals(pn, parsed.getPacketNumber());
     assertEquals(payload, parsed.getPayload());
   }
+
 
 }

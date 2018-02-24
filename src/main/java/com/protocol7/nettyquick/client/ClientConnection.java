@@ -16,6 +16,7 @@ import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
@@ -36,7 +37,6 @@ public class ClientConnection implements Connection {
 
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(new PacketNumber(1)); // TODO fix
-  private final PacketParser packetParser = new PacketParser();
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
@@ -63,9 +63,10 @@ public class ClientConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    ByteBuf bb = packetParser.serialize(packet);
+    ByteBuf bb = Unpooled.buffer();
+    packet.write(bb);
     channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
-    log.debug("Client send {}", packet);
+    log.debug("Client sent {}", packet);
   }
 
   public void onPacket(Packet packet) {

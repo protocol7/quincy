@@ -3,8 +3,41 @@ package com.protocol7.nettyquick.protocol;
 import java.util.Optional;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import io.netty.buffer.ByteBuf;
 
 public class ShortPacket implements Packet {
+
+  public static ShortPacket parse(ByteBuf bb) {
+    byte firstByte = bb.readByte();
+
+    byte ptByte = (byte)((firstByte & 0b00011111) & 0xFF);
+    boolean omitConnectionId = (firstByte & 0x40) == 0x40;
+    boolean keyPhase = (firstByte & 0x20) == 0x20;
+
+    PacketType packetType = PacketType.read(ptByte);
+    Optional<ConnectionId> connId;
+    if (!omitConnectionId) {
+      connId = Optional.of(ConnectionId.read(bb));
+    } else {
+      connId = Optional.empty();
+    }
+    PacketNumber packetNumber;
+    if (packetType == PacketType.Four_octets) {
+      packetNumber = PacketNumber.read4(bb);
+    } else if (packetType == PacketType.Two_octets) {
+      packetNumber = PacketNumber.read2(bb);
+    } else {
+      packetNumber = PacketNumber.read1(bb);
+    }
+    Payload payload = Payload.parse(bb);
+
+    return new ShortPacket(omitConnectionId,
+                           keyPhase,
+                           packetType,
+                           connId,
+                           packetNumber,
+                           payload);
+  }
 
   public static ShortPacket addFrame(ShortPacket packet, Frame frame) {
     return new ShortPacket(packet.omitConnectionId,
@@ -54,6 +87,30 @@ public class ShortPacket implements Packet {
 
   public Payload getPayload() {
     return payload;
+  }
+
+  public void write(ByteBuf bb) {
+    byte b = packetType.getType();
+    if (omitConnectionId) {
+      b = (byte)(b | 0x40);
+    }
+    if (keyPhase) {
+      b = (byte)(b | 0x20);
+    }
+    bb.writeByte(b);
+
+    if (!omitConnectionId) {
+      connectionId.get().write(bb); // handle omotted
+    }
+    if (packetType == PacketType.Four_octets) {
+      packetNumber.write4(bb);
+    } else if (packetType == PacketType.Two_octets) {
+      packetNumber.write2(bb);
+    } else if (packetType == PacketType.One_octet) {
+      packetNumber.write1(bb);
+    }
+
+    payload.write(bb);
   }
 
   @Override

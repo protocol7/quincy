@@ -1,8 +1,28 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import io.netty.buffer.ByteBuf;
 
 public class LongPacket implements Packet {
+
+  public static final int PACKET_TYPE_MASK = 0b10000000;
+
+  public static LongPacket parse(ByteBuf bb) {
+    byte firstByte = bb.readByte();
+    byte ptByte = (byte)((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
+    PacketType packetType = PacketType.read(ptByte);
+    ConnectionId connId = ConnectionId.read(bb);
+    Version version = Version.read(bb);
+    PacketNumber packetNumber = PacketNumber.read(bb);
+
+    Payload payload = Payload.parse(bb);
+
+    return new LongPacket(packetType,
+                          connId,
+                          version,
+                          packetNumber,
+                          payload);
+  }
 
   public static LongPacket addFrame(LongPacket packet, Frame frame) {
     return new LongPacket(packet.packetType,
@@ -44,6 +64,16 @@ public class LongPacket implements Packet {
 
   public Payload getPayload() {
     return payload;
+  }
+
+  public void write(ByteBuf bb) {
+    int b = (PACKET_TYPE_MASK | packetType.getType()) & 0xFF;
+    bb.writeByte(b);
+
+    connectionId.write(bb);
+    version.write(bb);
+    packetNumber.write(bb);
+    payload.write(bb);
   }
 
   @Override
