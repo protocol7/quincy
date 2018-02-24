@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.client;
 
-import com.protocol7.nettyquick.Connection;
+import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import io.netty.channel.ChannelHandlerContext;

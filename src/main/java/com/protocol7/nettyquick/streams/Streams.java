@@ -3,11 +3,8 @@ package com.protocol7.nettyquick.streams;
 import java.util.Map;
 
 import com.google.common.collect.Maps;
-import com.protocol7.nettyquick.Connection;
-import com.protocol7.nettyquick.server.ServerConnection;
-import com.protocol7.nettyquick.streams.StreamListener;
+import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.StreamId;
-import com.protocol7.nettyquick.streams.Stream;
 
 public class Streams {
   private final Map<StreamId, Stream> streams = Maps.newConcurrentMap();

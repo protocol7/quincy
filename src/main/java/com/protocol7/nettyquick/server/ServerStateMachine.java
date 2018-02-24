@@ -51,7 +51,7 @@ public class ServerStateMachine {
           if (frame instanceof StreamFrame) {
             StreamFrame sf = (StreamFrame) frame;
             Stream stream = connection.getOrCreateStream(sf.getStreamId());
-            stream.onData(sf.getData());
+            stream.onData(sf.getOffset(), sf.getData());
           }
         }
 

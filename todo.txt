@@ -1,3 +1,5 @@
 * ACK delay
 * Retransmits
 * Test core classes
+* fin streams
+* Don't use byte[]

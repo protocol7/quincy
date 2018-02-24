@@ -22,7 +22,7 @@ public class InitialPacket extends LongPacket {
     int length = 0; // TODO handshake stream frame
     while (length < 1200) {
       frames.add(PaddingFrame.INSTANCE);
-      length += PaddingFrame.INSTANCE.getLength();
+      length += PaddingFrame.INSTANCE.calculateLength();
     }
     Payload payload = new Payload(frames);
     return new InitialPacket(connectionId, version, packetNumber, payload);

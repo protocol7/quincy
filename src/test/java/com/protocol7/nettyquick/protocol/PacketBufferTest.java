@@ -8,8 +8,8 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import com.protocol7.nettyquick.Connection;
-import com.protocol7.nettyquick.protocol.PacketBuffer.Sender;
+import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;

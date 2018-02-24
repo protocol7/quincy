@@ -4,7 +4,7 @@ import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
-import com.protocol7.nettyquick.Connection;
+import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;

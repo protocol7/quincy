@@ -12,12 +12,12 @@ public class Runner {
   public static void main(String[] args) throws Exception {
     InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 9556);
 
-    QuicServer server = QuicServer.bind(address, (stream, data) -> {
+    QuicServer server = QuicServer.bind(address, (stream, offset, data) -> {
       System.out.println("s got " + new String(data));
       stream.write("Pong".getBytes());
     }).sync().get();
 
-    QuicClient client = QuicClient.connect(address, (stream, data) -> System.out.println("c got " + new String(data))).sync().get();
+    QuicClient client = QuicClient.connect(address, (stream, offset, data) -> System.out.println("c got " + new String(data))).sync().get();
 
     Stream stream = client.openStream();
 

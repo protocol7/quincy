@@ -30,7 +30,7 @@ public abstract class Frame {
     return type;
   }
 
-  public int getLength() {
+  public int calculateLength() {
     // TODO improve
     ByteBuf bb = Unpooled.buffer();
     try {

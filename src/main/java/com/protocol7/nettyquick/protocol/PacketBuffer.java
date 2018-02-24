@@ -10,7 +10,8 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import com.protocol7.nettyquick.Connection;
+import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import org.slf4j.Logger;
@@ -25,10 +26,6 @@ public class PacketBuffer {
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final Connection connection;
   private final Sender sender;
-
-  public interface Sender {
-    void send(Packet packet);
-  }
 
   public PacketBuffer(final Connection connection, final Sender sender) {
     this.connection = connection;

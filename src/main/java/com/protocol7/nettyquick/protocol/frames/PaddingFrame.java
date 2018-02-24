@@ -17,7 +17,7 @@ public class PaddingFrame extends Frame {
   }
 
   @Override
-  public int getLength() {
+  public int calculateLength() {
     return 1;
   }
 

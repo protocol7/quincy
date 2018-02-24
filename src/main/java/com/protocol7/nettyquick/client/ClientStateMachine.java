@@ -63,7 +63,7 @@ public class ClientStateMachine {
             StreamFrame sf = (StreamFrame) frame;
 
             Stream stream = connection.getOrCreateStream(sf.getStreamId());
-            stream.onData(sf.getData());
+            stream.onData(sf.getOffset(), sf.getData());
           }
         }
       } else {
