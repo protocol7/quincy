@@ -88,22 +88,22 @@ public class AckFrame extends Frame {
     AckBlock firstBlock = blocks.get(0);
 
     firstBlock.getLargest().writeVarint(bb);
-    new Varint(ackDelay).write(bb);
-    new Varint((blocks.size() - 1) * 2).write(bb);
+    Varint.write(ackDelay, bb);
+    Varint.write((blocks.size() - 1) * 2, bb);
 
     long largest = firstBlock.getLargest().asLong();
     long smallest = firstBlock.getSmallest().asLong();
-    new Varint(largest - smallest).write(bb);
+    Varint.write(largest - smallest, bb);
 
     for (int i = 1; i<blocks.size(); i++) {
       AckBlock block = blocks.get(i);
 
       long gap = smallest - block.getLargest().asLong() - 1;
-      new Varint(gap).write(bb);
+      Varint.write(gap, bb);
 
       long nextBlock = block.getLargest().asLong() - block.getSmallest().asLong();
       smallest = block.getSmallest().asLong();
-      new Varint(nextBlock).write(bb);
+      Varint.write(nextBlock, bb);
     }
   }
 

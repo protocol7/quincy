@@ -65,4 +65,22 @@ public class StreamFrameTest {
     assertEquals(new StreamId(4158820520164861892L), frame.getStreamId());
     assertArrayEquals(DATA, frame.getData());
   }
+
+  @Test
+  public void lengthWithoutOffset() {
+    StreamFrame frame = new StreamFrame(StreamId.create(),
+                                        0,
+                                        false,
+                                        DATA);
+    assertEquals(15, frame.calculateLength());
+  }
+
+  @Test
+  public void lengthWithOffset() {
+    StreamFrame frame = new StreamFrame(StreamId.create(),
+                                        123,
+                                        false,
+                                        DATA);
+    assertEquals(17, frame.calculateLength());
+  }
 }

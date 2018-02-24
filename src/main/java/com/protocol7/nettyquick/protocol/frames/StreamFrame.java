@@ -8,29 +8,29 @@ import io.netty.buffer.ByteBuf;
 
 public class StreamFrame extends Frame {
 
-  public static StreamFrame parse(ByteBuf bb) {
-    byte firstByte = bb.readByte();
+  public static StreamFrame parse(final ByteBuf bb) {
+    final byte firstByte = bb.readByte();
 
-    boolean off = (firstByte & 0x04) == 0x04;
-    boolean len = (firstByte & 0x02) == 0x02;
-    boolean fin = (firstByte & 0x01) == 0x01;
+    final boolean off = (firstByte & 0x04) == 0x04;
+    final boolean len = (firstByte & 0x02) == 0x02;
+    final boolean fin = (firstByte & 0x01) == 0x01;
 
-    StreamId streamId = StreamId.parse(bb);
-    Varint offset;
+    final StreamId streamId = StreamId.parse(bb);
+    final Varint offset;
     if (off) {
       offset = Varint.read(bb);
     } else {
       offset = new Varint(0);
     }
 
-    int length;
+    final int length;
     if (len) {
       length = (int)Varint.read(bb).getValue();
     } else {
       length = bb.readableBytes();
     }
 
-    byte[] data = new byte[length];
+    final byte[] data = new byte[length];
     bb.readBytes(data);
 
     return new StreamFrame(streamId, offset.getValue(), fin, data);
@@ -80,10 +80,10 @@ public class StreamFrame extends Frame {
     bb.writeByte(type);
     streamId.write(bb);
     if (offset > 0) {
-      new Varint(offset).write(bb);
+      Varint.write(offset, bb);
     }
 
-    new Varint(data.length).write(bb);
+    Varint.write(data.length, bb);
 
     bb.writeBytes(data);
   }

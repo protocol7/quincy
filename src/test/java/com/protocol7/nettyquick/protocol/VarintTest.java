@@ -13,6 +13,23 @@ import org.junit.Test;
 public class VarintTest {
 
   @Test
+  public void validateBounds() {
+    new Varint(0);
+    new Varint(123);
+    new Varint(4611686018427387903L);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void validateBoundsTooSmall() {
+    new Varint(-1);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void validateBoundsTooLarge() {
+    new Varint(4611686018427387904L);
+  }
+
+  @Test
   public void randomBounds() {
     for (int i = 0; i<1000_000; i++) {
       Varint v = Varint.random();

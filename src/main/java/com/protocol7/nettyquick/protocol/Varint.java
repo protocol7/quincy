@@ -9,8 +9,10 @@ import io.netty.buffer.ByteBuf;
 
 public class Varint {
 
+  private static final long MAX = 4611686018427387903L;
+
   public static Varint random() {
-    return new Varint(Rnd.rndLong(0, 4611686018427387903L));
+    return new Varint(Rnd.rndLong(0, MAX));
   }
 
   public static Varint read(ByteBuf bb) {
@@ -26,11 +28,16 @@ public class Varint {
     byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, b);
 
     return new Varint(Longs.fromByteArray(bs));
+  }
 
+  public static void write(long value, ByteBuf bb) {
+    new Varint(value).write(bb);
   }
 
   public Varint(final long value) {
-    // TODO validate value
+    if (value < 0 || value > MAX) {
+      throw new IllegalArgumentException("Varint out of bounds: " + value);
+    }
     this.value = value;
   }
 
