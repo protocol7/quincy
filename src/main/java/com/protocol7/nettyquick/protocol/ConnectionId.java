@@ -1,27 +1,28 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.google.common.primitives.Longs;
+import com.google.common.primitives.UnsignedLong;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 public class ConnectionId {
 
   public static ConnectionId random() {
-    return new ConnectionId(Rnd.rndLong(0, Long.MAX_VALUE)); // TODO use full unsigned range
+    return new ConnectionId(Rnd.rndUnsignedLong());
   }
 
   public static ConnectionId read(final ByteBuf bb) {
-    return new ConnectionId(bb.readLong());
+    return new ConnectionId(UnsignedLong.fromLongBits(bb.readLong()));
   }
 
-  private final long id;
+  private final UnsignedLong id;
 
-  public ConnectionId(final long id) {
+  public ConnectionId(final UnsignedLong id) {
     this.id = id;
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeBytes(Longs.toByteArray(id));
+    bb.writeBytes(Longs.toByteArray(id.longValue()));
   }
 
   @Override
@@ -31,16 +32,16 @@ public class ConnectionId {
 
     final ConnectionId that = (ConnectionId) o;
 
-    return id == that.id;
+    return id.equals(that.id);
   }
 
   @Override
   public int hashCode() {
-    return (int) (id ^ (id >>> 32));
+    return id.hashCode();
   }
 
   @Override
   public String toString() {
-    return Long.toString(id);
+    return id.toString();
   }
 }
