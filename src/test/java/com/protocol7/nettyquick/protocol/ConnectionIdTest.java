@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Random;
 
 import com.google.common.primitives.UnsignedLong;
+import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
@@ -41,11 +42,6 @@ public class ConnectionIdTest {
   private void assertWrite(String expected, UnsignedLong id) {
     ByteBuf bb = Unpooled.buffer();
     new ConnectionId(id).write(bb);
-    assertBuffer(expected, bb);
-  }
-
-  private void assertBuffer(String expected, ByteBuf actual) {
-    ByteBuf expectedBB = Unpooled.copiedBuffer(Hex.dehex(expected));
-    assertEquals(expectedBB, actual);
+    TestUtil.assertBuffer(expected, bb);
   }
 }

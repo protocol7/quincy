@@ -10,7 +10,6 @@ import io.netty.buffer.ByteBuf;
 public class Varint {
 
   public static Varint random() {
-    // TODO ensure max 4611686018427387903
     return new Varint(Rnd.rndLong(0, 4611686018427387903L));
   }
 
