@@ -35,7 +35,7 @@ public class ServerConnection implements Connection {
   private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
   private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(PacketNumber.MIN);
-  private final Streams streams = new Streams();
+  private final Streams streams;
   private final PacketParser packetParser = new PacketParser();
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
@@ -46,6 +46,7 @@ public class ServerConnection implements Connection {
     this.clientAddress = clientAddress;
     this.stateMachine = new ServerStateMachine(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
+    this.streams = new Streams(this);
   }
 
   public Optional<ConnectionId> getConnectionId() {
@@ -84,7 +85,7 @@ public class ServerConnection implements Connection {
   }
 
   public Stream getOrCreateStream(StreamId streamId) {
-    return streams.getOrCreate(streamId, this, handler);
+    return streams.getOrCreate(streamId, handler);
   }
 
 

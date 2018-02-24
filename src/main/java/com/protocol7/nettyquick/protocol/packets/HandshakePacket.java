@@ -11,7 +11,7 @@ import com.protocol7.nettyquick.protocol.Version;
 public class HandshakePacket extends LongPacket {
 
   public static HandshakePacket create(ConnectionId connectionId, PacketNumber packetNumber, Version version) { // TODO take crypto params
-    Payload payload = new Payload(Lists.newArrayList()); // TODO create stream and ack frames
+    Payload payload = new Payload(Lists.newArrayList()); // TODO random stream and ack frames
     return new HandshakePacket(connectionId, version, packetNumber, payload);
   }
 

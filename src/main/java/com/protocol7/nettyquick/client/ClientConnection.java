@@ -40,7 +40,7 @@ public class ClientConnection implements Connection {
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
-  private final Streams streams = new Streams();
+  private final Streams streams;
 
   public ClientConnection(final ConnectionId connectionId, final NioEventLoopGroup group, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
     this.connectionId = connectionId;
@@ -50,6 +50,7 @@ public class ClientConnection implements Connection {
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
+    this.streams = new Streams(this);
   }
 
   public Future<Void> handshake() {
@@ -91,12 +92,12 @@ public class ClientConnection implements Connection {
   }
 
   public Stream openStream() {
-    StreamId streamId = StreamId.create();
-    return streams.getOrCreate(streamId, this, streamListener);
+    StreamId streamId = StreamId.random();
+    return streams.getOrCreate(streamId, streamListener);
   }
 
   public Stream getOrCreateStream(StreamId streamId) {
-    return streams.getOrCreate(streamId, this, streamListener);
+    return streams.getOrCreate(streamId, streamListener);
   }
 
   public Future<?> close() {

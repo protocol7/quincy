@@ -18,18 +18,18 @@ public class Stream {
   private final StreamListener handler;
   private final AtomicLong offset = new AtomicLong(0);
 
-  public Stream(final StreamId id, final Connection connection, final StreamListener handler) {
+  public Stream(final StreamId id, final Connection connection, final StreamListener listener) {
     this.id = id;
     this.connection = connection;
-    this.handler = handler;
+    this.handler = listener;
   }
 
-  public void write(byte[] b) {
-    long frameOffset = offset.getAndAdd(b.length);
-    StreamFrame sf = new StreamFrame(id, frameOffset, false, b);
-    Payload payload = new Payload(sf);
+  public void write(final byte[] b) {
+    final long frameOffset = offset.getAndAdd(b.length);
+    final StreamFrame sf = new StreamFrame(id, frameOffset, false, b);
+    final Payload payload = new Payload(sf);
 
-    Packet p = new ShortPacket(false,
+    final Packet p = new ShortPacket(false,
                                false,
                                PacketType.Four_octets,
                                connection.getConnectionId(),
@@ -39,7 +39,7 @@ public class Stream {
     connection.sendPacket(p);
   }
 
-  public void onData(long offset, byte[] b) {
+  public void onData(final long offset, final byte[] b) {
     handler.onData(this, offset, b);
   }
 }

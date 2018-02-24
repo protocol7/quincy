@@ -10,7 +10,6 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import org.junit.Before;
@@ -37,7 +36,7 @@ public class StreamTest {
 
   @Test
   public void write() {
-    StreamId streamId = StreamId.create();
+    StreamId streamId = StreamId.random();
     Stream stream = new Stream(streamId,
                                connection,
                                listener);
@@ -54,7 +53,7 @@ public class StreamTest {
 
   @Test
   public void writeWithOffset() {
-    StreamId streamId = StreamId.create();
+    StreamId streamId = StreamId.random();
     Stream stream = new Stream(streamId,
                                connection,
                                listener);
@@ -74,4 +73,11 @@ public class StreamTest {
     return (StreamFrame) packetCaptor.getValue().getPayload().getFrames().get(0);
   }
 
+  @Test
+  public void onData() {
+    Stream stream = new Stream(StreamId.random(), connection, listener);
+    stream.onData(123, DATA);
+
+    verify(listener).onData(stream, 123, DATA);
+  }
 }

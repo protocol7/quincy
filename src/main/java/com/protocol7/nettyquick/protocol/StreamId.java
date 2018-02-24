@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 
 public class StreamId {
 
-  public static StreamId create() {
+  public static StreamId random() {
     return new StreamId(Varint.random());
   }
 
