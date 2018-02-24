@@ -12,9 +12,9 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PaddingFrame;
 
-public class InitialPacket extends LongPacket {
+public class InitialPacket {
 
-  public static InitialPacket create(ConnectionId connectionId) { // TODO take crypto params
+  public static LongPacket create(ConnectionId connectionId) { // TODO take crypto params
     Version version = Version.CURRENT;
     PacketNumber packetNumber = PacketNumber.random();
 
@@ -25,10 +25,6 @@ public class InitialPacket extends LongPacket {
       length += PaddingFrame.INSTANCE.calculateLength();
     }
     Payload payload = new Payload(frames);
-    return new InitialPacket(connectionId, version, packetNumber, payload);
-  }
-
-  private InitialPacket(final ConnectionId connectionId, final Version version, final PacketNumber packetNumber, final Payload payload) {
-    super(PacketType.Initial, connectionId, version, packetNumber, payload);
+    return new LongPacket(PacketType.Initial, connectionId, version, packetNumber, payload);
   }
 }

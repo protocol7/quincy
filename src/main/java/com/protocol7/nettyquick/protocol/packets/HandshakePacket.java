@@ -8,14 +8,10 @@ import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.Version;
 
-public class HandshakePacket extends LongPacket {
+public class HandshakePacket {
 
-  public static HandshakePacket create(ConnectionId connectionId, PacketNumber packetNumber, Version version) { // TODO take crypto params
+  public static LongPacket create(ConnectionId connectionId, PacketNumber packetNumber, Version version) { // TODO take crypto params
     Payload payload = new Payload(Lists.newArrayList()); // TODO random stream and ack frames
-    return new HandshakePacket(connectionId, version, packetNumber, payload);
-  }
-
-  private HandshakePacket(final ConnectionId connectionId, final Version version, final PacketNumber packetNumber, final Payload payload) {
-    super(PacketType.Handshake, connectionId, version, packetNumber, payload);
+    return new LongPacket(PacketType.Handshake, connectionId, version, packetNumber, payload);
   }
 }
