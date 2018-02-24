@@ -7,9 +7,9 @@ import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
-public class Varint {
+public class Varint implements Comparable<Varint> {
 
-  private static final long MAX = 4611686018427387903L;
+  public static final long MAX = 4611686018427387903L;
 
   public static Varint random() {
     return new Varint(Rnd.rndLong(0, MAX));
@@ -61,6 +61,11 @@ public class Varint {
   @Override
   public int hashCode() {
     return (int) (value ^ (value >>> 32));
+  }
+
+  @Override
+  public int compareTo(final Varint o) {
+    return Longs.compare(this.value, o.value);
   }
 
   public void write(ByteBuf bb) {

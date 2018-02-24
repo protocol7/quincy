@@ -7,35 +7,39 @@ import io.netty.buffer.ByteBuf;
 public class PacketNumber implements Comparable<PacketNumber> {
 
   public static PacketNumber random() {
-    return new PacketNumber(Rnd.rndLong(0, 4611686018427387903L));
+    return new PacketNumber(Rnd.rndLong(0, Varint.MAX));
   }
 
   public static PacketNumber read(final ByteBuf bb) {
     return new PacketNumber(bb.readLong());
   }
 
-  public static final PacketNumber MIN = new PacketNumber(Long.MIN_VALUE);
+  public static final PacketNumber MIN = new PacketNumber(0);
 
-  private final long number;
+  private final Varint number;
 
   public PacketNumber(final long number) {
+    this.number = new Varint(number);
+  }
+
+  public PacketNumber(final Varint number) {
     this.number = number;
   }
 
   public PacketNumber next() {
-    return new PacketNumber(number + 1);
+    return new PacketNumber(number.getValue() + 1);
   }
 
   public long asLong() {
-    return number;
+    return number.getValue();
   }
 
   public Varint asVarint() {
-    return new Varint(number);
+    return number;
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeBytes(Longs.toByteArray(number));
+    bb.writeBytes(Longs.toByteArray(number.getValue()));
   }
 
   public void writeVarint(final ByteBuf bb) {
@@ -49,22 +53,21 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
     final PacketNumber that = (PacketNumber) o;
 
-    return number == that.number;
-
+    return number.equals(that.number);
   }
 
   @Override
   public int hashCode() {
-    return (int) (number ^ (number >>> 32));
+    return number.hashCode();
   }
 
   @Override
   public int compareTo(final PacketNumber o) {
-    return Longs.compare(this.number, o.number);
+    return this.number.compareTo(o.number);
   }
 
   @Override
   public String toString() {
-    return Long.toString(number);
+    return number.toString();
   }
 }
