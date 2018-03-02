@@ -47,7 +47,7 @@ public class ClientStateMachine {
   public void processPacket(Packet packet) {
     log.info("Client got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getConnectionId());
 
-    synchronized (this) {
+    synchronized (this) { // TODO refactor to make non-syncronized
       // TODO validate connection ID
       if (packet.getPacketType() == PacketType.Handshake) {
         if (state == ClientState.InitialSent) {
@@ -55,7 +55,7 @@ public class ClientStateMachine {
           handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
         } else {
-          log.warn("Got Handshake packet in an unexpected state");
+          log.warn("Got Handshake packet in an unexpected state: " + state);
         }
       } else if (state == ClientState.Ready) {
         for (Frame frame : packet.getPayload().getFrames()) {
@@ -71,5 +71,4 @@ public class ClientStateMachine {
       }
     }
   }
-
 }

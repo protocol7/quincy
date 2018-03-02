@@ -34,7 +34,7 @@ public class ServerConnection implements Connection {
   private final Channel channel;
   private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
-  private final AtomicReference<PacketNumber> lastPacketNumber = new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(PacketNumber.MIN);
   private final Streams streams;
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
@@ -76,10 +76,6 @@ public class ServerConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    lastPacketNumber.getAndAccumulate(packet.getPacketNumber(), (pn1, pn2) -> pn1.compareTo(pn2) > 0 ? pn1 : pn2);
-
-    log.debug("Update packet number {}", lastPacketNumber.get());
-
     packetBuffer.onPacket(packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
     stateMachine.processPacket(packet);
   }
@@ -88,8 +84,11 @@ public class ServerConnection implements Connection {
     return streams.getOrCreate(streamId, handler);
   }
 
+  public PacketNumber lastAckedPacketNumber() {
+    return packetBuffer.getLargestAcked();
+  }
 
-  public PacketNumber nextPacketNumber() {
-    return lastPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
+  public PacketNumber nextSendPacketNumber() {
+    return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 }

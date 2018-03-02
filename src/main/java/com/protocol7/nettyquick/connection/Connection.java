@@ -16,7 +16,8 @@ public interface Connection {
 
   Version getVersion();
 
-  PacketNumber nextPacketNumber();
+  PacketNumber nextSendPacketNumber();
+  PacketNumber lastAckedPacketNumber();
 
   void onPacket(Packet packet);
 }

@@ -32,7 +32,7 @@ public class PacketBufferTest {
     MockitoAnnotations.initMocks(this);
 
     when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.nextPacketNumber()).thenReturn(new PacketNumber(3));
+    when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
 
     buffer = new PacketBuffer(connection, sender);
   }

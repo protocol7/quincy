@@ -37,7 +37,7 @@ public class ServerStateMachine {
             connection.setConnectionId(packet.getConnectionId());
 
             LongPacket handshakePacket = HandshakePacket.create(packet.getConnectionId(),
-                                                                     connection.nextPacketNumber(),
+                                                                     connection.nextSendPacketNumber(),
                                                                      longPacket.getVersion());
             connection.sendPacket(handshakePacket);
             state = ServerState.Ready;

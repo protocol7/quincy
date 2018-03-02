@@ -9,8 +9,10 @@ import io.netty.buffer.ByteBuf;
 
 public class PacketNumber implements Comparable<PacketNumber> {
 
+  private static final long INITIAL_MAX = 4294966271L;
+
   public static PacketNumber random() {
-    return new PacketNumber(Rnd.rndLong(0, Varint.MAX));
+    return new PacketNumber(Rnd.rndLong(0, INITIAL_MAX));
   }
 
   public static PacketNumber read(final ByteBuf bb) {
@@ -64,6 +66,14 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   public PacketNumber next() {
     return new PacketNumber(number.getValue() + 1);
+  }
+
+  public PacketNumber max(PacketNumber other) {
+    if (this.compareTo(other) > 0) {
+      return this;
+    } else {
+      return other;
+    }
   }
 
   public long asLong() {

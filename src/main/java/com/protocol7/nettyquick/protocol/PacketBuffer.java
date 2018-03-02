@@ -4,6 +4,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -24,6 +26,7 @@ public class PacketBuffer {
 
   private final Map<PacketNumber, Packet> buffer = Maps.newConcurrentMap();
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
+  private final AtomicReference<PacketNumber> largestAcked = new AtomicReference<>(PacketNumber.MIN);
   private final Connection connection;
   private final Sender sender;
 
@@ -35,6 +38,10 @@ public class PacketBuffer {
   @VisibleForTesting
   protected Map<PacketNumber, Packet> getBuffer() {
     return buffer;
+  }
+
+  public PacketNumber getLargestAcked() {
+    return largestAcked.get();
   }
 
   public void send(Packet packet) {
@@ -92,6 +99,7 @@ public class PacketBuffer {
       PacketNumber pn = new PacketNumber(i);
       if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
+        largestAcked.getAndAccumulate(pn, PacketNumber::max);
       }
     }
   }
@@ -104,7 +112,7 @@ public class PacketBuffer {
                                       false,
                                       PacketType.Four_octets,
                                       connection.getConnectionId(),
-                                      connection.nextPacketNumber(),
+                                      connection.nextSendPacketNumber(),
                                       new Payload(ackFrame));
 
       log.debug("Flushed acks {}", blocks);

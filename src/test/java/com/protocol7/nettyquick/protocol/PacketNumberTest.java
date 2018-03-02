@@ -32,7 +32,7 @@ public class PacketNumberTest {
   public void randomBounds() {
     for (int i = 0; i<1000_000; i++) {
       PacketNumber v = PacketNumber.random();
-      assertTrue(v.toString(), v.asLong() > 0 && v.asLong() < 4611686018427387903L);
+      assertTrue(v.toString(), v.asLong() > 0 && v.asLong() < 4294966271L);
     }
   }
 

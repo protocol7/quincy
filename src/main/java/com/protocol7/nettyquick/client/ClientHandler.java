@@ -18,7 +18,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) throws Exception {
-    Packet packet = Packet.parse(msg.content(), connectionId -> connection.nextPacketNumber());
+    Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber());
 
     MDC.put("actor", "client");
     MDC.put("packetnumber", packet.getPacketNumber().toString());

@@ -33,7 +33,7 @@ public class Stream {
                                false,
                                PacketType.Four_octets,
                                connection.getConnectionId(),
-                               connection.nextPacketNumber(),
+                               connection.nextSendPacketNumber(),
                                payload);
 
     connection.sendPacket(p);

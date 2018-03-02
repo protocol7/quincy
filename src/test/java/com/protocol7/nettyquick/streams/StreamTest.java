@@ -31,7 +31,7 @@ public class StreamTest {
     MockitoAnnotations.initMocks(this);
 
     Mockito.when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    Mockito.when(connection.nextPacketNumber()).thenReturn(PacketNumber.random());
+    Mockito.when(connection.nextSendPacketNumber()).thenReturn(PacketNumber.random());
   }
 
   @Test
