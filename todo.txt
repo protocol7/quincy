@@ -2,12 +2,10 @@
 * Asymetric packet numbers
 * Stream state machine
 * Pings and keep alive
-* Packet number reconstruction
 * Transport parameters
 * ver neg
 * ACK delay
 * Retransmits
-* Test core classes
 * fin streams
 * Don't use byte[]
 * TLS

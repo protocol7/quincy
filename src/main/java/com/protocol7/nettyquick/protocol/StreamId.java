@@ -45,4 +45,8 @@ public class StreamId {
   public String toString() {
     return id.toString();
   }
+
+  public long getValue() {
+    return id.getValue();
+  }
 }

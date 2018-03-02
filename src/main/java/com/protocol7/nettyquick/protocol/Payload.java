@@ -10,22 +10,18 @@ import io.netty.buffer.ByteBuf;
 
 public class Payload {
 
-  public static Payload EMPTY = new Payload(Collections.emptyList());
-
   public static Payload parse(ByteBuf bb) {
     List<Frame> frames = Lists.newArrayList();
     while (bb.isReadable()) {
       Frame frame = Frame.parse(bb);
-      System.out.println(frame);
       // TODO ignore padding frames?
       frames.add(frame);
-      System.out.println(bb.writerIndex() + "  - " +  bb.readerIndex()) ;
     }
     return new Payload(frames);
   }
 
-  public static Payload addFrame(Payload payload, Frame frame) {
-    List<Frame> newFrames = Lists.newArrayList(payload.frames);
+  public Payload addFrame(Frame frame) {
+    List<Frame> newFrames = Lists.newArrayList(frames);
     newFrames.add(frame);
     return new Payload(newFrames);
   }

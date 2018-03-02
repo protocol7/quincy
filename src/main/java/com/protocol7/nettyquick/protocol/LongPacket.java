@@ -29,7 +29,7 @@ public class LongPacket implements Packet {
                           packet.connectionId,
                           packet.version,
                           packet.packetNumber,
-                          Payload.addFrame(packet.payload, frame));
+                          packet.payload.addFrame(frame));
   }
 
   private final PacketType packetType;

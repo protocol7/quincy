@@ -46,7 +46,7 @@ public class ShortPacket implements Packet {
                            packet.packetType,
                            packet.connectionId,
                            packet.packetNumber,
-                           Payload.addFrame(packet.payload, frame));
+                           packet.payload.addFrame(frame));
   }
 
   private final boolean omitConnectionId;
