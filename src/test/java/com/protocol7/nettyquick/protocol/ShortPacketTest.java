@@ -30,7 +30,7 @@ public class ShortPacketTest {
     ByteBuf bb = Unpooled.buffer();
     p.write(bb);
 
-    ShortPacket parsed = (ShortPacket) Packet.parse(bb);
+    ShortPacket parsed = (ShortPacket) Packet.parse(bb, connectionId -> new PacketNumber(122));
 
     assertFalse(parsed.isOmitConnectionId());
     assertFalse(parsed.isKeyPhase());

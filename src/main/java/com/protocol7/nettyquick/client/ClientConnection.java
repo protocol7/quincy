@@ -11,7 +11,6 @@ import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.protocol.parser.PacketParser;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;

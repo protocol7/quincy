@@ -21,22 +21,33 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return Bytes.concat(new byte[8-b.length], b);
   }
 
-  public static PacketNumber read4(final ByteBuf bb) {
-    return readn(bb, 4);
+  public static PacketNumber read4(final ByteBuf bb, final PacketNumber lastAcked) {
+    return readn(bb, 4, lastAcked);
   }
 
-  public static PacketNumber read2(final ByteBuf bb) {
-    return readn(bb, 2);
+  public static PacketNumber read2(final ByteBuf bb, final PacketNumber lastAcked) {
+    return readn(bb, 2, lastAcked);
   }
 
-  public static PacketNumber read1(final ByteBuf bb) {
-    return readn(bb, 1);
+  public static PacketNumber read1(final ByteBuf bb, final PacketNumber lastAcked) {
+    return readn(bb, 1, lastAcked);
   }
 
-  private static PacketNumber readn(final ByteBuf bb, int len) {
+  private static PacketNumber readn(final ByteBuf bb, int len, final PacketNumber lastAcked) {
     byte[] b = new byte[len];
     bb.readBytes(b);
-    return new PacketNumber(Longs.fromByteArray(pad(b)));
+    byte[] merged = Longs.toByteArray(lastAcked.asLong());
+
+    System.arraycopy(b, 0, merged, 8-len, len);
+    long mergedLong = Longs.fromByteArray(merged);
+
+    if (mergedLong < lastAcked.asLong()) {
+      // bump byte
+      merged[8-len - 1]++; // TODO handle overflow
+      mergedLong = Longs.fromByteArray(merged);
+    }
+
+    return new PacketNumber(mergedLong);
   }
 
   public static final PacketNumber MIN = new PacketNumber(0);

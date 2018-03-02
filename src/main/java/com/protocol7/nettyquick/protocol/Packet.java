@@ -7,14 +7,18 @@ public interface Packet {
 
   int PACKET_TYPE_MASK = 0b10000000;
 
-  static Packet parse(ByteBuf bb) {
+  interface LastPacketNumberProvider {
+    PacketNumber getLastAcked(ConnectionId connectionId);
+  }
+
+  static Packet parse(ByteBuf bb, LastPacketNumberProvider lastAcked) {
     byte firstByte = bb.getByte(bb.readerIndex());
 
     if ((PACKET_TYPE_MASK & firstByte) == PACKET_TYPE_MASK) {
       return LongPacket.parse(bb);
     } else {
       // short packet
-      return ShortPacket.parse(bb);
+      return ShortPacket.parse(bb, lastAcked);
     }
   }
 

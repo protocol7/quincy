@@ -22,7 +22,7 @@ public class LongPacketTest {
 
     ByteBuf bb = Unpooled.buffer();
     lp.write(bb);
-    LongPacket parsed = (LongPacket) Packet.parse(bb);
+    LongPacket parsed = (LongPacket) Packet.parse(bb, connectionId -> new PacketNumber(1234));
 
     assertEquals(packetType, parsed.getPacketType());
     assertEquals(connId, parsed.getConnectionId());

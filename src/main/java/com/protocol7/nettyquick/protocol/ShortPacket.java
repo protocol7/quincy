@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 
 public class ShortPacket implements Packet {
 
-  public static ShortPacket parse(ByteBuf bb) {
+  public static ShortPacket parse(ByteBuf bb, LastPacketNumberProvider lastAckedProvider) {
     byte firstByte = bb.readByte();
 
     byte ptByte = (byte)((firstByte & 0b00011111) & 0xFF);
@@ -21,13 +21,14 @@ public class ShortPacket implements Packet {
     } else {
       connId = Optional.empty();
     }
+    PacketNumber lastAcked = lastAckedProvider.getLastAcked(connId.get());
     PacketNumber packetNumber;
     if (packetType == PacketType.Four_octets) {
-      packetNumber = PacketNumber.read4(bb);
+      packetNumber = PacketNumber.read4(bb, lastAcked);
     } else if (packetType == PacketType.Two_octets) {
-      packetNumber = PacketNumber.read2(bb);
+      packetNumber = PacketNumber.read2(bb, lastAcked);
     } else {
-      packetNumber = PacketNumber.read1(bb);
+      packetNumber = PacketNumber.read1(bb, lastAcked);
     }
     Payload payload = Payload.parse(bb);
 
