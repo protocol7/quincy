@@ -23,16 +23,12 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram) throws Exception {
-    System.out.println("Server first");
-
     final ByteBuf bb = datagram.content();
-
-    System.out.println("Server got " + bb);
 
     Packet packet = Packet.parse(bb, connectionId -> {
       Optional<Connection> connection = connections.get(connectionId);
       if (connection.isPresent()) {
-        return connection.get().lastAckedPacketNumber(); // TODO is getting the next the right thing to do?
+        return connection.get().lastAckedPacketNumber();
       } else {
         throw new IllegalStateException("Connection unknown: " + connectionId);
       }
