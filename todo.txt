@@ -1,3 +1,5 @@
+* Test client state machine
+* Test server state machine
 * Closing connections
 * Asymetric packet numbers
 * Stream state machine

@@ -10,6 +10,7 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
@@ -21,7 +22,7 @@ public class QuicServer {
                             group1 -> new QuicServer(group1));
   }
 
-  private static Future<NioEventLoopGroup> bindImpl(final InetSocketAddress address, final StreamListener streamHandler) {
+  private static Future<EventExecutorGroup> bindImpl(final InetSocketAddress address, final StreamListener streamHandler) {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
     final Bootstrap b = new Bootstrap();
@@ -39,9 +40,9 @@ public class QuicServer {
     return Futures.thenSync(GlobalEventExecutor.INSTANCE, b.bind(address), aVoid -> group);
   }
 
-  private final NioEventLoopGroup group;
+  private final EventExecutorGroup group;
 
-  private QuicServer(final NioEventLoopGroup group) {
+  private QuicServer(final EventExecutorGroup group) {
     this.group = group;
   }
 

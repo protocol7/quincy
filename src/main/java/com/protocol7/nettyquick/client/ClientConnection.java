@@ -19,6 +19,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.DatagramPacket;
+import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class ClientConnection implements Connection {
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
   private final ConnectionId connectionId;
-  private final NioEventLoopGroup group;
+  private final EventExecutorGroup group;
   private final Channel channel;
   private final InetSocketAddress serverAddress;
   private final StreamListener streamListener;
