@@ -106,7 +106,7 @@ public class ClientConnection implements Connection {
   }
 
   public Stream openStream() {
-    StreamId streamId = StreamId.random();
+    StreamId streamId = StreamId.random(true, true);
     return streams.getOrCreate(streamId, streamListener);
   }
 

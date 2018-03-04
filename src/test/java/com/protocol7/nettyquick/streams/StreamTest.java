@@ -27,7 +27,7 @@ public class StreamTest {
   @Mock
   private Connection connection;
   @Mock private StreamListener listener;
-  private final StreamId streamId = StreamId.random();
+  private final StreamId streamId = StreamId.random(true, true);
 
   @Before
   public void setUp() throws Exception {

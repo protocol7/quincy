@@ -42,7 +42,7 @@ public class ClientStateMachineTest {
   @Mock private Stream stream;
   private ClientStateMachine stm;
   private PacketNumber packetNumber = PacketNumber.random();
-  private StreamId streamId = StreamId.random();
+  private StreamId streamId = StreamId.random(true, true);
 
   @Before
   public void setUp() throws Exception {

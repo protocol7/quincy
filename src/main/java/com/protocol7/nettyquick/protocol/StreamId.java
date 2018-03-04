@@ -1,11 +1,28 @@
 package com.protocol7.nettyquick.protocol;
 
+import static com.protocol7.nettyquick.utils.Bits.set;
+import static com.protocol7.nettyquick.utils.Bits.unset;
+
 import io.netty.buffer.ByteBuf;
 
 public class StreamId {
 
-  public static StreamId random() {
-    return new StreamId(Varint.random());
+  public static StreamId random(boolean client, boolean bidirectional) {
+    long id = Varint.random().getValue();
+
+    if (client) {
+      id = unset(id, 0);
+    } else {
+      id = set(id, 0);
+    }
+
+    if (bidirectional) {
+      id = unset(id, 1);
+    } else {
+      id = set(id, 1);
+    }
+
+    return new StreamId(id);
   }
 
   public static StreamId parse(ByteBuf bb) {

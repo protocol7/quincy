@@ -17,7 +17,7 @@ public class StreamFrameTest {
 
   @Test
   public void roundtrip() {
-    StreamFrame frame = new StreamFrame(StreamId.random(),
+    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
                                         0,
                                         true,
                                         DATA);
@@ -68,7 +68,7 @@ public class StreamFrameTest {
 
   @Test
   public void lengthWithoutOffset() {
-    StreamFrame frame = new StreamFrame(StreamId.random(),
+    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
                                         0,
                                         false,
                                         DATA);
@@ -77,7 +77,7 @@ public class StreamFrameTest {
 
   @Test
   public void lengthWithOffset() {
-    StreamFrame frame = new StreamFrame(StreamId.random(),
+    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
                                         123,
                                         false,
                                         DATA);
