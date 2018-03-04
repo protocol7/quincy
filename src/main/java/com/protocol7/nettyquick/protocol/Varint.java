@@ -12,7 +12,11 @@ public class Varint implements Comparable<Varint> {
   public static final long MAX = 4611686018427387903L;
 
   public static Varint random() {
-    return new Varint(Rnd.rndLong(0, MAX));
+    return random(0);
+  }
+
+  public static Varint random(long min) {
+    return new Varint(Rnd.rndLong(min, MAX));
   }
 
   public static Varint read(ByteBuf bb) {

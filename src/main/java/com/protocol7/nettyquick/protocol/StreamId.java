@@ -8,7 +8,7 @@ import io.netty.buffer.ByteBuf;
 public class StreamId {
 
   public static StreamId random(boolean client, boolean bidirectional) {
-    long id = Varint.random().getValue();
+    long id = Varint.random(1).getValue();
 
     if (client) {
       id = unset(id, 0);

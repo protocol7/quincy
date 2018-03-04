@@ -29,7 +29,7 @@ public class StreamIdTest {
   public void randomBounds() {
     for (int i = 0; i<1000_000; i++) {
       StreamId v = StreamId.random(true, true);
-      assertTrue(v.toString(), v.getValue() > 0 && v.getValue() < 4611686018427387903L);
+      assertTrue(v.toString(), v.getValue() > 1 && v.getValue() < 4611686018427387903L);
     }
   }
 
