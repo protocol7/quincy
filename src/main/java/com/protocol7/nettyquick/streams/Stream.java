@@ -1,10 +1,11 @@
 package com.protocol7.nettyquick.streams;
 
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Payload;
 import com.protocol7.nettyquick.protocol.ShortPacket;
@@ -15,69 +16,94 @@ import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 
 public class Stream {
 
+  public enum StreamType {
+    Receiving,
+    Sending,
+    Bidirectional;
+
+    public boolean canSend() {
+      return this == Sending || this == Bidirectional;
+    }
+
+    public boolean canReceive() {
+      return this == Receiving || this == Bidirectional;
+    }
+  }
+
   private final StreamId id;
   private final Connection connection;
   private final StreamListener listener;
   private final AtomicLong offset = new AtomicLong(0);
-  private final AtomicBoolean closed = new AtomicBoolean(false);
+  private final StreamType streamType;
+  private final SendStateMachine sendStateMachine = new SendStateMachine();
+  private final ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine();
+  private final ReceivedDataBuffer receivedDataBuffer = new ReceivedDataBuffer();
 
-  public Stream(final StreamId id, final Connection connection, final StreamListener listener) {
+  public Stream(final StreamId id, final Connection connection, final StreamListener listener, StreamType streamType) {
     this.id = id;
     this.connection = connection;
     this.listener = listener;
+    this.streamType = streamType;
   }
 
   public void write(final byte[] b, boolean finish) {
-    verifyOpen();
+    canWrite();
 
     final long frameOffset = offset.getAndAdd(b.length);
     final StreamFrame sf = new StreamFrame(id, frameOffset, finish, b);
-    final Payload payload = new Payload(sf);
+    Packet p = connection.sendPacket(sf);
 
-    final Packet p = new ShortPacket(false,
-                               false,
-                               PacketType.Four_octets,
-                               connection.getConnectionId(),
-                               connection.nextSendPacketNumber(),
-                               payload);
-
-    connection.sendPacket(p);
-
-    closed.compareAndSet(false, finish);
+    sendStateMachine.onStream(p.getPacketNumber(), finish);
   }
 
   public void reset(int applicationErrorCode) {
-    verifyOpen();
+    canReset();
 
     final Frame frame = new RstStreamFrame(id, applicationErrorCode, offset.get());
 
-    final Packet p = new ShortPacket(false,
-                                     false,
-                                     PacketType.Four_octets,
-                                     connection.getConnectionId(),
-                                     connection.nextSendPacketNumber(),
-                                     new Payload(frame));
+    final Packet p = connection.sendPacket(frame);
 
-    connection.sendPacket(p);
-    closed.set(true);
+    sendStateMachine.onReset(p.getPacketNumber());
   }
 
-  private void verifyOpen() {
-    if (closed.get()) {
-      throw new IllegalStateException("Stream closed");
+  private void canWrite() {
+    if (!streamType.canSend() || !sendStateMachine.canSend()) {
+      throw new IllegalStateException();
     }
   }
 
-  public void onData(final long offset, final byte[] b) {
-    listener.onData(this, offset, b);
+  private void canReset() {
+    if (!sendStateMachine.canReset()) {
+      throw new IllegalStateException();
+    }
+  }
+
+  public void onData(final long offset, final boolean finish, final byte[] b) {
+    receivedDataBuffer.onData(b, offset, finish);
+
+    Optional<byte[]> data = receivedDataBuffer.read();
+    while (data.isPresent()) {
+      listener.onData(this, data.get());
+      data = receivedDataBuffer.read();
+    }
+    if (receivedDataBuffer.isDone()) {
+      listener.onDone();
+    }
+
+    receiveStateMachine.onStream(finish);
   }
 
   public void onReset(final int applicationErrorCode, final long offset) {
-    closed.set(true);
+    receiveStateMachine.onReset();
     listener.onReset(this, applicationErrorCode, offset);
+    receiveStateMachine.onAppReadReset();
+  }
+
+  public void onAck(PacketNumber pn) {
+    sendStateMachine.onAck(pn);
   }
 
   public boolean isClosed() {
-    return closed.get();
+    return !sendStateMachine.canSend() || !receiveStateMachine.canReceive();
   }
 }

@@ -28,7 +28,6 @@ public class AckFrame extends Frame {
 
     long largest = largestAcknowledged;
     for (int i = 0; i<blockCount; i++) {
-      System.out.println(largest + " - " + smallest);
       if (i % 2 == 0) {
         // reading gap
         Varint gap = Varint.read(bb);

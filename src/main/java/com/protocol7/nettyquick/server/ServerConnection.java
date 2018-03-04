@@ -48,8 +48,9 @@ public class ServerConnection implements Connection {
     this.channel = channel;
     this.clientAddress = clientAddress;
     this.stateMachine = new ServerStateMachine(this);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
     this.streams = new Streams(this);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
+
   }
 
   public Optional<ConnectionId> getConnectionId() {
@@ -64,17 +65,18 @@ public class ServerConnection implements Connection {
     return version.get();
   }
 
-  public void sendPacket(Packet p) {
+  public Packet sendPacket(Packet p) {
     packetBuffer.send(p);
+    return p;
   }
 
-  public void sendPacket(Frame... frames) {
-    packetBuffer.send(new ShortPacket(false,
-                                      false,
-                                      PacketType.Four_octets,
-                                      getConnectionId(),
-                                      nextSendPacketNumber(),
-                                      new Payload(frames)));
+  public Packet sendPacket(Frame... frames) {
+    return sendPacket(new ShortPacket(false,
+                               false,
+                               PacketType.Four_octets,
+                               getConnectionId(),
+                               nextSendPacketNumber(),
+                               new Payload(frames)));
   }
 
   private void sendPacketUnbuffered(Packet packet) {

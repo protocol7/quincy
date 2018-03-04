@@ -74,7 +74,7 @@ public class ClientStateMachineTest {
 
     stm.processPacket(packet(new StreamFrame(streamId, 123, false, DATA)));
 
-    verify(stream).onData(123, DATA);
+    verify(stream).onData(123, false, DATA);
   }
 
   @Test

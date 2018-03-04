@@ -36,32 +36,36 @@ public class StreamIdTest {
   @Test
   public void randomClient() {
     for (int i = 0; i<1000; i++) {
-      long v = StreamId.random(true, true).getValue();
-      assertTrue((v & 1) == 0);
+      StreamId id = StreamId.random(true, true);
+      assertTrue((id.getValue() & 1) == 0);
+      assertTrue(id.isClient());
     }
   }
 
   @Test
   public void randomServer() {
     for (int i = 0; i<1000; i++) {
-      long v = StreamId.random(false, true).getValue();
-      assertTrue((v & 1) == 1);
+      StreamId id = StreamId.random(false, true);
+      assertTrue((id.getValue() & 1) == 1);
+      assertFalse(id.isClient());
     }
   }
 
   @Test
   public void randomBidirectional() {
     for (int i = 0; i<1000; i++) {
-      long v = StreamId.random(true, true).getValue();
-      assertTrue((v & 0b10) == 0);
+      StreamId id = StreamId.random(true, true);
+      assertTrue((id.getValue() & 0b10) == 0);
+      assertTrue(id.isBidirectional());
     }
   }
 
   @Test
   public void randomUnidirectional() {
     for (int i = 0; i<1000; i++) {
-      long v = StreamId.random(true, false).getValue();
-      assertTrue((v & 0b10) == 0b10);
+      StreamId id = StreamId.random(true, false);
+      assertTrue((id.getValue() & 0b10) == 0b10);
+      assertFalse(id.isBidirectional());
     }
   }
 

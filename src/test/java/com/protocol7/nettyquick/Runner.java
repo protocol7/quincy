@@ -6,18 +6,47 @@ import java.net.InetSocketAddress;
 import com.protocol7.nettyquick.client.QuicClient;
 import com.protocol7.nettyquick.server.QuicServer;
 import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.streams.StreamListener;
 
 public class Runner {
 
   public static void main(String[] args) throws Exception {
     InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 9556);
 
-    QuicServer server = QuicServer.bind(address, (stream, offset, data) -> {
-      System.out.println("s got " + new String(data));
-      stream.write("Pong".getBytes(), true);
+    QuicServer server = QuicServer.bind(address, new StreamListener() {
+      @Override
+      public void onData(final Stream stream, final byte[] data) {
+        System.out.println("s got " + new String(data));
+        stream.write("Pong".getBytes(), true);
+      }
+
+      @Override
+      public void onDone() {
+        // do nothing
+      }
+
+      @Override
+      public void onReset(final Stream stream, final int applicationErrorCode, final long offset) {
+        // do nothing
+      }
     }).sync().get();
 
-    QuicClient client = QuicClient.connect(address, (stream, offset, data) -> System.out.println("c got " + new String(data))).sync().get();
+    QuicClient client = QuicClient.connect(address, new StreamListener() {
+      @Override
+      public void onData(final Stream stream, final byte[] data) {
+        System.out.println("c got " + new String(data));
+      }
+
+      @Override
+      public void onDone() {
+        // do nothing
+      }
+
+      @Override
+      public void onReset(final Stream stream, final int applicationErrorCode, final long offset) {
+        // do nothing
+      }
+    }).sync().get();
 
     Stream stream = client.openStream();
 

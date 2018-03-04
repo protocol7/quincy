@@ -53,8 +53,9 @@ public class ClientConnection implements Connection {
     this.serverAddress = serverAddress;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
     this.streams = new Streams(this);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
+
   }
 
   public Future<Void> handshake() {
@@ -62,12 +63,13 @@ public class ClientConnection implements Connection {
     return stateMachine.handshake();
   }
 
-  public void sendPacket(Packet p) {
+  public Packet sendPacket(Packet p) {
     packetBuffer.send(p);
+    return p;
   }
 
-  public void sendPacket(Frame... frames) {
-    sendPacket(new ShortPacket(false,
+  public Packet sendPacket(Frame... frames) {
+    return sendPacket(new ShortPacket(false,
                                false,
                                PacketType.Four_octets,
                                getConnectionId(),
@@ -106,8 +108,7 @@ public class ClientConnection implements Connection {
   }
 
   public Stream openStream() {
-    StreamId streamId = StreamId.random(true, true);
-    return streams.getOrCreate(streamId, streamListener);
+    return streams.openStream(true, true, streamListener);
   }
 
   public Stream getOrCreateStream(StreamId streamId) {

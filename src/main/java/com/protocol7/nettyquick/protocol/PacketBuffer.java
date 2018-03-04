@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.BinaryOperator;
 import java.util.stream.Collectors;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -22,6 +21,10 @@ import org.slf4j.LoggerFactory;
 // TODO resends
 public class PacketBuffer {
 
+  public interface AckListener {
+    void onAck(PacketNumber pn);
+  }
+
   private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
 
   private final Map<PacketNumber, Packet> buffer = Maps.newConcurrentMap();
@@ -29,10 +32,12 @@ public class PacketBuffer {
   private final AtomicReference<PacketNumber> largestAcked = new AtomicReference<>(PacketNumber.MIN);
   private final Connection connection;
   private final Sender sender;
+  private final AckListener ackListener;
 
-  public PacketBuffer(final Connection connection, final Sender sender) {
+  public PacketBuffer(final Connection connection, final Sender sender, final AckListener ackListener) {
     this.connection = connection;
     this.sender = sender;
+    this.ackListener = ackListener;
   }
 
   @VisibleForTesting
@@ -99,6 +104,7 @@ public class PacketBuffer {
       PacketNumber pn = new PacketNumber(i);
       if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
+        ackListener.onAck(pn);
         largestAcked.getAndAccumulate(pn, PacketNumber::max);
       }
     }

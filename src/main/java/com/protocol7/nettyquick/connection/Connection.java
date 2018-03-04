@@ -7,10 +7,12 @@ import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.frames.Frame;
 
 public interface Connection {
 
-  void sendPacket(Packet p);
+  Packet sendPacket(Packet p);
+  Packet sendPacket(Frame... frames);
 
   Optional<ConnectionId> getConnectionId();
 

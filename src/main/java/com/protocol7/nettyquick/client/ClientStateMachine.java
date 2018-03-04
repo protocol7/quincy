@@ -68,7 +68,7 @@ public class ClientStateMachine {
             StreamFrame sf = (StreamFrame) frame;
 
             Stream stream = connection.getOrCreateStream(sf.getStreamId());
-            stream.onData(sf.getOffset(), sf.getData());
+            stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
           } else if (frame instanceof RstStreamFrame) {
             RstStreamFrame rsf = (RstStreamFrame) frame;
             Stream stream = connection.getOrCreateStream(rsf.getStreamId());

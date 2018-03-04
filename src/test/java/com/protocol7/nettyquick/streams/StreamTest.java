@@ -1,8 +1,11 @@
 package com.protocol7.nettyquick.streams;
 
+import static com.protocol7.nettyquick.streams.Stream.StreamType.Bidirectional;
 import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
@@ -27,21 +30,26 @@ public class StreamTest {
   @Mock
   private Connection connection;
   @Mock private StreamListener listener;
+  @Mock private Packet packet;
   private final StreamId streamId = StreamId.random(true, true);
 
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    Mockito.when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    Mockito.when(connection.nextSendPacketNumber()).thenReturn(PacketNumber.random());
+    when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.nextSendPacketNumber()).thenReturn(PacketNumber.random());
+
+    when(packet.getPacketNumber()).thenReturn(new PacketNumber(123));
+    when(connection.sendPacket(any(Frame.class))).thenReturn(packet);
   }
 
   @Test
   public void write() {
     Stream stream = new Stream(streamId,
                                connection,
-                               listener);
+                               listener,
+                               Bidirectional);
 
     stream.write(DATA, false);
 
@@ -57,7 +65,8 @@ public class StreamTest {
   public void writeWithOffset() {
     Stream stream = new Stream(streamId,
                                connection,
-                               listener);
+                               listener,
+                               Bidirectional);
 
     stream.write(DATA, false);
     StreamFrame frame1 = (StreamFrame) captureFrame();
@@ -72,7 +81,8 @@ public class StreamTest {
   public void reset() {
     Stream stream = new Stream(streamId,
                                connection,
-                               listener);
+                               listener,
+                               Bidirectional);
 
     stream.write(DATA, false);
     captureFrame();
@@ -90,10 +100,10 @@ public class StreamTest {
   public void resetOnClosed() {
     Stream stream = new Stream(streamId,
                                connection,
-                               listener);
+                               listener,
+                               Bidirectional);
 
-    stream.write(DATA, true);
-    assertTrue(stream.isClosed());
+    stream.reset(123);
     stream.reset(123);
   }
 
@@ -101,29 +111,30 @@ public class StreamTest {
   public void writeOnClosed() {
     Stream stream = new Stream(streamId,
                                connection,
-                               listener);
+                               listener,
+                               Bidirectional);
     stream.write(DATA, true);
     assertTrue(stream.isClosed());
     stream.write(DATA, true);
   }
 
   private Frame captureFrame() {
-    ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
+    ArgumentCaptor<Frame> packetCaptor = ArgumentCaptor.forClass(Frame.class);
     verify(connection, atLeastOnce()).sendPacket(packetCaptor.capture());
-    return packetCaptor.getValue().getPayload().getFrames().get(0);
+    return packetCaptor.getValue();
   }
 
   @Test
   public void onData() {
-    Stream stream = new Stream(streamId, connection, listener);
-    stream.onData(123, DATA);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    stream.onData(0, true, DATA);
 
-    verify(listener).onData(stream, 123, DATA);
+    verify(listener).onData(stream, DATA);
   }
 
   @Test
   public void onReset() {
-    Stream stream = new Stream(streamId, connection, listener);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
     stream.onReset(123, 456);
 
     verify(listener).onReset(stream, 123, 456);

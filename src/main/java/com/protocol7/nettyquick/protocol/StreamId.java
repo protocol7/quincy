@@ -39,6 +39,14 @@ public class StreamId {
     this.id = new Varint(id);
   }
 
+  public boolean isClient() {
+    return (id.getValue() & 1) == 0;
+  }
+
+  public boolean isBidirectional() {
+    return (id.getValue() & 0b10) == 0;
+  }
+
   public void write(ByteBuf bb) {
     id.write(bb);
   }
