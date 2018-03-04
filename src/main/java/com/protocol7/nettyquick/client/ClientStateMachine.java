@@ -1,8 +1,12 @@
 package com.protocol7.nettyquick.client;
 
+import com.google.common.annotations.VisibleForTesting;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketType;
+import com.protocol7.nettyquick.protocol.ShortPacket;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
@@ -17,7 +21,7 @@ public class ClientStateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ClientStateMachine.class);
 
-  private enum ClientState {
+  protected enum ClientState {
     BeforeInitial,
     InitialSent,
     Ready
@@ -69,11 +73,21 @@ public class ClientStateMachine {
             RstStreamFrame rsf = (RstStreamFrame) frame;
             Stream stream = connection.getOrCreateStream(rsf.getStreamId());
             stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+          } else if (frame instanceof PingFrame) {
+            PingFrame pf = (PingFrame) frame;
+            if (!pf.isEmpty()) {
+              connection.sendPacket(new PongFrame(pf.getData()));
+            }
           }
         }
       } else {
         log.warn("Got packet in an unexpected state");
       }
     }
+  }
+
+  @VisibleForTesting
+  protected ClientState getState() {
+    return state;
   }
 }

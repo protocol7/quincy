@@ -9,8 +9,12 @@ import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
+import com.protocol7.nettyquick.protocol.PacketType;
+import com.protocol7.nettyquick.protocol.Payload;
+import com.protocol7.nettyquick.protocol.ShortPacket;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -62,6 +66,15 @@ public class ServerConnection implements Connection {
 
   public void sendPacket(Packet p) {
     packetBuffer.send(p);
+  }
+
+  public void sendPacket(Frame... frames) {
+    packetBuffer.send(new ShortPacket(false,
+                                      false,
+                                      PacketType.Four_octets,
+                                      getConnectionId(),
+                                      nextSendPacketNumber(),
+                                      new Payload(frames)));
   }
 
   private void sendPacketUnbuffered(Packet packet) {

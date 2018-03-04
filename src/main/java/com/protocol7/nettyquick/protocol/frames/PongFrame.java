@@ -5,9 +5,9 @@ import java.util.Arrays;
 import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
 
-public class PingFrame extends Frame {
+public class PongFrame extends Frame {
 
-  public static PingFrame parse(ByteBuf bb) {
+  public static PongFrame parse(ByteBuf bb) {
     bb.readByte();
 
     int length = bb.readByte();
@@ -15,29 +15,21 @@ public class PingFrame extends Frame {
     byte[] data = new byte[length];
     bb.readBytes(data);
 
-    return new PingFrame(data);
+    return new PongFrame(data);
   }
 
   private final byte[] data;
 
-  public PingFrame(final byte[] data) {
-    super(FrameType.PING);
+  public PongFrame(final byte[] data) {
+    super(FrameType.PONG);
 
     Preconditions.checkArgument(data.length < 256);
 
     this.data = data;
   }
 
-  public PingFrame() {
-    this(new byte[0]);
-  }
-
   public byte[] getData() {
     return data;
-  }
-
-  public boolean isEmpty() {
-    return data.length == 0;
   }
 
   @Override
@@ -58,7 +50,7 @@ public class PingFrame extends Frame {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    final PingFrame pingFrame = (PingFrame) o;
+    final PongFrame pingFrame = (PongFrame) o;
 
     return Arrays.equals(data, pingFrame.data);
 

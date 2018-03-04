@@ -4,6 +4,9 @@ import com.protocol7.nettyquick.protocol.LongPacket;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.frames.PongFrame;
+import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.streams.Stream;
@@ -14,7 +17,11 @@ public class ServerStateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ServerStateMachine.class);
 
-  private enum ServerState {
+  public ServerState getState() {
+    return state;
+  }
+
+  protected enum ServerState {
     BeforeInitial,
     Ready
   }
@@ -37,8 +44,8 @@ public class ServerStateMachine {
             connection.setConnectionId(packet.getConnectionId());
 
             LongPacket handshakePacket = HandshakePacket.create(packet.getConnectionId(),
-                                                                     connection.nextSendPacketNumber(),
-                                                                     longPacket.getVersion());
+                                                                connection.nextSendPacketNumber(),
+                                                                longPacket.getVersion());
             connection.sendPacket(handshakePacket);
             state = ServerState.Ready;
             log.info("Server connection state ready");
@@ -52,9 +59,17 @@ public class ServerStateMachine {
             StreamFrame sf = (StreamFrame) frame;
             Stream stream = connection.getOrCreateStream(sf.getStreamId());
             stream.onData(sf.getOffset(), sf.getData());
+          } else if (frame instanceof RstStreamFrame) {
+            RstStreamFrame rsf = (RstStreamFrame) frame;
+            Stream stream = connection.getOrCreateStream(rsf.getStreamId());
+            stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+          } else if (frame instanceof PingFrame) {
+            PingFrame pf = (PingFrame) frame;
+            if (!pf.isEmpty()) {
+              connection.sendPacket(new PongFrame(pf.getData()));
+            }
           }
         }
-
       }
   }
 
