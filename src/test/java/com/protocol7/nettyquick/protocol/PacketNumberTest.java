@@ -90,6 +90,16 @@ public class PacketNumberTest {
   }
 
   @Test
+  public void read2Overflow() {
+    PacketNumber lastAcked = new PacketNumber(2868900622L);
+
+    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("1f94"));
+    PacketNumber pn = PacketNumber.read2(bb, lastAcked);
+    assertTrue(pn.asLong() > 2868900622L);
+    assertEquals(new PacketNumber(2885623700L), pn);
+  }
+
+  @Test
   public void read4() {
     PacketNumber lastAcked = new PacketNumber(2860708622L);
 

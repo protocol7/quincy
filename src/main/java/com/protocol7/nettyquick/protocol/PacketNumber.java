@@ -40,12 +40,22 @@ public class PacketNumber implements Comparable<PacketNumber> {
     bb.readBytes(b);
     byte[] merged = Longs.toByteArray(lastAcked.asLong());
 
+    // merge the last acked value, with the read suffix
     System.arraycopy(b, 0, merged, 8-len, len);
+
     long mergedLong = Longs.fromByteArray(merged);
 
-    if (mergedLong < lastAcked.asLong()) {
+    // the resulting value must be larger than lastAcked. If not, we bump the bytes before until it is, handling byte overflows
+    int index = 8 - len - 1;
+    while (mergedLong < lastAcked.asLong()) {
       // bump byte
-      merged[8-len - 1]++; // TODO handle overflow
+      byte bump = merged[index];
+      bump++;
+      if (bump != 0) {
+        merged[index] = bump;
+      } else {
+        index--;
+      }
       mergedLong = Longs.fromByteArray(merged);
     }
 
