@@ -78,6 +78,7 @@ public class StreamTest {
     captureFrame();
 
     stream.reset(123);
+    assertTrue(stream.isClosed());
     RstStreamFrame frame2 = (RstStreamFrame) captureFrame();
 
     assertEquals(streamId, frame2.getStreamId());
@@ -92,6 +93,7 @@ public class StreamTest {
                                listener);
 
     stream.write(DATA, true);
+    assertTrue(stream.isClosed());
     stream.reset(123);
   }
 
@@ -101,6 +103,7 @@ public class StreamTest {
                                connection,
                                listener);
     stream.write(DATA, true);
+    assertTrue(stream.isClosed());
     stream.write(DATA, true);
   }
 
@@ -116,5 +119,15 @@ public class StreamTest {
     stream.onData(123, DATA);
 
     verify(listener).onData(stream, 123, DATA);
+  }
+
+  @Test
+  public void onReset() {
+    Stream stream = new Stream(streamId, connection, listener);
+    stream.onReset(123, 456);
+
+    verify(listener).onReset(stream, 123, 456);
+
+    assertTrue(stream.isClosed());
   }
 }

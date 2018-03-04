@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.client;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.streams.Stream;
@@ -64,6 +65,10 @@ public class ClientStateMachine {
 
             Stream stream = connection.getOrCreateStream(sf.getStreamId());
             stream.onData(sf.getOffset(), sf.getData());
+          } else if (frame instanceof RstStreamFrame) {
+            RstStreamFrame rsf = (RstStreamFrame) frame;
+            Stream stream = connection.getOrCreateStream(rsf.getStreamId());
+            stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
           }
         }
       } else {

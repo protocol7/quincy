@@ -7,7 +7,6 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.Packet;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.ShortPacket;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
@@ -18,14 +17,14 @@ public class Stream {
 
   private final StreamId id;
   private final Connection connection;
-  private final StreamListener handler;
+  private final StreamListener listener;
   private final AtomicLong offset = new AtomicLong(0);
   private final AtomicBoolean closed = new AtomicBoolean(false);
 
   public Stream(final StreamId id, final Connection connection, final StreamListener listener) {
     this.id = id;
     this.connection = connection;
-    this.handler = listener;
+    this.listener = listener;
   }
 
   public void write(final byte[] b, boolean finish) {
@@ -70,6 +69,15 @@ public class Stream {
   }
 
   public void onData(final long offset, final byte[] b) {
-    handler.onData(this, offset, b);
+    listener.onData(this, offset, b);
+  }
+
+  public void onReset(final int applicationErrorCode, final long offset) {
+    closed.set(true);
+    listener.onReset(this, applicationErrorCode, offset);
+  }
+
+  public boolean isClosed() {
+    return closed.get();
   }
 }
