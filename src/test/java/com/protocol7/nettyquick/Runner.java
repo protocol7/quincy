@@ -16,7 +16,7 @@ public class Runner {
     QuicServer server = QuicServer.bind(address, new StreamListener() {
       @Override
       public void onData(final Stream stream, final byte[] data) {
-        System.out.println("s got " + new String(data));
+        System.out.println("s got " + new String(data) + " on "+ stream.getId());
         stream.write("Pong".getBytes(), true);
       }
 
@@ -49,7 +49,6 @@ public class Runner {
     }).sync().get();
 
     Stream stream = client.openStream();
-
     stream.write("Ping".getBytes(), true);
 
     Thread.sleep(500);

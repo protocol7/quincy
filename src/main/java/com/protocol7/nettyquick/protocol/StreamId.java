@@ -10,6 +10,12 @@ public class StreamId {
   public static StreamId random(boolean client, boolean bidirectional) {
     long id = Varint.random(1).getValue();
 
+    id = encodeType(client, bidirectional, id);
+
+    return new StreamId(id);
+  }
+
+  private static long encodeType(final boolean client, final boolean bidirectional, long id) {
     if (client) {
       id = unset(id, 0);
     } else {
@@ -21,8 +27,21 @@ public class StreamId {
     } else {
       id = set(id, 1);
     }
+    return id;
+  }
 
-    return new StreamId(id);
+  public static StreamId next(StreamId prev, boolean client, boolean bidirectional) {
+    long v = prev.getValue();
+
+    v = encodeType(client, bidirectional, v);
+
+    long tmp = v;
+    while (v <= prev.getValue()) {
+      tmp++;
+      v = encodeType(client, bidirectional, tmp);
+    }
+
+    return new StreamId(v);
   }
 
   public static StreamId parse(ByteBuf bb) {

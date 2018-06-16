@@ -7,12 +7,14 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
+import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.streams.Stream.StreamType;
 
 public class Streams implements PacketBuffer.AckListener {
 
   private final Connection connection;
   private final Map<StreamId, Stream> streams = Maps.newConcurrentMap();
+  private StreamId maxId = new StreamId(0);
 
   public Streams(final Connection connection) {
     this.connection = connection;
@@ -20,7 +22,8 @@ public class Streams implements PacketBuffer.AckListener {
 
   public Stream openStream(boolean client, boolean bidirectional, StreamListener handler) {
     StreamType type = bidirectional ? StreamType.Bidirectional : StreamType.Sending;
-    StreamId streamId = StreamId.random(client, bidirectional);
+    StreamId streamId = StreamId.next(maxId, client, bidirectional);
+    this.maxId = streamId;
     Stream stream = new Stream(streamId,
                                connection,
                                handler,

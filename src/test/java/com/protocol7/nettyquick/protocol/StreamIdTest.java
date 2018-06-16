@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.protocol;
 
 import static org.junit.Assert.*;
 
+import com.protocol7.nettyquick.streams.Stream;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -67,6 +68,13 @@ public class StreamIdTest {
       assertTrue((id.getValue() & 0b10) == 0b10);
       assertFalse(id.isBidirectional());
     }
+  }
+
+  @Test
+  public void next() {
+    assertEquals(new StreamId(3), StreamId.next(new StreamId(0), false, false));
+    assertEquals(new StreamId(1), StreamId.next(new StreamId(0), false, true));
+    assertEquals(new StreamId(4), StreamId.next(new StreamId(0), true, true));
   }
 
   @Test

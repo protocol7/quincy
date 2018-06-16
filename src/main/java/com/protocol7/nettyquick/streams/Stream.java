@@ -46,6 +46,14 @@ public class Stream {
     this.streamType = streamType;
   }
 
+  public StreamId getId() {
+    return id;
+  }
+
+  public StreamType getStreamType() {
+    return streamType;
+  }
+
   public void write(final byte[] b, boolean finish) {
     canWrite();
 

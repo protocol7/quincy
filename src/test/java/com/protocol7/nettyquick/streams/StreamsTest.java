@@ -14,14 +14,23 @@ public class StreamsTest {
   @Mock Connection connection;
   @Mock StreamListener listener;
 
+  private Streams streams;
+
   @Before
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
+
+    this.streams = new Streams(connection);
+  }
+
+  @Test
+  public void openStream() {
+    Stream stream = streams.openStream(false, false, listener);
+    assertEquals(new StreamId(3), stream.getId());
   }
 
   @Test
   public void createAndThenGet() {
-    Streams streams = new Streams(connection);
     StreamId streamId = StreamId.random(true, true);
     Stream stream1 = streams.getOrCreate(streamId, listener);
     Stream stream2 = streams.getOrCreate(streamId, listener);
