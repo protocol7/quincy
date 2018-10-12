@@ -3,7 +3,8 @@ package com.protocol7.nettyquick.server;
 import java.util.Optional;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.Header;
+import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.StreamListener;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -36,9 +37,9 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     MDC.put("actor", "server");
     MDC.put("packetnumber", packet.getPacketNumber().toString());
-    MDC.put("connectionid", packet.getConnectionId().toString());
+    MDC.put("connectionid", packet.getDestinationConnectionId().toString());
 
-    ServerConnection conn = connections.get(packet.getConnectionId(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
+    ServerConnection conn = connections.get(packet.getDestinationConnectionId().get(), streamHandler, ctx.channel(), datagram.sender()); // TODO fix for when connId is omitted
 
     conn.onPacket(packet);
   }

@@ -12,20 +12,16 @@ import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Packet;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.protocol.ShortPacket;
-import com.protocol7.nettyquick.protocol.StreamId;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.protocol.ShortHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import io.netty.util.concurrent.Future;
 import org.junit.Before;
@@ -37,7 +33,8 @@ import org.mockito.MockitoAnnotations;
 public class ClientStateMachineTest {
 
   public static final byte[] DATA = "Hello".getBytes();
-  private final ConnectionId connectionId = ConnectionId.random();
+  private final ConnectionId destConnectionId = ConnectionId.random();
+  private final ConnectionId srcConnectionId = ConnectionId.random();
   @Mock private ClientConnection connection;
   @Mock private Stream stream;
   private ClientStateMachine stm;
@@ -48,7 +45,8 @@ public class ClientStateMachineTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getConnectionId()).thenReturn(Optional.of(connectionId));
+    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(destConnectionId));
+    when(connection.getSourceConnectionId()).thenReturn(Optional.of(srcConnectionId));
     when(connection.getOrCreateStream(streamId)).thenReturn(stream);
 
     stm = new ClientStateMachine(connection);
@@ -62,7 +60,11 @@ public class ClientStateMachineTest {
     assertFalse(handshakeFuture.isDone());
     assertEquals(ClientStateMachine.ClientState.InitialSent, stm.getState());
 
-    stm.processPacket(HandshakePacket.create(connectionId, PacketNumber.random(), Version.DRAFT_09));
+    stm.processPacket(HandshakePacket.create(
+            Optional.of(destConnectionId),
+            Optional.of(srcConnectionId),
+            PacketNumber.random(),
+            Version.DRAFT_09));
 
     assertTrue(handshakeFuture.isDone());
     assertEquals(ClientStateMachine.ClientState.Ready, stm.getState());
@@ -128,12 +130,12 @@ public class ClientStateMachineTest {
 
 
   private Packet packet(Frame... frames) {
-    return new ShortPacket(false,
+    return new ShortPacket(new ShortHeader(false,
                            false,
                            PacketType.Four_octets,
-                           Optional.of(connectionId),
+                           Optional.of(destConnectionId),
                            incrPacketNumber(),
-                           new Payload(frames));
+                           new Payload(frames)));
   }
 
   private PacketNumber incrPacketNumber() {
@@ -143,7 +145,11 @@ public class ClientStateMachineTest {
 
   private void getReady() {
     stm.handshake();
-    stm.processPacket(HandshakePacket.create(connectionId, PacketNumber.random(), Version.DRAFT_09));
+    stm.processPacket(HandshakePacket.create(
+            Optional.of(destConnectionId),
+            Optional.of(srcConnectionId),
+            PacketNumber.random(),
+            Version.DRAFT_09));
   }
 
 }

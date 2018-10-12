@@ -10,7 +10,7 @@ import io.netty.buffer.ByteBuf;
 
 public class Payload {
 
-  public static Payload parse(ByteBuf bb) {
+  public static Payload parse(ByteBuf bb) { // TODO take length
     List<Frame> frames = Lists.newArrayList();
     while (bb.isReadable()) {
       Frame frame = Frame.parse(bb);
@@ -38,6 +38,10 @@ public class Payload {
 
   public List<Frame> getFrames() {
     return frames;
+  }
+
+  public int getLength() {
+    return frames.stream().mapToInt(f -> f.calculateLength()).sum();
   }
 
   public void write(ByteBuf bb) {

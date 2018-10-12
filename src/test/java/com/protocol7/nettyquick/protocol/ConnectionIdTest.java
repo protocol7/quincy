@@ -20,28 +20,14 @@ public class ConnectionIdTest {
   @Test
   public void roundtrip() {
     assertRoundtrip(ConnectionId.random());
-    assertRoundtrip(new ConnectionId(UnsignedLong.ZERO));
-    assertRoundtrip(new ConnectionId(UnsignedLong.MAX_VALUE));
   }
 
   private void assertRoundtrip(ConnectionId connectionId) {
     ByteBuf bb = Unpooled.buffer();
     connectionId.write(bb);
 
-    ConnectionId parsed = ConnectionId.read(bb);
+    ConnectionId parsed = ConnectionId.read(connectionId.getLength(), bb);
 
     assertEquals(parsed, connectionId);
-  }
-
-  @Test
-  public void write() {
-    assertWrite("0000000000000000", UnsignedLong.ZERO);
-    assertWrite("ffffffffffffffff", UnsignedLong.MAX_VALUE);
-  }
-
-  private void assertWrite(String expected, UnsignedLong id) {
-    ByteBuf bb = Unpooled.buffer();
-    new ConnectionId(id).write(bb);
-    TestUtil.assertBuffer(expected, bb);
   }
 }

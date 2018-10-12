@@ -5,16 +5,11 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Packet;
-import com.protocol7.nettyquick.protocol.PacketBuffer;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.protocol.ShortPacket;
-import com.protocol7.nettyquick.protocol.StreamId;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -33,7 +28,8 @@ public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
-  private final ConnectionId connectionId;
+  private final Optional<ConnectionId> destConnectionId = Optional.empty();
+  private final Optional<ConnectionId> srcConnectionId;
   private final EventExecutorGroup group;
   private final Channel channel;
   private final InetSocketAddress serverAddress;
@@ -46,8 +42,8 @@ public class ClientConnection implements Connection {
 
   private final Streams streams;
 
-  public ClientConnection(final ConnectionId connectionId, final NioEventLoopGroup group, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
-    this.connectionId = connectionId;
+  public ClientConnection(final ConnectionId srcConnectionId, final NioEventLoopGroup group, final Channel channel, final InetSocketAddress serverAddress, final StreamListener streamListener) {
+    this.srcConnectionId = Optional.ofNullable(srcConnectionId);
     this.group = group;
     this.channel = channel;
     this.serverAddress = serverAddress;
@@ -69,12 +65,22 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Frame... frames) {
-    return sendPacket(new ShortPacket(false,
+    return sendPacket(new ShortPacket(new ShortHeader(false,
                                false,
                                PacketType.Four_octets,
-                               getConnectionId(),
+                               getDestinationConnectionId(),
                                nextSendPacketNumber(),
-                               new Payload(frames)));
+                               new Payload(frames))));
+  }
+
+  @Override
+  public Optional<ConnectionId> getSourceConnectionId() {
+    return Optional.empty();
+  }
+
+  @Override
+  public Optional<ConnectionId> getDestinationConnectionId() {
+    return Optional.empty();
   }
 
   private void sendPacketUnbuffered(Packet packet) {
@@ -89,10 +95,6 @@ public class ClientConnection implements Connection {
 
     packetBuffer.onPacket(packet);
     stateMachine.processPacket(packet);
-  }
-
-  public Optional<ConnectionId> getConnectionId() {
-    return Optional.of(connectionId);
   }
 
   public Version getVersion() {

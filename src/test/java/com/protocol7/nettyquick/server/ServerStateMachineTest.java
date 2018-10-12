@@ -8,21 +8,19 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
 import java.util.Optional;
 
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Packet;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.protocol.ShortPacket;
-import com.protocol7.nettyquick.protocol.StreamId;
+import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.protocol.ShortHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.server.ServerStateMachine.ServerState;
 import com.protocol7.nettyquick.streams.Stream;
 import org.junit.Before;
@@ -34,7 +32,8 @@ import org.mockito.MockitoAnnotations;
 public class ServerStateMachineTest {
 
   public static final byte[] DATA = "Hello".getBytes();
-  private final ConnectionId connectionId = ConnectionId.random();
+  private final ConnectionId destConnectionId = ConnectionId.random();
+  private final ConnectionId srcConnectionId = ConnectionId.random();
   @Mock
   private ServerConnection connection;
   @Mock private Stream stream;
@@ -46,7 +45,8 @@ public class ServerStateMachineTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getConnectionId()).thenReturn(Optional.of(connectionId));
+    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(destConnectionId));
+    when(connection.getSourceConnectionId()).thenReturn(Optional.of(srcConnectionId));
     when(connection.getOrCreateStream(streamId)).thenReturn(stream);
 
     stm = new ServerStateMachine(connection);
@@ -55,7 +55,7 @@ public class ServerStateMachineTest {
   @Test
   public void handshake() {
     assertEquals(ServerState.BeforeInitial, stm.getState());
-    stm.processPacket(InitialPacket.create(connectionId));
+    stm.processPacket(initialPacket());
 
     assertEquals(ServerState.Ready, stm.getState());
   }
@@ -112,7 +112,7 @@ public class ServerStateMachineTest {
   }
 
   private void getReady() {
-    stm.processPacket(InitialPacket.create(connectionId));
+    stm.processPacket(initialPacket());
   }
 
   private Frame captureLastSentFrame() {
@@ -121,14 +121,21 @@ public class ServerStateMachineTest {
     return sentPacketCaptor.getValue();
   }
 
+  private InitialPacket initialPacket() {
+    return InitialPacket.create(
+            Optional.of(destConnectionId),
+            Optional.of(srcConnectionId),
+            Optional.empty(),
+            Collections.emptyList());
+  }
 
   private Packet packet(Frame... frames) {
-    return new ShortPacket(false,
+    return new ShortPacket(new ShortHeader(false,
                            false,
                            PacketType.Four_octets,
-                           Optional.of(connectionId),
+                           Optional.of(destConnectionId),
                            incrPacketNumber(),
-                           new Payload(frames));
+                           new Payload(frames)));
   }
 
   private PacketNumber incrPacketNumber() {

@@ -15,6 +15,8 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -54,7 +56,7 @@ public class PacketBuffer {
     if (!ackBlocks.isEmpty()) {
       // add to packet
       AckFrame ackFrame = new AckFrame(123, ackBlocks);
-      sendImpl(Packet.addFrame(packet, ackFrame));
+      sendImpl(packet.addFrame(ackFrame));
     } else {
       sendImpl(packet);
     }
@@ -114,12 +116,12 @@ public class PacketBuffer {
     List<AckBlock> blocks = drainAcks(ackQueue);
     if (!blocks.isEmpty()) {
       AckFrame ackFrame = new AckFrame(123, blocks);
-      Packet packet = new ShortPacket(false,
+      Packet packet = new ShortPacket(new ShortHeader(false,
                                       false,
                                       PacketType.Four_octets,
-                                      connection.getConnectionId(),
+                                      connection.getDestinationConnectionId(),
                                       connection.nextSendPacketNumber(),
-                                      new Payload(ackFrame));
+                                      new Payload(ackFrame)));
 
       log.debug("Flushed acks {}", blocks);
 

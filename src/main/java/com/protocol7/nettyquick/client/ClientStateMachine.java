@@ -1,21 +1,24 @@
 package com.protocol7.nettyquick.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.ShortPacket;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
+import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.Collections;
+import java.util.Optional;
 
 public class ClientStateMachine {
 
@@ -39,7 +42,11 @@ public class ClientStateMachine {
     synchronized (this) {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
-        connection.sendPacket(InitialPacket.create(connection.getConnectionId().get()));
+        connection.sendPacket(InitialPacket.create(
+                connection.getDestinationConnectionId(),
+                connection.getSourceConnectionId(),
+                Optional.empty(),
+                Collections.emptyList()));
         state = ClientState.InitialSent;
         log.info("Client connection state inital sent");
       } else {
@@ -50,7 +57,7 @@ public class ClientStateMachine {
   }
 
   public void processPacket(Packet packet) {
-    log.info("Client got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getConnectionId());
+    log.info("Client got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getDestinationConnectionId());
 
     synchronized (this) { // TODO refactor to make non-syncronized
       // TODO validate connection ID

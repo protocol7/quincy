@@ -5,16 +5,11 @@ import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Packet;
-import com.protocol7.nettyquick.protocol.PacketBuffer;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
-import com.protocol7.nettyquick.protocol.ShortPacket;
-import com.protocol7.nettyquick.protocol.StreamId;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -33,7 +28,8 @@ public class ServerConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
-  private Optional<ConnectionId> connectionId = Optional.empty();
+  private Optional<ConnectionId> destConnectionId = Optional.empty();
+  private Optional<ConnectionId> srcConnectionId = Optional.empty();
   private final StreamListener handler;
   private final Channel channel;
   private final InetSocketAddress clientAddress;
@@ -53,12 +49,15 @@ public class ServerConnection implements Connection {
 
   }
 
-  public Optional<ConnectionId> getConnectionId() {
-    return connectionId;
+  public Optional<ConnectionId> getDestinationConnectionId() {
+    return destConnectionId;
+  }
+  public Optional<ConnectionId> getSourceConnectionId() {
+    return srcConnectionId;
   }
 
-  public void setConnectionId(ConnectionId connectionId) {
-    this.connectionId = Optional.of(connectionId);
+  public void setDestinationConnectionId(ConnectionId destConnectionId) {
+    this.destConnectionId = Optional.of(destConnectionId);
   }
 
   public Version getVersion() {
@@ -71,12 +70,12 @@ public class ServerConnection implements Connection {
   }
 
   public Packet sendPacket(Frame... frames) {
-    return sendPacket(new ShortPacket(false,
+    return sendPacket(new ShortPacket(new ShortHeader(false,
                                false,
                                PacketType.Four_octets,
-                               getConnectionId(),
+                               getDestinationConnectionId(),
                                nextSendPacketNumber(),
-                               new Payload(frames)));
+                               new Payload(frames))));
   }
 
   private void sendPacketUnbuffered(Packet packet) {

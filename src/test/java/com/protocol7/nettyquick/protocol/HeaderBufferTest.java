@@ -14,13 +14,15 @@ import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class PacketBufferTest {
+public class HeaderBufferTest {
 
   @Mock private Connection connection;
   @Mock private Sender sender;
@@ -31,19 +33,20 @@ public class PacketBufferTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getSourceConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
 
     buffer = new PacketBuffer(connection, sender, pn -> {});
   }
 
   private Packet packet(long pn, Frame... frames) {
-    return new ShortPacket(false,
+    return new ShortPacket(new ShortHeader(false,
                            false,
                            PacketType.Four_octets,
                            Optional.of(ConnectionId.random()),
                            new PacketNumber(pn),
-                           new Payload(frames));
+                           new Payload(frames)));
   }
 
   @Test

@@ -10,7 +10,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-public class ShortPacketTest {
+public class ShortHeaderTest {
 
   public static final byte[] DATA = "hello".getBytes();
 
@@ -20,7 +20,7 @@ public class ShortPacketTest {
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = new PacketNumber(123);
     Payload payload = new Payload(new PingFrame(DATA));
-    ShortPacket p = new ShortPacket(false,
+    ShortHeader p = new ShortHeader(false,
                                     false,
                                     PacketType.Four_octets,
                                     Optional.of(connId),
@@ -30,12 +30,12 @@ public class ShortPacketTest {
     ByteBuf bb = Unpooled.buffer();
     p.write(bb);
 
-    ShortPacket parsed = (ShortPacket) Packet.parse(bb, connectionId -> new PacketNumber(122));
+    ShortHeader parsed = ShortHeader.parse(bb, connectionId -> new PacketNumber(122));
 
     assertFalse(parsed.isOmitConnectionId());
     assertFalse(parsed.isKeyPhase());
     assertEquals(packetType, parsed.getPacketType());
-    assertEquals(connId, parsed.getConnectionId());
+    assertEquals(Optional.of(connId), parsed.getDestinationConnectionId());
     assertEquals(pn, parsed.getPacketNumber());
     assertEquals(payload, parsed.getPayload());
   }

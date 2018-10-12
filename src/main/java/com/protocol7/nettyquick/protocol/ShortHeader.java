@@ -5,9 +5,9 @@ import java.util.Optional;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
 
-public class ShortPacket implements Packet {
+public class ShortHeader implements Header {
 
-  public static ShortPacket parse(ByteBuf bb, LastPacketNumberProvider lastAckedProvider) {
+  public static ShortHeader parse(ByteBuf bb, LastPacketNumberProvider lastAckedProvider) {
     byte firstByte = bb.readByte();
 
     byte ptByte = (byte)((firstByte & 0b00011111) & 0xFF);
@@ -17,7 +17,7 @@ public class ShortPacket implements Packet {
     PacketType packetType = PacketType.read(ptByte);
     Optional<ConnectionId> connId;
     if (!omitConnectionId) {
-      connId = Optional.of(ConnectionId.read(bb));
+      connId = Optional.of(ConnectionId.read(12, bb)); // TODO how to determine length?
     } else {
       connId = Optional.empty();
     }
@@ -32,7 +32,7 @@ public class ShortPacket implements Packet {
     }
     Payload payload = Payload.parse(bb);
 
-    return new ShortPacket(omitConnectionId,
+    return new ShortHeader(omitConnectionId,
                            keyPhase,
                            packetType,
                            connId,
@@ -40,8 +40,8 @@ public class ShortPacket implements Packet {
                            payload);
   }
 
-  public static ShortPacket addFrame(ShortPacket packet, Frame frame) {
-    return new ShortPacket(packet.omitConnectionId,
+  public static ShortHeader addFrame(ShortHeader packet, Frame frame) {
+    return new ShortHeader(packet.omitConnectionId,
                            packet.keyPhase,
                            packet.packetType,
                            packet.connectionId,
@@ -56,7 +56,7 @@ public class ShortPacket implements Packet {
   private final PacketNumber packetNumber;
   private final Payload payload;
 
-  public ShortPacket(final boolean omitConnectionId, final boolean keyPhase, final PacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
+  public ShortHeader(final boolean omitConnectionId, final boolean keyPhase, final PacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
     this.omitConnectionId = omitConnectionId;
     this.keyPhase = keyPhase;
     this.packetType = packetType;
@@ -78,8 +78,8 @@ public class ShortPacket implements Packet {
   }
 
   @Override
-  public ConnectionId getConnectionId() {
-    return connectionId.get(); // TODO fix for when connId is omitted
+  public Optional<ConnectionId> getDestinationConnectionId() {
+    return connectionId;
   }
 
   public PacketNumber getPacketNumber() {
@@ -116,7 +116,7 @@ public class ShortPacket implements Packet {
 
   @Override
   public String toString() {
-    return "ShortPacket{" +
+    return "ShortHeader{" +
             "packetType=" + packetType +
             ", connectionId=" + connectionId +
             ", packetNumber=" + packetNumber +

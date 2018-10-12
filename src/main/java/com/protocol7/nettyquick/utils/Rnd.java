@@ -13,6 +13,10 @@ public class Rnd {
     return ThreadLocalRandom.current().nextLong();
   }
 
+  public static void rndBytes(byte[] b) {
+    ThreadLocalRandom.current().nextBytes(b);
+  }
+
   public static long rndLong(long min, long max) {
     return ThreadLocalRandom.current().nextLong(min, max);
   }

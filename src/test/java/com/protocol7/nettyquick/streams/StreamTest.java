@@ -11,17 +11,17 @@ import java.util.Optional;
 
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.packets.Packet;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 
 public class StreamTest {
@@ -34,10 +34,11 @@ public class StreamTest {
   private final StreamId streamId = StreamId.random(true, true);
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getSourceConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(PacketNumber.random());
 
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(123));

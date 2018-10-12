@@ -1,7 +1,7 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.protocol.LongPacket;
-import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.Header;
+import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
@@ -9,6 +9,8 @@ import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquick.protocol.packets.InitialPacket;
+import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,18 +36,19 @@ public class ServerStateMachine {
   }
 
   public synchronized void processPacket(Packet packet) {
-    log.info("Server got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getConnectionId());
+    log.info("Server got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getDestinationConnectionId());
 
       // TODO check version
       if (state == ServerState.BeforeInitial) {
         if (packet.getPacketType() == PacketType.Initial) {
-          if (packet instanceof LongPacket) {
-            LongPacket longPacket = (LongPacket) packet;
-            connection.setConnectionId(packet.getConnectionId());
+          if (packet instanceof InitialPacket) {
+            InitialPacket initialPacket = (InitialPacket) packet;
+            connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
 
-            LongPacket handshakePacket = HandshakePacket.create(packet.getConnectionId(),
-                                                                connection.nextSendPacketNumber(),
-                                                                longPacket.getVersion());
+            Packet handshakePacket = HandshakePacket.create(packet.getSourceConnectionId(),
+                                                            packet.getDestinationConnectionId(),
+                                                            connection.nextSendPacketNumber(),
+                                                            initialPacket.getVersion());
             connection.sendPacket(handshakePacket);
             state = ServerState.Ready;
             log.info("Server connection state ready");

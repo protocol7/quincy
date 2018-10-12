@@ -1,7 +1,8 @@
 package com.protocol7.nettyquick.client;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.Packet;
+import com.protocol7.nettyquick.protocol.Header;
+import com.protocol7.nettyquick.protocol.packets.Packet;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
@@ -22,7 +23,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     MDC.put("actor", "client");
     MDC.put("packetnumber", packet.getPacketNumber().toString());
-    MDC.put("connectionid", packet.getConnectionId().toString());
+    MDC.put("connectionid", packet.getDestinationConnectionId().toString());
 
     connection.onPacket(packet);
   }
