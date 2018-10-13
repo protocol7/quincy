@@ -20,7 +20,7 @@ public class LongHeaderTest {
     Optional<ConnectionId> destConnId = Optional.of(ConnectionId.random());
     Optional<ConnectionId> srcConnId = Optional.of(ConnectionId.random());
     PacketNumber pn = PacketNumber.random();
-    Version version = Version.DRAFT_09;
+    Version version = Version.CURRENT;
     Payload payload = new Payload(new PingFrame(DATA));
     LongHeader lp = new LongHeader(packetType, destConnId, srcConnId, version, pn, payload);
 

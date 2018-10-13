@@ -64,7 +64,7 @@ public class ClientStateMachineTest {
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
-            Version.DRAFT_09));
+            Version.CURRENT));
 
     assertTrue(handshakeFuture.isDone());
     assertEquals(ClientStateMachine.ClientState.Ready, stm.getState());
@@ -149,7 +149,7 @@ public class ClientStateMachineTest {
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
-            Version.DRAFT_09));
+            Version.CURRENT));
   }
 
 }

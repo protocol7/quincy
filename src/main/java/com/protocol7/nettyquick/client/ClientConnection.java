@@ -1,12 +1,7 @@
 package com.protocol7.nettyquick.client;
 
-import java.net.InetSocketAddress;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
-import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
@@ -24,6 +19,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
+import java.net.InetSocketAddress;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+
 public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
@@ -35,7 +34,7 @@ public class ClientConnection implements Connection {
   private final InetSocketAddress serverAddress;
   private final StreamListener streamListener;
 
-  private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
+  private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
   private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(new PacketNumber(1)); // TODO fix
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;

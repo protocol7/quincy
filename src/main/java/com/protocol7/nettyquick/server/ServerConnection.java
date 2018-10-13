@@ -33,7 +33,7 @@ public class ServerConnection implements Connection {
   private final StreamListener handler;
   private final Channel channel;
   private final InetSocketAddress clientAddress;
-  private final AtomicReference<Version> version = new AtomicReference<>(Version.DRAFT_09);
+  private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
   private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(PacketNumber.MIN);
   private final Streams streams;
   private final ServerStateMachine stateMachine;
