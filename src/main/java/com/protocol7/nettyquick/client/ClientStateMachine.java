@@ -8,6 +8,7 @@ import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
@@ -57,11 +58,11 @@ public class ClientStateMachine {
   }
 
   public void processPacket(Packet packet) {
-    log.info("Client got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getDestinationConnectionId());
+    log.info("Client got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
 
     synchronized (this) { // TODO refactor to make non-syncronized
       // TODO validate connection ID
-      if (packet.getPacketType() == PacketType.Handshake) {
+      if (packet instanceof HandshakePacket) {
         if (state == ClientState.InitialSent) {
           state = ClientState.Ready;
           handshakeFuture.setSuccess(null);

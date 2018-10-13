@@ -70,9 +70,7 @@ public class ServerConnection implements Connection {
 
   public Packet sendPacket(Frame... frames) {
     return sendPacket(new ShortPacket(new ShortHeader(false,
-                               false,
-                               PacketType.Four_octets,
-                               getDestinationConnectionId(),
+             getDestinationConnectionId(),
                                nextSendPacketNumber(),
                                new ProtectedPayload(frames))));
   }

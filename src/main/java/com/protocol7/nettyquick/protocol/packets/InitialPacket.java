@@ -119,7 +119,6 @@ public class InitialPacket implements Packet {
     return header.getDestinationConnectionId();
   }
 
-  @Override
   public PacketType getPacketType() {
     return header.getPacketType();
   }

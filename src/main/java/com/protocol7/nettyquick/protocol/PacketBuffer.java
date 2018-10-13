@@ -15,6 +15,7 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
+import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import org.slf4j.Logger;
@@ -81,7 +82,7 @@ public class PacketBuffer {
   }
 
   private boolean shouldFlush(Packet packet) {
-    if (packet.getPacketType() == PacketType.Initial) {
+    if (packet instanceof InitialPacket) {
       return false;
     } else if (acksOnly(packet)) {
       return false;
@@ -117,8 +118,6 @@ public class PacketBuffer {
     if (!blocks.isEmpty()) {
       AckFrame ackFrame = new AckFrame(123, blocks);
       Packet packet = new ShortPacket(new ShortHeader(false,
-                                      false,
-                                      PacketType.Four_octets,
                                       connection.getDestinationConnectionId(),
                                       connection.nextSendPacketNumber(),
                                       new ProtectedPayload(ackFrame)));

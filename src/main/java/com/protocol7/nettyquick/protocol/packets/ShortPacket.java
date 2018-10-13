@@ -40,11 +40,6 @@ public class ShortPacket implements Packet {
     }
 
     @Override
-    public PacketType getPacketType() {
-        return header.getPacketType();
-    }
-
-    @Override
     public Payload getPayload() {
         return header.getPayload();
     }

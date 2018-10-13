@@ -131,8 +131,6 @@ public class ServerStateMachineTest {
 
   private Packet packet(Frame... frames) {
     return new ShortPacket(new ShortHeader(false,
-                           false,
-                           PacketType.Four_octets,
                            Optional.of(destConnectionId),
                            incrPacketNumber(),
                            new ProtectedPayload(frames)));

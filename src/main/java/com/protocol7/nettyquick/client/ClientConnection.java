@@ -65,8 +65,6 @@ public class ClientConnection implements Connection {
 
   public Packet sendPacket(Frame... frames) {
     return sendPacket(new ShortPacket(new ShortHeader(false,
-                               false,
-                               PacketType.Four_octets,
                                getDestinationConnectionId(),
                                nextSendPacketNumber(),
                                new ProtectedPayload(frames))));

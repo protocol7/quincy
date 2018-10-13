@@ -34,7 +34,5 @@ public interface Packet {
     Optional<ConnectionId> getSourceConnectionId();
     Optional<ConnectionId> getDestinationConnectionId();
 
-    PacketType getPacketType();
-
     Payload getPayload();
 }

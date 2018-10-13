@@ -36,11 +36,11 @@ public class ServerStateMachine {
   }
 
   public synchronized void processPacket(Packet packet) {
-    log.info("Server got {} in state {} with connection ID {}", packet.getPacketType(), state, packet.getDestinationConnectionId());
+    log.info("Server got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
 
       // TODO check version
       if (state == ServerState.BeforeInitial) {
-        if (packet.getPacketType() == PacketType.Initial) {
+        if (packet instanceof InitialPacket) {
           if (packet instanceof InitialPacket) {
             InitialPacket initialPacket = (InitialPacket) packet;
             connection.setDestinationConnectionId(packet.getSourceConnectionId().get());

@@ -42,8 +42,6 @@ public class HeaderBufferTest {
 
   private Packet packet(long pn, Frame... frames) {
     return new ShortPacket(new ShortHeader(false,
-                           false,
-                           PacketType.Four_octets,
                            Optional.of(ConnectionId.random()),
                            new PacketNumber(pn),
                            new ProtectedPayload(frames)));

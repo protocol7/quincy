@@ -16,13 +16,10 @@ public class ShortHeaderTest {
 
   @Test
   public void roundtrip() {
-    PacketType packetType = PacketType.Four_octets;
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = new PacketNumber(123);
     ProtectedPayload payload = new ProtectedPayload(new PingFrame(DATA));
     ShortHeader p = new ShortHeader(false,
-                                    false,
-                                    PacketType.Four_octets,
                                     Optional.of(connId),
                                     pn,
                                     payload);
@@ -32,9 +29,7 @@ public class ShortHeaderTest {
 
     ShortHeader parsed = ShortHeader.parse(bb, connectionId -> new PacketNumber(122));
 
-    assertFalse(parsed.isOmitConnectionId());
     assertFalse(parsed.isKeyPhase());
-    assertEquals(packetType, parsed.getPacketType());
     assertEquals(Optional.of(connId), parsed.getDestinationConnectionId());
     assertEquals(pn, parsed.getPacketNumber());
     // assertEquals(payload, parsed.getPayload()); // TODO enable when parsing protected payloads correctly
