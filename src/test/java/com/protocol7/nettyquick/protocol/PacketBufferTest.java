@@ -23,7 +23,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class HeaderBufferTest {
+public class PacketBufferTest {
 
   @Mock private Connection connection;
   @Mock private Sender sender;

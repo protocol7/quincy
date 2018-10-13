@@ -33,4 +33,7 @@ public class Rnd {
     return UnsignedLong.valueOf(new BigInteger(b).abs().multiply(TWO));
   }
 
+  public static int rndInt() {
+    return ThreadLocalRandom.current().nextInt();
+  }
 }

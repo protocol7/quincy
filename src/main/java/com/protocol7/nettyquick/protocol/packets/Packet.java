@@ -11,11 +11,19 @@ public interface Packet {
     int PACKET_TYPE_MASK = 0b10000000;
 
     static Packet parse(ByteBuf bb, LastPacketNumber lastAcked) {
-        int firstByte = bb.getByte(bb.readerIndex()) & 0xFF;
+        bb.markReaderIndex();
+        int firstByte = bb.readByte() & 0xFF;
 
         if ((PACKET_TYPE_MASK & firstByte) == PACKET_TYPE_MASK) {
             // Long header packet
-            if (firstByte == InitialPacket.MARKER) {
+
+            // might be a ver neg packet, so we must check the version
+            Version version = Version.read(bb);
+            bb.resetReaderIndex();
+
+            if (version == Version.VERSION_NEGOTIATION) {
+                return VersionNegotiationPacket.parse(bb);
+            } else if (firstByte == InitialPacket.MARKER) {
                 return InitialPacket.parse(bb);
             } else if (firstByte == HandshakePacket.MARKER) {
                 return HandshakePacket.parse(bb);
@@ -24,6 +32,7 @@ public interface Packet {
             }
         } else {
             // short header packet
+            bb.resetReaderIndex();
             return ShortPacket.parse(bb, lastAcked);
         }
     }

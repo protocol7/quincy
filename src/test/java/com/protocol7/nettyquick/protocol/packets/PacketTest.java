@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.junit.Assert.assertTrue;
 
 public class PacketTest {
@@ -24,6 +25,30 @@ public class PacketTest {
 
         Packet parsed = Packet.parse(bb, c -> PacketNumber.random());
         assertTrue(parsed instanceof InitialPacket);
+    }
+
+    @Test
+    public void parseVerNegPacket() {
+        VersionNegotiationPacket packet = new VersionNegotiationPacket(empty(), empty(), Version.DRAFT_15);
+        ByteBuf bb = Unpooled.buffer();
+        packet.write(bb);
+
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random());
+        assertTrue(parsed instanceof VersionNegotiationPacket);
+    }
+
+    @Test
+    public void parseVerNegPacketWithClashingMarker() {
+        // even if the market byte matches a different packet, anything with 0 version must be a ver neg packet
+        // craft a special ver neg packet
+        ByteBuf bb = Unpooled.buffer();
+        bb.writeByte(InitialPacket.MARKER);
+        Version.VERSION_NEGOTIATION.write(bb);
+        bb.writeByte(0);
+        Version.DRAFT_15.write(bb);
+
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random());
+        assertTrue(parsed instanceof VersionNegotiationPacket);
     }
 
     @Test
