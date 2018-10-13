@@ -5,7 +5,7 @@ import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.Payload;
+import com.protocol7.nettyquick.protocol.UnprotectedPayload;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
@@ -18,7 +18,7 @@ public class HandshakePacket implements Packet {
                                        Optional<ConnectionId> srcConnectionId,
                                   PacketNumber packetNumber,
                                   Version version) { // TODO take crypto params
-    Payload payload = new Payload(Lists.newArrayList()); // TODO random stream and ack frames
+    UnprotectedPayload payload = new UnprotectedPayload(Lists.newArrayList()); // TODO random stream and ack frames
     return new HandshakePacket(new LongHeader(PacketType.Handshake,
             destConnectionId,
             srcConnectionId,
@@ -64,7 +64,7 @@ public class HandshakePacket implements Packet {
   }
 
   @Override
-  public Payload getPayload() {
+  public UnprotectedPayload getPayload() {
     return header.getPayload();
   }
 }

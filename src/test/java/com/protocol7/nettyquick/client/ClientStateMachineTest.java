@@ -135,7 +135,7 @@ public class ClientStateMachineTest {
                            PacketType.Four_octets,
                            Optional.of(destConnectionId),
                            incrPacketNumber(),
-                           new Payload(frames)));
+                           new ProtectedPayload(frames)));
   }
 
   private PacketNumber incrPacketNumber() {

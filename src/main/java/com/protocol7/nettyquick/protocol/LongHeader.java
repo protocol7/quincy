@@ -28,7 +28,7 @@ public class LongHeader implements Header {
     PacketNumber packetNumber = PacketNumber.read(bb);
     int payloadLength = length - 8; // TODO pn length
 
-    Payload payload = Payload.parse(bb); // TOOO length
+    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
 
     return new LongHeader(packetType,
                           destConnId,
@@ -52,14 +52,14 @@ public class LongHeader implements Header {
   private final Optional<ConnectionId> sourceConnectionId;
   private final Version version;
   private final PacketNumber packetNumber;
-  private final Payload payload;
+  private final UnprotectedPayload payload;
 
   public LongHeader(final PacketType packetType,
                     final Optional<ConnectionId> destinationConnectionId,
                     final Optional<ConnectionId> sourceConnectionId,
                     final Version version,
                     final PacketNumber packetNumber,
-                    final Payload payload) {
+                    final UnprotectedPayload payload) {
     this.packetType = packetType; // TODO validate only those valid for LondHeaders are used
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -87,7 +87,7 @@ public class LongHeader implements Header {
     return packetNumber;
   }
 
-  public Payload getPayload() {
+  public UnprotectedPayload getPayload() {
     return payload;
   }
 

@@ -69,7 +69,7 @@ public class ClientConnection implements Connection {
                                PacketType.Four_octets,
                                getDestinationConnectionId(),
                                nextSendPacketNumber(),
-                               new Payload(frames))));
+                               new ProtectedPayload(frames))));
   }
 
   @Override

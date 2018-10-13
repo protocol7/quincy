@@ -121,7 +121,7 @@ public class PacketBuffer {
                                       PacketType.Four_octets,
                                       connection.getDestinationConnectionId(),
                                       connection.nextSendPacketNumber(),
-                                      new Payload(ackFrame)));
+                                      new ProtectedPayload(ackFrame)));
 
       log.debug("Flushed acks {}", blocks);
 

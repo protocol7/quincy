@@ -6,7 +6,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
-import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
@@ -75,7 +74,7 @@ public class ServerConnection implements Connection {
                                PacketType.Four_octets,
                                getDestinationConnectionId(),
                                nextSendPacketNumber(),
-                               new Payload(frames))));
+                               new ProtectedPayload(frames))));
   }
 
   private void sendPacketUnbuffered(Packet packet) {

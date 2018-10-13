@@ -18,7 +18,7 @@ public class InitialPacket implements Packet {
                                      Version version,
                                      Optional<byte[]> token,
                                      List<Frame> frames) { // TODO validate frame types
-    Payload payload = new Payload(frames);
+    UnprotectedPayload payload = new UnprotectedPayload(frames);
     return new InitialPacket(new LongHeader(PacketType.Initial,
             destConnectionId,
             srcConnectionId,
@@ -65,7 +65,7 @@ public class InitialPacket implements Packet {
     PacketNumber packetNumber = PacketNumber.read(bb);
     int payloadLength = length - 8; // TODO pn length
 
-    Payload payload = Payload.parse(bb); // TOOO length
+    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
 
     return InitialPacket.create(
             destConnId,
@@ -125,7 +125,7 @@ public class InitialPacket implements Packet {
   }
 
   @Override
-  public Payload getPayload() {
+  public UnprotectedPayload getPayload() {
     return header.getPayload();
   }
 

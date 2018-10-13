@@ -42,7 +42,7 @@ public class PingFrame extends Frame {
 
   @Override
   public int calculateLength() {
-    return 1 + data.length;
+    return 2 + data.length;
   }
 
   @Override

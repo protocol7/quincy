@@ -30,7 +30,7 @@ public class ShortHeader implements Header {
     } else {
       packetNumber = PacketNumber.read1(bb, lastAcked);
     }
-    Payload payload = Payload.parse(bb);
+    ProtectedPayload payload = ProtectedPayload.parse(bb);
 
     return new ShortHeader(omitConnectionId,
                            keyPhase,
@@ -54,9 +54,9 @@ public class ShortHeader implements Header {
   private final PacketType packetType;
   private final Optional<ConnectionId> connectionId;
   private final PacketNumber packetNumber;
-  private final Payload payload;
+  private final ProtectedPayload payload;
 
-  public ShortHeader(final boolean omitConnectionId, final boolean keyPhase, final PacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
+  public ShortHeader(final boolean omitConnectionId, final boolean keyPhase, final PacketType packetType, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final ProtectedPayload payload) {
     this.omitConnectionId = omitConnectionId;
     this.keyPhase = keyPhase;
     this.packetType = packetType;
@@ -86,7 +86,7 @@ public class ShortHeader implements Header {
     return packetNumber;
   }
 
-  public Payload getPayload() {
+  public ProtectedPayload getPayload() {
     return payload;
   }
 

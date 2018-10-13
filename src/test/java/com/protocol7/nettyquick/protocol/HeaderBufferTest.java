@@ -46,7 +46,7 @@ public class HeaderBufferTest {
                            PacketType.Four_octets,
                            Optional.of(ConnectionId.random()),
                            new PacketNumber(pn),
-                           new Payload(frames)));
+                           new ProtectedPayload(frames)));
   }
 
   @Test

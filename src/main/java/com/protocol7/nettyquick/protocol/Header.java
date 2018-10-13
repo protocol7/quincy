@@ -26,7 +26,5 @@ public interface Header {
 
   PacketType getPacketType();
 
-  Payload getPayload();
-
   void write(ByteBuf bb);
 }

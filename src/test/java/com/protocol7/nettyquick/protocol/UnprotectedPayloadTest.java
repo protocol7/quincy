@@ -10,25 +10,25 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-public class PayloadTest {
+public class UnprotectedPayloadTest {
 
   public static final byte[] DATA = "Hello".getBytes();
 
   @Test
   public void roundtrip() {
-    Payload payload = new Payload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb);
 
-    Payload parsed = Payload.parse(bb);
+    UnprotectedPayload parsed = UnprotectedPayload.parse(bb, payload.getLength());
 
     assertEquals(payload, parsed);
   }
 
   @Test
   public void write() {
-    Payload payload = new Payload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb);
@@ -39,22 +39,22 @@ public class PayloadTest {
   @Test
   public void parse() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("070548656c6c6f00"));
-    Payload parsed = Payload.parse(bb);
+    UnprotectedPayload parsed = UnprotectedPayload.parse(bb, bb.writerIndex());
 
-    Payload expected = new Payload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload expected = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
     assertEquals(expected, parsed);
   }
 
   @Test
   public void addFrame() {
-    Payload payload = new Payload(new PingFrame(DATA));
+    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA));
 
-    Payload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
+    UnprotectedPayload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
 
-    Payload expected = new Payload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload expected = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
 
     assertEquals(expected, withAdded);
-    assertEquals(new Payload(new PingFrame(DATA)), payload); // must not been mutated
+    assertEquals(new UnprotectedPayload(new PingFrame(DATA)), payload); // must not been mutated
 
   }
 }
