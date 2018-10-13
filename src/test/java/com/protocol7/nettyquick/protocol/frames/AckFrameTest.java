@@ -1,10 +1,12 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 import java.util.List;
 
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -48,9 +50,7 @@ public class AckFrameTest {
     ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    ByteBuf expected = Unpooled.copiedBuffer(Hex.dehex("0e406444d20000"));
-
+    ByteBuf expected = Unpooled.copiedBuffer(Hex.dehex("1a406444d20000"));
     assertEquals(expected, bb);
   }
-
 }

@@ -1,11 +1,7 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.protocol.Header;
-import com.protocol7.nettyquick.protocol.LongHeader;
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
@@ -69,9 +65,6 @@ public class ServerStateMachine {
             stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
           } else if (frame instanceof PingFrame) {
             PingFrame pf = (PingFrame) frame;
-            if (!pf.isEmpty()) {
-              connection.sendPacket(new PongFrame(pf.getData()));
-            }
           }
         }
       }

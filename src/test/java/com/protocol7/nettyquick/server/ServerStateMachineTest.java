@@ -15,7 +15,6 @@ import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.ShortHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
@@ -86,17 +85,6 @@ public class ServerStateMachineTest {
 
     // nothing should happen
     verify(connection, never()).sendPacket(any(Frame.class));
-  }
-
-  @Test
-  public void pingWithData() {
-    getReady();
-
-    stm.processPacket(packet(new PingFrame(DATA)));
-
-    PongFrame pongFrame = (PongFrame) captureLastSentFrame();
-
-    assertArrayEquals(DATA, pongFrame.getData());
   }
 
   @Test

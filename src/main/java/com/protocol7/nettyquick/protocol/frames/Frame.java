@@ -13,7 +13,9 @@ public abstract class Frame {
       return StreamFrame.parse(bb);
     } else if (type == FrameType.PADDING) {
       return PaddingFrame.parse(bb);
-    } else if (type == FrameType.ACK) {
+    } else if (type == FrameType.CRYPTO) {
+      return CryptoFrame.parse(bb);
+    } else if (type == FrameType.ACK_1) {
       return AckFrame.parse(bb);
     } else if (type == FrameType.PING) {
       return PingFrame.parse(bb);

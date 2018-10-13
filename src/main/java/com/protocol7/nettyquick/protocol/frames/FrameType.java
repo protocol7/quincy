@@ -17,10 +17,15 @@ public enum FrameType {
   STREAM_BLOCKED(0x09),
   STREAM_ID_BLOCKED(0x0a),
   NEW_CONNECTION_ID(0x0b),
+  RETIRE_CONNECTION_ID(0x1b),
   STOP_SENDING(0x0c),
-  PONG(0x0d),
-  ACK(0x0e),
-  STREAM(0x10); // 0x10 - 0x17
+  ACK_1(0x1a),
+  ACK_2(0x1b),
+  PATH_CHALLENGE(0x0e),
+  PATH_RESPONSE(0x0f),
+  NEW_TOKEN(0x19),
+  STREAM(0x10), // 0x10 - 0x17
+  CRYPTO(0x18);
 
   public static FrameType fromByte(byte b) {
     if (b == PADDING.type) {
@@ -41,6 +46,8 @@ public enum FrameType {
       return PING;
     } else if (b == BLOCKED.type) {
       return BLOCKED;
+    } else if (b == RETIRE_CONNECTION_ID.type) {
+      return RETIRE_CONNECTION_ID;
     } else if (b == STREAM_BLOCKED.type) {
       return STREAM_BLOCKED;
     } else if (b == STREAM_ID_BLOCKED.type) {
@@ -49,12 +56,20 @@ public enum FrameType {
       return NEW_CONNECTION_ID;
     } else if (b == STOP_SENDING.type) {
       return STOP_SENDING;
-    } else if (b == PONG.type) {
-      return PONG;
-    } else if (b == ACK.type) {
-      return ACK;
+    } else if (b == ACK_1.type) {
+      return ACK_1;
+    } else if (b == ACK_2.type) {
+      return ACK_2;
+    } else if (b == PATH_CHALLENGE.type) {
+      return PATH_CHALLENGE;
+    } else if (b == PATH_RESPONSE.type) {
+      return PATH_RESPONSE;
+    } else if (b == NEW_TOKEN.type) {
+      return NEW_TOKEN;
     } else if (b >= 0x10 && b <= 0x17) {
       return STREAM;
+    } else if (b == CRYPTO.type) {
+      return CRYPTO;
     } else {
       throw new RuntimeException("Unknown frame type " + Hex.hex(b));
     }

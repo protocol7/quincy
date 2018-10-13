@@ -50,7 +50,7 @@ public class AckFrame extends Frame {
   }
 
   public AckFrame(final long ackDelay, final List<AckBlock> blocks) {
-    super(FrameType.ACK);
+    super(FrameType.ACK_1);
 
     Objects.requireNonNull(ackDelay);
     Objects.requireNonNull(blocks);
