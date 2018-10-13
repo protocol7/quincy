@@ -18,14 +18,8 @@ public class LongHeader implements Header {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    int dcil = ((cil & 0b11110000) >> 4);
-    if (dcil > 0) {
-      dcil += 3;
-    }
-    int scil = (cil & 0b00001111);
-    if (scil > 0) {
-      scil += 3;
-    }
+    int dcil = ConnectionId.firstLength(cil);
+    int scil = ConnectionId.lastLength(cil);
 
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);

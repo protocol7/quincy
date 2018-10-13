@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.protocol.packets;
 
 import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -59,6 +60,16 @@ public class PacketTest {
 
         Packet parsed = Packet.parse(bb, c -> PacketNumber.random());
         assertTrue(parsed instanceof HandshakePacket);
+    }
+
+    @Test
+    public void parseRetryPacket() {
+        RetryPacket packet = new RetryPacket(Version.CURRENT, empty(), empty(), ConnectionId.random(), Rnd.rndBytes(11));
+        ByteBuf bb = Unpooled.buffer();
+        packet.write(bb);
+
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random());
+        assertTrue(parsed instanceof RetryPacket);
     }
 
     @Test

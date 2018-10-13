@@ -31,6 +31,24 @@ public class ConnectionId {
     }
   }
 
+  public static int firstLength(int cil) {
+    int l = ((cil & 0b11110000) >> 4);
+    if (l > 0) {
+      return l + 3;
+    } else {
+      return 0;
+    }
+  }
+
+  public static int lastLength(int cil) {
+    int l = ((cil & 0b00001111));
+    if (l > 0) {
+      return l + 3;
+    } else {
+      return 0;
+    }
+  }
+
   public static int joinLenghts(Optional<ConnectionId> id1, Optional<ConnectionId> id2) {
     int dcil;
     if (id1.isPresent()) {

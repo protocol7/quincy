@@ -27,6 +27,8 @@ public interface Packet {
                 return InitialPacket.parse(bb);
             } else if (firstByte == HandshakePacket.MARKER) {
                 return HandshakePacket.parse(bb);
+            } else if (firstByte == RetryPacket.MARKER) {
+                return RetryPacket.parse(bb);
             } else {
                 throw new RuntimeException("Unknown long header packet");
             }
