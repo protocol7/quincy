@@ -14,6 +14,8 @@ import java.util.Optional;
 
 public class HandshakePacket implements Packet {
 
+  public static int MARKER = 0x80 | PacketType.Handshake.getType();
+
   public static HandshakePacket create(Optional<ConnectionId> destConnectionId,
                                        Optional<ConnectionId> srcConnectionId,
                                   PacketNumber packetNumber,
@@ -25,6 +27,13 @@ public class HandshakePacket implements Packet {
             version,
             packetNumber,
             payload));
+  }
+
+  public static HandshakePacket parse(ByteBuf bb) {
+    // TODO validate marker
+
+    LongHeader header = LongHeader.parse(bb);
+    return new HandshakePacket(header);
   }
 
   private final LongHeader header;
@@ -56,10 +65,6 @@ public class HandshakePacket implements Packet {
   @Override
   public Optional<ConnectionId> getDestinationConnectionId() {
     return header.getDestinationConnectionId();
-  }
-
-  public PacketType getPacketType() {
-    return header.getPacketType();
   }
 
   @Override

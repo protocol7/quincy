@@ -10,18 +10,21 @@ public interface Packet {
 
     int PACKET_TYPE_MASK = 0b10000000;
 
-    static Packet parse(ByteBuf bb, Header.LastPacketNumberProvider lastAcked) {
-        byte firstByte = bb.getByte(bb.readerIndex());
+    static Packet parse(ByteBuf bb, LastPacketNumber lastAcked) {
+        int firstByte = bb.getByte(bb.readerIndex()) & 0xFF;
 
         if ((PACKET_TYPE_MASK & firstByte) == PACKET_TYPE_MASK) {
             // Long header packet
             if (firstByte == InitialPacket.MARKER) {
                 return InitialPacket.parse(bb);
+            } else if (firstByte == HandshakePacket.MARKER) {
+                return HandshakePacket.parse(bb);
+            } else {
+                throw new RuntimeException("Unknown long header packet");
             }
-            return null;
         } else {
             // short header packet
-            return null;
+            return ShortPacket.parse(bb, lastAcked);
         }
     }
 

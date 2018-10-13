@@ -8,6 +8,10 @@ import java.util.Optional;
 
 public class ShortPacket implements Packet {
 
+    public static ShortPacket parse(ByteBuf bb, LastPacketNumber lastAcked) {
+        return new ShortPacket(ShortHeader.parse(bb, lastAcked));
+    }
+
     private final ShortHeader header;
 
     public ShortPacket(ShortHeader header) {

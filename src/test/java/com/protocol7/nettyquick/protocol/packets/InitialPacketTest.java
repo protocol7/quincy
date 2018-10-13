@@ -9,8 +9,11 @@ import org.junit.Test;
 import java.util.Collections;
 import java.util.Optional;
 
+import static java.util.Collections.emptyList;
+import static java.util.Optional.empty;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class InitialPacketTest {
 
@@ -24,7 +27,7 @@ public class InitialPacketTest {
                 Optional.of(destConnId),
                 Optional.of(srcConnId),
                 Optional.of(token),
-                Collections.emptyList());
+                emptyList());
 
         ByteBuf bb = Unpooled.buffer();
 
@@ -37,6 +40,28 @@ public class InitialPacketTest {
         assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
         assertEquals(packet.getVersion(), parsed.getVersion());
         assertArrayEquals(token, parsed.getToken().get());
+        assertEquals(0, parsed.getPayload().getLength());
+    }
+
+    @Test
+    public void roundtripEmpty() {
+        InitialPacket packet = InitialPacket.create(
+                empty(),
+                empty(),
+                empty(),
+                emptyList());
+
+        ByteBuf bb = Unpooled.buffer();
+
+        packet.write(bb);
+
+        InitialPacket parsed = InitialPacket.parse(bb);
+
+        assertFalse(parsed.getDestinationConnectionId().isPresent());
+        assertFalse(parsed.getSourceConnectionId().isPresent());
+        assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
+        assertEquals(packet.getVersion(), parsed.getVersion());
+        assertFalse(parsed.getToken().isPresent());
         assertEquals(0, parsed.getPayload().getLength());
     }
 }

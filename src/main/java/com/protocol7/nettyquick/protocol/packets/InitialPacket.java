@@ -10,7 +10,7 @@ import io.netty.buffer.ByteBuf;
 
 public class InitialPacket implements Packet {
 
-  public static int MARKER = 0x80 | 0x7f;
+  public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
 
   public static InitialPacket create(Optional<ConnectionId> destConnectionId,
                                      Optional<ConnectionId> srcConnectionId,
@@ -44,13 +44,20 @@ public class InitialPacket implements Packet {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    int dcil = ((cil & 0b11110000) >> 4) + 3;
-    int scil = (cil & 0b00001111) + 3;
+    int dcil = ((cil & 0b11110000) >> 4);
+    if (dcil > 0) {
+      dcil += 3;
+    }
+    int scil = (cil & 0b00001111);
+    if (scil > 0) {
+      scil += 3;
+    }
 
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
     Varint tokenLength = Varint.read(bb);
+
     byte[] tokenBytes = new byte[(int) tokenLength.getValue()];
     bb.readBytes(tokenBytes);
     Optional<byte[]> token;
@@ -99,6 +106,8 @@ public class InitialPacket implements Packet {
       byte[] t = token.get();
       new Varint(t.length).write(bb);
       bb.writeBytes(t);
+    } else {
+      new Varint(0).write(bb);
     }
 
     header.writeSuffix(bb);
@@ -117,10 +126,6 @@ public class InitialPacket implements Packet {
   @Override
   public Optional<ConnectionId> getDestinationConnectionId() {
     return header.getDestinationConnectionId();
-  }
-
-  public PacketType getPacketType() {
-    return header.getPacketType();
   }
 
   @Override

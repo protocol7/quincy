@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -17,8 +18,14 @@ public class LongHeader implements Header {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    int dcil = ((cil & 0b11110000) >> 4) + 3;
-    int scil = (cil & 0b00001111) + 3;
+    int dcil = ((cil & 0b11110000) >> 4);
+    if (dcil > 0) {
+      dcil += 3;
+    }
+    int scil = (cil & 0b00001111);
+    if (scil > 0) {
+      scil += 3;
+    }
 
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);

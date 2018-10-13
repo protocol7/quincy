@@ -7,7 +7,7 @@ import io.netty.buffer.ByteBuf;
 
 public class ShortHeader implements Header {
 
-  public static ShortHeader parse(ByteBuf bb, LastPacketNumberProvider lastAckedProvider) {
+  public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider) {
     byte firstByte = bb.readByte();
 
     boolean keyPhase = (firstByte & 0x40) == 0x40;

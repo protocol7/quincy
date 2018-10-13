@@ -7,10 +7,6 @@ import java.util.Optional;
 
 public interface Header {
 
-  interface LastPacketNumberProvider {
-    PacketNumber getLastAcked(ConnectionId connectionId);
-  }
-
   static Header addFrame(Header packet, Frame frame) {
     if (packet instanceof ShortHeader) {
       return ShortHeader.addFrame((ShortHeader) packet, frame);
