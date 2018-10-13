@@ -34,6 +34,8 @@ public class InitialPacketTest {
 
         assertEquals(destConnId, parsed.getDestinationConnectionId().get());
         assertEquals(srcConnId, parsed.getSourceConnectionId().get());
+        assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
+        assertEquals(packet.getVersion(), parsed.getVersion());
         assertArrayEquals(token, parsed.getToken().get());
         assertEquals(0, parsed.getPayload().getLength());
     }

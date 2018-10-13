@@ -67,7 +67,13 @@ public class InitialPacket implements Packet {
 
     Payload payload = Payload.parse(bb); // TOOO length
 
-    return InitialPacket.create(destConnId, srcConnId, token, payload.getFrames());
+    return InitialPacket.create(
+            destConnId,
+            srcConnId,
+            packetNumber,
+            version,
+            token,
+            payload.getFrames());
   }
 
   private final LongHeader header;
