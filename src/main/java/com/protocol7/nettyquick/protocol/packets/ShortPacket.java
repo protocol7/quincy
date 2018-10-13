@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.protocol.packets;
 
 import com.protocol7.nettyquick.protocol.*;
-import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
 

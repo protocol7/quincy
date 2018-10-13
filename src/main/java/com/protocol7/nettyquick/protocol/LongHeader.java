@@ -17,8 +17,8 @@ public class LongHeader implements Header {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    int dcil = (cil & 0b11110000) >> 4;
-    int scil = (cil & 0b00001111);
+    int dcil = ((cil & 0b11110000) >> 4) + 3;
+    int scil = (cil & 0b00001111) + 3;
 
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
@@ -92,13 +92,17 @@ public class LongHeader implements Header {
   }
 
   public void write(ByteBuf bb) {
+    writePrefix(bb);
+    writeSuffix(bb);
+  }
+
+  public void writePrefix(ByteBuf bb) {
     int b = (PACKET_TYPE_MASK | packetType.getType()) & 0xFF;
     bb.writeByte(b);
 
     version.write(bb);
 
     int cil = ConnectionId.joinLenghts(destinationConnectionId, sourceConnectionId);
-    System.out.println(cil);
     bb.writeByte(cil);
 
     if (destinationConnectionId.isPresent()) {
@@ -107,7 +111,9 @@ public class LongHeader implements Header {
     if (sourceConnectionId.isPresent()) {
       sourceConnectionId.get().write(bb);
     }
+  }
 
+  public void writeSuffix(ByteBuf bb) {
     Varint length = new Varint(8 + payload.getLength()); // TODO packet number length
     length.write(bb);
     packetNumber.write(bb);

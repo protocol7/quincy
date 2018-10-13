@@ -14,11 +14,10 @@ public class InitialPacket implements Packet {
 
   public static InitialPacket create(Optional<ConnectionId> destConnectionId,
                                      Optional<ConnectionId> srcConnectionId,
+                                     PacketNumber packetNumber,
+                                     Version version,
                                      Optional<byte[]> token,
                                      List<Frame> frames) { // TODO validate frame types
-    Version version = Version.CURRENT;
-    PacketNumber packetNumber = PacketNumber.random();
-
     Payload payload = new Payload(frames);
     return new InitialPacket(new LongHeader(PacketType.Initial,
             destConnectionId,
@@ -29,8 +28,46 @@ public class InitialPacket implements Packet {
             token);
   }
 
+  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
+                                     Optional<ConnectionId> srcConnectionId,
+                                     Optional<byte[]> token,
+                                     List<Frame> frames) { // TODO validate frame types
+    Version version = Version.CURRENT;
+    PacketNumber packetNumber = PacketNumber.random();
+    return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
+
+  }
+
   public static InitialPacket parse(ByteBuf bb) {
-    return null;
+    bb.readByte(); // TODO validate
+
+    Version version = Version.read(bb);
+
+    int cil = bb.readByte() & 0xFF;
+    int dcil = ((cil & 0b11110000) >> 4) + 3;
+    int scil = (cil & 0b00001111) + 3;
+
+    Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
+    Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+
+    Varint tokenLength = Varint.read(bb);
+    byte[] tokenBytes = new byte[(int) tokenLength.getValue()];
+    bb.readBytes(tokenBytes);
+    Optional<byte[]> token;
+    if (tokenBytes.length > 0) {
+      token = Optional.of(tokenBytes);
+    } else {
+      token = Optional.empty();
+    }
+
+    int length = (int) Varint.read(bb).getValue();
+
+    PacketNumber packetNumber = PacketNumber.read(bb);
+    int payloadLength = length - 8; // TODO pn length
+
+    Payload payload = Payload.parse(bb); // TOOO length
+
+    return InitialPacket.create(destConnId, srcConnId, token, payload.getFrames());
   }
 
   private final LongHeader header;
@@ -50,20 +87,7 @@ public class InitialPacket implements Packet {
 
   @Override
   public void write(ByteBuf bb) {
-    // Initial packet inserts some extra fields, so needs a custom write method
-
-    bb.writeByte(MARKER);
-
-    header.getVersion().write(bb);
-
-    bb.writeByte(ConnectionId.joinLenghts(header.getDestinationConnectionId(), header.getSourceConnectionId()));
-
-    if (header.getDestinationConnectionId().isPresent()) {
-      header.getDestinationConnectionId().get().write(bb);
-    }
-    if (header.getSourceConnectionId().isPresent()) {
-      header.getSourceConnectionId().get().write(bb);
-    }
+    header.writePrefix(bb);
 
     if (token.isPresent()) {
       byte[] t = token.get();
@@ -71,11 +95,7 @@ public class InitialPacket implements Packet {
       bb.writeBytes(t);
     }
 
-    Varint length = new Varint(8 + header.getPayload().getLength()); // TODO packet number length
-    length.write(bb);
-    header.getPacketNumber().write(bb);
-    header.getPayload().write(bb);
-
+    header.writeSuffix(bb);
   }
 
   @Override
@@ -105,5 +125,9 @@ public class InitialPacket implements Packet {
 
   public Version getVersion() {
     return header.getVersion();
+  }
+
+  public Optional<byte[]> getToken() {
+    return token;
   }
 }

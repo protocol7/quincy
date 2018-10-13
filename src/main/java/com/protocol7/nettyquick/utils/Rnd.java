@@ -17,6 +17,12 @@ public class Rnd {
     ThreadLocalRandom.current().nextBytes(b);
   }
 
+  public static byte[] rndBytes(int length) {
+    byte[] b = new byte[length];
+    rndBytes(b);
+    return b;
+  }
+
   public static long rndLong(long min, long max) {
     return ThreadLocalRandom.current().nextLong(min, max);
   }

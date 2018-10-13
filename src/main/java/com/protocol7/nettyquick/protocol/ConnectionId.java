@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.protocol;
 
 import com.google.common.primitives.Longs;
 import com.google.common.primitives.UnsignedLong;
+import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
@@ -33,13 +34,13 @@ public class ConnectionId {
   public static int joinLenghts(Optional<ConnectionId> id1, Optional<ConnectionId> id2) {
     int dcil;
     if (id1.isPresent()) {
-      dcil = id1.get().getLength() & 0b1111;
+      dcil = (id1.get().getLength() & 0b1111) - 3;
     } else {
       dcil = 0;
     }
     int scil;
     if (id2.isPresent()) {
-      scil = id2.get().getLength() & 0b1111;
+      scil = (id2.get().getLength() & 0b1111) - 3;
     } else {
       scil = 0;
     }
@@ -77,6 +78,6 @@ public class ConnectionId {
 
   @Override
   public String toString() {
-    return id.toString();
+    return Hex.hex(id);
   }
 }
