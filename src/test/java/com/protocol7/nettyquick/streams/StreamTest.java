@@ -17,6 +17,7 @@ import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,7 +31,7 @@ public class StreamTest {
   @Mock
   private Connection connection;
   @Mock private StreamListener listener;
-  @Mock private Packet packet;
+  @Mock private FullPacket packet;
   private final StreamId streamId = StreamId.random(true, true);
 
   @Before

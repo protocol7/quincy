@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.client;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
@@ -63,8 +64,8 @@ public class ClientConnection implements Connection {
     return p;
   }
 
-  public Packet sendPacket(Frame... frames) {
-    return sendPacket(new ShortPacket(new ShortHeader(false,
+  public FullPacket sendPacket(Frame... frames) {
+    return (FullPacket) sendPacket(new ShortPacket(new ShortHeader(false,
                                getDestinationConnectionId(),
                                nextSendPacketNumber(),
                                new ProtectedPayload(frames))));

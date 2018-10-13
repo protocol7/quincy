@@ -10,6 +10,7 @@ import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 
 public class Stream {
@@ -57,7 +58,7 @@ public class Stream {
 
     final long frameOffset = offset.getAndAdd(b.length);
     final StreamFrame sf = new StreamFrame(id, frameOffset, finish, b);
-    Packet p = connection.sendPacket(sf);
+    FullPacket p = connection.sendPacket(sf);
 
     sendStateMachine.onStream(p.getPacketNumber(), finish);
   }
@@ -67,7 +68,7 @@ public class Stream {
 
     final Frame frame = new RstStreamFrame(id, applicationErrorCode, offset.get());
 
-    final Packet p = connection.sendPacket(frame);
+    final FullPacket p = connection.sendPacket(frame);
 
     sendStateMachine.onReset(p.getPacketNumber());
   }

@@ -14,6 +14,7 @@ import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import org.junit.Before;
@@ -63,7 +64,7 @@ public class HeaderBufferTest {
 
     Packet actual = verifySent();
 
-    AckFrame actualFrame = (AckFrame) actual.getPayload().getFrames().get(0);
+    AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
     assertEquals(AckBlock.fromLongs(1, 2), actualFrame.getBlocks().get(0));
 
     assertBuffered(3);
@@ -84,7 +85,7 @@ public class HeaderBufferTest {
 
     Packet actual = verifySent();
 
-    AckFrame actualFrame = (AckFrame) actual.getPayload().getFrames().get(0);
+    AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
     assertEquals(AckBlock.fromLongs(2, 2), actualFrame.getBlocks().get(0));
 
     assertBuffered(3);

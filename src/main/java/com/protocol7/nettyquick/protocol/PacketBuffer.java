@@ -15,6 +15,7 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
@@ -53,38 +54,46 @@ public class PacketBuffer {
   }
 
   public void send(Packet packet) {
-    List<AckBlock> ackBlocks = drainAcks(ackQueue);
-    if (!ackBlocks.isEmpty()) {
-      // add to packet
-      AckFrame ackFrame = new AckFrame(123, ackBlocks);
-      sendImpl(packet.addFrame(ackFrame));
+    if (packet instanceof FullPacket) {
+      List<AckBlock> ackBlocks = drainAcks(ackQueue);
+      if (!ackBlocks.isEmpty()) {
+        // add to packet
+        AckFrame ackFrame = new AckFrame(123, ackBlocks);
+        sendImpl(((FullPacket)packet).addFrame(ackFrame));
+      } else {
+        sendImpl(packet);
+      }
     } else {
       sendImpl(packet);
     }
   }
 
   private void sendImpl(Packet packet) {
-    buffer.put(packet.getPacketNumber(), packet);
-    log.debug("Buffered packet {}", packet.getPacketNumber());
+    if (packet instanceof FullPacket) {
+      buffer.put(((FullPacket)packet).getPacketNumber(), packet);
+      log.debug("Buffered packet {}", ((FullPacket)packet).getPacketNumber());
+    }
     sender.send(packet);
   }
 
   public void onPacket(Packet packet) {
-    ackQueue.add(packet.getPacketNumber());
-    log.debug("Acked packet {}", packet.getPacketNumber());
+    if (packet instanceof FullPacket) {
+      ackQueue.add(((FullPacket)packet).getPacketNumber());
+      log.debug("Acked packet {}", ((FullPacket)packet).getPacketNumber());
 
-    handleAcks(packet);
+      handleAcks(packet);
 
-    if (shouldFlush(packet)) {
-      log.debug("Directly acking packet");
-      flushAcks();
+      if (shouldFlush(packet)) {
+        log.debug("Directly acking packet");
+        flushAcks();
+      }
     }
   }
 
   private boolean shouldFlush(Packet packet) {
     if (packet instanceof InitialPacket) {
       return false;
-    } else if (acksOnly(packet)) {
+    } else if (packet instanceof FullPacket && acksOnly((FullPacket)packet)) {
       return false;
     } else {
       return true;
@@ -92,7 +101,9 @@ public class PacketBuffer {
   }
 
   private void handleAcks(Packet packet) {
-    packet.getPayload().getFrames().stream().filter(frame -> frame instanceof AckFrame).forEach(frame -> handleAcks((AckFrame) frame));
+    if (packet instanceof FullPacket) {
+      ((FullPacket)packet).getPayload().getFrames().stream().filter(frame -> frame instanceof AckFrame).forEach(frame -> handleAcks((AckFrame) frame));
+    }
   }
 
   private void handleAcks(AckFrame frame) {
@@ -161,8 +172,7 @@ public class PacketBuffer {
     return blocks;
   }
 
-  private boolean acksOnly(Packet packet) {
+  private boolean acksOnly(FullPacket packet) {
     return packet.getPayload().getFrames().stream().allMatch(frame -> frame instanceof AckFrame);
   }
-
 }

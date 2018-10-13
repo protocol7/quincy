@@ -12,7 +12,7 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
 
-public class HandshakePacket implements Packet {
+public class HandshakePacket implements FullPacket {
 
   public static int MARKER = 0x80 | PacketType.Handshake.getType();
 

@@ -8,6 +8,7 @@ import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.PongFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
@@ -57,7 +58,7 @@ public class ServerStateMachine {
           }
         }
       } else if (state == ServerState.Ready) {
-        for (Frame frame : packet.getPayload().getFrames()) {
+        for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {
           if (frame instanceof StreamFrame) {
             StreamFrame sf = (StreamFrame) frame;
             Stream stream = connection.getOrCreateStream(sf.getStreamId());

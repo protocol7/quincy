@@ -28,14 +28,8 @@ public interface Packet {
         }
     }
 
-    Packet addFrame(Frame frame);
-
     void write(ByteBuf bb);
-
-    PacketNumber getPacketNumber();
 
     Optional<ConnectionId> getSourceConnectionId();
     Optional<ConnectionId> getDestinationConnectionId();
-
-    Payload getPayload();
 }

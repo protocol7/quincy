@@ -6,7 +6,7 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
 
-public class ShortPacket implements Packet {
+public class ShortPacket implements FullPacket {
 
     public static ShortPacket parse(ByteBuf bb, LastPacketNumber lastAcked) {
         return new ShortPacket(ShortHeader.parse(bb, lastAcked));

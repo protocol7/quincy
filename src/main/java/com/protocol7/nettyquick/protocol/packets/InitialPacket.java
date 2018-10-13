@@ -8,7 +8,7 @@ import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
 
-public class InitialPacket implements Packet {
+public class InitialPacket implements FullPacket {
 
   public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
 
