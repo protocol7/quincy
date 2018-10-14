@@ -47,7 +47,6 @@ public class HeaderNumberTest {
   public void writeAsVarint() {
     ByteBuf bb = Unpooled.buffer();
     new PacketNumber(123).writeVarint(bb);
-    Bytes.debug(bb);
     TestUtil.assertBuffer("407b", bb);
   }
 

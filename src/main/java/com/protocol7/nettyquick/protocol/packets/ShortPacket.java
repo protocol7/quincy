@@ -47,4 +47,11 @@ public class ShortPacket implements FullPacket {
     public Payload getPayload() {
         return header.getPayload();
     }
+
+    @Override
+    public String toString() {
+        return "ShortPacket{" +
+                "header=" + header +
+                '}';
+    }
 }

@@ -11,8 +11,6 @@ import java.util.Optional;
 
 public class LongHeaderTest {
 
-  public static final byte[] DATA = "hello".getBytes();
-
   @Test
   public void roundtrip() {
     PacketType packetType = PacketType.Initial;
@@ -20,7 +18,7 @@ public class LongHeaderTest {
     Optional<ConnectionId> srcConnId = Optional.of(ConnectionId.random());
     PacketNumber pn = PacketNumber.random();
     Version version = Version.CURRENT;
-    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA));
+    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
 
     LongHeader lp = new LongHeader(packetType, destConnId, srcConnId, version, pn, payload);
 

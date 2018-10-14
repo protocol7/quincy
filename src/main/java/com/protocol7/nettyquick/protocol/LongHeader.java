@@ -124,9 +124,11 @@ public class LongHeader implements Header {
   @Override
   public String toString() {
     return "LongHeader{" +
-            "packetNumber=" + packetNumber +
-            ", packetType=" + packetType +
+            "packetType=" + packetType +
             ", destinationConnectionId=" + destinationConnectionId +
+            ", sourceConnectionId=" + sourceConnectionId +
+            ", version=" + version +
+            ", packetNumber=" + packetNumber +
             ", payload=" + payload +
             '}';
   }

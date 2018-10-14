@@ -11,12 +11,10 @@ import static org.mockito.Mockito.when;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.ShortHeader;
-import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
-import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
@@ -54,7 +52,7 @@ public class ServerStateMachineTest {
   @Test
   public void handshake() {
     assertEquals(ServerState.BeforeInitial, stm.getState());
-    stm.processPacket(initialPacket());
+    stm.processPacket(initialPacket(new CryptoFrame(0, "ch".getBytes())));
 
     assertEquals(ServerState.Ready, stm.getState());
   }
@@ -81,7 +79,7 @@ public class ServerStateMachineTest {
   public void pingWithoutData() {
     getReady();
 
-    stm.processPacket(packet(new PingFrame()));
+    stm.processPacket(packet(PingFrame.INSTANCE));
 
     // nothing should happen
     verify(connection, never()).sendPacket(any(Frame.class));
@@ -92,15 +90,15 @@ public class ServerStateMachineTest {
     // not handshaking
     assertEquals(ServerState.BeforeInitial, stm.getState());
 
-    stm.processPacket(packet(new PingFrame()));
+    stm.processPacket(initialPacket(new CryptoFrame(0, "ch".getBytes())));
 
     // ignoring in unexpected state, nothing should happen
     verify(connection, never()).sendPacket(any(Frame.class));
-    assertEquals(ServerState.BeforeInitial, stm.getState());
+    assertEquals(ServerState.Ready, stm.getState());
   }
 
   private void getReady() {
-    stm.processPacket(initialPacket());
+    stm.processPacket(initialPacket(new CryptoFrame(0, "ch".getBytes())));
   }
 
   private Frame captureLastSentFrame() {
@@ -109,12 +107,12 @@ public class ServerStateMachineTest {
     return sentPacketCaptor.getValue();
   }
 
-  private InitialPacket initialPacket() {
+  private InitialPacket initialPacket(Frame... frames) {
     return InitialPacket.create(
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             Optional.empty(),
-            Collections.emptyList());
+            Lists.newArrayList(frames));
   }
 
   private Packet packet(Frame... frames) {

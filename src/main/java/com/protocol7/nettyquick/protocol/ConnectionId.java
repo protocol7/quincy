@@ -85,13 +85,12 @@ public class ConnectionId {
     if (o == null || getClass() != o.getClass()) return false;
 
     final ConnectionId that = (ConnectionId) o;
-
     return Arrays.equals(id, that.id);
   }
 
   @Override
   public int hashCode() {
-    return id.hashCode();
+    return Arrays.hashCode(id);
   }
 
   @Override

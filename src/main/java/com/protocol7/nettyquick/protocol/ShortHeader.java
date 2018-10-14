@@ -2,8 +2,11 @@ package com.protocol7.nettyquick.protocol;
 
 import java.util.Optional;
 
+import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ShortHeader implements Header {
 
@@ -13,7 +16,7 @@ public class ShortHeader implements Header {
     boolean keyPhase = (firstByte & 0x40) == 0x40;
 
     Optional<ConnectionId> connId = Optional.of(ConnectionId.read(12, bb)); // TODO how to determine length?
-    PacketNumber lastAcked = lastAckedProvider.getLastAcked(connId.get());
+    //PacketNumber lastAcked = lastAckedProvider.getLastAcked(connId.get());
     PacketNumber packetNumber = PacketNumber.read(bb);
     ProtectedPayload payload = ProtectedPayload.parse(bb);
 
@@ -36,10 +39,10 @@ public class ShortHeader implements Header {
   private final ProtectedPayload payload;
 
   public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final ProtectedPayload payload) {
-    this.keyPhase = keyPhase;
-    this.connectionId = connectionId;
-    this.packetNumber = packetNumber;
-    this.payload = payload;
+    this.keyPhase = checkNotNull(keyPhase);
+    this.connectionId = checkNotNull(connectionId);
+    this.packetNumber = checkNotNull(packetNumber);
+    this.payload = checkNotNull(payload);
   }
 
   public boolean isKeyPhase() {
@@ -76,6 +79,7 @@ public class ShortHeader implements Header {
   @Override
   public String toString() {
     return "ShortHeader{" +
+            "keyPhase=" + keyPhase +
             ", connectionId=" + connectionId +
             ", packetNumber=" + packetNumber +
             ", payload=" + payload +

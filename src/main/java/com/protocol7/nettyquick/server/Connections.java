@@ -9,15 +9,25 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import io.netty.channel.Channel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import javax.swing.text.html.Option;
 
 public class Connections {
 
+  private final Logger log = LoggerFactory.getLogger(Connections.class);
+
   private final Map<ConnectionId, ServerConnection> connections = Maps.newConcurrentMap();
 
-  public ServerConnection get(ConnectionId connId, StreamListener streamHandler, Channel channel, InetSocketAddress clientAddress) {
+  public ServerConnection get(Optional<ConnectionId> connIdOpt, StreamListener streamHandler, Channel channel, InetSocketAddress clientAddress) {
+
+    ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
+
     ServerConnection conn = connections.get(connId);
     if (conn == null) {
-      conn = ServerConnection.create(streamHandler, channel, clientAddress);
+      log.debug("Creating new server connection for {}", connId);
+      conn = ServerConnection.create(streamHandler, channel, clientAddress, connId);
       ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

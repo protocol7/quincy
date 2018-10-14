@@ -91,7 +91,7 @@ public class ClientStateMachineTest {
   public void pingWithoutData() {
     getReady();
 
-    stm.processPacket(packet(new PingFrame()));
+    stm.processPacket(packet(PingFrame.INSTANCE));
 
     // nothing should happen
     verify(connection, never()).sendPacket(any(Frame.class));
@@ -102,7 +102,7 @@ public class ClientStateMachineTest {
     // not handshaking
     assertEquals(ClientStateMachine.ClientState.BeforeInitial, stm.getState());
 
-    stm.processPacket(packet(new PingFrame()));
+    stm.processPacket(packet(PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
     verify(connection, never()).sendPacket(any(Frame.class));

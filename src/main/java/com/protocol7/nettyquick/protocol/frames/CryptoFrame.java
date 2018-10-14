@@ -6,6 +6,8 @@ import io.netty.buffer.ByteBuf;
 public class CryptoFrame extends Frame {
 
     public static CryptoFrame parse(ByteBuf bb) {
+        bb.readByte(); // TODO validate
+
         Varint offset = Varint.read(bb);
         Varint length = Varint.read(bb);
         byte[] cryptoData = new byte[(int) length.getValue()];
@@ -15,6 +17,10 @@ public class CryptoFrame extends Frame {
 
     private final Varint offset;
     private final byte[] cryptoData;
+
+    public CryptoFrame(int offset, byte[] cryptoData) {
+        this(new Varint(offset), cryptoData);
+    }
 
     public CryptoFrame(Varint offset, byte[] cryptoData) {
         super(FrameType.CRYPTO);
@@ -32,6 +38,7 @@ public class CryptoFrame extends Frame {
 
     @Override
     public void write(ByteBuf bb) {
+        bb.writeByte(getType().getType());
         offset.write(bb);
         new Varint(cryptoData.length).write(bb);
         bb.writeBytes(cryptoData);

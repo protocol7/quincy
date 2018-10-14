@@ -12,13 +12,11 @@ import org.junit.Test;
 
 public class ShortHeaderTest {
 
-  public static final byte[] DATA = "hello".getBytes();
-
   @Test
   public void roundtrip() {
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = new PacketNumber(123);
-    ProtectedPayload payload = new ProtectedPayload(new PingFrame(DATA));
+    ProtectedPayload payload = new ProtectedPayload(PingFrame.INSTANCE);
     ShortHeader p = new ShortHeader(false,
                                     Optional.of(connId),
                                     pn,

@@ -16,7 +16,7 @@ public class UnprotectedPayloadTest {
 
   @Test
   public void roundtrip() {
-    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb);
@@ -28,33 +28,33 @@ public class UnprotectedPayloadTest {
 
   @Test
   public void write() {
-    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb);
 
-    TestUtil.assertBuffer("070548656c6c6f00", bb);
+    TestUtil.assertBuffer("0700", bb);
   }
 
   @Test
   public void parse() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("070548656c6c6f00"));
+    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("0700"));
     UnprotectedPayload parsed = UnprotectedPayload.parse(bb, bb.writerIndex());
 
-    UnprotectedPayload expected = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload expected = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
     assertEquals(expected, parsed);
   }
 
   @Test
   public void addFrame() {
-    UnprotectedPayload payload = new UnprotectedPayload(new PingFrame(DATA));
+    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
 
     UnprotectedPayload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
 
-    UnprotectedPayload expected = new UnprotectedPayload(new PingFrame(DATA), PaddingFrame.INSTANCE);
+    UnprotectedPayload expected = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     assertEquals(expected, withAdded);
-    assertEquals(new UnprotectedPayload(new PingFrame(DATA)), payload); // must not been mutated
+    assertEquals(new UnprotectedPayload(PingFrame.INSTANCE), payload); // must not been mutated
 
   }
 }

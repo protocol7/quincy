@@ -22,14 +22,17 @@ import org.slf4j.LoggerFactory;
 
 public class ServerConnection implements Connection {
 
-  public static ServerConnection create(StreamListener handler, Channel channel, InetSocketAddress clientAddress) {
-    return new ServerConnection(handler, channel, clientAddress);
+  public static ServerConnection create(StreamListener handler,
+                                        Channel channel,
+                                        InetSocketAddress clientAddress,
+                                        ConnectionId srcConnId) {
+    return new ServerConnection(handler, channel, clientAddress, srcConnId);
   }
 
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
   private Optional<ConnectionId> destConnectionId = Optional.empty();
-  private Optional<ConnectionId> srcConnectionId = Optional.empty();
+  private final Optional<ConnectionId> srcConnectionId;
   private final StreamListener handler;
   private final Channel channel;
   private final InetSocketAddress clientAddress;
@@ -39,7 +42,10 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  public ServerConnection(final StreamListener handler, final Channel channel, final InetSocketAddress clientAddress) {
+  public ServerConnection(final StreamListener handler,
+                          final Channel channel,
+                          final InetSocketAddress clientAddress,
+                          final ConnectionId srcConnId) {
     this.handler = handler;
     this.channel = channel;
     this.clientAddress = clientAddress;
@@ -47,6 +53,7 @@ public class ServerConnection implements Connection {
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
+    this.srcConnectionId = Optional.of(srcConnId);
   }
 
   public Optional<ConnectionId> getDestinationConnectionId() {
@@ -71,17 +78,15 @@ public class ServerConnection implements Connection {
 
   public FullPacket sendPacket(Frame... frames) {
     return (FullPacket)sendPacket(new ShortPacket(new ShortHeader(false,
-             getDestinationConnectionId(),
-                               nextSendPacketNumber(),
-                               new ProtectedPayload(frames))));
+                                  getDestinationConnectionId(),
+                                  nextSendPacketNumber(),
+                                  new ProtectedPayload(frames))));
   }
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb);
     channel.writeAndFlush(new DatagramPacket(bb, clientAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
-    log.debug("c sent packet to " + clientAddress);
-
     log.debug("Server sent {}", packet);
   }
 

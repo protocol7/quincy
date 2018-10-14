@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.protocol.packets;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
@@ -35,7 +36,13 @@ public class InitialPacket implements FullPacket {
     Version version = Version.CURRENT;
     PacketNumber packetNumber = PacketNumber.random();
     return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
+  }
 
+  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
+                                     Optional<ConnectionId> srcConnectionId,
+                                     Optional<byte[]> token,
+                                     Frame... frames) {
+    return create(destConnectionId, srcConnectionId, token, Lists.newArrayList(frames));
   }
 
   public static InitialPacket parse(ByteBuf bb) {
@@ -133,5 +140,13 @@ public class InitialPacket implements FullPacket {
 
   public Optional<byte[]> getToken() {
     return token;
+  }
+
+  @Override
+  public String toString() {
+    return "InitialPacket{" +
+            "header=" + header +
+            ", token=" + token +
+            '}';
   }
 }

@@ -1,15 +1,14 @@
 package com.protocol7.nettyquick.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
-import com.protocol7.nettyquick.protocol.frames.StreamFrame;
+import com.protocol7.nettyquick.protocol.Varint;
+import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.tls.TlsEngine;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -32,6 +31,7 @@ public class ClientStateMachine {
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
+  private final TlsEngine tlsEngine = new TlsEngine(true);
 
   public ClientStateMachine(final ClientConnection connection) {
     this.connection = connection;
@@ -41,13 +41,15 @@ public class ClientStateMachine {
     synchronized (this) {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
+        CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
+
         connection.sendPacket(InitialPacket.create(
                 connection.getDestinationConnectionId(),
                 connection.getSourceConnectionId(),
                 Optional.empty(),
-                Collections.emptyList()));
+                clientHello));
         state = ClientState.InitialSent;
-        log.info("Client connection state inital sent");
+        log.info("Client connection state initial sent");
       } else {
         throw new IllegalStateException("Can't handshake in state " + state);
       }
@@ -58,11 +60,12 @@ public class ClientStateMachine {
   public void processPacket(Packet packet) {
     log.info("Client got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
 
-    synchronized (this) { // TODO refactor to make non-syncronized
+    synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
       if (packet instanceof HandshakePacket) {
         if (state == ClientState.InitialSent) {
           state = ClientState.Ready;
+          connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
           handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
         } else {

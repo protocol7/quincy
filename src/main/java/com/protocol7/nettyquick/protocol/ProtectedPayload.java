@@ -9,7 +9,11 @@ import java.util.List;
 public class ProtectedPayload implements Payload {
 
     public static ProtectedPayload parse(ByteBuf bb) {
-        return null;
+        List<Frame> frames = Lists.newArrayList();
+        while (bb.isReadable()) {
+            frames.add(Frame.parse(bb));
+        }
+        return new ProtectedPayload(frames);
     }
 
     private List<Frame> frames;
@@ -23,7 +27,9 @@ public class ProtectedPayload implements Payload {
     }
 
     public void write(ByteBuf bb) {
-        
+        for (Frame frame : frames) {
+            frame.write(bb);
+        }
     }
 
     public ProtectedPayload addFrame(Frame frame) {

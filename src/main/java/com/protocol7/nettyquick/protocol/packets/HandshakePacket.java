@@ -71,4 +71,11 @@ public class HandshakePacket implements FullPacket {
   public UnprotectedPayload getPayload() {
     return header.getPayload();
   }
+
+  @Override
+  public String toString() {
+    return "HandshakePacket{" +
+            "header=" + header +
+            '}';
+  }
 }

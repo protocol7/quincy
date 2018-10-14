@@ -11,7 +11,7 @@ import com.protocol7.nettyquick.streams.StreamListener;
 public class Runner {
 
   public static void main(String[] args) throws Exception {
-    InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), 9556);
+    InetSocketAddress address = new InetSocketAddress("127.0.0.1", 9556);
 
     QuicServer server = QuicServer.bind(address, new StreamListener() {
       @Override

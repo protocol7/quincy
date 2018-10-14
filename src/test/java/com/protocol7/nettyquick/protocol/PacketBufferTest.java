@@ -58,7 +58,7 @@ public class PacketBufferTest {
     verifyNoMoreInteractions(connection);
     assertBufferEmpty();
 
-    Packet pingPacket = packet(2, new PingFrame("Hello".getBytes()));
+    Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.onPacket(pingPacket);
 
@@ -79,7 +79,7 @@ public class PacketBufferTest {
 
   @Test
   public void ackOnPing() {
-    Packet pingPacket = packet(2, new PingFrame("Hello".getBytes()));
+    Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.onPacket(pingPacket);
 
@@ -93,7 +93,7 @@ public class PacketBufferTest {
 
   @Test
   public void send() {
-    Packet pingPacket = packet(2, new PingFrame("Hello".getBytes()));
+    Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.send(pingPacket);
 
@@ -108,7 +108,7 @@ public class PacketBufferTest {
   public void ackSentPacket() {
     // send packet to buffer it
 
-    Packet pingPacket = packet(2, new PingFrame("Hello".getBytes()));
+    Packet pingPacket = packet(2, PingFrame.INSTANCE);
     buffer.send(pingPacket);
     assertBuffered(2);
 
