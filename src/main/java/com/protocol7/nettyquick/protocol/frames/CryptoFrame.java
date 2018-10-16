@@ -1,7 +1,10 @@
 package com.protocol7.nettyquick.protocol.frames;
 
 import com.protocol7.nettyquick.protocol.Varint;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
+
+import java.util.Arrays;
 
 public class CryptoFrame extends Frame {
 
@@ -42,5 +45,13 @@ public class CryptoFrame extends Frame {
         offset.write(bb);
         new Varint(cryptoData.length).write(bb);
         bb.writeBytes(cryptoData);
+    }
+
+    @Override
+    public String toString() {
+        return "CryptoFrame{" +
+                "offset=" + offset +
+                ", cryptoData=" + Hex.hex(cryptoData) +
+                '}';
     }
 }
