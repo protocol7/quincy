@@ -1,19 +1,6 @@
 package com.protocol7.nettyquick.client;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Optional;
-
 import com.protocol7.nettyquick.protocol.*;
-import com.protocol7.nettyquick.protocol.ShortHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
@@ -28,6 +15,12 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+
+import java.util.Optional;
+
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
 
 public class ClientStateMachineTest {
 
@@ -63,7 +56,8 @@ public class ClientStateMachineTest {
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
-            Version.CURRENT));
+            Version.CURRENT,
+            PingFrame.INSTANCE));
 
     assertTrue(handshakeFuture.isDone());
     assertEquals(ClientStateMachine.ClientState.Ready, stm.getState());
@@ -135,7 +129,8 @@ public class ClientStateMachineTest {
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
-            Version.CURRENT));
+            Version.CURRENT,
+            PingFrame.INSTANCE));
   }
 
 }

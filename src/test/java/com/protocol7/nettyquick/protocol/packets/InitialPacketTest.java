@@ -1,6 +1,8 @@
 package com.protocol7.nettyquick.protocol.packets;
 
+import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -11,6 +13,7 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -27,7 +30,7 @@ public class InitialPacketTest {
                 Optional.of(destConnId),
                 Optional.of(srcConnId),
                 Optional.of(token),
-                emptyList());
+                Lists.newArrayList(PingFrame.INSTANCE));
 
         ByteBuf bb = Unpooled.buffer();
 
@@ -40,7 +43,8 @@ public class InitialPacketTest {
         assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
         assertEquals(packet.getVersion(), parsed.getVersion());
         assertArrayEquals(token, parsed.getToken().get());
-        assertEquals(0, parsed.getPayload().getLength());
+        assertEquals(1, parsed.getPayload().getLength());
+        assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
     }
 
     @Test
@@ -49,7 +53,7 @@ public class InitialPacketTest {
                 empty(),
                 empty(),
                 empty(),
-                emptyList());
+                Lists.newArrayList(PingFrame.INSTANCE));
 
         ByteBuf bb = Unpooled.buffer();
 
@@ -62,6 +66,7 @@ public class InitialPacketTest {
         assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
         assertEquals(packet.getVersion(), parsed.getVersion());
         assertFalse(parsed.getToken().isPresent());
-        assertEquals(0, parsed.getPayload().getLength());
+        assertEquals(1, parsed.getPayload().getLength());
+        assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
     }
 }

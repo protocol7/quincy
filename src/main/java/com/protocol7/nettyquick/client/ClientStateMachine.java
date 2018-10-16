@@ -1,7 +1,9 @@
 package com.protocol7.nettyquick.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Varint;
+import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
@@ -46,6 +48,8 @@ public class ClientStateMachine {
         connection.sendPacket(InitialPacket.create(
                 connection.getDestinationConnectionId(),
                 connection.getSourceConnectionId(),
+                PacketNumber.MIN,
+                Version.DRAFT_15,
                 Optional.empty(),
                 clientHello));
         state = ClientState.InitialSent;

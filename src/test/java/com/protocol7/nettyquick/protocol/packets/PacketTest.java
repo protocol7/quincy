@@ -1,6 +1,8 @@
 package com.protocol7.nettyquick.protocol.packets;
 
+import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
+import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -8,9 +10,7 @@ import org.junit.Test;
 
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.junit.Assert.assertTrue;
 
 public class PacketTest {
@@ -20,7 +20,7 @@ public class PacketTest {
         InitialPacket packet = InitialPacket.create(empty(),
                 empty(),
                 empty(),
-                emptyList());
+                Lists.newArrayList(PingFrame.INSTANCE));
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb);
 
@@ -54,7 +54,7 @@ public class PacketTest {
 
     @Test
     public void parseHandshakePacket() {
-        HandshakePacket packet = HandshakePacket.create(empty(), empty(), PacketNumber.random(), Version.CURRENT);
+        HandshakePacket packet = HandshakePacket.create(empty(), empty(), PacketNumber.random(), Version.CURRENT, PingFrame.INSTANCE);
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb);
 

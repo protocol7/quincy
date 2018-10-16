@@ -10,6 +10,8 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class HandshakePacket implements FullPacket {
@@ -18,9 +20,19 @@ public class HandshakePacket implements FullPacket {
 
   public static HandshakePacket create(Optional<ConnectionId> destConnectionId,
                                        Optional<ConnectionId> srcConnectionId,
-                                  PacketNumber packetNumber,
-                                  Version version) { // TODO take crypto params
-    UnprotectedPayload payload = new UnprotectedPayload(Lists.newArrayList()); // TODO random stream and ack frames
+                                       PacketNumber packetNumber,
+                                       Version version,
+                                       Frame... frames) {
+    return create(destConnectionId, srcConnectionId, packetNumber, version, Arrays.asList(frames));
+  }
+
+
+  public static HandshakePacket create(Optional<ConnectionId> destConnectionId,
+                                       Optional<ConnectionId> srcConnectionId,
+                                       PacketNumber packetNumber,
+                                       Version version,
+                                       List<Frame> frames) {
+    UnprotectedPayload payload = new UnprotectedPayload(frames);
     return new HandshakePacket(new LongHeader(PacketType.Handshake,
             destConnectionId,
             srcConnectionId,

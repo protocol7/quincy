@@ -3,9 +3,14 @@ package com.protocol7.nettyquick.protocol;
 import java.util.Arrays;
 import java.util.List;
 
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import io.netty.buffer.ByteBuf;
+
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 public class UnprotectedPayload implements Payload {
 
@@ -29,11 +34,14 @@ public class UnprotectedPayload implements Payload {
   private final List<Frame> frames;
 
   public UnprotectedPayload(final List<Frame> frames) {
-    this.frames = frames;
+    checkNotNull(frames);
+    checkArgument(!frames.isEmpty());
+
+    this.frames = ImmutableList.copyOf(frames);
   }
 
   public UnprotectedPayload(final Frame... frames) {
-    this.frames = Arrays.asList(frames);
+    this(Arrays.asList(frames));
   }
 
   public List<Frame> getFrames() {

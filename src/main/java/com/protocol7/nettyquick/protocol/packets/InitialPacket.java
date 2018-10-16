@@ -1,8 +1,10 @@
 package com.protocol7.nettyquick.protocol.packets;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.LongHeader;
@@ -12,6 +14,15 @@ import io.netty.buffer.ByteBuf;
 public class InitialPacket implements FullPacket {
 
   public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
+
+  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
+                                     Optional<ConnectionId> srcConnectionId,
+                                     PacketNumber packetNumber,
+                                     Version version,
+                                     Optional<byte[]> token,
+                                     Frame... frames) { // TODO validate frame types
+    return create(destConnectionId, srcConnectionId, packetNumber, version, token, ImmutableList.copyOf(frames));
+  }
 
   public static InitialPacket create(Optional<ConnectionId> destConnectionId,
                                      Optional<ConnectionId> srcConnectionId,
@@ -36,13 +47,6 @@ public class InitialPacket implements FullPacket {
     Version version = Version.CURRENT;
     PacketNumber packetNumber = PacketNumber.random();
     return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
-  }
-
-  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
-                                     Optional<ConnectionId> srcConnectionId,
-                                     Optional<byte[]> token,
-                                     Frame... frames) {
-    return create(destConnectionId, srcConnectionId, token, Lists.newArrayList(frames));
   }
 
   public static InitialPacket parse(ByteBuf bb) {
