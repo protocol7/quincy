@@ -79,7 +79,7 @@ public class TlsEngine {
         try {
             SSLEngineResult result = engine.wrap(in, out);
 
-            log.debug("wrap: {}", result);
+            log.debug("wrap: {}", resultToString(result));
 
             runDelegatedTasks(result);
             out.flip();
@@ -100,7 +100,7 @@ public class TlsEngine {
         try {
             SSLEngineResult result = engine.unwrap(in, out);
 
-            log.debug("unwrap: {}", result);
+            log.debug("unwrap: {}", resultToString(result));
 
             runDelegatedTasks(result);
 
@@ -130,7 +130,9 @@ public class TlsEngine {
         }
     }
 
-
+    private String resultToString(SSLEngineResult result) {
+        return result.toString().replace("\n", ", ");
+    }
 
     private ByteBuffer allocate() {
         return ByteBuffer.allocate(engine.getSession().getPacketBufferSize());

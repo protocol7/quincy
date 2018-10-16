@@ -66,7 +66,7 @@ public class ClientStateMachine {
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
-      if (packet instanceof HandshakePacket) {
+      if (packet instanceof InitialPacket) {
         if (state == ClientState.InitialSent) {
           state = ClientState.Ready;
           connection.setDestinationConnectionId(packet.getSourceConnectionId().get());

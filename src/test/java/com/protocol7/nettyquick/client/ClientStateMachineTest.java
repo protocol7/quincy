@@ -6,6 +6,7 @@ import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
@@ -52,11 +53,12 @@ public class ClientStateMachineTest {
     assertFalse(handshakeFuture.isDone());
     assertEquals(ClientStateMachine.ClientState.InitialSent, stm.getState());
 
-    stm.processPacket(HandshakePacket.create(
+    stm.processPacket(InitialPacket.create(
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
             Version.CURRENT,
+            Optional.empty(),
             PingFrame.INSTANCE));
 
     assertTrue(handshakeFuture.isDone());
@@ -125,11 +127,12 @@ public class ClientStateMachineTest {
 
   private void getReady() {
     stm.handshake();
-    stm.processPacket(HandshakePacket.create(
+    stm.processPacket(InitialPacket.create(
             Optional.of(destConnectionId),
             Optional.of(srcConnectionId),
             PacketNumber.random(),
             Version.CURRENT,
+            Optional.empty(),
             PingFrame.INSTANCE));
   }
 
