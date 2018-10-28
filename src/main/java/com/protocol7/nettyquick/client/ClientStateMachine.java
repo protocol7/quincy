@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.protocol.Version;
@@ -18,6 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 
 public class ClientStateMachine {
@@ -43,7 +45,17 @@ public class ClientStateMachine {
     synchronized (this) {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
+
+        List<Frame> frames = Lists.newArrayList();
+
+        int len = 1200;
+
         CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
+        len -= clientHello.calculateLength();
+        frames.add(clientHello);
+        for (int i = len; i>0; i--) {
+          frames.add(PaddingFrame.INSTANCE);
+        }
 
         connection.sendPacket(InitialPacket.create(
                 connection.getDestinationConnectionId(),
@@ -51,7 +63,7 @@ public class ClientStateMachine {
                 PacketNumber.MIN,
                 Version.DRAFT_15,
                 Optional.empty(),
-                clientHello));
+                frames));
         state = ClientState.InitialSent;
         log.info("Client connection state initial sent");
       } else {

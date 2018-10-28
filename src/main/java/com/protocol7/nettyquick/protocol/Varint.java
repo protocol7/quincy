@@ -91,7 +91,6 @@ public class Varint implements Comparable<Varint> {
     byte[] bs = Longs.toByteArray(value);
     byte[] b = Arrays.copyOfRange(bs, from, 8);
     b[0] = (byte)(b[0] | mask);
-
     bb.writeBytes(b);
   }
 

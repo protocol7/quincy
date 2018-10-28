@@ -74,8 +74,8 @@ public class InitialPacket implements FullPacket {
 
     int length = (int) Varint.read(bb).getValue();
 
-    PacketNumber packetNumber = PacketNumber.read(bb);
-    int payloadLength = length - 8; // TODO pn length
+    PacketNumber packetNumber = new PacketNumber(Varint.read(bb));
+    int payloadLength = length; // TODO pn length
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
 

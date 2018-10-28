@@ -6,9 +6,10 @@ public enum Version {
 
   VERSION_NEGOTIATION(0x00000000),
   FINAL(0x00000001),
+  TLS_DEV(0x00000065),
   DRAFT_15(0xff000000 + 15);
 
-  public static final Version CURRENT = Version.DRAFT_15;
+  public static final Version CURRENT = Version.TLS_DEV;
 
   public static Version read(final ByteBuf bb) {
     long l = bb.readInt();
@@ -17,6 +18,8 @@ public enum Version {
       return VERSION_NEGOTIATION;
     } else if (l == FINAL.version) {
       return FINAL;
+    } else if (l == TLS_DEV.version) {
+      return TLS_DEV;
     } else if (l == DRAFT_15.version) {
       return DRAFT_15;
     } else {

@@ -15,7 +15,7 @@ public class ShortHeader implements Header {
 
     boolean keyPhase = (firstByte & 0x40) == 0x40;
 
-    Optional<ConnectionId> connId = Optional.of(ConnectionId.read(12, bb)); // TODO how to determine length?
+    Optional<ConnectionId> connId = Optional.of(ConnectionId.read(13, bb)); // TODO how to determine length?
     //PacketNumber lastAcked = lastAckedProvider.getLastAcked(connId.get());
     PacketNumber packetNumber = PacketNumber.read(bb);
     ProtectedPayload payload = ProtectedPayload.parse(bb);

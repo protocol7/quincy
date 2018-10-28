@@ -26,8 +26,8 @@ public class LongHeader implements Header {
 
     int length = (int) Varint.read(bb).getValue();
 
-    PacketNumber packetNumber = PacketNumber.read(bb);
-    int payloadLength = length - 8; // TODO pn length
+    PacketNumber packetNumber = new PacketNumber(Varint.read(bb));
+    int payloadLength = length; // TODO pn length
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
 
@@ -115,9 +115,9 @@ public class LongHeader implements Header {
   }
 
   public void writeSuffix(ByteBuf bb) {
-    Varint length = new Varint(8 + payload.getLength()); // TODO packet number length
+    Varint length = new Varint(payload.getLength()); // TODO packet number length
     length.write(bb);
-    packetNumber.write(bb);
+    packetNumber.asVarint().write(bb);
     payload.write(bb);
   }
 
@@ -125,11 +125,19 @@ public class LongHeader implements Header {
   public String toString() {
     return "LongHeader{" +
             "packetType=" + packetType +
-            ", destinationConnectionId=" + destinationConnectionId +
-            ", sourceConnectionId=" + sourceConnectionId +
+            ", destinationConnectionId=" + optToString(destinationConnectionId) +
+            ", sourceConnectionId=" + optToString(sourceConnectionId) +
             ", version=" + version +
             ", packetNumber=" + packetNumber +
             ", payload=" + payload +
             '}';
+  }
+
+  private String optToString(Optional<?> opt) {
+    if (opt.isPresent()) {
+      return "[" + opt.get().toString() + "]";
+    } else {
+      return "[]";
+    }
   }
 }

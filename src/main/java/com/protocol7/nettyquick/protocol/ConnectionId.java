@@ -12,7 +12,7 @@ import java.util.Optional;
 public class ConnectionId {
 
   public static ConnectionId random() {
-    byte[] id = new byte[12]; // TODO what length to use?
+    byte[] id = new byte[13]; // TODO what length to use?
     Rnd.rndBytes(id);
     return new ConnectionId(id);
   }

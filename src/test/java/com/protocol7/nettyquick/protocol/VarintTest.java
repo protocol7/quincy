@@ -30,6 +30,12 @@ public class VarintTest {
   }
 
   @Test
+  public void name() {
+    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("44 9a"));
+    System.out.println(Varint.read(bb));
+  }
+
+  @Test
   public void randomBounds() {
     for (int i = 0; i<1000_000; i++) {
       Varint v = Varint.random();
