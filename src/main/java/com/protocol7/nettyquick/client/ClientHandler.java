@@ -32,7 +32,6 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
       if (packet.getDestinationConnectionId().isPresent()) {
         MDC.put("connectionid", packet.getDestinationConnectionId().get().toString());
       }
-
       connection.onPacket(packet);
     }
   }

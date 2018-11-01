@@ -44,7 +44,7 @@ public class HandshakePacket implements FullPacket {
   public static HandshakePacket parse(ByteBuf bb) {
     // TODO validate marker
 
-    LongHeader header = LongHeader.parse(bb);
+    LongHeader header = LongHeader.parse(bb, false);
     return new HandshakePacket(header);
   }
 

@@ -17,7 +17,7 @@ public class TlsEngine {
     private static String trustStoreFile = "testkeys";
     private static String passwd = "passphrase";
 
-    private final SSLEngine engine;
+    private SSLEngine engine;
 
     private static KeyManagerFactory createKeyManagerFactory(String passphrase) throws Exception {
         KeyStore ks = KeyStore.getInstance("JKS");
@@ -37,9 +37,15 @@ public class TlsEngine {
         return tmf;
     }
 
-    private final boolean clientMode;
+    private boolean clientMode;
 
     public TlsEngine(boolean clientMode) {
+        this.clientMode = clientMode;
+
+        reset();
+    }
+
+    public void reset() {
         try {
             SSLContext sslCtx = SSLContext.getInstance("TLS");
 

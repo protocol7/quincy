@@ -3,9 +3,12 @@ package com.protocol7.nettyquick.protocol.packets;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Opt;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
+import java.util.Arrays;
 import java.util.Optional;
 
 public class RetryPacket implements Packet {
@@ -87,5 +90,16 @@ public class RetryPacket implements Packet {
 
     public byte[] getRetryToken() {
         return retryToken;
+    }
+
+    @Override
+    public String toString() {
+        return "RetryPacket{" +
+                "version=" + version +
+                ", destinationConnectionId=" + Opt.toString(destinationConnectionId) +
+                ", sourceConnectionId=" + Opt.toString(sourceConnectionId) +
+                ", originalConnectionId=" + originalConnectionId +
+                ", retryToken=" + Hex.hex(retryToken) +
+                '}';
     }
 }

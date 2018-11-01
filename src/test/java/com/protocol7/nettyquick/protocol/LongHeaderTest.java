@@ -24,7 +24,7 @@ public class LongHeaderTest {
 
     ByteBuf bb = Unpooled.buffer();
     lp.write(bb);
-    LongHeader parsed = LongHeader.parse(bb);
+    LongHeader parsed = LongHeader.parse(bb, true);
 
     assertEquals(packetType, parsed.getPacketType());
     assertEquals(destConnId, parsed.getDestinationConnectionId());

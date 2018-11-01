@@ -7,6 +7,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -17,6 +19,9 @@ public class UnprotectedPayload implements Payload {
   public static UnprotectedPayload parse(ByteBuf bb, int length) {
     List<Frame> frames = Lists.newArrayList();
     ByteBuf frameBuf = bb.readBytes(length);
+
+    Bytes.debug(frameBuf);
+
     while (frameBuf.isReadable()) {
       Frame frame = Frame.parse(frameBuf);
       // TODO ignore padding frames?

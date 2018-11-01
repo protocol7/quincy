@@ -20,6 +20,8 @@ public abstract class Frame {
       return AckFrame.parse(bb);
     } else if (type == FrameType.PING) {
       return PingFrame.parse(bb);
+    } else if (type == FrameType.RETIRE_CONNECTION_ID) {
+      return RetireConnectionIdFrame.parse(bb);
     } else {
       throw new RuntimeException("Unknown frame type " + type);
     }

@@ -28,8 +28,8 @@ public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
-  private Optional<ConnectionId> destConnectionId = Optional.empty();
-  private final Optional<ConnectionId> srcConnectionId;
+  private Optional<ConnectionId> destConnectionId;
+  private Optional<ConnectionId> srcConnectionId = Optional.empty();
   private final EventExecutorGroup group;
   private final Channel channel;
   private final InetSocketAddress serverAddress;
@@ -42,12 +42,12 @@ public class ClientConnection implements Connection {
 
   private final Streams streams;
 
-  public ClientConnection(final ConnectionId srcConnectionId,
+  public ClientConnection(final ConnectionId destConnectionId,
                           final NioEventLoopGroup group,
                           final Channel channel,
                           final InetSocketAddress serverAddress,
                           final StreamListener streamListener) {
-    this.srcConnectionId = Optional.ofNullable(srcConnectionId);
+    this.destConnectionId = Optional.ofNullable(destConnectionId);
     this.group = group;
     this.channel = channel;
     this.serverAddress = serverAddress;
@@ -85,8 +85,12 @@ public class ClientConnection implements Connection {
     return destConnectionId;
   }
 
-  public void setDestinationConnectionId(ConnectionId dstConnId) {
-    this.destConnectionId = Optional.of(dstConnId);
+  public void setSourceConnectionId(Optional<ConnectionId> srcConnId) {
+    this.srcConnectionId = srcConnId;
+  }
+
+  public void setDestinationConnectionId(Optional<ConnectionId> destConnId) {
+    this.destConnectionId = destConnId;
   }
 
   private void sendPacketUnbuffered(Packet packet) {

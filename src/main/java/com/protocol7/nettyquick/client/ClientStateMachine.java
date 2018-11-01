@@ -3,13 +3,12 @@ package com.protocol7.nettyquick.client;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.RetryPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.TlsEngine;
 import io.netty.util.concurrent.DefaultPromise;
@@ -18,7 +17,6 @@ import io.netty.util.concurrent.GlobalEventExecutor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,24 +44,7 @@ public class ClientStateMachine {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
 
-        List<Frame> frames = Lists.newArrayList();
-
-        int len = 1200;
-
-        CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
-        len -= clientHello.calculateLength();
-        frames.add(clientHello);
-        for (int i = len; i>0; i--) {
-          frames.add(PaddingFrame.INSTANCE);
-        }
-
-        connection.sendPacket(InitialPacket.create(
-                connection.getDestinationConnectionId(),
-                connection.getSourceConnectionId(),
-                PacketNumber.MIN,
-                Version.DRAFT_15,
-                Optional.empty(),
-                frames));
+        sendInitialPacket(Optional.empty());
         state = ClientState.InitialSent;
         log.info("Client connection state initial sent");
       } else {
@@ -73,19 +54,48 @@ public class ClientStateMachine {
     return handshakeFuture;
   }
 
+  private void sendInitialPacket(Optional<byte[]> token) {
+    List<Frame> frames = Lists.newArrayList();
+
+    int len = 1200;
+
+    CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
+    len -= clientHello.calculateLength();
+    frames.add(clientHello);
+    for (int i = len; i>0; i--) {
+      frames.add(PaddingFrame.INSTANCE);
+    }
+
+    connection.sendPacket(InitialPacket.create(
+            connection.getDestinationConnectionId(),
+            connection.getSourceConnectionId(),
+            PacketNumber.MIN,
+            Version.TLS_DEV,
+            token,
+            frames));
+  }
+
   public void processPacket(Packet packet) {
     log.info("Client got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
-      if (packet instanceof InitialPacket) {
-        if (state == ClientState.InitialSent) {
+      if (state == ClientState.InitialSent) {
+        if (packet instanceof InitialPacket) {
           state = ClientState.Ready;
-          connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
+          connection.setDestinationConnectionId(packet.getSourceConnectionId());
           handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
+        } else if (packet instanceof RetryPacket) {
+          RetryPacket retryPacket = (RetryPacket) packet;
+          connection.setDestinationConnectionId(packet.getSourceConnectionId());
+          connection.setSourceConnectionId(Optional.empty());
+
+          tlsEngine.reset();
+
+          sendInitialPacket(Optional.of(retryPacket.getRetryToken()));
         } else {
-          log.warn("Got Handshake packet in an unexpected state: " + state);
+          log.warn("Got packet in an unexpected state: {} - {}", state, packet);
         }
       } else if (state == ClientState.Ready) {
         for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {

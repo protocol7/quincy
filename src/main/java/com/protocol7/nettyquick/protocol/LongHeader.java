@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -10,9 +11,11 @@ public class LongHeader implements Header {
 
   public static final int PACKET_TYPE_MASK = 0b10000000;
 
-  public static LongHeader parse(ByteBuf bb) {
+  public static LongHeader parse(ByteBuf bb, boolean pnVarint) {
+    System.out.println(bb.readableBytes());
+
     byte firstByte = bb.readByte();
-    byte ptByte = (byte)((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
+    byte ptByte = (byte) ((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
     PacketType packetType = PacketType.read(ptByte);
 
     Version version = Version.read(bb);
@@ -26,8 +29,20 @@ public class LongHeader implements Header {
 
     int length = (int) Varint.read(bb).getValue();
 
-    PacketNumber packetNumber = new PacketNumber(Varint.read(bb));
+    PacketNumber packetNumber;
+    if (pnVarint) {
+      packetNumber = new PacketNumber(Varint.read(bb));
+    } else {
+      packetNumber = PacketNumber.read2(bb, PacketNumber.MIN);
+    }
+
+    System.out.println(destConnId);
+    System.out.println(srcConnId);
+    System.out.println(packetNumber);
+
     int payloadLength = length; // TODO pn length
+    System.out.println(payloadLength);
+    System.out.println(bb.readableBytes());
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
 
@@ -125,19 +140,11 @@ public class LongHeader implements Header {
   public String toString() {
     return "LongHeader{" +
             "packetType=" + packetType +
-            ", destinationConnectionId=" + optToString(destinationConnectionId) +
-            ", sourceConnectionId=" + optToString(sourceConnectionId) +
+            ", destinationConnectionId=" + Opt.toString(destinationConnectionId) +
+            ", sourceConnectionId=" + Opt.toString(sourceConnectionId) +
             ", version=" + version +
             ", packetNumber=" + packetNumber +
             ", payload=" + payload +
             '}';
-  }
-
-  private String optToString(Optional<?> opt) {
-    if (opt.isPresent()) {
-      return "[" + opt.get().toString() + "]";
-    } else {
-      return "[]";
-    }
   }
 }
