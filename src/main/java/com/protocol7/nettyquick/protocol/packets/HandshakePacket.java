@@ -1,13 +1,9 @@
 package com.protocol7.nettyquick.protocol.packets;
 
-import com.google.common.collect.Lists;
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.LongHeader;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.PacketType;
-import com.protocol7.nettyquick.protocol.UnprotectedPayload;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
@@ -41,10 +37,10 @@ public class HandshakePacket implements FullPacket {
             payload));
   }
 
-  public static HandshakePacket parse(ByteBuf bb) {
+  public static HandshakePacket parse(ByteBuf bb, AEADProvider aeadProvider) {
     // TODO validate marker
 
-    LongHeader header = LongHeader.parse(bb, false);
+    LongHeader header = LongHeader.parse(bb, true, aeadProvider);
     return new HandshakePacket(header);
   }
 
@@ -60,8 +56,8 @@ public class HandshakePacket implements FullPacket {
   }
 
   @Override
-  public void write(ByteBuf bb) {
-    header.write(bb);
+  public void write(ByteBuf bb, AEAD aead) {
+    header.write(bb, aead);
   }
 
   @Override

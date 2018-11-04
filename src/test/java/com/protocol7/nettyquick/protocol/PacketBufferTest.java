@@ -17,6 +17,8 @@ import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -29,6 +31,8 @@ public class PacketBufferTest {
   @Mock private Sender sender;
 
   private PacketBuffer buffer;
+
+  private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
 
   @Before
   public void setUp() throws Exception {
@@ -52,7 +56,7 @@ public class PacketBufferTest {
   public void dontAckOnlyAcks() {
     Packet ackPacket = packet(1, new AckFrame(123, AckBlock.fromLongs(7, 8)));
 
-    buffer.onPacket(ackPacket);
+    buffer.onPacket(ackPacket, aead);
 
     // should not send an ack
     verifyNoMoreInteractions(connection);
@@ -60,7 +64,7 @@ public class PacketBufferTest {
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.onPacket(pingPacket);
+    buffer.onPacket(pingPacket, aead);
 
     Packet actual = verifySent();
 
@@ -81,7 +85,7 @@ public class PacketBufferTest {
   public void ackOnPing() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.onPacket(pingPacket);
+    buffer.onPacket(pingPacket, aead);
 
     Packet actual = verifySent();
 
@@ -95,7 +99,7 @@ public class PacketBufferTest {
   public void send() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.send(pingPacket);
+    buffer.send(pingPacket, aead);
 
     Packet actual = verifySent();
 
@@ -109,12 +113,12 @@ public class PacketBufferTest {
     // send packet to buffer it
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
-    buffer.send(pingPacket);
+    buffer.send(pingPacket, aead);
     assertBuffered(2);
 
     // now ack the packet
     Packet ackPacket = packet(3, new AckFrame(123, AckBlock.fromLongs(2, 2)));
-    buffer.onPacket(ackPacket);
+    buffer.onPacket(ackPacket, aead);
 
     // all messages should now have been acked
     assertBufferEmpty();

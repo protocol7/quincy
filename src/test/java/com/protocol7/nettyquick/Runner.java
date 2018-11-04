@@ -1,12 +1,11 @@
 package com.protocol7.nettyquick;
 
-import java.net.InetAddress;
-import java.net.InetSocketAddress;
-
 import com.protocol7.nettyquick.client.QuicClient;
 import com.protocol7.nettyquick.server.QuicServer;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
+
+import java.net.InetSocketAddress;
 
 public class Runner {
 

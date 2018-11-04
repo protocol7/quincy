@@ -9,6 +9,8 @@ import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -42,6 +44,8 @@ public class ClientConnection implements Connection {
 
   private final Streams streams;
 
+  private AEAD initialAead;
+
   public ClientConnection(final ConnectionId destConnectionId,
                           final NioEventLoopGroup group,
                           final Channel channel,
@@ -56,6 +60,13 @@ public class ClientConnection implements Connection {
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
+    initAEAD();
+  }
+
+  private void initAEAD() {
+    this.initialAead = NullAEAD.create(destConnectionId.get(), true);
+
+    System.out.println("Using AEAD: " + initialAead);
   }
 
   public Future<Void> handshake() {
@@ -64,7 +75,7 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p);
+    packetBuffer.send(p, initialAead);
     return p;
   }
 
@@ -91,11 +102,12 @@ public class ClientConnection implements Connection {
 
   public void setDestinationConnectionId(Optional<ConnectionId> destConnId) {
     this.destConnectionId = destConnId;
+    initAEAD();
   }
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
-    packet.write(bb);
+    packet.write(bb, initialAead);
     channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Client sent {}", packet);
   }
@@ -103,8 +115,13 @@ public class ClientConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Client got {}", packet);
 
-    packetBuffer.onPacket(packet);
+    packetBuffer.onPacket(packet, initialAead);
     stateMachine.processPacket(packet);
+  }
+
+  @Override
+  public AEAD getAEAD() {
+    return initialAead;
   }
 
   public Version getVersion() {

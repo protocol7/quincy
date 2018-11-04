@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -20,5 +21,5 @@ public interface Header {
 
   PacketNumber getPacketNumber();
 
-  void write(ByteBuf bb);
+  void write(ByteBuf bb, AEAD aead);
 }

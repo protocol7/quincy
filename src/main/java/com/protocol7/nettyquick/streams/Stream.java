@@ -12,6 +12,7 @@ import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.tls.AEAD;
 
 public class Stream {
 

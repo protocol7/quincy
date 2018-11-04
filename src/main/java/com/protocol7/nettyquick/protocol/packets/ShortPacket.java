@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.protocol.packets;
 
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -24,8 +25,8 @@ public class ShortPacket implements FullPacket {
     }
 
     @Override
-    public void write(ByteBuf bb) {
-        header.write(bb);
+    public void write(ByteBuf bb, AEAD aead) {
+        header.write(bb, aead);
     }
 
     @Override

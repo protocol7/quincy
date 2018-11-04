@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.protocol.packets;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
@@ -52,7 +53,7 @@ public class VersionNegotiationPacket implements Packet {
     }
 
     @Override
-    public void write(ByteBuf bb) {
+    public void write(ByteBuf bb, AEAD aead) {
         int marker = Rnd.rndInt() & 0xFF;
         marker |= 0b10000000;
         bb.writeByte(marker);

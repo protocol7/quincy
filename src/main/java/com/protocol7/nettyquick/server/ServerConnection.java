@@ -13,6 +13,8 @@ import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -42,6 +44,8 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
+  private final AEAD initialAead;
+
   public ServerConnection(final StreamListener handler,
                           final Channel channel,
                           final InetSocketAddress clientAddress,
@@ -54,6 +58,8 @@ public class ServerConnection implements Connection {
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
     this.srcConnectionId = Optional.of(srcConnId);
+
+    this.initialAead = NullAEAD.create(srcConnId, true);
   }
 
   public Optional<ConnectionId> getDestinationConnectionId() {
@@ -72,7 +78,7 @@ public class ServerConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p);
+    packetBuffer.send(p, initialAead);
     return p;
   }
 
@@ -85,7 +91,7 @@ public class ServerConnection implements Connection {
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
-    packet.write(bb);
+    packet.write(bb, initialAead);
     channel.writeAndFlush(new DatagramPacket(bb, clientAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Server sent {}", packet);
   }
@@ -93,8 +99,13 @@ public class ServerConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    packetBuffer.onPacket(packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
+    packetBuffer.onPacket(packet, initialAead); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
     stateMachine.processPacket(packet);
+  }
+
+  @Override
+  public AEAD getAEAD() {
+    return initialAead;
   }
 
   public Stream getOrCreateStream(StreamId streamId) {

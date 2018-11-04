@@ -9,6 +9,7 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.tls.AEAD;
 
 public interface Connection {
 
@@ -24,4 +25,6 @@ public interface Connection {
   PacketNumber lastAckedPacketNumber();
 
   void onPacket(Packet packet);
+
+  AEAD getAEAD();
 }

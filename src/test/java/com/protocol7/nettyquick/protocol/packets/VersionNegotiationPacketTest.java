@@ -2,7 +2,11 @@ package com.protocol7.nettyquick.protocol.packets;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -21,10 +25,12 @@ public class VersionNegotiationPacketTest {
     private List<Version> supported = Lists.newArrayList(Version.DRAFT_15, Version.FINAL);
     private VersionNegotiationPacket packet = new VersionNegotiationPacket(of(dest), of(src), supported);
 
+    private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
+
     @Test
     public void roundtrip() {
         ByteBuf bb = Unpooled.buffer();
-        packet.write(bb);
+        packet.write(bb, aead);
 
         VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb);
 
@@ -37,14 +43,13 @@ public class VersionNegotiationPacketTest {
     public void randomMarker() {
         // marker must be random except for first bit
         ByteBuf bb = Unpooled.buffer();
-        packet.write(bb);
+        packet.write(bb, aead);
         byte marker1 = bb.readByte();
 
         ByteBuf bb2 = Unpooled.buffer();
-        packet.write(bb2);
+        packet.write(bb2, aead);
         byte marker2 = bb2.readByte();
 
-        assertNotEquals(marker1, marker2);
         assertTrue((0x80 & marker1) == 0x80);
         assertTrue((0x80 & marker2) == 0x80);
 

@@ -6,11 +6,15 @@ import static org.junit.Assert.assertFalse;
 import java.util.Optional;
 
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
 public class ShortHeaderTest {
+
+  private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
 
   @Test
   public void roundtrip() {
@@ -23,7 +27,7 @@ public class ShortHeaderTest {
                                     payload);
 
     ByteBuf bb = Unpooled.buffer();
-    p.write(bb);
+    p.write(bb, aead);
 
     ShortHeader parsed = ShortHeader.parse(bb, connectionId -> new PacketNumber(122));
 

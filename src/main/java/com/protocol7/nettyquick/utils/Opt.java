@@ -11,4 +11,12 @@ public class Opt {
         }
     }
 
+    public static String toStringBytes(Optional<byte[]> opt) {
+        if (opt.isPresent()) {
+            return "[" + Hex.hex(opt.get()) + "]";
+        } else {
+            return "[]";
+        }
+    }
+
 }

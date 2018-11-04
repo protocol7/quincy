@@ -2,6 +2,8 @@ package com.protocol7.nettyquick.protocol.packets;
 
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -10,7 +12,7 @@ public interface Packet {
 
     int PACKET_TYPE_MASK = 0b10000000;
 
-    static Packet parse(ByteBuf bb, LastPacketNumber lastAcked) {
+    static Packet parse(ByteBuf bb, LastPacketNumber lastAcked, AEADProvider aeadProvider) {
         bb.markReaderIndex();
         int firstByte = bb.readByte() & 0xFF;
 
@@ -24,9 +26,9 @@ public interface Packet {
             if (version == Version.VERSION_NEGOTIATION) {
                 return VersionNegotiationPacket.parse(bb);
             } else if (firstByte == InitialPacket.MARKER) {
-                return InitialPacket.parse(bb);
+                return InitialPacket.parse(bb, aeadProvider);
             } else if (firstByte == HandshakePacket.MARKER) {
-                return HandshakePacket.parse(bb);
+                return HandshakePacket.parse(bb, aeadProvider);
             } else if (firstByte == RetryPacket.MARKER) {
                 return RetryPacket.parse(bb);
             } else {
@@ -39,7 +41,7 @@ public interface Packet {
         }
     }
 
-    void write(ByteBuf bb);
+    void write(ByteBuf bb, AEAD aead);
 
     Optional<ConnectionId> getSourceConnectionId();
     Optional<ConnectionId> getDestinationConnectionId();

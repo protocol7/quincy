@@ -1,7 +1,10 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
@@ -11,8 +14,8 @@ public class LongHeader implements Header {
 
   public static final int PACKET_TYPE_MASK = 0b10000000;
 
-  public static LongHeader parse(ByteBuf bb, boolean pnVarint) {
-    System.out.println(bb.readableBytes());
+  public static LongHeader parse(ByteBuf bb, boolean pnVarint, AEADProvider aeadProvider) {
+    bb.markReaderIndex();
 
     byte firstByte = bb.readByte();
     byte ptByte = (byte) ((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
@@ -36,15 +39,15 @@ public class LongHeader implements Header {
       packetNumber = PacketNumber.read2(bb, PacketNumber.MIN);
     }
 
-    System.out.println(destConnId);
-    System.out.println(srcConnId);
-    System.out.println(packetNumber);
-
     int payloadLength = length; // TODO pn length
-    System.out.println(payloadLength);
-    System.out.println(bb.readableBytes());
 
-    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
+    byte[] aad = new byte[bb.readerIndex()];
+    bb.resetReaderIndex();
+    bb.readBytes(aad);
+
+    AEAD aead = aeadProvider.forConnection(destConnId.get());
+
+    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 
     return new LongHeader(packetType,
                           destConnId,
@@ -107,9 +110,9 @@ public class LongHeader implements Header {
     return payload;
   }
 
-  public void write(ByteBuf bb) {
+  public void write(ByteBuf bb, AEAD aead) {
     writePrefix(bb);
-    writeSuffix(bb);
+    writeSuffix(bb, aead);
   }
 
   public void writePrefix(ByteBuf bb) {
@@ -129,11 +132,19 @@ public class LongHeader implements Header {
     }
   }
 
-  public void writeSuffix(ByteBuf bb) {
+  public void writeSuffix(ByteBuf bb, AEAD aead) {
     Varint length = new Varint(payload.getLength()); // TODO packet number length
     length.write(bb);
     packetNumber.asVarint().write(bb);
-    payload.write(bb);
+
+    byte[] aad = new byte[bb.writerIndex()];
+    bb.markReaderIndex();
+    bb.readBytes(aad);
+    bb.resetReaderIndex();
+
+    System.out.println(Hex.hex(aad));
+
+    payload.write(bb, aead, packetNumber, aad);
   }
 
   @Override

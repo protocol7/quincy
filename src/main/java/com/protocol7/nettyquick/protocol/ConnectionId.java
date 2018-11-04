@@ -79,6 +79,10 @@ public class ConnectionId {
     return id.length;
   }
 
+  public byte[] asBytes() {
+    return id;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) return true;

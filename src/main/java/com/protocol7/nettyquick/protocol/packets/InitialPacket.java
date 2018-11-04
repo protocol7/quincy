@@ -9,6 +9,9 @@ import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
 public class InitialPacket implements FullPacket {
@@ -49,7 +52,8 @@ public class InitialPacket implements FullPacket {
     return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
   }
 
-  public static InitialPacket parse(ByteBuf bb) {
+  public static InitialPacket parse(ByteBuf bb, AEADProvider aeadProvider) {
+    bb.markReaderIndex();
     bb.readByte(); // TODO validate
 
     Version version = Version.read(bb);
@@ -77,7 +81,13 @@ public class InitialPacket implements FullPacket {
     PacketNumber packetNumber = new PacketNumber(Varint.read(bb));
     int payloadLength = length; // TODO pn length
 
-    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength);
+    byte[] aad = new byte[bb.readerIndex()];
+    bb.resetReaderIndex();
+    bb.readBytes(aad);
+
+    AEAD aead = aeadProvider.forConnection(destConnId.get());
+
+    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 
     return InitialPacket.create(
             destConnId,
@@ -104,7 +114,7 @@ public class InitialPacket implements FullPacket {
   }
 
   @Override
-  public void write(ByteBuf bb) {
+  public void write(ByteBuf bb, AEAD aead) {
     header.writePrefix(bb);
 
     if (token.isPresent()) {
@@ -115,7 +125,7 @@ public class InitialPacket implements FullPacket {
       new Varint(0).write(bb);
     }
 
-    header.writeSuffix(bb);
+    header.writeSuffix(bb, aead);
   }
 
   @Override
@@ -150,7 +160,7 @@ public class InitialPacket implements FullPacket {
   public String toString() {
     return "InitialPacket{" +
             "header=" + header +
-            ", token=" + token +
+            ", token=" + Opt.toStringBytes(token) +
             '}';
   }
 }

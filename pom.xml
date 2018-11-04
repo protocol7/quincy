@@ -33,6 +33,11 @@
 
   <dependencies>
     <dependency>
+      <groupId>at.favre.lib</groupId>
+      <artifactId>hkdf</artifactId>
+      <version>1.0.0</version>
+    </dependency>
+    <dependency>
       <groupId>org.whispersystems</groupId>
       <artifactId>curve25519-java</artifactId>
       <version>0.4.1</version>

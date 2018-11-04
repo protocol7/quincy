@@ -10,10 +10,13 @@ import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.RetryPacket;
 import com.protocol7.nettyquick.streams.Stream;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.NullAEAD;
 import com.protocol7.nettyquick.tls.TlsEngine;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -34,6 +37,7 @@ public class ClientStateMachine {
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
   private final TlsEngine tlsEngine = new TlsEngine(true);
+
 
   public ClientStateMachine(final ClientConnection connection) {
     this.connection = connection;
@@ -69,7 +73,7 @@ public class ClientStateMachine {
     connection.sendPacket(InitialPacket.create(
             connection.getDestinationConnectionId(),
             connection.getSourceConnectionId(),
-            PacketNumber.MIN,
+            new PacketNumber(1),
             Version.TLS_DEV,
             token,
             frames));

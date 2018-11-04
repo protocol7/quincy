@@ -7,6 +7,7 @@ import javax.net.ssl.*;
 import java.io.FileInputStream;
 import java.nio.ByteBuffer;
 import java.security.KeyStore;
+import java.util.Arrays;
 
 public class TlsEngine {
 
@@ -59,7 +60,6 @@ public class TlsEngine {
             engine.setEnabledProtocols(new String[]{"TLSv1.3"});
             engine.setEnabledCipherSuites(new String[]{"TLS_AES_128_GCM_SHA256"}); // TODO make configurable
 
-            this.clientMode = clientMode;
         } catch (Exception e) {
             throw new RuntimeException("Failed to init TLS", e);
         }
@@ -70,7 +70,8 @@ public class TlsEngine {
             throw new IllegalStateException("Can not start in server mode");
         }
 
-        return wrap();
+        byte[] b = wrap();
+        return Arrays.copyOfRange(b, 5, b.length); // remove record header
     }
 
     public byte[] next(byte[] msg) {

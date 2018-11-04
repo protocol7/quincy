@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.frames.Frame;
+import com.protocol7.nettyquick.tls.AEAD;
 import io.netty.buffer.ByteBuf;
 
 import static com.google.common.base.Preconditions.checkNotNull;
@@ -62,7 +63,7 @@ public class ShortHeader implements Header {
     return payload;
   }
 
-  public void write(ByteBuf bb) {
+  public void write(ByteBuf bb, AEAD aead) {
     byte b = 0;
     if (keyPhase) {
       b = (byte)(b | 0x40);

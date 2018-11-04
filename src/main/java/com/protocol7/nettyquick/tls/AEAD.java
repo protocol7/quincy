@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.tls;
 
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;
@@ -11,6 +12,8 @@ import java.security.GeneralSecurityException;
 import java.util.Arrays;
 
 public class AEAD {
+
+    public static final int OVERHEAD = 16;
 
     private static byte[] makeNonce(final byte[] iv, final long packetNumber) {
         final byte[] nonce = new byte[iv.length];
@@ -53,13 +56,12 @@ public class AEAD {
         this.otherIV = prepareIV(otherIV);
     }
 
-    public byte[] open(final byte[] src, final int packetNumber, final byte[] aad) throws GeneralSecurityException {
+    public byte[] open(final byte[] src, final long packetNumber, final byte[] aad) throws GeneralSecurityException {
         return process(src, packetNumber, aad, otherKey, otherIV, Cipher.DECRYPT_MODE);
     }
 
-    public byte[] seal(final byte[] src, final int packetNumber, final byte[] aad) throws GeneralSecurityException {
-        final byte[] output = process(src, packetNumber, aad, myKey, myIV, Cipher.ENCRYPT_MODE);
-        return Bytes.concat(aad, output);
+    public byte[] seal(final byte[] src, final long packetNumber, final byte[] aad) throws GeneralSecurityException {
+        return process(src, packetNumber, aad, myKey, myIV, Cipher.ENCRYPT_MODE);
     }
 
     private final ThreadLocal<Cipher> ciphers = ThreadLocal.withInitial(() -> {
@@ -71,7 +73,7 @@ public class AEAD {
     });
 
     private byte[] process(final byte[] src,
-                           final int packetNumber,
+                           final long packetNumber,
                            final byte[] aad,
                            final byte[] key,
                            final byte[] iv,
@@ -83,5 +85,31 @@ public class AEAD {
         cipher.init(mode, secretKey, spec);
         cipher.updateAAD(aad);
         return cipher.doFinal(src);
+    }
+
+    public byte[] getMyKey() {
+        return myKey;
+    }
+
+    public byte[] getOtherKey() {
+        return otherKey;
+    }
+
+    public byte[] getMyIV() {
+        return myIV;
+    }
+
+    public byte[] getOtherIV() {
+        return otherIV;
+    }
+
+    @Override
+    public String toString() {
+        return "AEAD{" +
+                "myKey=" + Hex.hex(myKey) +
+                ", otherKey=" + Hex.hex(otherKey) +
+                ", myIV=" + Hex.hex(myIV) +
+                ", otherIV=" + Hex.hex(otherIV) +
+                '}';
     }
 }

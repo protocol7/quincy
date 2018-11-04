@@ -3,10 +3,13 @@ package com.protocol7.nettyquick.server;
 import java.util.Optional;
 
 import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.StreamListener;
+import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
@@ -29,13 +32,14 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
     while (bb.isReadable()) {
       Packet packet = Packet.parse(bb, connectionId -> {
-        Optional<Connection> connection = connections.get(connectionId);
-        if (connection.isPresent()) {
-          return connection.get().lastAckedPacketNumber();
-        } else {
-          throw new IllegalStateException("Connection unknown: " + connectionId);
-        }
-      });
+                Optional<Connection> connection = connections.get(connectionId);
+                if (connection.isPresent()) {
+                  return connection.get().lastAckedPacketNumber();
+                } else {
+                  throw new IllegalStateException("Connection unknown: " + connectionId);
+                }
+              },
+              connId -> connections.get(connId).get().getAEAD());
 
       MDC.put("actor", "server");
       if (packet instanceof FullPacket) {
