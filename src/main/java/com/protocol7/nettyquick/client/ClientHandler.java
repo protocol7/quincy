@@ -7,11 +7,14 @@ import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import org.slf4j.MDC;
+
+import java.util.function.Consumer;
 
 public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
@@ -26,6 +29,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
+      Bytes.debug(bb);
       Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber(),
               connId -> connection.getAEAD());
 
@@ -33,9 +37,8 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
       if (packet instanceof FullPacket) {
         MDC.put("packetnumber", ((FullPacket) packet).getPacketNumber().toString());
       }
-      if (packet.getDestinationConnectionId().isPresent()) {
-        MDC.put("connectionid", packet.getDestinationConnectionId().get().toString());
-      }
+      packet.getDestinationConnectionId().ifPresent(connId -> MDC.put("connectionid", connId.toString()));
+
       connection.onPacket(packet);
     }
   }

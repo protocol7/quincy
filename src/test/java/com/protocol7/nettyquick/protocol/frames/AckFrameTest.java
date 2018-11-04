@@ -50,7 +50,6 @@ public class AckFrameTest {
     ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    ByteBuf expected = Unpooled.copiedBuffer(Hex.dehex("1a406444d20000"));
-    assertEquals(expected, bb);
+    assertEquals("1a406444d20000", Hex.hex(Bytes.asArray(bb)));
   }
 }

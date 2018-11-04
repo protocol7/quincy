@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.protocol;
 
 import java.util.Arrays;
 
+import com.google.common.primitives.Ints;
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
@@ -9,18 +10,41 @@ import io.netty.buffer.ByteBuf;
 
 public class PacketNumber implements Comparable<PacketNumber> {
 
-  private static final long INITIAL_MAX = 4294966271L;
+  private static final int INITIAL_MAX = 1073741823; // TODO fix
 
   public static PacketNumber random() {
     return new PacketNumber(Rnd.rndLong(0, INITIAL_MAX));
   }
 
-  public static PacketNumber read(final ByteBuf bb) {
-    return new PacketNumber(bb.readLong());
+  public static PacketNumber parseVarint(final ByteBuf bb) {
+    int first = (bb.readByte() & 0xFF);
+    int size = ((first & 0b11000000) & 0xFF) ;
+    int rest = ((first & 0b00111111) & 0xFF) ;
+
+    int len;
+    if (size == 0b10000000) {
+      len = 1;
+    } else if (size == 0b11000000) {
+      len = 3;
+    } else if (size == 0b0000000) {
+      len = 0;
+    } else {
+      throw new RuntimeException("Unknown size marker");
+    }
+
+    //int len = (int)Math.pow(2, size >> 6) - 1;
+
+    byte[] b = new byte[len];
+    bb.readBytes(b);
+    byte[] pad = new byte[3-len];
+    byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, b);
+
+    return new PacketNumber(Ints.fromByteArray(bs));
   }
 
-  private static byte[] pad(byte[] b) {
-    return Bytes.concat(new byte[8-b.length], b);
+
+  public static PacketNumber read(final ByteBuf bb) {
+    return new PacketNumber(bb.readLong());
   }
 
   public static PacketNumber read4(final ByteBuf bb, final PacketNumber lastAcked) {
@@ -98,23 +122,25 @@ public class PacketNumber implements Comparable<PacketNumber> {
     bb.writeBytes(Longs.toByteArray(number.getValue()));
   }
 
-  public void write4(final ByteBuf bb) {
-    byte[] b = Longs.toByteArray(number.getValue());
-    bb.writeBytes(Arrays.copyOfRange(b, 4, 8));
-  }
-
-  public void write2(final ByteBuf bb) {
-    byte[] b = Longs.toByteArray(number.getValue());
-    bb.writeBytes(Arrays.copyOfRange(b, 6, 8));
-  }
-
-  public void write1(final ByteBuf bb) {
-    byte[] b = Longs.toByteArray(number.getValue());
-    bb.writeBytes(Arrays.copyOfRange(b, 7, 8));
-  }
-
   public void writeVarint(final ByteBuf bb) {
-    asVarint().write(bb);
+    int value = (int)number.getValue();
+    int from;
+    int mask;
+    if (value > 16383) {
+      from = 0;
+      mask = 0b11000000;
+    } else if (value > 63) {
+      from = 2;
+      mask = 0b10000000;
+    } else {
+      from = 3;
+      mask = 0b00000000;
+    }
+    byte[] bs = Ints.toByteArray(value);
+    byte[] b = Arrays.copyOfRange(bs, from, 4);
+
+    b[0] = (byte)(b[0] | mask);
+    bb.writeBytes(b);
   }
 
   @Override

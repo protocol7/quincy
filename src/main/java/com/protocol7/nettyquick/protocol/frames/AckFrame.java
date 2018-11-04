@@ -86,7 +86,7 @@ public class AckFrame extends Frame {
 
     AckBlock firstBlock = blocks.get(0);
 
-    firstBlock.getLargest().writeVarint(bb);
+    firstBlock.getLargest().asVarint().write(bb);
     Varint.write(ackDelay, bb);
     Varint.write((blocks.size() - 1) * 2, bb);
 

@@ -11,6 +11,7 @@ import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
@@ -54,14 +55,18 @@ public class InitialPacket implements FullPacket {
 
   public static InitialPacket parse(ByteBuf bb, AEADProvider aeadProvider) {
     bb.markReaderIndex();
+
+    Bytes.debug(bb);
+
     bb.readByte(); // TODO validate
 
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
+    // server 	Long Header{Type: Initial, DestConnectionID: (empty), SrcConnectionID: 0x88f9f1ab, Token: (empty), PacketNumber: 0x1, PacketNumberLen: 2, PayloadLen: 181, Version: TLS dev version (WIP)}
+
     int dcil = ConnectionId.firstLength(cil);
     int scil = ConnectionId.lastLength(cil);
-
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
@@ -77,15 +82,20 @@ public class InitialPacket implements FullPacket {
     }
 
     int length = (int) Varint.read(bb).getValue();
+    System.out.println(length);
 
-    PacketNumber packetNumber = new PacketNumber(Varint.read(bb));
+    Bytes.debug(bb);
+
+    PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+    System.out.println(packetNumber);
+    Bytes.debug(bb);
     int payloadLength = length; // TODO pn length
 
     byte[] aad = new byte[bb.readerIndex()];
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId.get());
+    AEAD aead = aeadProvider.forConnection(destConnId);
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 

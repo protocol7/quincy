@@ -31,13 +31,7 @@ public class LongHeader implements Header {
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
     int length = (int) Varint.read(bb).getValue();
-
-    PacketNumber packetNumber;
-    if (pnVarint) {
-      packetNumber = new PacketNumber(Varint.read(bb));
-    } else {
-      packetNumber = PacketNumber.read2(bb, PacketNumber.MIN);
-    }
+    PacketNumber packetNumber = PacketNumber.parseVarint(bb);
 
     int payloadLength = length; // TODO pn length
 
@@ -45,7 +39,7 @@ public class LongHeader implements Header {
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId.get());
+    AEAD aead = aeadProvider.forConnection(destConnId);
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 
@@ -135,14 +129,13 @@ public class LongHeader implements Header {
   public void writeSuffix(ByteBuf bb, AEAD aead) {
     Varint length = new Varint(payload.getLength()); // TODO packet number length
     length.write(bb);
-    packetNumber.asVarint().write(bb);
-
+    Bytes.debug("+", bb);
+    packetNumber.writeVarint(bb);
+    Bytes.debug("-", bb);
     byte[] aad = new byte[bb.writerIndex()];
     bb.markReaderIndex();
     bb.readBytes(aad);
     bb.resetReaderIndex();
-
-    System.out.println(Hex.hex(aad));
 
     payload.write(bb, aead, packetNumber, aad);
   }

@@ -9,7 +9,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-public class HeaderNumberTest {
+public class PacketNumberTest {
 
   @Test
   public void validateBounds() {
@@ -41,13 +41,6 @@ public class HeaderNumberTest {
     ByteBuf bb = Unpooled.buffer();
     new PacketNumber(123).write(bb);
     TestUtil.assertBuffer("000000000000007b", bb);
-  }
-
-  @Test
-  public void writeAsVarint() {
-    ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(123).writeVarint(bb);
-    TestUtil.assertBuffer("407b", bb);
   }
 
   @Test
@@ -106,4 +99,56 @@ public class HeaderNumberTest {
     PacketNumber pn = PacketNumber.read4(bb, lastAcked);
     assertEquals(new PacketNumber(4600373140L), pn);
   }
+
+  @Test
+  public void parseVarint() {
+    assertRead(0x19, "19");
+    assertRead(1, "8001");
+    assertRead(0x3719, "b719");
+    assertRead(0x2589fa19, "e589fa19");
+  }
+
+  @Test
+  public void writeVarint() {
+    System.out.println("----");
+    System.out.println(Bytes.binary(0x3f));
+    System.out.println(Bytes.binary(0x80));
+    System.out.println(Bytes.binary(0xc0));
+    System.out.println("----");
+
+    assertWrite(0x19, "19");
+    assertWrite(0x3719, "b719");
+    assertWrite(0x2589fa19, "e589fa19");
+    assertWrite(1160621137, "c52dac51");
+  }
+
+  @Test
+  public void roundtripVarint() {
+    int pn = (int)PacketNumber.random().asLong();
+    ByteBuf bb = Unpooled.buffer();
+    new PacketNumber(pn).writeVarint(bb);
+
+    PacketNumber parsed = PacketNumber.parseVarint(bb);
+
+    assertEquals(pn, parsed.asLong());
+  }
+
+  private void assertRead(int expected, String h) {
+    PacketNumber pn = PacketNumber.parseVarint(bb(h));
+    assertEquals(expected, pn.asLong());
+  }
+
+  private void assertWrite(int pn, String expected) {
+    ByteBuf bb = Unpooled.buffer();
+    new PacketNumber(pn).writeVarint(bb);
+
+    byte[] b = Bytes.asArray(bb);
+
+    assertEquals(expected, Hex.hex(b));
+  }
+
+  private ByteBuf bb(String h) {
+    return Unpooled.wrappedBuffer(Hex.dehex(h));
+  }
+
 }

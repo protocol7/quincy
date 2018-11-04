@@ -4,6 +4,13 @@ import io.netty.buffer.ByteBuf;
 
 public class Bytes {
 
+  public static byte[] asArray(ByteBuf bb) {
+    byte[] b = new byte[bb.readableBytes()];
+    bb.readBytes(b);
+    return b;
+  }
+
+
   public static String binary(int i) {
     return Integer.toBinaryString(i);
   }
