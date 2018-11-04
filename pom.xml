@@ -75,9 +75,9 @@
 
     <!-- Tests -->
     <dependency>
-      <artifactId>mockito-all</artifactId>
+      <artifactId>mockito-core</artifactId>
       <groupId>org.mockito</groupId>
-      <version>1.9.5</version>
+      <version>2.21.0</version>
       <scope>test</scope>
     </dependency>
     <dependency>

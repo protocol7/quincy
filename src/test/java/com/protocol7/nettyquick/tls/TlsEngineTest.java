@@ -33,7 +33,6 @@ public class TlsEngineTest {
     private void parseClentHello(byte[] ch) {
         ByteBuf bb = Unpooled.wrappedBuffer(ch);
 
-
         Bytes.debug(bb);
 
         assertNextBytes(bb, "01"); // HandshakeType
