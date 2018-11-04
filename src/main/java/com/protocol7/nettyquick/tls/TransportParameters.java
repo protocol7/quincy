@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
 
@@ -111,6 +112,20 @@ public class TransportParameters {
 
     public static Builder newBuilder() {
         return new Builder();
+    }
+
+    public static TransportParameters defaults() {
+        return new Builder()
+                .withInitialMaxStreamDataBidiLocal(32768)
+                .withInitialMaxData(49152)
+                .withInitialMaxBidiStreams(100)
+                .withIdleTimeout(30)
+                .withMaxPacketSize(1452)
+                .withInitialMaxUniStreams(100)
+                .withDisableMigration(true)
+                .withInitialMaxStreamDataBidiRemote(32768)
+                .withInitialMaxStreamDataUni(32768)
+                .build();
     }
 
     public static TransportParameters parse(ByteBuf bb) {
@@ -293,6 +308,13 @@ public class TransportParameters {
                 ", maxAckDelay=" + maxAckDelay +
                 ", originalConnectionId=" + Arrays.toString(originalConnectionId) +
                 '}';
+    }
+
+    public int calculateLength() {
+        // TODO optimize
+        ByteBuf bb = Unpooled.buffer();
+        write(bb);
+        return bb.writerIndex();
     }
 
     public void write(ByteBuf bb) {

@@ -15,6 +15,6 @@ public class Hex {
   }
 
   public static byte[] dehex(String s) {
-    return HEX.decode(s.replace(" ", ""));
+    return HEX.decode(s.replace(" ", "").toLowerCase());
   }
 }

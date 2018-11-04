@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.tls;
 
+import com.protocol7.nettyquick.utils.Hex;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -71,7 +72,11 @@ public class TlsEngine {
         }
 
         byte[] b = wrap();
-        return Arrays.copyOfRange(b, 5, b.length); // remove record header
+        byte[] ch = Arrays.copyOfRange(b, 5, b.length); // remove record header
+        TransportParameters tps = TransportParameters.defaults();
+        byte[] che = ClientHello.extend(ch, tps);
+        System.out.println(Hex.hex(che));
+        return che;
     }
 
     public byte[] next(byte[] msg) {
