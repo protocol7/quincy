@@ -10,7 +10,7 @@ import java.util.Arrays;
 
 import static com.protocol7.nettyquick.tls.TransportParameterType.*;
 
-public class TransportParameters {
+public class TransportParameters implements Extension {
 
     public static class Builder {
         private int initialMaxStreamDataBidiLocal = -1;
@@ -237,6 +237,11 @@ public class TransportParameters {
         this.initialMaxStreamDataUni = initialMaxStreamDataUni;
         this.maxAckDelay = maxAckDelay;
         this.originalConnectionId = originalConnectionId;
+    }
+
+    @Override
+    public ExtensionType getType() {
+        return ExtensionType.QUIC;
     }
 
     public int getInitialMaxStreamDataBidiLocal() {

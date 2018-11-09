@@ -38,9 +38,7 @@ public class TlsEngineTest {
         assertNextBytes(bb, "01"); // HandshakeType
         debug(bb, 1);
 
-        byte[] b = new byte[3];
-        bb.readBytes(b);
-        int payloadLength = b[0] << 16 | b[1] << 8 | b[2];
+        int payloadLength = read24(bb);
         assertEquals(payloadLength, bb.readableBytes());
         debug(bb, 4);
 
@@ -48,7 +46,7 @@ public class TlsEngineTest {
 
         debug(bb, 6);
 
-        b = new byte[32];
+        byte[] b = new byte[32];
         bb.readBytes(b); // client random
         debug(bb, 38);
 
@@ -92,10 +90,61 @@ public class TlsEngineTest {
         }
     }
 
+    private int read24(ByteBuf bb) {
+        byte[] b = new byte[3];
+        bb.readBytes(b);
+        return (b[0] & 0xFF) << 16 | (b[1] & 0xFF) << 8 | (b[2] & 0xFF);
+    }
+
+    @Test
+    public void parseServerHello() {
+        byte[] sh = Hex.dehex("020000970303ef2ce1c4da717b59b6bbb9ae054a38ead7117750995de153a025de2b8357c278202fb4351a14525590326d02c24858223279d4d3717cbbb37d29c9793dd189b954130100004f002b000203040033004500170041047e94b5ac77b9ecb657a7a26eccc865c97731c47cc344fa496c4848630f3d7ccffb6efa31aa105c11234722531fb33229de79a80982775ab86b2f3dba589efd78");
+        ByteBuf bb = Unpooled.wrappedBuffer(sh);
+
+        debug(bb, 0);
+
+        assertNextBytes(bb, "02"); // server hello
+        int payloadLength = read24(bb);
+
+        debug(bb, 4);
+
+        assertEquals(bb.readableBytes(), payloadLength);
+
+        assertNextBytes(bb, "0303"); // version
+
+        byte[] b = new byte[32];
+        bb.readBytes(b); // server random
+
+        debug(bb, 4 + 32);
+
+        int sessionIdLen = bb.readByte();
+        b = new byte[sessionIdLen];
+        bb.readBytes(b); // session ID
+
+        debug(bb, 4 + 32 + 1 + sessionIdLen);
+
+        b = new byte[2];
+        bb.readBytes(b); // cipher suite
+
+        debug(bb, 4 + 32 + 1 + sessionIdLen + 2);
+
+        int compressionMethod = bb.readByte();
+
+        debug(bb, 4 + 32 + 1 + sessionIdLen + 3);
+
+        int extensionLen = bb.readShort();
+        b = new byte[extensionLen];
+        bb.readBytes(b); // extensions
+
+        parseExtensions(b);
+    }
+
+
+
     private String extensionType(byte[] type) {
         try {
             int t = type[0] << 8 | type[1];
-            return ExtensionType.fromValue(t).name();
+            return ExtensionType.fromValue(t).getName();
         } catch (IllegalArgumentException e) {
             return "Unknown (" + Hex.hex(type) + ")";
         }

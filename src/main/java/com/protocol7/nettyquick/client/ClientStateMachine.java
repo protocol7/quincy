@@ -12,6 +12,7 @@ import com.protocol7.nettyquick.protocol.packets.RetryPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.NullAEAD;
+import com.protocol7.nettyquick.tls.ServerHello;
 import com.protocol7.nettyquick.tls.TlsEngine;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
@@ -88,6 +89,14 @@ public class ClientStateMachine {
         if (packet instanceof InitialPacket) {
           state = ClientState.Ready;
           connection.setDestinationConnectionId(packet.getSourceConnectionId());
+
+          for (Frame frame : ((InitialPacket)packet).getPayload().getFrames()) {
+            if (frame instanceof CryptoFrame) {
+              CryptoFrame cf = (CryptoFrame) frame;
+              ServerHello.parse(cf.getCryptoData());
+            }
+          }
+
           handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {

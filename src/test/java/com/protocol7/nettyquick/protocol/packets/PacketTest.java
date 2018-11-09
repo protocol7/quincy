@@ -103,15 +103,4 @@ public class PacketTest {
         Packet parsed = Packet.parse(bb, c -> pn, c -> aead);
         assertTrue(parsed instanceof ShortPacket);
     }
-
-    @Test
-    public void name() {
-        byte[] b = Hex.dehex("ff000000650188f9f1ab0040b58001a7f5d3fc96f5e977ac558a8379f56de1a7e99f962602608df4f59e277eaa0228fd0a2a834fbee439ba30f5e84119dd41252056502e6ad698a70c3a10c971aaba0f5a59d8b05b003a7735abc255bf71d198791baf993112a0e8ce50611f14a35c3371c3f044e46951904f0ff4de6229748e3bedc72a3382e3536510240d647d4309cc5251a54e95fb868d5584be6468f25c706e3ff7fa1a719ff23225518743565f4b3578b4d513994021af3f7a6e607fe615b057c3");
-
-        // server 	Long Header{Type: Initial, DestConnectionID: (empty), SrcConnectionID: 0x88f9f1ab, Token: (empty), PacketNumber: 0x1, PacketNumberLen: 2, PayloadLen: 181, Version: TLS dev version (WIP)}
-
-        ByteBuf bb = Unpooled.wrappedBuffer(b);
-
-        Packet.parse(bb, c -> pn, c -> aead);
-    }
 }

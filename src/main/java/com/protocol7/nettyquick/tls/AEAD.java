@@ -80,11 +80,24 @@ public class AEAD {
                            final int mode) throws GeneralSecurityException {
         final Cipher cipher = ciphers.get();
         final SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
-        final GCMParameterSpec spec = new GCMParameterSpec(128, makeNonce(iv, packetNumber));
+        byte[] nonce = makeNonce(iv, packetNumber);
+        final GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
+
+        String msg = mode == Cipher.DECRYPT_MODE ? "opening" : "sealing";
+        System.out.println(msg + " src=" +
+                Hex.hex(src) + " pn≈" + packetNumber + " aad=" +
+                Hex.hex(aad) + " myKey=" +
+                Hex.hex(myKey) + " otherKey=" +
+                Hex.hex(otherKey) + " myIV=" +
+                Hex.hex(myIV) + " otherIV=" +
+                Hex.hex(otherIV));
 
         cipher.init(mode, secretKey, spec);
         cipher.updateAAD(aad);
-        return cipher.doFinal(src);
+        byte[] b= cipher.doFinal(src);
+        msg = mode == Cipher.DECRYPT_MODE ? "opened" : "sealed";
+        System.out.println(msg + " " + Hex.hex(b));
+        return b;
     }
 
     public byte[] getMyKey() {

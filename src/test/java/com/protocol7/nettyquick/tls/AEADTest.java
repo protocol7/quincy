@@ -75,12 +75,12 @@ public class AEADTest {
         assertArrayEquals(myCipherText, actual);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void sealNullAad() throws GeneralSecurityException {
         aead.seal(plainText, packetNumber, null);
     }
 
-    @Test(expected = IllegalArgumentException.class)
+    @Test(expected = NullPointerException.class)
     public void sealNullSrc() throws GeneralSecurityException {
         aead.seal(null, packetNumber, aad);
     }

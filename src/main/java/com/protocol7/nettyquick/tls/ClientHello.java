@@ -1,18 +1,22 @@
 package com.protocol7.nettyquick.tls;
 
+import com.google.common.collect.Maps;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
+import java.util.Map;
+import java.util.Optional;
+import java.util.SortedMap;
 
-public class ClientHello {
+public class ClientHello extends TlsMessage {
 
-    public static byte[] extend(byte[] ch, TransportParameters tps) {
-        ClientHello hello = parse(ch);
+    public static byte[] extend(byte[] ch, Extension extension) {
+        ClientHello hello = parse(ch).addExtension(extension);
 
         ByteBuf bb = Unpooled.buffer();
-        hello.writeWithTransportParameters(bb, tps);
+        hello.write(bb);
 
         byte[] b = new byte[bb.writerIndex()];
         bb.readBytes(b);
@@ -60,26 +64,25 @@ public class ClientHello {
         }
 
         int extensionsLen = bb.readShort();
-        byte[] extensions = new byte[extensionsLen];
-        bb.readBytes(extensions); // extensions
+        SortedMap<ExtensionType, Extension> ext = Extension.parseAll(bb.readBytes(extensionsLen));
 
         return new ClientHello(
                 clientRandom,
                 sessionId,
                 cipherSuites,
-                extensions);
+                ext);
     }
 
     private final byte[] clientRandom;
     private final byte[] sessionId;
     private final byte[] cipherSuites;
-    private final byte[] extensions;
+    private final SortedMap<ExtensionType, Extension> extensions;
 
-    public ClientHello(byte[] clientRandom, byte[] sessionId, byte[] cipherSuites, byte[] extensions) {
+    public ClientHello(byte[] clientRandom, byte[] sessionId, byte[] cipherSuites, SortedMap<ExtensionType, Extension> extensions) {
         this.clientRandom = clientRandom;
         this.sessionId = sessionId;
         this.cipherSuites = cipherSuites;
-        this.extensions = extensions;
+        this.extensions = Maps.newTreeMap(extensions);
     }
 
     public byte[] getClientRandom() {
@@ -94,24 +97,31 @@ public class ClientHello {
         return cipherSuites;
     }
 
-    public byte[] getExtensions() {
+    public Map<ExtensionType, Extension> getExtensions() {
         return extensions;
     }
 
-    public void write(ByteBuf bb) {
-        writeWithTransportParameters(bb, null);
+    public Optional<Extension> geExtension(ExtensionType type) {
+        return Optional.ofNullable(extensions.get(type));
     }
 
-    public void writeWithTransportParameters(ByteBuf bb, TransportParameters tps) {
+    public ClientHello addExtension(Extension extension) {
+        SortedMap<ExtensionType, Extension> newExtensionMap = Maps.newTreeMap(extensions);
+        newExtensionMap.put(extension.getType(), extension);
+
+        return new ClientHello(clientRandom, sessionId, cipherSuites, newExtensionMap);
+    }
+
+    public void write(ByteBuf bb) {
         bb.writeByte(0x01);
 
-        int tpsLen = 0;
-        if (tps != null) {
-            tpsLen = 2 + 2 + tps.calculateLength();
-        }
+        ByteBuf extBuf = Unpooled.buffer();
+        Extension.writeAll(extensions.values(), extBuf);
+        byte[] ext = new byte[extBuf.readableBytes()];
+        extBuf.readBytes(ext);
 
         // payload length
-        int len = 2 + clientRandom.length + 1 + sessionId.length + 2 + cipherSuites.length + 2 + 2 + extensions.length + tpsLen;
+        int len = 2 + clientRandom.length + 1 + sessionId.length + 2 + cipherSuites.length + 2 + 2 + ext.length;
         bb.writeByte((len >> 16) & 0xFF);
         bb.writeByte((len >> 8)  & 0xFF);
         bb.writeByte(len & 0xFF);
@@ -132,19 +142,8 @@ public class ClientHello {
         bb.writeByte(0x01);
         bb.writeByte(0x00);
 
-        bb.writeShort(extensions.length + tpsLen);
-        bb.writeBytes(extensions);
-
-        if (tps != null) {
-            ByteBuf tpsBB = Unpooled.buffer();
-            tps.write(tpsBB);
-            byte[] x = new byte[tpsBB.writerIndex()];
-            tpsBB.readBytes(x);
-
-            bb.writeShort(4085);
-            bb.writeShort(x.length);
-            bb.writeBytes(x);
-        }
+        bb.writeShort(ext.length);
+        bb.writeBytes(ext);
     }
 
     @Override
@@ -153,7 +152,7 @@ public class ClientHello {
                 "clientRandom=" + Hex.hex(clientRandom) +
                 ", sessionId=" + Hex.hex(sessionId) +
                 ", cipherSuites=" + Hex.hex(cipherSuites) +
-                ", extensions=" + Hex.hex(extensions) +
+                ", extensions=" + extensions +
                 '}';
     }
 }
