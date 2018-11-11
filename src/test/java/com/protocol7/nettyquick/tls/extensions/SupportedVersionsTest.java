@@ -6,7 +6,7 @@ import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
 import static com.protocol7.nettyquick.tls.extensions.SupportedVersions.TLS13;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class SupportedVersionsTest {
 

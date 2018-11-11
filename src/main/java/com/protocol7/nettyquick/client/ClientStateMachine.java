@@ -5,17 +5,10 @@ import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
-import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.InitialPacket;
-import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.protocol.packets.RetryPacket;
+import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.ServerHello;
 import com.protocol7.nettyquick.tls.ClientTlsEngine;
-import com.protocol7.nettyquick.utils.Bytes;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -31,8 +24,9 @@ public class ClientStateMachine {
 
   protected enum ClientState {
     BeforeInitial,
-    InitialSent,
-    Ready
+    WaitingForServerHello,
+    WaitingForHandshake,
+    Ready;
   }
 
   private ClientState state = ClientState.BeforeInitial;
@@ -51,7 +45,7 @@ public class ClientStateMachine {
       if (state == ClientState.BeforeInitial) {
 
         sendInitialPacket(Optional.empty());
-        state = ClientState.InitialSent;
+        state = ClientState.WaitingForServerHello;
         log.info("Client connection state initial sent");
       } else {
         throw new IllegalStateException("Can't handshake in state " + state);
@@ -86,9 +80,9 @@ public class ClientStateMachine {
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
-      if (state == ClientState.InitialSent) {
+      if (state == ClientState.WaitingForServerHello) {
         if (packet instanceof InitialPacket) {
-          state = ClientState.Ready;
+
           connection.setDestinationConnectionId(packet.getSourceConnectionId());
 
           for (Frame frame : ((InitialPacket)packet).getPayload().getFrames()) {
@@ -97,6 +91,7 @@ public class ClientStateMachine {
 
               AEAD handshakeAead = tlsEngine.handleServerHello(cf.getCryptoData());
               connection.setHandshakeAead(handshakeAead);
+              state = ClientState.WaitingForHandshake;
             }
           }
 
@@ -112,6 +107,23 @@ public class ClientStateMachine {
           sendInitialPacket(Optional.of(retryPacket.getRetryToken()));
         } else {
           log.warn("Got packet in an unexpected state: {} - {}", state, packet);
+        }
+      } else if (state == ClientState.WaitingForHandshake) {
+        if (packet instanceof HandshakePacket) {
+          for (Frame frame : ((HandshakePacket)packet).getPayload().getFrames()) {
+            if (frame instanceof CryptoFrame) {
+              CryptoFrame cf = (CryptoFrame) frame;
+
+              Optional<AEAD> aead = tlsEngine.handleHandshake(cf.getCryptoData());
+
+              if (aead.isPresent()) {
+                connection.setOneRttAead(aead.get());
+                state = ClientState.Ready;
+              }
+            }
+          }
+        } else {
+          log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
       } else if (state == ClientState.Ready) {
         for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {

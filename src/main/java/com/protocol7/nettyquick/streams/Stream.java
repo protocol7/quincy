@@ -1,18 +1,15 @@
 package com.protocol7.nettyquick.streams;
 
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicLong;
-
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.tls.AEAD;
+
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicLong;
 
 public class Stream {
 

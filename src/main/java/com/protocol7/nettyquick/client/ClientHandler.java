@@ -1,20 +1,14 @@
 package com.protocol7.nettyquick.client;
 
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Header;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.AEADProvider;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;
 import org.slf4j.MDC;
-
-import java.util.function.Consumer;
 
 public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 

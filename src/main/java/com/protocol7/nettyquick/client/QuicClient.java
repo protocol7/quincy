@@ -1,7 +1,5 @@
 package com.protocol7.nettyquick.client;
 
-import java.net.InetSocketAddress;
-
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
@@ -12,6 +10,8 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
+
+import java.net.InetSocketAddress;
 
 public class QuicClient {
 

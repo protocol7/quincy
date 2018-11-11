@@ -1,10 +1,10 @@
 package com.protocol7.nettyquick.protocol.frames;
 
-import java.util.Arrays;
-
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
+
+import java.util.Arrays;
 
 public class StreamFrame extends Frame {
 

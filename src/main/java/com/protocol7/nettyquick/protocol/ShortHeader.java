@@ -1,11 +1,10 @@
 package com.protocol7.nettyquick.protocol;
 
-import java.util.Optional;
-
-import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
 import io.netty.buffer.ByteBuf;
+
+import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 

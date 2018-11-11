@@ -9,7 +9,6 @@ import com.protocol7.nettyquick.utils.Opt;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
-import java.util.Arrays;
 import java.util.Optional;
 
 public class RetryPacket implements Packet {

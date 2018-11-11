@@ -3,7 +3,9 @@ package com.protocol7.nettyquick.tls.extensions;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -129,16 +131,28 @@ public class TransportParameters implements Extension {
     }
 
     public static TransportParameters parse(ByteBuf bb) {
-        bb.readBytes(new byte[6]); // TODO figure out
+        byte[] version = new byte[4];
+        bb.readBytes(version); // TODO validate version
+
+        if (Arrays.equals(version, new byte[]{0, 0, 0, 0x65})) {
+            int xLen = bb.readByte();
+            byte[] x = new byte[xLen];
+            bb.readBytes(x); // TODO figure out
+        }
+
+        int bufLen = bb.readShort();
+        ByteBuf tpBB = bb.readBytes(bufLen);
 
         Builder builder = new Builder();
 
-        while (bb.isReadable()) {
+        while (tpBB.isReadable()) {
             byte[] type = new byte[2];
-            bb.readBytes(type);
-            int len = bb.readShort();
+            tpBB.readBytes(type);
+
+            int len = tpBB.readShort();
+
             byte[] data = new byte[len];
-            bb.readBytes(data);
+            tpBB.readBytes(data);
 
             TransportParameterType tp = TransportParameterType.fromValue(type);
 
@@ -343,8 +357,8 @@ public class TransportParameters implements Extension {
                 '}';
     }
 
-    public void write(ByteBuf bb, boolean isClient) {
-        bb.writeBytes(new byte[] {00, 00, 00, 00, 00, 0x3c}); // TODO figure out
+    public void write(ByteBuf tpBB, boolean isClient) {
+        ByteBuf bb = Unpooled.buffer();
 
         if (initialMaxStreamDataBidiLocal > -1) {
             bb.writeBytes(initial_max_stream_data_bidi_local.asBytes());
@@ -410,5 +424,10 @@ public class TransportParameters implements Extension {
             bb.writeShort(originalConnectionId.length);
             bb.writeBytes(originalConnectionId);
         }
+
+        tpBB.writeBytes(new byte[] {00, 00, 00, 00}); // version
+        byte[] x = Bytes.asArray(bb);
+        tpBB.writeShort(x.length);
+        tpBB.writeBytes(x);
     }
 }

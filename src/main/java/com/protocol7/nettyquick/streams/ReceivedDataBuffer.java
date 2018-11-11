@@ -1,9 +1,9 @@
 package com.protocol7.nettyquick.streams;
 
+import com.google.common.collect.Maps;
+
 import java.util.Optional;
 import java.util.TreeMap;
-
-import com.google.common.collect.Maps;
 
 // TODO optimize
 public class ReceivedDataBuffer {

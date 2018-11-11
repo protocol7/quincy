@@ -1,9 +1,9 @@
 package com.protocol7.nettyquick.protocol;
 
+import io.netty.buffer.ByteBuf;
+
 import static com.protocol7.nettyquick.utils.Bits.set;
 import static com.protocol7.nettyquick.utils.Bits.unset;
-
-import io.netty.buffer.ByteBuf;
 
 public class StreamId {
 

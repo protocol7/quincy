@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -9,9 +8,7 @@ import org.junit.Test;
 import java.util.Iterator;
 import java.util.List;
 
-import static com.protocol7.nettyquick.tls.Group.SECP256R1;
-import static com.protocol7.nettyquick.tls.Group.SECP384R1;
-import static com.protocol7.nettyquick.tls.Group.X25519;
+import static com.protocol7.nettyquick.tls.Group.*;
 import static com.protocol7.nettyquick.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
 

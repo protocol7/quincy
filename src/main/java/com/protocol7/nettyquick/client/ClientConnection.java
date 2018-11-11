@@ -46,6 +46,7 @@ public class ClientConnection implements Connection {
 
   private AEAD initialAead;
   private AEAD handshakeAead;
+  private AEAD oneRttAead;
 
   public ClientConnection(final ConnectionId destConnectionId,
                           final NioEventLoopGroup group,
@@ -66,8 +67,6 @@ public class ClientConnection implements Connection {
 
   private void initAEAD() {
     this.initialAead = NullAEAD.create(destConnectionId.get(), true);
-
-    System.out.println("Using AEAD: " + initialAead);
   }
 
   public Future<Void> handshake() {
@@ -122,17 +121,27 @@ public class ClientConnection implements Connection {
 
   @Override
   public AEAD getAEAD(PacketType packetType) {
+    System.out.println("Initial " + initialAead);
+    System.out.println("Handshake " + handshakeAead);
+    System.out.println("1-RTT " + oneRttAead);
+
+
     if (packetType == PacketType.Initial) {
       return initialAead;
-    } else if (packetType == PacketType.Handshake) {
-      return handshakeAead;
+    } else if (oneRttAead != null) {
+        return oneRttAead;
     } else {
-      throw new RuntimeException("Not implemented");
+      return handshakeAead;
     }
   }
 
   public void setHandshakeAead(AEAD handshakeAead) {
     this.handshakeAead = handshakeAead;
+  }
+
+  public void setOneRttAead(AEAD oneRttAead) {
+    System.out.println("Setting 1-RTT AEAD " + oneRttAead);
+    this.oneRttAead = oneRttAead;
   }
 
   public Version getVersion() {

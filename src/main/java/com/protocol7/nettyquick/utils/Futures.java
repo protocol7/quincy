@@ -1,13 +1,13 @@
 package com.protocol7.nettyquick.utils;
 
-import java.util.function.Function;
-
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.EventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
+
+import java.util.function.Function;
 
 public class Futures {
 

@@ -1,18 +1,16 @@
 package com.protocol7.nettyquick.protocol;
 
-import java.security.GeneralSecurityException;
-import java.util.Arrays;
-import java.util.List;
-
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
+import java.util.List;
 
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;

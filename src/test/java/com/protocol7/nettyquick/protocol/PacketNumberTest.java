@@ -1,13 +1,14 @@
 package com.protocol7.nettyquick.protocol;
 
-import static org.junit.Assert.*;
-
 import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class PacketNumberTest {
 

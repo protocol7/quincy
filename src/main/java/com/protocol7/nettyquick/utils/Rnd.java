@@ -1,10 +1,9 @@
 package com.protocol7.nettyquick.utils;
 
+import com.google.common.primitives.UnsignedLong;
+
 import java.math.BigInteger;
 import java.security.SecureRandom;
-import java.util.concurrent.ThreadLocalRandom;
-
-import com.google.common.primitives.UnsignedLong;
 
 public class Rnd {
 

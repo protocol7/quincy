@@ -4,22 +4,17 @@ import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.NullAEAD;
 import com.protocol7.nettyquick.tls.TestAEAD;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-import java.util.Collections;
 import java.util.Optional;
 
-import static java.util.Collections.emptyList;
 import static java.util.Optional.empty;
 import static junit.framework.TestCase.assertTrue;
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.*;
 
 public class InitialPacketTest {
 

@@ -1,12 +1,12 @@
 package com.protocol7.nettyquick.protocol.frames;
 
-import static org.junit.Assert.assertSame;
-
 import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+
+import static org.junit.Assert.assertSame;
 
 public class PaddingFrameTest {
 

@@ -4,8 +4,6 @@ import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
-import java.util.Arrays;
-
 public class CryptoFrame extends Frame {
 
     public static CryptoFrame parse(ByteBuf bb) {

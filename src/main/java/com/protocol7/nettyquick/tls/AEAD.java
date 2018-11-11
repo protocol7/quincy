@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls;
 
 import com.google.common.primitives.Longs;
-import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 
 import javax.crypto.Cipher;

@@ -1,14 +1,13 @@
 package com.protocol7.nettyquick.streams;
 
-import java.util.Map;
-
 import com.google.common.collect.Maps;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
-import com.protocol7.nettyquick.protocol.Varint;
 import com.protocol7.nettyquick.streams.Stream.StreamType;
+
+import java.util.Map;
 
 public class Streams implements PacketBuffer.AckListener {
 

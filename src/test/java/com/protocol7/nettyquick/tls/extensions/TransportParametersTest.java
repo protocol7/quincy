@@ -5,7 +5,8 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
 public class TransportParametersTest {
 
@@ -67,6 +68,28 @@ public class TransportParametersTest {
         assertEquals(-1, parsed.getMaxAckDelay());
         assertEquals(1452, parsed.getMaxPacketSize());
         assertEquals(0, parsed.getStatelessResetToken().length);
+        assertEquals(0, parsed.getOriginalConnectionId().length);
+    }
+
+    @Test
+    public void parseKnown2() {
+        byte[] data = Hex.dehex("0000006508cacaca1a0000006500500000000400008000000a000400008000000b000400008000000100040000c00000020002006400080002006400030002001e0005000205ac00090000000600102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a");
+        ByteBuf bb = Unpooled.wrappedBuffer(data);
+
+        TransportParameters parsed = TransportParameters.parse(bb);
+
+        assertEquals(-1, parsed.getAckDelayExponent());
+        assertEquals(true, parsed.isDisableMigration());
+        assertEquals(30, parsed.getIdleTimeout());
+        assertEquals(100, parsed.getInitialMaxBidiStreams());
+        assertEquals(49152, parsed.getInitialMaxData());
+        assertEquals(32768, parsed.getInitialMaxStreamDataBidiLocal());
+        assertEquals(32768, parsed.getInitialMaxStreamDataBidiRemote());
+        assertEquals(32768, parsed.getInitialMaxStreamDataUni());
+        assertEquals(100, parsed.getInitialMaxUniStreams());
+        assertEquals(-1, parsed.getMaxAckDelay());
+        assertEquals(1452, parsed.getMaxPacketSize());
+        assertEquals("2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a", Hex.hex(parsed.getStatelessResetToken()));
         assertEquals(0, parsed.getOriginalConnectionId().length);
     }
 }

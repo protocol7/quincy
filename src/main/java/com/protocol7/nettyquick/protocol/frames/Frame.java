@@ -1,6 +1,5 @@
 package com.protocol7.nettyquick.protocol.frames;
 
-import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

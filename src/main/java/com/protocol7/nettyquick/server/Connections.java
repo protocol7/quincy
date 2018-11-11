@@ -1,18 +1,16 @@
 package com.protocol7.nettyquick.server;
 
-import java.net.InetSocketAddress;
-import java.util.Map;
-import java.util.Optional;
-
 import com.google.common.collect.Maps;
 import com.protocol7.nettyquick.connection.Connection;
-import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.streams.StreamListener;
 import io.netty.channel.Channel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.text.html.Option;
+import java.net.InetSocketAddress;
+import java.util.Map;
+import java.util.Optional;
 
 public class Connections {
 

@@ -1,17 +1,6 @@
 package com.protocol7.nettyquick.streams;
 
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.DataRead;
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.DataRecvd;
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.Recv;
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.ResetRead;
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.ResetRecvd;
-import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.SizeKnown;
-
-import java.util.Optional;
-import java.util.Set;
-
-import com.google.common.collect.Sets;
-import com.protocol7.nettyquick.protocol.PacketNumber;
+import static com.protocol7.nettyquick.streams.ReceiveStateMachine.ReceiveStreamState.*;
 
 public class ReceiveStateMachine {
 

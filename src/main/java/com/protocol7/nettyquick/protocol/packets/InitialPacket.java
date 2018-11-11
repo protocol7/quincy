@@ -1,19 +1,15 @@
 package com.protocol7.nettyquick.protocol.packets;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
-import com.protocol7.nettyquick.protocol.LongHeader;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.AEADProvider;
-import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
+
+import java.util.List;
+import java.util.Optional;
 
 public class InitialPacket implements FullPacket {
 

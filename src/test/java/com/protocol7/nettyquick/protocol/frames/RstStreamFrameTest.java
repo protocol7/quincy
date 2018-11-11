@@ -1,11 +1,11 @@
 package com.protocol7.nettyquick.protocol.frames;
 
-import static org.junit.Assert.*;
-
 import com.protocol7.nettyquick.protocol.StreamId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+
+import static org.junit.Assert.assertEquals;
 
 public class RstStreamFrameTest {
 

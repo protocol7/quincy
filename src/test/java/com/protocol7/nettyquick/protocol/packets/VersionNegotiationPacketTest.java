@@ -2,11 +2,9 @@ package com.protocol7.nettyquick.protocol.packets;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.NullAEAD;
-import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -15,7 +13,6 @@ import java.util.List;
 
 import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertTrue;
 
 public class VersionNegotiationPacketTest {

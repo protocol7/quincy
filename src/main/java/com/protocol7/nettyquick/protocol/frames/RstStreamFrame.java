@@ -1,11 +1,11 @@
 package com.protocol7.nettyquick.protocol.frames;
 
-import static java.util.Objects.requireNonNull;
-
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
+
+import static java.util.Objects.requireNonNull;
 
 public class RstStreamFrame extends Frame {
 

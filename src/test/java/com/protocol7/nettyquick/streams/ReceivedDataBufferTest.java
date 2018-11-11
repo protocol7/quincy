@@ -1,10 +1,8 @@
 package com.protocol7.nettyquick.streams;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class ReceivedDataBufferTest {
 

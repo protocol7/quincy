@@ -1,17 +1,12 @@
 package com.protocol7.nettyquick.streams;
 
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.DataRecvd;
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.DataSent;
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.Open;
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.ResetRecvd;
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.ResetSent;
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.Send;
+import com.google.common.collect.Sets;
+import com.protocol7.nettyquick.protocol.PacketNumber;
 
 import java.util.Optional;
 import java.util.Set;
 
-import com.google.common.collect.Sets;
-import com.protocol7.nettyquick.protocol.PacketNumber;
+import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.*;
 
 public class SendStateMachine {
 

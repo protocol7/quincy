@@ -1,11 +1,10 @@
 package com.protocol7.nettyquick.protocol;
 
-import static org.junit.Assert.*;
-
-import com.protocol7.nettyquick.streams.Stream;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
+
+import static org.junit.Assert.*;
 
 public class StreamIdTest {
 

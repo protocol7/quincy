@@ -2,10 +2,9 @@ package com.protocol7.nettyquick.tls;
 
 import org.junit.Test;
 
-import static com.protocol7.nettyquick.tls.Group.SECP256R1;
-import static com.protocol7.nettyquick.tls.Group.SECP384R1;
+import static com.protocol7.nettyquick.tls.Group.*;
 import static com.protocol7.nettyquick.tls.Group.X25519;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class GroupTest {
 
