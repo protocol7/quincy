@@ -22,7 +22,6 @@ public class LongHeaderTest {
     Optional<ConnectionId> destConnId = Optional.of(ConnectionId.random());
     Optional<ConnectionId> srcConnId = Optional.of(ConnectionId.random());
     PacketNumber pn = PacketNumber.random();
-    System.out.println(pn.asLong());
     Version version = Version.CURRENT;
     UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
 
@@ -30,7 +29,7 @@ public class LongHeaderTest {
 
     ByteBuf bb = Unpooled.buffer();
     lp.write(bb, aead);
-    LongHeader parsed = LongHeader.parse(bb, true, c -> aead);
+    LongHeader parsed = LongHeader.parse(bb, true, (c, p) -> aead);
 
     assertEquals(packetType, parsed.getPacketType());
     assertEquals(destConnId, parsed.getDestinationConnectionId());

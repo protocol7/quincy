@@ -68,19 +68,19 @@ public class StreamFrameTest {
 
   @Test
   public void lengthWithoutOffset() {
-    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
+    StreamFrame frame = new StreamFrame(new StreamId(123),
                                         0,
                                         false,
                                         DATA);
-    assertEquals(15, frame.calculateLength());
+    assertEquals(9, frame.calculateLength());
   }
 
   @Test
   public void lengthWithOffset() {
-    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
+    StreamFrame frame = new StreamFrame(new StreamId(123),
                                         123,
                                         false,
                                         DATA);
-    assertEquals(17, frame.calculateLength());
+    assertEquals(11, frame.calculateLength());
   }
 }

@@ -11,13 +11,14 @@ import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.RetryPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.NullAEAD;
 import com.protocol7.nettyquick.tls.ServerHello;
-import com.protocol7.nettyquick.tls.TlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsEngine;
+import com.protocol7.nettyquick.utils.Bytes;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.apache.commons.lang.ObjectUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -37,7 +38,7 @@ public class ClientStateMachine {
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
-  private final TlsEngine tlsEngine = new TlsEngine(true);
+  private final ClientTlsEngine tlsEngine = new ClientTlsEngine();
 
 
   public ClientStateMachine(final ClientConnection connection) {
@@ -93,7 +94,9 @@ public class ClientStateMachine {
           for (Frame frame : ((InitialPacket)packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
               CryptoFrame cf = (CryptoFrame) frame;
-              ServerHello.parse(cf.getCryptoData());
+
+              AEAD handshakeAead = tlsEngine.handleServerHello(cf.getCryptoData());
+              connection.setHandshakeAead(handshakeAead);
             }
           }
 

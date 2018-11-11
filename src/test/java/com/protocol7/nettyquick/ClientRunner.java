@@ -1,19 +1,11 @@
 package com.protocol7.nettyquick;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.client.ClientConnection;
 import com.protocol7.nettyquick.client.ClientHandler;
-import com.protocol7.nettyquick.client.QuicClient;
 import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.protocol.frames.CryptoFrame;
-import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.PaddingFrame;
-import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
-import com.protocol7.nettyquick.tls.TlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsEngine;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -23,8 +15,6 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
-import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 public class ClientRunner {
@@ -35,7 +25,7 @@ public class ClientRunner {
         InetSocketAddress server2 = new InetSocketAddress("test.privateoctopus.com", 4433);
         InetSocketAddress server3 = new InetSocketAddress("127.0.0.1", 6121);
 
-        TlsEngine tlsEngine = new TlsEngine(true);
+        ClientTlsEngine tlsEngine = new ClientTlsEngine();
 
         NioEventLoopGroup group = new NioEventLoopGroup();
         ClientHandler handler = new ClientHandler();

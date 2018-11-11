@@ -2,11 +2,10 @@ package com.protocol7.nettyquick.server;
 
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
-import com.protocol7.nettyquick.tls.TlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsEngine;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,7 +26,7 @@ public class ServerStateMachine {
 
   private ServerState state = ServerState.BeforeInitial;
   private final ServerConnection connection;
-  private final TlsEngine tlsEngine = new TlsEngine(false);
+  private final ClientTlsEngine tlsEngine = new ClientTlsEngine();
 
   public ServerStateMachine(final ServerConnection connection) {
     this.connection = connection;
@@ -44,17 +43,19 @@ public class ServerStateMachine {
 
           CryptoFrame clientHello = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
-          CryptoFrame serverHello = new CryptoFrame(0, tlsEngine.next(clientHello.getCryptoData()));
+          throw new RuntimeException("Not implemented");
 
-          Packet handshakePacket = InitialPacket.create(packet.getSourceConnectionId(),
-                                                          connection.getSourceConnectionId(),
-                                                          connection.nextSendPacketNumber(),
-                                                          initialPacket.getVersion(),
-                                                          Optional.empty(),
-                                                          serverHello);
-          connection.sendPacket(handshakePacket);
-          state = ServerState.Ready;
-          log.info("Server connection state ready");
+          //CryptoFrame serverHello = new CryptoFrame(0, tlsEngine.handleServerHello(clientHello.getCryptoData()));
+
+          // Packet handshakePacket = InitialPacket.create(packet.getSourceConnectionId(),
+          //                                                 connection.getSourceConnectionId(),
+          //                                                connection.nextSendPacketNumber(),
+          //                                                 initialPacket.getVersion(),
+          //                                                Optional.empty(),
+          //                                                 serverHello);
+          // connection.sendPacket(handshakePacket);
+          // state = ServerState.Ready;
+          // log.info("Server connection state ready");
         } else {
           throw new RuntimeException("Unexpected packet in BeforeInitial: " + packet);
         }

@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.utils;
 
 import java.math.BigInteger;
+import java.security.SecureRandom;
 import java.util.concurrent.ThreadLocalRandom;
 
 import com.google.common.primitives.UnsignedLong;
@@ -8,13 +9,14 @@ import com.google.common.primitives.UnsignedLong;
 public class Rnd {
 
   private static final BigInteger TWO = BigInteger.valueOf(2);
+  private static SecureRandom rnd = new SecureRandom();
 
   public static long rndLong() {
-    return ThreadLocalRandom.current().nextLong();
+    return rnd.nextLong();
   }
 
   public static void rndBytes(byte[] b) {
-    ThreadLocalRandom.current().nextBytes(b);
+    rnd.nextBytes(b);
   }
 
   public static byte[] rndBytes(int length) {
@@ -23,17 +25,17 @@ public class Rnd {
     return b;
   }
 
-  public static long rndLong(long min, long max) {
-    return ThreadLocalRandom.current().nextLong(min, max);
+  public static int rndInt(int min, int  max) {
+    return rnd.nextInt(max - min) + min;
   }
 
   public static UnsignedLong rndUnsignedLong() {
     byte[] b = new byte[8];
-    ThreadLocalRandom.current().nextBytes(b);
+    rnd.nextBytes(b);
     return UnsignedLong.valueOf(new BigInteger(b).abs().multiply(TWO));
   }
 
   public static int rndInt() {
-    return ThreadLocalRandom.current().nextInt();
+    return rnd.nextInt();
   }
 }

@@ -31,7 +31,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     while (bb.isReadable()) {
       Bytes.debug(bb);
       Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber(),
-              connId -> connection.getAEAD());
+              (connId, packetType) -> connection.getAEAD(packetType));
 
       MDC.put("actor", "client");
       if (packet instanceof FullPacket) {

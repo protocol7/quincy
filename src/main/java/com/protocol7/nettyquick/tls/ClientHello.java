@@ -1,16 +1,33 @@
 package com.protocol7.nettyquick.tls;
 
-import com.google.common.collect.Maps;
+import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
-import java.util.Map;
+import java.util.List;
 import java.util.Optional;
-import java.util.SortedMap;
 
 public class ClientHello extends TlsMessage {
+
+    public static ClientHello defaults(KeyExchangeKeys kek, TransportParameters tps) {
+        byte[] clientRandom = Rnd.rndBytes(32);
+        byte[] sessionId = new byte[0];
+        byte[] cipherSuites = Hex.dehex("1301");
+        List<Extension> extensions = ImmutableList.of(
+                KeyShare.of(kek.getGroup(), kek.getPublicKey()),
+                new SupportedGroups(Group.X25519),
+                SupportedVersions.TLS13,
+                tps
+        );
+
+        return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
+    }
 
     public static byte[] extend(byte[] ch, Extension extension) {
         ClientHello hello = parse(ch).addExtension(extension);
@@ -64,7 +81,7 @@ public class ClientHello extends TlsMessage {
         }
 
         int extensionsLen = bb.readShort();
-        SortedMap<ExtensionType, Extension> ext = Extension.parseAll(bb.readBytes(extensionsLen));
+        List<Extension> ext = Extension.parseAll(bb.readBytes(extensionsLen), true);
 
         return new ClientHello(
                 clientRandom,
@@ -76,13 +93,14 @@ public class ClientHello extends TlsMessage {
     private final byte[] clientRandom;
     private final byte[] sessionId;
     private final byte[] cipherSuites;
-    private final SortedMap<ExtensionType, Extension> extensions;
+    private final List<Extension> extensions;
 
-    public ClientHello(byte[] clientRandom, byte[] sessionId, byte[] cipherSuites, SortedMap<ExtensionType, Extension> extensions) {
+    public ClientHello(byte[] clientRandom, byte[] sessionId, byte[] cipherSuites, List<Extension> extensions) {
+        Preconditions.checkArgument(clientRandom.length == 32);
         this.clientRandom = clientRandom;
-        this.sessionId = sessionId;
-        this.cipherSuites = cipherSuites;
-        this.extensions = Maps.newTreeMap(extensions);
+        this.sessionId = Preconditions.checkNotNull(sessionId);
+        this.cipherSuites = Preconditions.checkNotNull(cipherSuites);
+        this.extensions = extensions;
     }
 
     public byte[] getClientRandom() {
@@ -97,17 +115,22 @@ public class ClientHello extends TlsMessage {
         return cipherSuites;
     }
 
-    public Map<ExtensionType, Extension> getExtensions() {
+    public List<Extension> getExtensions() {
         return extensions;
     }
 
     public Optional<Extension> geExtension(ExtensionType type) {
-        return Optional.ofNullable(extensions.get(type));
+        for (Extension ext : extensions) {
+            if (ext.getType().equals(type)) {
+                return Optional.of(ext);
+            }
+        }
+        return Optional.empty();
     }
 
     public ClientHello addExtension(Extension extension) {
-        SortedMap<ExtensionType, Extension> newExtensionMap = Maps.newTreeMap(extensions);
-        newExtensionMap.put(extension.getType(), extension);
+        List<Extension> newExtensionMap = Lists.newArrayList(extensions);
+        newExtensionMap.add(extension);
 
         return new ClientHello(clientRandom, sessionId, cipherSuites, newExtensionMap);
     }
@@ -116,7 +139,7 @@ public class ClientHello extends TlsMessage {
         bb.writeByte(0x01);
 
         ByteBuf extBuf = Unpooled.buffer();
-        Extension.writeAll(extensions.values(), extBuf);
+        Extension.writeAll(extensions, extBuf, true);
         byte[] ext = new byte[extBuf.readableBytes()];
         extBuf.readBytes(ext);
 

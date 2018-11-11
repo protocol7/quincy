@@ -39,7 +39,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
                   throw new IllegalStateException("Connection unknown: " + connectionId);
                 }
               },
-              connId -> connections.get(connId.get()).get().getAEAD());
+              (connId, packetType) -> connections.get(connId.get()).get().getAEAD(packetType));
 
       MDC.put("actor", "server");
       if (packet instanceof FullPacket) {

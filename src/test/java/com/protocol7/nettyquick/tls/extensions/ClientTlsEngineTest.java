@@ -1,5 +1,6 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
+import com.protocol7.nettyquick.tls.ClientTlsEngine;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
@@ -11,7 +12,7 @@ import java.util.Arrays;
 
 import static org.junit.Assert.assertEquals;
 
-public class TlsEngineTest {
+public class ClientTlsEngineTest {
 
     @Test
     public void clientHelloFromGo() {
@@ -22,7 +23,7 @@ public class TlsEngineTest {
 
     @Test
     public void clientHello() {
-        TlsEngine engine = new TlsEngine(true);
+        ClientTlsEngine engine = new ClientTlsEngine();
 
         byte[] ch = engine.start();
 

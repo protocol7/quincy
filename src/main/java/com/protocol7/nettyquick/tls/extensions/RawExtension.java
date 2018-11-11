@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
@@ -27,7 +27,7 @@ public class RawExtension implements Extension {
     }
 
     @Override
-    public void write(ByteBuf bb) {
+    public void write(ByteBuf bb, boolean isClient) {
         bb.writeBytes(data);
     }
 

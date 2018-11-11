@@ -45,6 +45,7 @@ public class ClientConnection implements Connection {
   private final Streams streams;
 
   private AEAD initialAead;
+  private AEAD handshakeAead;
 
   public ClientConnection(final ConnectionId destConnectionId,
                           final NioEventLoopGroup group,
@@ -120,8 +121,18 @@ public class ClientConnection implements Connection {
   }
 
   @Override
-  public AEAD getAEAD() {
-    return initialAead;
+  public AEAD getAEAD(PacketType packetType) {
+    if (packetType == PacketType.Initial) {
+      return initialAead;
+    } else if (packetType == PacketType.Handshake) {
+      return handshakeAead;
+    } else {
+      throw new RuntimeException("Not implemented");
+    }
+  }
+
+  public void setHandshakeAead(AEAD handshakeAead) {
+    this.handshakeAead = handshakeAead;
   }
 
   public Version getVersion() {

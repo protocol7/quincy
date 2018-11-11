@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Shorts;

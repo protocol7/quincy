@@ -2,10 +2,7 @@ package com.protocol7.nettyquick.connection;
 
 import java.util.Optional;
 
-import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.Header;
-import com.protocol7.nettyquick.protocol.PacketNumber;
-import com.protocol7.nettyquick.protocol.Version;
+import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
@@ -26,5 +23,5 @@ public interface Connection {
 
   void onPacket(Packet packet);
 
-  AEAD getAEAD();
+  AEAD getAEAD(PacketType packetType);
 }

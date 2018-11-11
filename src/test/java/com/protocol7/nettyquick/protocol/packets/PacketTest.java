@@ -34,7 +34,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), c -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
         assertTrue(parsed instanceof InitialPacket);
     }
 
@@ -44,7 +44,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), c -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
         assertTrue(parsed instanceof VersionNegotiationPacket);
     }
 
@@ -58,7 +58,7 @@ public class PacketTest {
         bb.writeByte(0);
         Version.DRAFT_15.write(bb);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), c -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
         assertTrue(parsed instanceof VersionNegotiationPacket);
     }
 
@@ -72,7 +72,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> pn, c -> aead);
+        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead);
         assertTrue(parsed instanceof HandshakePacket);
     }
 
@@ -86,7 +86,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), c -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
         assertTrue(parsed instanceof RetryPacket);
     }
 
@@ -100,7 +100,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> pn, c -> aead);
+        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead);
         assertTrue(parsed instanceof ShortPacket);
     }
 }

@@ -1,14 +1,14 @@
 package com.protocol7.nettyquick.tls;
 
+import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.fail;
 
 public class ClientHelloTest {
 
@@ -30,7 +30,7 @@ public class ClientHelloTest {
 
     @Test
     public void inverseRoundtrip() {
-        byte[] ch = Hex.dehex("010001470303a76cc637036e871b63c463a73175ca81a5f09b14e80f58715d52c8f5e90a794a10fe8a3d447a7ea799dfd5bdbffca6e5bc0026130113021303c02fc030c02bc02ccca8cca9c013c009c014c00a009c009d002f0035c012000a010000e80ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000003300260024001d0020a62c058352d7a007efbf4b944fad2dbcdf80b6ab56504533fc04a360a06dcc2000320012001004010403050105030601060302010203002b000302030400120000000d0018001608040401040308050501050308060601060302010203000b00020100000a000a0008001d001700180019000500050100000000000000150013000010717569632e636c656d656e74652e696fff01000100");
+        byte[] ch = Hex.dehex("010001450303a76cc637036e871b63c463a73175ca81a5f09b14e80f58715d52c8f5e90a794a10fe8a3d447a7ea799dfd5bdbffca6e5bc0026130113021303c02fc030c02bc02ccca8cca9c013c009c014c00a009c009d002f0035c012000a010000e60ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000003300260024001d0020a62c058352d7a007efbf4b944fad2dbcdf80b6ab56504533fc04a360a06dcc2000320012001004010403050105030601060302010203002b000302030400120000000d0018001608040401040308050501050308060601060302010203000b00020100000a00080006001d00170018000500050100000000000000150013000010717569632e636c656d656e74652e696fff01000100");
 
         ClientHello hello = ClientHello.parse(ch);
 
@@ -79,5 +79,28 @@ public class ClientHelloTest {
         assertEquals("1301",
                 Hex.hex(parsed.getCipherSuites()));
         assertEquals(8, parsed.getExtensions().size());
+    }
+
+    @Test
+    public void defaults() {
+        KeyExchangeKeys kek = KeyExchangeKeys.generate(Group.X25519);
+        ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
+
+        assertEquals(32, ch.getClientRandom().length);
+        assertEquals(0, ch.getSessionId().length);
+        assertEquals("1301", Hex.hex(ch.getCipherSuites()));
+
+        KeyShare keyShare = (KeyShare) ch.geExtension(ExtensionType.key_share).get();
+        assertEquals(1, keyShare.getKeys().size());
+        assertEquals(Hex.hex(kek.getPublicKey()), Hex.hex(keyShare.getKey(Group.X25519).get()));
+
+        SupportedGroups supportedGroups = (SupportedGroups) ch.geExtension(ExtensionType.supported_groups).get();
+        assertEquals(ImmutableList.of(Group.X25519), supportedGroups.getGroups());
+
+        SupportedVersions supportedVersions = (SupportedVersions) ch.geExtension(ExtensionType.supported_versions).get();
+        assertEquals("0304", Hex.hex(supportedVersions.getVersion()));
+
+        TransportParameters transportParameters = (TransportParameters) ch.geExtension(ExtensionType.QUIC).get();
+        assertEquals(TransportParameters.defaults(), transportParameters);
     }
 }

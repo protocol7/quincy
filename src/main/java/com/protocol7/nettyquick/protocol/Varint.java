@@ -15,8 +15,8 @@ public class Varint implements Comparable<Varint> {
     return random(0);
   }
 
-  public static Varint random(long min) {
-    return new Varint(Rnd.rndLong(min, MAX));
+  public static Varint random(int min) {
+    return new Varint(Rnd.rndInt(min, Integer.MAX_VALUE));
   }
 
   public static Varint read(ByteBuf bb) {

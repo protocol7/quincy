@@ -1,14 +1,14 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
+import java.util.Objects;
 
-import static com.protocol7.nettyquick.tls.TransportParameterType.*;
+import static com.protocol7.nettyquick.tls.extensions.TransportParameterType.*;
 
 public class TransportParameters implements Extension {
 
@@ -297,6 +297,34 @@ public class TransportParameters implements Extension {
     }
 
     @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        TransportParameters that = (TransportParameters) o;
+        return initialMaxStreamDataBidiLocal == that.initialMaxStreamDataBidiLocal &&
+                initialMaxData == that.initialMaxData &&
+                initialMaxBidiStreams == that.initialMaxBidiStreams &&
+                idleTimeout == that.idleTimeout &&
+                maxPacketSize == that.maxPacketSize &&
+                ackDelayExponent == that.ackDelayExponent &&
+                initialMaxUniStreams == that.initialMaxUniStreams &&
+                disableMigration == that.disableMigration &&
+                initialMaxStreamDataBidiRemote == that.initialMaxStreamDataBidiRemote &&
+                initialMaxStreamDataUni == that.initialMaxStreamDataUni &&
+                maxAckDelay == that.maxAckDelay &&
+                Arrays.equals(statelessResetToken, that.statelessResetToken) &&
+                Arrays.equals(originalConnectionId, that.originalConnectionId);
+    }
+
+    @Override
+    public int hashCode() {
+        int result = Objects.hash(initialMaxStreamDataBidiLocal, initialMaxData, initialMaxBidiStreams, idleTimeout, maxPacketSize, ackDelayExponent, initialMaxUniStreams, disableMigration, initialMaxStreamDataBidiRemote, initialMaxStreamDataUni, maxAckDelay);
+        result = 31 * result + Arrays.hashCode(statelessResetToken);
+        result = 31 * result + Arrays.hashCode(originalConnectionId);
+        return result;
+    }
+
+    @Override
     public String toString() {
         return "TransportParameters{" +
                 "initialMaxStreamDataBidiLocal=" + initialMaxStreamDataBidiLocal +
@@ -315,14 +343,7 @@ public class TransportParameters implements Extension {
                 '}';
     }
 
-    public int calculateLength() {
-        // TODO optimize
-        ByteBuf bb = Unpooled.buffer();
-        write(bb);
-        return bb.writerIndex();
-    }
-
-    public void write(ByteBuf bb) {
+    public void write(ByteBuf bb, boolean isClient) {
         bb.writeBytes(new byte[] {00, 00, 00, 00, 00, 0x3c}); // TODO figure out
 
         if (initialMaxStreamDataBidiLocal > -1) {

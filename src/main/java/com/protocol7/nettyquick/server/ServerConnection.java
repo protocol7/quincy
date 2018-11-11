@@ -104,8 +104,14 @@ public class ServerConnection implements Connection {
   }
 
   @Override
-  public AEAD getAEAD() {
-    return initialAead;
+  public AEAD getAEAD(PacketType packetType) {
+    if (packetType == PacketType.Initial) {
+      return initialAead;
+    } else if (packetType == PacketType.Handshake) {
+      throw new RuntimeException("Not implemented");
+    } else {
+      throw new RuntimeException("Not implemented");
+    }
   }
 
   public Stream getOrCreateStream(StreamId streamId) {

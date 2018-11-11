@@ -110,12 +110,6 @@ public class PacketNumberTest {
 
   @Test
   public void writeVarint() {
-    System.out.println("----");
-    System.out.println(Bytes.binary(0x3f));
-    System.out.println(Bytes.binary(0x80));
-    System.out.println(Bytes.binary(0xc0));
-    System.out.println("----");
-
     assertWrite(0x19, "19");
     assertWrite(0x3719, "b719");
     assertWrite(0x2589fa19, "e589fa19");

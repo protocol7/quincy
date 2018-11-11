@@ -56,8 +56,6 @@ public class InitialPacket implements FullPacket {
   public static InitialPacket parse(ByteBuf bb, AEADProvider aeadProvider) {
     bb.markReaderIndex();
 
-    Bytes.debug(bb);
-
     bb.readByte(); // TODO validate
 
     Version version = Version.read(bb);
@@ -82,20 +80,16 @@ public class InitialPacket implements FullPacket {
     }
 
     int length = (int) Varint.read(bb).getValue();
-    System.out.println(length);
 
-    Bytes.debug(bb);
 
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-    System.out.println(packetNumber);
-    Bytes.debug(bb);
     int payloadLength = length; // TODO pn length
 
     byte[] aad = new byte[bb.readerIndex()];
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId);
+    AEAD aead = aeadProvider.forConnection(destConnId, PacketType.Initial);
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 

@@ -81,7 +81,6 @@ public class UnprotectedPayload implements Payload {
 
     try {
       byte[] x = aead.seal(b, pn.asLong(), aad);
-      System.out.println(Hex.hex(x));
       bb.writeBytes(x);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);

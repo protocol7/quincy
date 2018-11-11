@@ -1,6 +1,5 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
-import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -30,7 +29,7 @@ public class TransportParametersTest {
 
         ByteBuf bb = Unpooled.buffer();
 
-        tps.write(bb);
+        tps.write(bb, true);
 
         TransportParameters parsed = TransportParameters.parse(bb);
 

@@ -1,8 +1,7 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.collect.Sets;
 
-import java.util.EnumSet;
 import java.util.Objects;
 import java.util.Set;
 

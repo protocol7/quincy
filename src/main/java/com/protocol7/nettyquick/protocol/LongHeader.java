@@ -39,7 +39,7 @@ public class LongHeader implements Header {
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId);
+    AEAD aead = aeadProvider.forConnection(destConnId, packetType);
 
     UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
 

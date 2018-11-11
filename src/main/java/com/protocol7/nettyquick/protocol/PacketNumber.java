@@ -13,7 +13,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
   private static final int INITIAL_MAX = 1073741823; // TODO fix
 
   public static PacketNumber random() {
-    return new PacketNumber(Rnd.rndLong(0, INITIAL_MAX));
+    return new PacketNumber(Rnd.rndInt(0, INITIAL_MAX));
   }
 
   public static PacketNumber parseVarint(final ByteBuf bb) {
