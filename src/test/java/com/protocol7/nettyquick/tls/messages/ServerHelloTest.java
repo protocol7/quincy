@@ -1,8 +1,9 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
+import com.protocol7.nettyquick.tls.messages.ServerHello;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;

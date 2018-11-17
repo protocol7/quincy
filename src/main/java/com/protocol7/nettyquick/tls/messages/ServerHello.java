@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.ExtensionType;

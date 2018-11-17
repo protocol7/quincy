@@ -7,7 +7,7 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
 
 import java.util.Optional;
 

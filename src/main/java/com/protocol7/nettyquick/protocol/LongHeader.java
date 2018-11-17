@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 

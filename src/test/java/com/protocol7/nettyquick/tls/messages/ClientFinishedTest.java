@@ -1,5 +1,6 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
+import com.protocol7.nettyquick.tls.messages.ClientFinished;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

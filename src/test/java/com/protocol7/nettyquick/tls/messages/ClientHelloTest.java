@@ -1,7 +1,10 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.tls.Group;
+import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
+import com.protocol7.nettyquick.tls.messages.ClientHello;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

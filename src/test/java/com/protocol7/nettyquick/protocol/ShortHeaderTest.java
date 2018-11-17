@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.TestAEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;

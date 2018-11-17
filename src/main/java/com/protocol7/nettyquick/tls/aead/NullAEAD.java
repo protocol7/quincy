@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.aead;
 
 import at.favre.lib.crypto.HKDF;
 import com.google.common.base.Charsets;

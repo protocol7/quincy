@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.aead;
 
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Hex;

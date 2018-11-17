@@ -3,8 +3,8 @@ package com.protocol7.nettyquick.protocol.packets;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.LastPacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;

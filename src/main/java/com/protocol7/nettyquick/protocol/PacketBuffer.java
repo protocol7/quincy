@@ -11,8 +11,7 @@ import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.protocol.packets.ShortPacket;
-import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

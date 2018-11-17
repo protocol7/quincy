@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.tls.extensions.Extension;

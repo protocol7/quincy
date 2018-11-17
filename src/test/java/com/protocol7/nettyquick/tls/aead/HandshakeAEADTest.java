@@ -1,5 +1,8 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.aead;
 
+import com.protocol7.nettyquick.tls.HKDFUtil;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.HandshakeAEAD;
 import org.junit.Test;
 
 import static com.protocol7.nettyquick.utils.Hex.dehex;

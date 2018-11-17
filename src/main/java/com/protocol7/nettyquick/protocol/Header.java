@@ -1,7 +1,7 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;

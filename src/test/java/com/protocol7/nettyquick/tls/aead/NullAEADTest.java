@@ -1,6 +1,8 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.aead;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import com.protocol7.nettyquick.utils.Hex;
 import org.junit.Assert;
 import org.junit.Test;

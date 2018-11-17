@@ -3,7 +3,7 @@ package com.protocol7.nettyquick.protocol.packets;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.Version;
-import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Opt;
 import com.protocol7.nettyquick.utils.Rnd;

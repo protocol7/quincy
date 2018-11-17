@@ -1,6 +1,7 @@
-package com.protocol7.nettyquick.tls;
+package com.protocol7.nettyquick.tls.messages;
 
 import com.protocol7.nettyquick.tls.extensions.TransportParameters;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;

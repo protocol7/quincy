@@ -2,15 +2,16 @@ package com.protocol7.nettyquick.tls;
 
 import com.google.common.hash.HashFunction;
 import com.google.common.hash.Hashing;
+import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquick.tls.extensions.ExtensionType;
 import com.protocol7.nettyquick.tls.extensions.KeyShare;
 import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
-import com.protocol7.nettyquick.tls.extensions.TransportParameters;
+import com.protocol7.nettyquick.tls.messages.ClientFinished;
+import com.protocol7.nettyquick.tls.messages.ClientHello;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
-import java.util.Optional;
 
 public class ServerTlsSession {
 

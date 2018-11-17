@@ -7,7 +7,7 @@ import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
-import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.ClientTlsSession;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
