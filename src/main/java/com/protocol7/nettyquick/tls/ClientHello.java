@@ -15,12 +15,12 @@ import java.util.Optional;
 
 public class ClientHello extends TlsMessage {
 
-    public static ClientHello defaults(KeyExchangeKeys kek, TransportParameters tps) {
+    public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
         byte[] clientRandom = Rnd.rndBytes(32);
         byte[] sessionId = new byte[0];
         byte[] cipherSuites = Hex.dehex("1301");
         List<Extension> extensions = ImmutableList.of(
-                KeyShare.of(kek.getGroup(), kek.getPublicKey()),
+                KeyShare.of(ke.getGroup(), ke.getPublicKey()),
                 new SupportedGroups(Group.X25519),
                 SupportedVersions.TLS13,
                 tps
@@ -145,9 +145,7 @@ public class ClientHello extends TlsMessage {
 
         // payload length
         int len = 2 + clientRandom.length + 1 + sessionId.length + 2 + cipherSuites.length + 2 + 2 + ext.length;
-        bb.writeByte((len >> 16) & 0xFF);
-        bb.writeByte((len >> 8)  & 0xFF);
-        bb.writeByte(len & 0xFF);
+        write24(bb, len);
 
         // version
         bb.writeByte(0x03);

@@ -4,6 +4,8 @@ import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
+import java.util.Arrays;
+
 public class SupportedVersions implements Extension {
 
     public static final SupportedVersions TLS13 = new SupportedVersions(new byte[]{3, 4});
@@ -39,6 +41,19 @@ public class SupportedVersions implements Extension {
             bb.writeByte(version.length);
         }
         bb.writeBytes(version);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        SupportedVersions that = (SupportedVersions) o;
+        return Arrays.equals(version, that.version);
+    }
+
+    @Override
+    public int hashCode() {
+        return Arrays.hashCode(version);
     }
 
     @Override

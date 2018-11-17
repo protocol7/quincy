@@ -128,9 +128,9 @@ public class LongHeader implements Header {
   public void writeSuffix(ByteBuf bb, AEAD aead) {
     Varint length = new Varint(payload.getLength()); // TODO packet number length
     length.write(bb);
-    Bytes.debug("+", bb);
+
     packetNumber.writeVarint(bb);
-    Bytes.debug("-", bb);
+
     byte[] aad = new byte[bb.writerIndex()];
     bb.markReaderIndex();
     bb.readBytes(aad);

@@ -5,7 +5,7 @@ import com.protocol7.nettyquick.client.ClientHandler;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
-import com.protocol7.nettyquick.tls.ClientTlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsSession;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -25,7 +25,7 @@ public class ClientRunner {
         InetSocketAddress server2 = new InetSocketAddress("test.privateoctopus.com", 4433);
         InetSocketAddress server3 = new InetSocketAddress("127.0.0.1", 6121);
 
-        ClientTlsEngine tlsEngine = new ClientTlsEngine();
+        ClientTlsSession tlsEngine = new ClientTlsSession();
 
         NioEventLoopGroup group = new NioEventLoopGroup();
         ClientHandler handler = new ClientHandler();

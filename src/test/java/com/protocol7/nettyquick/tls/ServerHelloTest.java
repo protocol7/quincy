@@ -1,10 +1,18 @@
 package com.protocol7.nettyquick.tls;
 
+import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.tls.extensions.Extension;
+import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
+import java.util.List;
+
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class ServerHelloTest {
@@ -21,7 +29,26 @@ public class ServerHelloTest {
         assertEquals("1301", Hex.hex(hello.getCipherSuites()));
 
         assertEquals(2, hello.getExtensions().size());
+    }
 
+    @Test
+    public void roundtrip() {
+        List<Extension> ext = ImmutableList.of(SupportedVersions.TLS13);
+        ServerHello sh = new ServerHello(Rnd.rndBytes(32), new byte[0], Hex.dehex("1301"), ext);
+
+        ByteBuf bb = Unpooled.buffer();
+
+        sh.write(bb);
+
+        Bytes.debug(bb);
+
+        ServerHello parsed = ServerHello.parse(bb);
+
+        assertArrayEquals(sh.getServerRandom(), parsed.getServerRandom());
+        assertArrayEquals(sh.getSessionId(), parsed.getSessionId());
+        assertArrayEquals(sh.getCipherSuites(), parsed.getCipherSuites());
+
+        assertEquals(ext, parsed.getExtensions());
 
     }
 }

@@ -5,7 +5,8 @@ public enum PacketType {
   Initial((byte)0x7F),
   Retry((byte)0x7E),
   Handshake((byte)0x7D),
-  Zero_RTT_Protected((byte)0x7C);
+  Zero_RTT_Protected((byte)0x7C),
+  Short((byte)0); // TODO figure out
 
   public static PacketType read(byte b) {
 

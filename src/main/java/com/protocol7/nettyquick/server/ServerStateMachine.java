@@ -5,7 +5,7 @@ import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.Stream;
-import com.protocol7.nettyquick.tls.ClientTlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsSession;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +24,7 @@ public class ServerStateMachine {
 
   private ServerState state = ServerState.BeforeInitial;
   private final ServerConnection connection;
-  private final ClientTlsEngine tlsEngine = new ClientTlsEngine();
+  private final ClientTlsSession tlsEngine = new ClientTlsSession();
 
   public ServerStateMachine(final ServerConnection connection) {
     this.connection = connection;

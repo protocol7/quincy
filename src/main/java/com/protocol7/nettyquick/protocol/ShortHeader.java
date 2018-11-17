@@ -2,6 +2,9 @@ package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
+import com.protocol7.nettyquick.tls.AEADProvider;
+import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -10,15 +13,29 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 public class ShortHeader implements Header {
 
-  public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider) {
+  public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
+    bb.markReaderIndex();
     byte firstByte = bb.readByte();
 
     boolean keyPhase = (firstByte & 0x40) == 0x40;
 
-    Optional<ConnectionId> connId = Optional.of(ConnectionId.read(13, bb)); // TODO how to determine length?
-    //PacketNumber lastAcked = lastAckedProvider.getLastAcked(connId.get());
+    Optional<ConnectionId> connId;
+    if (connIdLength > 0) {
+        connId = Optional.of(ConnectionId.read(connIdLength, bb));
+    } else {
+        connId = Optional.empty();
+    }
+
     PacketNumber packetNumber = PacketNumber.read(bb);
-    ProtectedPayload payload = ProtectedPayload.parse(bb);
+
+    byte[] aad = new byte[bb.readerIndex()];
+    bb.resetReaderIndex();
+    bb.readBytes(aad);
+
+    Bytes.debug("113 ", bb);
+    System.out.println("114 " + Hex.hex(aad));
+
+    UnprotectedPayload payload = UnprotectedPayload.parse(bb, bb.readableBytes(), aead.forConnection(connId, PacketType.Short), packetNumber, aad);
 
     return new ShortHeader(keyPhase,
                            connId,
@@ -36,9 +53,9 @@ public class ShortHeader implements Header {
   private final boolean keyPhase;
   private final Optional<ConnectionId> connectionId;
   private final PacketNumber packetNumber;
-  private final ProtectedPayload payload;
+  private final UnprotectedPayload payload;
 
-  public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final ProtectedPayload payload) {
+  public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final UnprotectedPayload payload) {
     this.keyPhase = checkNotNull(keyPhase);
     this.connectionId = checkNotNull(connectionId);
     this.packetNumber = checkNotNull(packetNumber);
@@ -58,7 +75,7 @@ public class ShortHeader implements Header {
     return packetNumber;
   }
 
-  public ProtectedPayload getPayload() {
+  public UnprotectedPayload getPayload() {
     return payload;
   }
 
@@ -73,7 +90,17 @@ public class ShortHeader implements Header {
 
     connectionId.get().write(bb);
     packetNumber.write(bb);
-    payload.write(bb);
+
+    byte[] aad = new byte[bb.writerIndex()];
+    bb.markReaderIndex();
+    bb.readBytes(aad);
+    bb.resetReaderIndex();
+
+    System.out.println("111 " + Hex.hex(aad));
+
+    payload.write(bb, aead, packetNumber, aad);
+
+    Bytes.debug("112 ", bb);
   }
 
   @Override

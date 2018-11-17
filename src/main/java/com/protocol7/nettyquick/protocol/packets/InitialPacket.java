@@ -107,6 +107,10 @@ public class InitialPacket implements FullPacket {
     this.token = token;
   }
 
+  @Override
+  public PacketType getType() {
+    return PacketType.Initial;
+  }
 
   @Override
   public Packet addFrame(Frame frame) {

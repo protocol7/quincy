@@ -22,7 +22,6 @@ public class ServerHandshake extends TlsMessage {
         ByteBuf ext = bb.readBytes(extLen);
         List<Extension> extensions = Extension.parseAll(ext, false);
 
-
         // server cert
         int serverCertType = bb.readByte();
         if (serverCertType != 0x0b) {

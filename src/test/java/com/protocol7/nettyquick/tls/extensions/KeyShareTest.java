@@ -14,7 +14,7 @@ public class KeyShareTest {
     private byte[] key = Rnd.rndBytes(32);
     private byte[] key2 = Rnd.rndBytes(32);
     private KeyShare ext = KeyShare.of(Group.X25519, key);
-    private KeyShare extMultiple = KeyShare.of(Group.X25519, key, Group.SECP256R1, key2);
+    private KeyShare extMultiple = KeyShare.of(Group.X25519, key, Group.X448, key2);
 
     @Test
     public void getType() {
@@ -43,6 +43,6 @@ public class KeyShareTest {
 
         assertEquals(extMultiple.getKeys().size(), parsed.getKeys().size());
         assertArrayEquals(extMultiple.getKey(Group.X25519).get(), parsed.getKey(Group.X25519).get());
-        assertArrayEquals(extMultiple.getKey(Group.SECP256R1).get(), parsed.getKey(Group.SECP256R1).get());
+        assertArrayEquals(extMultiple.getKey(Group.X448).get(), parsed.getKey(Group.X448).get());
     }
 }

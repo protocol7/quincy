@@ -2,14 +2,19 @@ package com.protocol7.nettyquick.tls;
 
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.ExtensionType;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
 import static com.protocol7.nettyquick.utils.Hex.hex;
 
 public class ServerHello extends TlsMessage {
+
+    private final static byte[] VERSION = new byte[]{0x03, 0x03};
+    private final static byte[] CIPHER_SUITES = new byte[]{0x13, 0x01};
 
     public static ServerHello parse(ByteBuf bb) {
         int messageType = bb.readByte(); // server hello
@@ -19,7 +24,11 @@ public class ServerHello extends TlsMessage {
 
         read24(bb); // payloadLength
 
-        bb.readShort(); // version
+        byte[] version = new byte[2];
+        bb.readBytes(version);
+        if (!Arrays.equals(version, VERSION)) {
+            throw new IllegalArgumentException("Illegal version");
+        }
 
         byte[] serverRandom = new byte[32];
         bb.readBytes(serverRandom); // server random
@@ -29,13 +38,47 @@ public class ServerHello extends TlsMessage {
 
         byte[] cipherSuites = new byte[2];
         bb.readBytes(cipherSuites); // cipher suite
+        // TODO implement all know cipher suites
+        if (!Arrays.equals(cipherSuites, CIPHER_SUITES)) {
+            throw new IllegalArgumentException("Illegal cipher suite: " + hex(version));
+        }
 
         bb.readByte(); // compressionMethod
 
         int extensionLen = bb.readShort();
-        List<Extension> extensions = Extension.parseAll(bb.readBytes(extensionLen), false);
+        ByteBuf extBB = bb.readBytes(extensionLen);
+        try {
+            List<Extension> extensions = Extension.parseAll(extBB, false);
+            return new ServerHello(serverRandom, sessionId, cipherSuites, extensions);
+        } finally {
+            extBB.release();
+        }
+    }
 
-        return new ServerHello(serverRandom, sessionId, cipherSuites, extensions);
+    public void write(ByteBuf bb) {
+        bb.writeByte(0x02);
+
+        int lenPosition = bb.writerIndex();
+        // write placeholder
+        bb.writeBytes(new byte[3]);
+        bb.writeBytes(VERSION);
+
+        bb.writeBytes(serverRandom);
+        bb.writeByte(sessionId.length);
+        bb.writeBytes(sessionId);
+        bb.writeBytes(cipherSuites);
+        bb.writeByte(0);
+
+        int extPosition = bb.writerIndex();
+        bb.writeShort(0); // placeholder
+
+        Extension.writeAll(extensions, bb, false);
+        bb.setShort(extPosition, bb.writerIndex() - extPosition - 2);
+
+
+        // update length
+        write24(bb, bb.writerIndex() - lenPosition - 3, lenPosition);
+
     }
 
     private final byte[] serverRandom;

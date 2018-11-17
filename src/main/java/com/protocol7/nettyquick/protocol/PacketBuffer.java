@@ -60,6 +60,7 @@ public class PacketBuffer {
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
+        System.out.println("!!!!!!!!! add acks " + ackFrame);
         sendImpl(((FullPacket)packet).addFrame(ackFrame), aead);
       } else {
         sendImpl(packet, aead);
@@ -126,20 +127,20 @@ public class PacketBuffer {
   }
 
   private void flushAcks(AEAD aead) {
-    if (connection.getDestinationConnectionId().isPresent()) { // TODO hack, check valid state to send acks
-      List<AckBlock> blocks = drainAcks(ackQueue);
-      if (!blocks.isEmpty()) {
-        AckFrame ackFrame = new AckFrame(123, blocks);
-        Packet packet = new ShortPacket(new ShortHeader(false,
-                connection.getDestinationConnectionId(),
-                connection.nextSendPacketNumber(),
-                new ProtectedPayload(ackFrame)));
-
-        log.debug("Flushed acks {}", blocks);
-
-        sendImpl(packet, aead);
-      }
-    }
+//    if (connection.getDestinationConnectionId().isPresent()) { // TODO hack, check valid state to send acks
+//      List<AckBlock> blocks = drainAcks(ackQueue);
+//      if (!blocks.isEmpty()) {
+//        AckFrame ackFrame = new AckFrame(123, blocks);
+//        Packet packet = new ShortPacket(new ShortHeader(false,
+//                connection.getDestinationConnectionId(),
+//                connection.nextSendPacketNumber(),
+//                new ProtectedPayload(ackFrame)));
+//
+//        log.debug("Flushed acks {}", blocks);
+//
+//        sendImpl(packet, aead);
+//      }
+//    }
   }
 
   // TODO break out and test directly

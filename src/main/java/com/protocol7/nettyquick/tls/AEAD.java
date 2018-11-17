@@ -82,20 +82,9 @@ public class AEAD {
         byte[] nonce = makeNonce(iv, packetNumber);
         final GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
 
-        String msg = mode == Cipher.DECRYPT_MODE ? "opening" : "sealing";
-        System.out.println(msg + " src=" +
-                Hex.hex(src) + " pn≈" + packetNumber + " aad=" +
-                Hex.hex(aad) + " myKey=" +
-                Hex.hex(myKey) + " otherKey=" +
-                Hex.hex(otherKey) + " myIV=" +
-                Hex.hex(myIV) + " otherIV=" +
-                Hex.hex(otherIV));
-
         cipher.init(mode, secretKey, spec);
         cipher.updateAAD(aad);
         byte[] b= cipher.doFinal(src);
-        msg = mode == Cipher.DECRYPT_MODE ? "opened" : "sealed";
-        System.out.println(msg + " " + Hex.hex(b));
         return b;
     }
 

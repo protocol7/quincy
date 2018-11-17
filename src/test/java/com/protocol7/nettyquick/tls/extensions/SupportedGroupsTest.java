@@ -11,7 +11,7 @@ public class SupportedGroupsTest {
 
     @Test
     public void roundtrip() {
-        SupportedGroups supportedGroups = new SupportedGroups(Group.X25519, Group.SECP256R1);
+        SupportedGroups supportedGroups = new SupportedGroups(Group.X25519, Group.X448);
 
         ByteBuf bb = Unpooled.buffer();
 

@@ -13,7 +13,7 @@ public interface Packet {
 
     int PACKET_TYPE_MASK = 0b10000000;
 
-    static Packet parse(ByteBuf bb, LastPacketNumber lastAcked, AEADProvider aeadProvider) {
+    static Packet parse(ByteBuf bb, LastPacketNumber lastAcked, AEADProvider aeadProvider, int connidLength) {
         bb.markReaderIndex();
         int firstByte = bb.readByte() & 0xFF;
 
@@ -38,7 +38,7 @@ public interface Packet {
         } else {
             // short header packet
             bb.resetReaderIndex();
-            return ShortPacket.parse(bb, lastAcked);
+            return ShortPacket.parse(bb, lastAcked, aeadProvider, connidLength);
         }
     }
 

@@ -26,7 +26,7 @@ public class ExtensionTest {
         assertRaw("0100000000", ExtensionType.status_request, iter.next());
 
         SupportedGroups supportedGroups = (SupportedGroups) iter.next();
-        assertEquals(ImmutableList.of(X25519, SECP256R1, SECP384R1), supportedGroups.getGroups());
+        assertEquals(ImmutableList.of(X25519), supportedGroups.getGroups());
 
         assertRaw("0100", ExtensionType.ec_point_formats, iter.next());
         assertRaw("001608040401040308050501050308060601060302010203", ExtensionType.signature_algorithms, iter.next());

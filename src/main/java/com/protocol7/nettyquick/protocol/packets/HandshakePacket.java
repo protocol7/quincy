@@ -51,6 +51,11 @@ public class HandshakePacket implements FullPacket {
   }
 
   @Override
+  public PacketType getType() {
+    return PacketType.Handshake;
+  }
+
+  @Override
   public Packet addFrame(Frame frame) {
     return new HandshakePacket(LongHeader.addFrame(header, frame));
   }

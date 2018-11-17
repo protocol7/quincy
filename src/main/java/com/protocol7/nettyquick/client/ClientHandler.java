@@ -23,9 +23,8 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
-      Bytes.debug(bb);
       Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber(),
-              (connId, packetType) -> connection.getAEAD(packetType));
+              (connId, packetType) -> connection.getAEAD(packetType), connection.getDestinationConnectionId().get().getLength());
 
       MDC.put("actor", "client");
       if (packet instanceof FullPacket) {

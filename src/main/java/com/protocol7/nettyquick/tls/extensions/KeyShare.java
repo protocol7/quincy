@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableSortedMap;
 import com.google.common.collect.ImmutableSortedMap.Builder;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -21,12 +22,14 @@ public class KeyShare implements Extension {
         Builder<Group, byte[]> builder = ImmutableSortedMap.naturalOrder();
 
         while (bb.isReadable()) {
-            Group group = Group.fromValue(bb.readShort());
+            Optional<Group> group = Group.fromValue(bb.readShort());
             int keyLen = bb.readShort();
             byte[] key = new byte[keyLen];
             bb.readBytes(key);
 
-            builder.put(group, key);
+            if (group.isPresent()) {
+                builder.put(group.get(), key);
+            }
         }
 
         return new KeyShare(builder.build());
@@ -77,6 +80,11 @@ public class KeyShare implements Extension {
 
     @Override
     public String toString() {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Group, byte[]> key : keys.entrySet()) {
+            sb.append('{').append(key.getKey().name()).append('=').append(Hex.hex(key.getValue())).append('}');
+        }
+
         return "KeyShare{" + keys + '}';
     }
 }

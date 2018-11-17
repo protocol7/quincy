@@ -8,7 +8,7 @@ import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.ClientTlsEngine;
+import com.protocol7.nettyquick.tls.ClientTlsSession;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -32,7 +32,7 @@ public class ClientStateMachine {
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
-  private final ClientTlsEngine tlsEngine = new ClientTlsEngine();
+  private final ClientTlsSession tlsEngine = new ClientTlsSession();
 
 
   public ClientStateMachine(final ClientConnection connection) {
@@ -114,10 +114,18 @@ public class ClientStateMachine {
             if (frame instanceof CryptoFrame) {
               CryptoFrame cf = (CryptoFrame) frame;
 
-              Optional<AEAD> aead = tlsEngine.handleHandshake(cf.getCryptoData());
+              Optional<ClientTlsSession.HandshakeResult> result = tlsEngine.handleHandshake(cf.getCryptoData());
 
-              if (aead.isPresent()) {
-                connection.setOneRttAead(aead.get());
+              if (result.isPresent()) {
+                connection.setOneRttAead(result.get().getOneRttAead());
+
+                connection.sendPacket(HandshakePacket.create(
+                        connection.getDestinationConnectionId(),
+                        connection.getSourceConnectionId(),
+                        new PacketNumber(2),
+                        Version.TLS_DEV,
+                        new CryptoFrame(0, result.get().getFin())));
+                System.out.println("Send client handshake fin");
                 state = ClientState.Ready;
               }
             }

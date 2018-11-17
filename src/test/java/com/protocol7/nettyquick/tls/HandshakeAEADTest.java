@@ -13,7 +13,7 @@ public class HandshakeAEADTest {
         byte[] sharedSecret = dehex("df4a291baa1eb7cfa6934b29b474baad2697e29f1f920dcc77c8a0a088447624");
         byte[] helloHash = dehex("da75ce1139ac80dae4044da932350cf65c97ccc9e33f1e6f7d2d4b18b736ffd5");
 
-        byte[] handshakeSecret = AEADUtil.calculateHandshakeSecret(sharedSecret);
+        byte[] handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
 
         AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, false, true);
 
@@ -28,7 +28,7 @@ public class HandshakeAEADTest {
         byte[] sharedSecret = dehex("c1a6e992dc90a4729325da67fc4f90d7ec853ca2481ae9a7bca6cd33eff8403c");
         byte[] helloHash = dehex("96e0581a2ce8cb7154fd942ed2f2cd37861783fc8498d02e2b533d8ed927e27a");
 
-        byte[] handshakeSecret = AEADUtil.calculateHandshakeSecret(sharedSecret);
+        byte[] handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
 
         AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
 

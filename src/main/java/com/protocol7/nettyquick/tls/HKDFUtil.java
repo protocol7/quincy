@@ -9,7 +9,7 @@ import io.netty.buffer.Unpooled;
 
 import static com.protocol7.nettyquick.utils.Hex.dehex;
 
-public class AEADUtil {
+public class HKDFUtil {
 
     public static final String TLS_13_LABEL_PREFIX = "tls13 ";
     public static final String QUIC_LABEL_PREFIX = "quic ";

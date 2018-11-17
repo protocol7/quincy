@@ -5,9 +5,11 @@ import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.TestAEAD;
+import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.bouncycastle.util.Pack;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -31,7 +33,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof InitialPacket);
     }
 
@@ -41,7 +43,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof VersionNegotiationPacket);
     }
 
@@ -55,7 +57,7 @@ public class PacketTest {
         bb.writeByte(0);
         Version.DRAFT_15.write(bb);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof VersionNegotiationPacket);
     }
 
@@ -69,7 +71,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof HandshakePacket);
     }
 
@@ -83,7 +85,7 @@ public class PacketTest {
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof RetryPacket);
     }
 
@@ -93,11 +95,11 @@ public class PacketTest {
                 false,
                 Optional.of(connId),
                 pn,
-                new ProtectedPayload()));
+                new UnprotectedPayload(PingFrame.INSTANCE)));
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 
-        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead);
+        Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
         assertTrue(parsed instanceof ShortPacket);
     }
-}
+    }

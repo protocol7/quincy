@@ -75,7 +75,7 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p, initialAead);
+    packetBuffer.send(p, getAEAD(((FullPacket)p).getType()));
     return p;
   }
 
@@ -83,7 +83,7 @@ public class ClientConnection implements Connection {
     return (FullPacket) sendPacket(new ShortPacket(new ShortHeader(false,
                                getDestinationConnectionId(),
                                nextSendPacketNumber(),
-                               new ProtectedPayload(frames))));
+                               new UnprotectedPayload(frames))));
   }
 
   @Override
@@ -107,7 +107,7 @@ public class ClientConnection implements Connection {
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
-    packet.write(bb, initialAead);
+    packet.write(bb, getAEAD(((FullPacket)packet).getType()));
     channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Client sent {}", packet);
   }
@@ -115,7 +115,7 @@ public class ClientConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Client got {}", packet);
 
-    packetBuffer.onPacket(packet, initialAead);
+    packetBuffer.onPacket(packet, null);  // TODO assign aead for sent packet
     stateMachine.processPacket(packet);
   }
 
@@ -127,11 +127,14 @@ public class ClientConnection implements Connection {
 
 
     if (packetType == PacketType.Initial) {
+      System.out.println("Using initial AEAD" + packetType);
       return initialAead;
-    } else if (oneRttAead != null) {
-        return oneRttAead;
-    } else {
+    } else if (packetType == PacketType.Handshake) {
+      System.out.println("Using handshake AEAD" + packetType + " - " + oneRttAead);
       return handshakeAead;
+    } else {
+      System.out.println("Using 1-RTT AEAD for " + packetType);
+      return oneRttAead;
     }
   }
 

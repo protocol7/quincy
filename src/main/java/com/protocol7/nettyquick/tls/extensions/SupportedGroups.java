@@ -6,6 +6,7 @@ import com.protocol7.nettyquick.tls.Group;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
+import java.util.Optional;
 
 public class SupportedGroups implements Extension {
 
@@ -15,11 +16,8 @@ public class SupportedGroups implements Extension {
         Builder<Group> groups = ImmutableList.builder();
 
         while (bb.isReadable()) {
-            try {
-                groups.add(Group.fromValue(bb.readShort()));
-            } catch (IllegalArgumentException e) {
-                // ignore unknown values
-            }
+            Optional<Group> group = Group.fromValue(bb.readShort());
+            group.ifPresent(groups::add);
         }
 
         return new SupportedGroups(groups.build());
