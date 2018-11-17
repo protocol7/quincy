@@ -2,12 +2,13 @@ package com.protocol7.nettyquick.tls;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.tls.extensions.Extension;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 import java.util.List;
 
-public class ServerHandshake extends TlsMessage {
+public class ServerHandshake {
 
     public static ServerHandshake parse(ByteBuf bb) {
         // EE
@@ -16,7 +17,7 @@ public class ServerHandshake extends TlsMessage {
             throw new IllegalArgumentException("Invalid EE type: " + eeType);
         }
 
-        int eeMsgLen = read24(bb);
+        int eeMsgLen = Bytes.read24(bb);
         int extLen = bb.readShort();
 
         ByteBuf ext = bb.readBytes(extLen);
@@ -28,17 +29,17 @@ public class ServerHandshake extends TlsMessage {
             throw new IllegalArgumentException("Invalid server cert type: " + serverCertType);
         }
 
-        int scMsgLen = read24(bb);
+        int scMsgLen = Bytes.read24(bb);
         int requestContextLen = bb.readByte();
 
-        int certsLen = read24(bb);
+        int certsLen = Bytes.read24(bb);
 
         ByteBuf certBB = bb.readBytes(certsLen);
 
         List<byte[]> serverCertificates = Lists.newArrayList();
 
         while (certBB.isReadable()) {
-            int certLen = read24(certBB);
+            int certLen = Bytes.read24(certBB);
 
             byte[] cert = new byte[certLen];
             certBB.readBytes(cert);
@@ -56,7 +57,7 @@ public class ServerHandshake extends TlsMessage {
             throw new IllegalArgumentException("Invalid server cert verify type: " + serverCertVerifyType);
         }
 
-        int scvMsgLen = read24(bb);
+        int scvMsgLen = Bytes.read24(bb);
 
         int signType = bb.readShort();
         int signLen = bb.readShort();
@@ -70,7 +71,7 @@ public class ServerHandshake extends TlsMessage {
             throw new IllegalArgumentException("Invalid fin type: " + finType);
         }
 
-        int finLen = read24(bb);
+        int finLen = Bytes.read24(bb);
 
         byte[] verifyData = new byte[finLen];
         bb.readBytes(verifyData);

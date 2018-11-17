@@ -1,10 +1,11 @@
 package com.protocol7.nettyquick.tls;
 
 import com.google.common.hash.Hashing;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
-public class ClientFinished extends TlsMessage {
+public class ClientFinished {
 
     public static ClientFinished create(byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
         String labelPrefix;
@@ -42,7 +43,7 @@ public class ClientFinished extends TlsMessage {
             throw new IllegalArgumentException("Invalid type: " + type);
         }
 
-        int len = read24(bb);
+        int len = Bytes.read24(bb);
         byte[] verifyData = new byte[len];
         bb.readBytes(verifyData);
 
@@ -62,7 +63,7 @@ public class ClientFinished extends TlsMessage {
     public void write(ByteBuf bb) {
         bb.writeByte(0x14);
 
-        write24(bb, verificationData.length);
+        Bytes.write24(bb, verificationData.length);
         bb.writeBytes(verificationData);
     }
 }

@@ -2,7 +2,7 @@ package com.protocol7.nettyquick.tls;
 
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.ExtensionType;
-import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ import java.util.Optional;
 
 import static com.protocol7.nettyquick.utils.Hex.hex;
 
-public class ServerHello extends TlsMessage {
+public class ServerHello {
 
     private final static byte[] VERSION = new byte[]{0x03, 0x03};
     private final static byte[] CIPHER_SUITES = new byte[]{0x13, 0x01};
@@ -22,7 +22,7 @@ public class ServerHello extends TlsMessage {
             throw new IllegalArgumentException("Not a server hello");
         }
 
-        read24(bb); // payloadLength
+        Bytes.read24(bb); // payloadLength
 
         byte[] version = new byte[2];
         bb.readBytes(version);
@@ -77,7 +77,7 @@ public class ServerHello extends TlsMessage {
 
 
         // update length
-        write24(bb, bb.writerIndex() - lenPosition - 3, lenPosition);
+        Bytes.write24(bb, bb.writerIndex() - lenPosition - 3, lenPosition);
 
     }
 

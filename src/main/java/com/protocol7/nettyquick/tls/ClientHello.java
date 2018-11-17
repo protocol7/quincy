@@ -4,6 +4,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.tls.extensions.*;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
@@ -13,7 +14,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ClientHello extends TlsMessage {
+public class ClientHello {
 
     public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
         byte[] clientRandom = Rnd.rndBytes(32);
@@ -145,7 +146,7 @@ public class ClientHello extends TlsMessage {
 
         // payload length
         int len = 2 + clientRandom.length + 1 + sessionId.length + 2 + cipherSuites.length + 2 + 2 + ext.length;
-        write24(bb, len);
+        Bytes.write24(bb, len);
 
         // version
         bb.writeByte(0x03);
