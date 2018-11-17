@@ -5,11 +5,9 @@ import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.TestAEAD;
-import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.bouncycastle.util.Pack;
 import org.junit.Test;
 
 import java.util.Optional;
@@ -95,7 +93,7 @@ public class PacketTest {
                 false,
                 Optional.of(connId),
                 pn,
-                new UnprotectedPayload(PingFrame.INSTANCE)));
+                new Payload(PingFrame.INSTANCE)));
         ByteBuf bb = Unpooled.buffer();
         packet.write(bb, aead);
 

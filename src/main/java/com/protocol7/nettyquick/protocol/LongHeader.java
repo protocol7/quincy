@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.protocol;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.AEAD;
 import com.protocol7.nettyquick.tls.AEADProvider;
-import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
@@ -40,7 +39,7 @@ public class LongHeader implements Header {
 
     AEAD aead = aeadProvider.forConnection(destConnId, packetType);
 
-    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
+    Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
     return new LongHeader(packetType,
                           destConnId,
@@ -64,14 +63,14 @@ public class LongHeader implements Header {
   private final Optional<ConnectionId> sourceConnectionId;
   private final Version version;
   private final PacketNumber packetNumber;
-  private final UnprotectedPayload payload;
+  private final Payload payload;
 
   public LongHeader(final PacketType packetType,
                     final Optional<ConnectionId> destinationConnectionId,
                     final Optional<ConnectionId> sourceConnectionId,
                     final Version version,
                     final PacketNumber packetNumber,
-                    final UnprotectedPayload payload) {
+                    final Payload payload) {
     this.packetType = packetType; // TODO validate only those valid for LondHeaders are used
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -99,7 +98,7 @@ public class LongHeader implements Header {
     return packetNumber;
   }
 
-  public UnprotectedPayload getPayload() {
+  public Payload getPayload() {
     return payload;
   }
 

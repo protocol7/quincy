@@ -30,7 +30,7 @@ public class InitialPacket implements FullPacket {
                                      Version version,
                                      Optional<byte[]> token,
                                      List<Frame> frames) { // TODO validate frame types
-    UnprotectedPayload payload = new UnprotectedPayload(frames);
+    Payload payload = new Payload(frames);
     return new InitialPacket(new LongHeader(PacketType.Initial,
             destConnectionId,
             srcConnectionId,
@@ -87,7 +87,7 @@ public class InitialPacket implements FullPacket {
 
     AEAD aead = aeadProvider.forConnection(destConnId, PacketType.Initial);
 
-    UnprotectedPayload payload = UnprotectedPayload.parse(bb, payloadLength, aead, packetNumber, aad);
+    Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
     return InitialPacket.create(
             destConnId,
@@ -148,7 +148,7 @@ public class InitialPacket implements FullPacket {
   }
 
   @Override
-  public UnprotectedPayload getPayload() {
+  public Payload getPayload() {
     return header.getPayload();
   }
 

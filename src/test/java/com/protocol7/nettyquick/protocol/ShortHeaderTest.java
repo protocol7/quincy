@@ -2,7 +2,6 @@ package com.protocol7.nettyquick.protocol;
 
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.AEAD;
-import com.protocol7.nettyquick.tls.NullAEAD;
 import com.protocol7.nettyquick.tls.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -21,7 +20,7 @@ public class ShortHeaderTest {
   public void roundtrip() {
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = new PacketNumber(123);
-    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE);
     ShortHeader p = new ShortHeader(false,
                                     Optional.of(connId),
                                     pn,

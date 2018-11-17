@@ -22,7 +22,7 @@ public class LongHeaderTest {
     Optional<ConnectionId> srcConnId = Optional.of(ConnectionId.random());
     PacketNumber pn = PacketNumber.random();
     Version version = Version.CURRENT;
-    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE);
 
     LongHeader lp = new LongHeader(packetType, destConnId, srcConnId, version, pn, payload);
 

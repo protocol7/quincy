@@ -12,7 +12,7 @@ import org.junit.Test;
 
 import static org.junit.Assert.assertEquals;
 
-public class UnprotectedPayloadTest {
+public class PayloadTest {
 
   private final AEAD aead = TestAEAD.create();
   private final PacketNumber pn = new PacketNumber(1);
@@ -20,19 +20,19 @@ public class UnprotectedPayloadTest {
 
   @Test
   public void roundtrip() {
-    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
 
-    UnprotectedPayload parsed = UnprotectedPayload.parse(bb, payload.getLength(), aead, pn, aad);
+    Payload parsed = Payload.parse(bb, payload.getLength(), aead, pn, aad);
 
     assertEquals(payload, parsed);
   }
 
   @Test
   public void write() {
-    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
@@ -43,22 +43,22 @@ public class UnprotectedPayloadTest {
   @Test
   public void parse() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("e7ece5d6d0adf7f6bf189050d8fcace66501"));
-    UnprotectedPayload parsed = UnprotectedPayload.parse(bb, bb.writerIndex(), aead, pn, aad);
+    Payload parsed = Payload.parse(bb, bb.writerIndex(), aead, pn, aad);
 
-    UnprotectedPayload expected = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload expected = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
     assertEquals(expected, parsed);
   }
 
   @Test
   public void addFrame() {
-    UnprotectedPayload payload = new UnprotectedPayload(PingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE);
 
-    UnprotectedPayload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
+    Payload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
 
-    UnprotectedPayload expected = new UnprotectedPayload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload expected = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
 
     assertEquals(expected, withAdded);
-    assertEquals(new UnprotectedPayload(PingFrame.INSTANCE), payload); // must not been mutated
+    assertEquals(new Payload(PingFrame.INSTANCE), payload); // must not been mutated
   }
 
   @Test
@@ -78,7 +78,7 @@ public class UnprotectedPayloadTest {
 
     byte[] aad = Hex.dehex("ff000000651094f217c33fe1b40a695562cbf368fd43019bfd5ca6f32f8dc9e1ee7afcd038f553e696e92e06d6feb3e4c7197b91b0e047b7c3528f0cc8c8a23e631928bef2ddca99b78644c001");
 
-    UnprotectedPayload up = UnprotectedPayload.parse(bb, bb.readableBytes(), aead, pn, aad);
+    Payload up = Payload.parse(bb, bb.readableBytes(), aead, pn, aad);
 
     System.out.println(up);
   }
@@ -101,7 +101,7 @@ public class UnprotectedPayloadTest {
 
     byte[] aad = Hex.dehex("ff0000006501f67973660040b58001");
 
-    UnprotectedPayload up = UnprotectedPayload.parse(bb, bb.readableBytes(), aead, pn, aad);
+    Payload up = Payload.parse(bb, bb.readableBytes(), aead, pn, aad);
 
     System.out.println(up);
   }

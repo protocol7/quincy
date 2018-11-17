@@ -115,7 +115,7 @@ public class ServerStateMachineTest {
     return new ShortPacket(new ShortHeader(false,
                            Optional.of(destConnectionId),
                            incrPacketNumber(),
-                           new UnprotectedPayload(frames)));
+                           new Payload(frames)));
   }
 
   private PacketNumber incrPacketNumber() {

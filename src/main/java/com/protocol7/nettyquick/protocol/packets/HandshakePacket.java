@@ -28,7 +28,7 @@ public class HandshakePacket implements FullPacket {
                                        PacketNumber packetNumber,
                                        Version version,
                                        List<Frame> frames) {
-    UnprotectedPayload payload = new UnprotectedPayload(frames);
+    Payload payload = new Payload(frames);
     return new HandshakePacket(new LongHeader(PacketType.Handshake,
             destConnectionId,
             srcConnectionId,
@@ -81,7 +81,7 @@ public class HandshakePacket implements FullPacket {
   }
 
   @Override
-  public UnprotectedPayload getPayload() {
+  public Payload getPayload() {
     return header.getPayload();
   }
 

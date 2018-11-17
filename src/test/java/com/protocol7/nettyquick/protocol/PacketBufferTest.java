@@ -6,7 +6,6 @@ import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
-import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.tls.AEAD;
@@ -47,7 +46,7 @@ public class PacketBufferTest {
     return new ShortPacket(new ShortHeader(false,
                            Optional.of(ConnectionId.random()),
                            new PacketNumber(pn),
-                           new UnprotectedPayload(frames)));
+                           new Payload(frames)));
   }
 
   @Test

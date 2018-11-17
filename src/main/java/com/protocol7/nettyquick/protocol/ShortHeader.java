@@ -35,7 +35,7 @@ public class ShortHeader implements Header {
     Bytes.debug("113 ", bb);
     System.out.println("114 " + Hex.hex(aad));
 
-    UnprotectedPayload payload = UnprotectedPayload.parse(bb, bb.readableBytes(), aead.forConnection(connId, PacketType.Short), packetNumber, aad);
+    Payload payload = Payload.parse(bb, bb.readableBytes(), aead.forConnection(connId, PacketType.Short), packetNumber, aad);
 
     return new ShortHeader(keyPhase,
                            connId,
@@ -53,9 +53,9 @@ public class ShortHeader implements Header {
   private final boolean keyPhase;
   private final Optional<ConnectionId> connectionId;
   private final PacketNumber packetNumber;
-  private final UnprotectedPayload payload;
+  private final Payload payload;
 
-  public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final UnprotectedPayload payload) {
+  public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
     this.keyPhase = checkNotNull(keyPhase);
     this.connectionId = checkNotNull(connectionId);
     this.packetNumber = checkNotNull(packetNumber);
@@ -75,7 +75,7 @@ public class ShortHeader implements Header {
     return packetNumber;
   }
 
-  public UnprotectedPayload getPayload() {
+  public Payload getPayload() {
     return payload;
   }
 
