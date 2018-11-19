@@ -11,6 +11,10 @@ import com.protocol7.nettyquick.tls.extensions.TransportParameters;
 import com.protocol7.nettyquick.tls.messages.ClientFinished;
 import com.protocol7.nettyquick.tls.messages.ClientHello;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.EncryptedExtensions;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificate;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificateVerify;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerHandshakeFinished;
 import com.protocol7.nettyquick.tls.messages.ServerHello;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -66,18 +70,18 @@ public class ServerTlsSession {
 
         ByteBuf handshakeBB = Unpooled.buffer();
 
-        ServerHandshake.EncryptedExtensions ee = ServerHandshake.EncryptedExtensions.defaults();
+        EncryptedExtensions ee = EncryptedExtensions.defaults();
         ee.write(handshakeBB);
 
-        ServerHandshake.ServerCertificate sc = new ServerHandshake.ServerCertificate(new byte[0], certificates);
+        ServerCertificate sc = new ServerCertificate(new byte[0], certificates);
         sc.write(handshakeBB);
 
         // create server cert verification
         byte[] toVerify = peekToArray(handshakeBB);
 
-        byte[] verificationSig = CertificateVerify.sign(Bytes.concat(clientHello, serverHello, toVerify), privateKey, false);
+        byte[] verificationSig = CertificateVerify.sign(Hash.sha256(clientHello, serverHello, toVerify), privateKey, false);
 
-        ServerHandshake.ServerCertificateVerify scv = new ServerHandshake.ServerCertificateVerify(2052, verificationSig);
+        ServerCertificateVerify scv = new ServerCertificateVerify(2052, verificationSig);
         scv.write(handshakeBB);
 
         // create server finished
@@ -96,7 +100,7 @@ public class ServerTlsSession {
 
         byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash, false);
 
-        ServerHandshake.ServerHandshakeFinished fin = new ServerHandshake.ServerHandshakeFinished(verifyData);
+        ServerHandshakeFinished fin = new ServerHandshakeFinished(verifyData);
         fin.write(handshakeBB);
 
         // create 1-RTT AEAD

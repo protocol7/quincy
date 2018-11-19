@@ -10,8 +10,13 @@ import com.protocol7.nettyquick.tls.extensions.TransportParameters;
 import com.protocol7.nettyquick.tls.messages.ClientFinished;
 import com.protocol7.nettyquick.tls.messages.ClientHello;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.EncryptedExtensions;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificate;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificateVerify;
+import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerHandshakeFinished;
 import com.protocol7.nettyquick.tls.messages.ServerHello;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -87,12 +92,27 @@ public class ClientTlsSession {
 
         handshakeBuffer.markReaderIndex();
         try {
-            ServerHandshake handshake = ServerHandshake.parse(handshakeBuffer);
+            int pos = handshakeBuffer.readerIndex();
+            EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer);
+            ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
 
-            validateServerCertificateVerify(handshake);
+            byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];
+            handshakeBuffer.resetReaderIndex();
+            handshakeBuffer.readBytes(scvBytes);
+
+            ServerCertificateVerify scv = ServerCertificateVerify.parse(handshakeBuffer);
+
+            validateServerCertificateVerify(sc, scv, scvBytes);
+
+            byte[] finBytes = new byte[handshakeBuffer.readerIndex() - pos];
+            handshakeBuffer.resetReaderIndex();
+            handshakeBuffer.readBytes(finBytes);
+
+
+            ServerHandshakeFinished fin = ServerHandshakeFinished.parse(handshakeBuffer);
 
             byte[] helloHash = Hash.sha256(clientHello, serverHello);
-            validateServerFinish(handshake, helloHash);
+            validateServerFinish(fin, helloHash, finBytes);
 
             // TODO verify certificate
 
@@ -114,9 +134,9 @@ public class ClientTlsSession {
 
             ByteBuf finBB = Unpooled.buffer();
             clientFinished.write(finBB);
-            byte[] fin = Bytes.drainToArray(finBB);
+            byte[] b = Bytes.drainToArray(finBB);
 
-            return Optional.of(new HandshakeResult(fin, aead));
+            return Optional.of(new HandshakeResult(b, aead));
         } catch (IndexOutOfBoundsException e) {
             // wait for more data
             System.out.println("Need more data, waiting...");
@@ -126,19 +146,14 @@ public class ClientTlsSession {
         }
     }
 
-    private void validateServerFinish(ServerHandshake handshake, byte[] helloHash) {
+    private void validateServerFinish(ServerHandshakeFinished fin, byte[] helloHash, byte[] finBytes) {
         // verify server fin
-        byte[] finishedHash = Hash.sha256(
-                clientHello,
-                serverHello,
-                Bytes.write(handshake.getEncryptedExtensions()),
-                Bytes.write(handshake.getServerCertificate()),
-                Bytes.write(handshake.getServerCertificateVerify()));
+        byte[] finishedHash = Hash.sha256(clientHello, serverHello, finBytes);
 
         byte[] serverHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","s hs traffic", helloHash, 32);
 
         boolean valid = VerifyData.verify(
-                handshake.getServerHandshakeFinished().getVerificationData(),
+                fin.getVerificationData(),
                 serverHandshakeTrafficSecret,
                 finishedHash,
                 false);
@@ -147,15 +162,12 @@ public class ClientTlsSession {
         }
     }
 
-    private void validateServerCertificateVerify(ServerHandshake handshake) {
-        byte[] toVerify = Bytes.concat(
-                clientHello,
-                serverHello,
-                Bytes.write(handshake.getEncryptedExtensions(), handshake.getServerCertificate()));
+    private void validateServerCertificateVerify(ServerCertificate sc, ServerCertificateVerify scv, byte[] handshakeData) {
+        byte[] toVerify = Hash.sha256(clientHello, serverHello, handshakeData);
 
-        byte[] serverSig = handshake.getServerCertificateVerify().getSignature();
+        byte[] serverSig = scv.getSignature();
 
-        PublicKey serverKey = handshake.getServerCertificate().getAsCertificiates().get(0).getPublicKey();
+        PublicKey serverKey = sc.getAsCertificiates().get(0).getPublicKey();
 
         boolean valid = CertificateVerify.verify(serverSig, toVerify, serverKey, false);
         if (!valid) {

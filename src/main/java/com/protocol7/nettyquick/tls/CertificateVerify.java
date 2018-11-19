@@ -1,7 +1,9 @@
 package com.protocol7.nettyquick.tls;
 
 import com.google.common.base.Charsets;
+import com.google.common.hash.Hashing;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
 import org.apache.commons.lang.StringUtils;
 
 import java.security.GeneralSecurityException;
@@ -41,14 +43,14 @@ public class CertificateVerify {
 
     public static boolean verify(byte[] signature, byte[] data, PublicKey publicKey, boolean isClient) {
         byte[] prefix = isClient ? CLIENT_PREFIX : SERVER_PREFIX;
-        byte[] toSign = Bytes.concat(prefix, data);
+        byte[] toVerify = Bytes.concat(prefix, data);
 
         try {
             Signature sig = Signature.getInstance(ALGORITHM);
             sig.setParameter(PARAMETER_SPEC);
 
             sig.initVerify(publicKey);
-            sig.update(toSign);
+            sig.update(toVerify);
             return sig.verify(signature);
         } catch (GeneralSecurityException e) {
             throw new RuntimeException(e);
