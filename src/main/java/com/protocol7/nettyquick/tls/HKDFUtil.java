@@ -53,7 +53,7 @@ public class HKDFUtil {
         bb.writeByte(context.length);
         bb.writeBytes(context);
 
-        return Bytes.asArray(bb);
+        return Bytes.drainToArray(bb);
     }
 
 }

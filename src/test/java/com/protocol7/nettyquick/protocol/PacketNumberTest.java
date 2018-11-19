@@ -137,7 +137,7 @@ public class PacketNumberTest {
     ByteBuf bb = Unpooled.buffer();
     new PacketNumber(pn).writeVarint(bb);
 
-    byte[] b = Bytes.asArray(bb);
+    byte[] b = Bytes.drainToArray(bb);
 
     assertEquals(expected, Hex.hex(b));
   }

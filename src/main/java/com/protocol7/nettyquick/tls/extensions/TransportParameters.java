@@ -357,8 +357,11 @@ public class TransportParameters implements Extension {
                 '}';
     }
 
-    public void write(ByteBuf tpBB, boolean isClient) {
-        ByteBuf bb = Unpooled.buffer();
+    public void write(ByteBuf bb, boolean isClient) {
+
+        bb.writeBytes(new byte[] {00, 00, 00, 00}); // version
+        int lenPos = bb.writerIndex();
+        bb.writeShort(0);
 
         if (initialMaxStreamDataBidiLocal > -1) {
             bb.writeBytes(initial_max_stream_data_bidi_local.asBytes());
@@ -425,9 +428,6 @@ public class TransportParameters implements Extension {
             bb.writeBytes(originalConnectionId);
         }
 
-        tpBB.writeBytes(new byte[] {00, 00, 00, 00}); // version
-        byte[] x = Bytes.asArray(bb);
-        tpBB.writeShort(x.length);
-        tpBB.writeBytes(x);
+        bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
     }
 }

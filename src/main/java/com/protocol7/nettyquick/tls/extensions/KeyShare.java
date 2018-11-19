@@ -71,7 +71,7 @@ public class KeyShare implements Extension {
             b.writeBytes(entry.getValue());
         }
 
-        byte[] x = Bytes.asArray(b);
+        byte[] x = Bytes.drainToArray(b);
         if (isClient) {
             bb.writeShort(x.length);
         }

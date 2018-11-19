@@ -1,8 +1,12 @@
 package com.protocol7.nettyquick.tls.messages;
 
-import com.protocol7.nettyquick.tls.extensions.Extension;
-import com.protocol7.nettyquick.tls.extensions.ExtensionType;
+import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.tls.Group;
+import com.protocol7.nettyquick.tls.KeyExchange;
+import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
@@ -15,6 +19,21 @@ public class ServerHello {
 
     private final static byte[] VERSION = new byte[]{0x03, 0x03};
     private final static byte[] CIPHER_SUITES = new byte[]{0x13, 0x01};
+
+    public static ServerHello defaults(KeyExchange ke, TransportParameters tps) {
+        byte[] clientRandom = Rnd.rndBytes(32);
+        byte[] sessionId = new byte[0];
+        byte[] cipherSuites = Hex.dehex("1301");
+        List<Extension> extensions = ImmutableList.of(
+                KeyShare.of(ke.getGroup(), ke.getPublicKey()),
+                new SupportedGroups(Group.X25519),
+                SupportedVersions.TLS13,
+                tps
+        );
+
+        return new ServerHello(clientRandom, sessionId, cipherSuites, extensions);
+
+    }
 
     public static ServerHello parse(ByteBuf bb) {
         int messageType = bb.readByte(); // server hello

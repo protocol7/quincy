@@ -4,10 +4,22 @@ import io.netty.buffer.ByteBuf;
 
 public class Bytes {
 
-  public static byte[] asArray(ByteBuf bb) {
-    byte[] b = new byte[bb.readableBytes()];
-    bb.readBytes(b);
-    return b;
+  public static byte[] drainToArray(ByteBuf bb) {
+      try {
+          byte[] b = new byte[bb.readableBytes()];
+          bb.readBytes(b);
+          return b;
+      } finally {
+          bb.release();
+      }
+  }
+
+  public static byte[] peekToArray(ByteBuf bb) {
+      byte[] b = new byte[bb.readableBytes()];
+      bb.markReaderIndex();
+      bb.readBytes(b);
+      bb.resetReaderIndex();
+      return b;
   }
 
 

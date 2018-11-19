@@ -20,7 +20,7 @@ public class HandshakeAEAD {
         //    context = hello_hash,
         //    len = 32)
         byte[] clientHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","c hs traffic", helloHash, 32);
-        System.out.println("clientHandshakeTrafficSecret 1 "+ Hex.hex(clientHandshakeTrafficSecret));
+
         //server_handshake_traffic_secret = hkdf-Expand-Label(
         //    key = handshake_secret,
         //    label = "s hs traffic",

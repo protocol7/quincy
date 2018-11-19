@@ -67,7 +67,7 @@ public class ClientTlsSessionTest {
         ServerHello sh = new ServerHello(serverRandom, new byte[0], ciphers, ext);
         ByteBuf bb = Unpooled.buffer();
         sh.write(bb);
-        return Bytes.asArray(bb);
+        return Bytes.drainToArray(bb);
     }
 
     private List<Extension> ext(Extension... extensions) {

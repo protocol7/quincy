@@ -51,7 +51,7 @@ public class ClientTlsSession {
         ByteBuf bb = Unpooled.buffer();
         ch.write(bb);
 
-        clientHello = Bytes.asArray(bb);
+        clientHello = Bytes.drainToArray(bb);
         return clientHello;
     }
 
@@ -96,7 +96,7 @@ public class ClientTlsSession {
 
             handshakeBuffer.resetReaderIndex();
 
-            byte[] hs = Bytes.asArray(handshakeBuffer);
+            byte[] hs = Bytes.drainToArray(handshakeBuffer);
 
             byte[] helloHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello)).asBytes();
             byte[] handshakeHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello, hs)).asBytes();
@@ -111,7 +111,7 @@ public class ClientTlsSession {
 
             ByteBuf finBB = Unpooled.buffer();
             clientFinished.write(finBB);
-            byte[] fin = Bytes.asArray(finBB);
+            byte[] fin = Bytes.drainToArray(finBB);
 
             return Optional.of(new HandshakeResult(fin, aead));
         } catch (IndexOutOfBoundsException e) {

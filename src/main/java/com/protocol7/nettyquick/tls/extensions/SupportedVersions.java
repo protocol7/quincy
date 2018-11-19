@@ -15,7 +15,7 @@ public class SupportedVersions implements Extension {
             bb.readByte();
         }
 
-        byte[] version = Bytes.asArray(bb);
+        byte[] version = Bytes.drainToArray(bb);
 
         return new SupportedVersions(version);
     }
