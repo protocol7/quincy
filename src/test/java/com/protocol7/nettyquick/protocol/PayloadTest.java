@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.TestUtil;
-import com.protocol7.nettyquick.protocol.frames.PaddingFrame;
-import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import com.protocol7.nettyquick.utils.Hex;
@@ -80,7 +80,10 @@ public class PayloadTest {
 
     Payload up = Payload.parse(bb, bb.readableBytes(), aead, pn, aad);
 
-    System.out.println(up);
+    CryptoFrame cf = (CryptoFrame) up.getFrames().get(0);
+
+    assertEquals(0, cf.getOffset().getValue());
+    TestUtil.assertHex("010001060303dec0ab54ecd6ac7a528ad533aeb1a9a4e7b543b70de3de5b37c8c16663a87a892057c92cc059e24266c7fb3b8ca7e33283e48fe4cc4306ff9c56cde1f8e7dab58400021301010000bb000500050100000000000a0012001000170018001901000101010201030104000d001e001c0403050306030804080508060809080a080b040105010601020302010032001e001c0403050306030804080508060809080a080b04010501060102030201002b0003020304002d000201010033004700450017004104409d6a24b309478239cb3c3c440bfab4dca0166f4ebe54f28bac2a63cc48b9a169c9e24623f79d7e7371c3a94542fdb5fa511774ccf8751340c8365be5fbac92", cf.getCryptoData());
   }
 
   @Test
@@ -103,6 +106,14 @@ public class PayloadTest {
 
     Payload up = Payload.parse(bb, bb.readableBytes(), aead, pn, aad);
 
-    System.out.println(up);
+    AckFrame af = (AckFrame) up.getFrames().get(0);
+    assertEquals(1519, af.getAckDelay());
+    assertEquals(ImmutableList.of(new AckBlock(new PacketNumber(1), new PacketNumber(1))), af.getBlocks());
+
+    CryptoFrame cf = (CryptoFrame) up.getFrames().get(1);
+
+    assertEquals(0, cf.getOffset().getValue());
+    TestUtil.assertHex("020000970303c5b1846bacefca18971b4285ef0bfcbab790059b5ab337df2d2dfcf0162b1d60203eda7adaf3b48724a58841bb97bc0ebbbe08de28bf5c11bc5a6774c2129fca80130100004f002b000203040033004500170041047e0f705a51a2ea2b91dab6dbcfd18ac30c6ac9966eb5f52bef0060d93d3d53a495173ee03a3c008e4cb9bd021f55aeae48f100bfc974e33df82178cb52928cae", cf.getCryptoData());
+
   }
 }

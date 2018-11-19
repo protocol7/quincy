@@ -1,11 +1,9 @@
 package com.protocol7.nettyquick.protocol;
 
-import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
-import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Hex;
+import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Optional;
@@ -18,13 +16,9 @@ public class ShortHeader implements Header {
   public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
     bb.markReaderIndex();
 
-    Bytes.debug(bb);
-
     byte firstByte = bb.readByte();
 
     boolean keyPhase = (firstByte & 0x40) == 0x40;
-
-    Bytes.debug(bb);
 
     Optional<ConnectionId> connId;
     if (connIdLength > 0) {
@@ -33,18 +27,11 @@ public class ShortHeader implements Header {
         connId = Optional.empty();
     }
 
-    Bytes.debug(bb);
-
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-
-    Bytes.debug(bb);
 
     byte[] aad = new byte[bb.readerIndex()];
     bb.resetReaderIndex();
     bb.readBytes(aad);
-
-    Bytes.debug("113 ", bb);
-    System.out.println("114 " + Hex.hex(aad));
 
     Payload payload = Payload.parse(bb, bb.readableBytes(), aead.forConnection(connId, OneRtt), packetNumber, aad);
 
@@ -100,6 +87,7 @@ public class ShortHeader implements Header {
     bb.writeByte(b);
 
     connectionId.get().write(bb);
+
     packetNumber.write(bb);
 
     byte[] aad = new byte[bb.writerIndex()];
@@ -107,18 +95,14 @@ public class ShortHeader implements Header {
     bb.readBytes(aad);
     bb.resetReaderIndex();
 
-    System.out.println("111 " + Hex.hex(aad));
-
     payload.write(bb, aead, packetNumber, aad);
-
-    Bytes.debug("112 ", bb);
   }
 
   @Override
   public String toString() {
     return "ShortHeader{" +
             "keyPhase=" + keyPhase +
-            ", connectionId=" + connectionId +
+            ", connectionId=" + Opt.toString(connectionId) +
             ", packetNumber=" + packetNumber +
             ", payload=" + payload +
             '}';

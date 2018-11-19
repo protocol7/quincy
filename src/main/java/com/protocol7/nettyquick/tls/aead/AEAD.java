@@ -84,8 +84,7 @@ public class AEAD {
 
         cipher.init(mode, secretKey, spec);
         cipher.updateAAD(aad);
-        byte[] b= cipher.doFinal(src);
-        return b;
+        return cipher.doFinal(src);
     }
 
     public byte[] getMyKey() {

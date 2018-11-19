@@ -10,6 +10,7 @@ import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -106,14 +107,15 @@ public class ClientConnection implements Connection {
   }
 
   public int getLastDestConnectionIdLength() {
-    System.out.println("!!!!!!!! Parsing with conn ID length: " + lastDestConnectionIdLength);
-
     return lastDestConnectionIdLength;
   }
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, getAEAD(EncryptionLevel.forPacket(packet)));
+
+    Bytes.debug("Sending ", bb);
+
     channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Client sent {}", packet);
   }
@@ -134,13 +136,13 @@ public class ClientConnection implements Connection {
   @Override
   public AEAD getAEAD(EncryptionLevel level) {
     if (level == EncryptionLevel.Initial) {
-      System.out.println("Using initial AEAD");
+      log.debug("Using initial AEAD: {}", initialAead);
       return initialAead;
     } else if (level == EncryptionLevel.Handshake) {
-      System.out.println("Using handshake AEAD");
+      log.debug("Using handshake AEAD: {}", handshakeAead);
       return handshakeAead;
     } else {
-      System.out.println("Using 1-RTT AEAD for ");
+      log.debug("Using 1-RTT AEAD: {}", oneRttAead);
       return oneRttAead;
     }
   }
@@ -150,7 +152,6 @@ public class ClientConnection implements Connection {
   }
 
   public void setOneRttAead(AEAD oneRttAead) {
-    System.out.println("Setting 1-RTT AEAD " + oneRttAead);
     this.oneRttAead = oneRttAead;
   }
 

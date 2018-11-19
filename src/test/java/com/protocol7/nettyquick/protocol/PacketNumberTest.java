@@ -41,7 +41,7 @@ public class PacketNumberTest {
   public void write() {
     ByteBuf bb = Unpooled.buffer();
     new PacketNumber(123).write(bb);
-    TestUtil.assertBuffer("000000000000007b", bb);
+    TestUtil.assertBuffer("807b", bb);
   }
 
   @Test
@@ -59,46 +59,9 @@ public class PacketNumberTest {
 
     pn.write(bb);
 
-    PacketNumber parsed = PacketNumber.read(bb);
+    PacketNumber parsed = PacketNumber.parseVarint(bb);
 
     assertEquals(pn, parsed);
-  }
-
-  @Test
-  public void read1() {
-    PacketNumber lastAcked = new PacketNumber(2860708622L);
-
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("94"));
-    PacketNumber pn = PacketNumber.read1(bb, lastAcked);
-    assertEquals(new PacketNumber(2860708756L), pn);
-  }
-
-  @Test
-  public void read2() {
-    PacketNumber lastAcked = new PacketNumber(2860708622L);
-
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("1f94"));
-    PacketNumber pn = PacketNumber.read2(bb, lastAcked);
-    assertEquals(new PacketNumber(2860720020L), pn);
-  }
-
-  @Test
-  public void read2Overflow() {
-    PacketNumber lastAcked = new PacketNumber(2868900622L);
-
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("1f94"));
-    PacketNumber pn = PacketNumber.read2(bb, lastAcked);
-    assertTrue(pn.asLong() > 2868900622L);
-    assertEquals(new PacketNumber(2885623700L), pn);
-  }
-
-  @Test
-  public void read4() {
-    PacketNumber lastAcked = new PacketNumber(2860708622L);
-
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("12341f94"));
-    PacketNumber pn = PacketNumber.read4(bb, lastAcked);
-    assertEquals(new PacketNumber(4600373140L), pn);
   }
 
   @Test
@@ -121,7 +84,7 @@ public class PacketNumberTest {
   public void roundtripVarint() {
     int pn = (int)PacketNumber.random().asLong();
     ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(pn).writeVarint(bb);
+    new PacketNumber(pn).write(bb);
 
     PacketNumber parsed = PacketNumber.parseVarint(bb);
 
@@ -135,7 +98,7 @@ public class PacketNumberTest {
 
   private void assertWrite(int pn, String expected) {
     ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(pn).writeVarint(bb);
+    new PacketNumber(pn).write(bb);
 
     byte[] b = Bytes.drainToArray(bb);
 

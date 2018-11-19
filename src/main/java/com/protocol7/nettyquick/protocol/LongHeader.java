@@ -129,7 +129,7 @@ public class LongHeader implements Header {
     Varint length = new Varint(payload.getLength()); // TODO packet number length
     length.write(bb);
 
-    packetNumber.writeVarint(bb);
+    packetNumber.write(bb);
 
     byte[] aad = new byte[bb.writerIndex()];
     bb.markReaderIndex();

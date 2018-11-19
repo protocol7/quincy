@@ -125,7 +125,7 @@ public class ClientStateMachine {
                         new PacketNumber(2),
                         Version.TLS_DEV,
                         new CryptoFrame(0, result.get().getFin())));
-                System.out.println("Send client handshake fin");
+
                 state = ClientState.Ready;
               }
             }

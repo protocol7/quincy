@@ -25,4 +25,9 @@ public class PingFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
   }
+
+  @Override
+  public String toString() {
+    return "PingFrame";
+  }
 }

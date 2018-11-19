@@ -42,50 +42,6 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return new PacketNumber(Ints.fromByteArray(bs));
   }
 
-
-  public static PacketNumber read(final ByteBuf bb) {
-    return new PacketNumber(bb.readLong());
-  }
-
-  public static PacketNumber read4(final ByteBuf bb, final PacketNumber lastAcked) {
-    return readn(bb, 4, lastAcked);
-  }
-
-  public static PacketNumber read2(final ByteBuf bb, final PacketNumber lastAcked) {
-    return readn(bb, 2, lastAcked);
-  }
-
-  public static PacketNumber read1(final ByteBuf bb, final PacketNumber lastAcked) {
-    return readn(bb, 1, lastAcked);
-  }
-
-  private static PacketNumber readn(final ByteBuf bb, int len, final PacketNumber lastAcked) {
-    byte[] b = new byte[len];
-    bb.readBytes(b);
-    byte[] merged = Longs.toByteArray(lastAcked.asLong());
-
-    // merge the last acked value, with the read suffix
-    System.arraycopy(b, 0, merged, 8-len, len);
-
-    long mergedLong = Longs.fromByteArray(merged);
-
-    // the resulting value must be larger than lastAcked. If not, we bump the bytes before until it is, handling byte overflows
-    int index = 8 - len - 1;
-    while (mergedLong < lastAcked.asLong()) {
-      // bump byte
-      byte bump = merged[index];
-      bump++;
-      if (bump != 0) {
-        merged[index] = bump;
-      } else {
-        index--;
-      }
-      mergedLong = Longs.fromByteArray(merged);
-    }
-
-    return new PacketNumber(mergedLong);
-  }
-
   public static final PacketNumber MIN = new PacketNumber(0);
 
   private final Varint number;
@@ -119,10 +75,6 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeBytes(Longs.toByteArray(number.getValue()));
-  }
-
-  public void writeVarint(final ByteBuf bb) {
     int value = (int)number.getValue();
     int from;
     int mask;
