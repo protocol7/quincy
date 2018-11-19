@@ -30,6 +30,11 @@ public class Bytes {
   }
 
   public static byte[] concat(byte[]... bs) {
+      if (bs.length == 0) {
+          return new byte[0];
+      } else if (bs.length == 1) {
+          return bs[0];
+      }
     return com.google.common.primitives.Bytes.concat(bs);
   }
 

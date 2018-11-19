@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls;
 
-import com.google.common.hash.HashFunction;
-import com.google.common.hash.Hashing;
+import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquick.tls.aead.OneRttAEAD;
@@ -24,8 +23,6 @@ import static com.protocol7.nettyquick.utils.Bytes.peekToArray;
 
 public class ServerTlsSession {
 
-    private static final HashFunction SHA256 = Hashing.sha256();
-
     private KeyExchange kek;
 
     private final PrivateKey privateKey;
@@ -36,8 +33,10 @@ public class ServerTlsSession {
     private byte[] handshakeSecret;
 
     public ServerTlsSession(List<byte[]> certificates, PrivateKey privateKey) {
+        Preconditions.checkArgument(!certificates.isEmpty());
+
         this.privateKey = privateKey;
-        this.certificates = certificates;
+        this.certificates = Preconditions.checkNotNull(certificates);
         reset();
     }
 
@@ -54,6 +53,7 @@ public class ServerTlsSession {
 
         ClientHello ch = ClientHello.parse(msg);
 
+        // verify expected extensions
         SupportedVersions version = (SupportedVersions) ch.geExtension(ExtensionType.supported_versions).orElseThrow(IllegalArgumentException::new);
         if (!version.equals(SupportedVersions.TLS13)) {
             throw new IllegalArgumentException("Illegal version");
@@ -61,13 +61,8 @@ public class ServerTlsSession {
 
         KeyShare keyShareExtension = (KeyShare) ch.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
 
-        ServerHello sh = ServerHello.defaults(kek, TransportParameters.defaults());
-
-        ByteBuf shBB = Unpooled.buffer();
-        sh.write(shBB);
-        serverHello = Bytes.drainToArray(shBB);
-
-        byte[] helloHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello)).asBytes();
+        // create ServerHello
+        serverHello = Bytes.write(ServerHello.defaults(kek, TransportParameters.defaults()));
 
         ByteBuf handshakeBB = Unpooled.buffer();
 
@@ -77,6 +72,7 @@ public class ServerTlsSession {
         ServerHandshake.ServerCertificate sc = new ServerHandshake.ServerCertificate(new byte[0], certificates);
         sc.write(handshakeBB);
 
+        // create server cert verification
         byte[] toVerify = peekToArray(handshakeBB);
 
         byte[] verificationSig = CertificateVerify.sign(Bytes.concat(clientHello, serverHello, toVerify), privateKey, false);
@@ -84,33 +80,29 @@ public class ServerTlsSession {
         ServerHandshake.ServerCertificateVerify scv = new ServerHandshake.ServerCertificateVerify(2052, verificationSig);
         scv.write(handshakeBB);
 
+        // create server finished
         byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
         byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
         handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
+        byte[] helloHash = Hash.sha256(clientHello, serverHello);
+
+        // create handshake AEAD
+        AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
+
         byte[] serverHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","s hs traffic", helloHash, 32);
-        // finished_key = HKDF-Expand-Label(
-        //    key = server_handshake_traffic_secret,
-        //    label = "finished",
-        //    context = "",
-        //    len = 32)
-        byte[] finishedKey = HKDFUtil.expandLabel(serverHandshakeTrafficSecret, "tls13 ", "finished", new byte[0], 32);
 
         // finished_hash = SHA256(Client Hello ... Server Cert Verify)
-        byte[] finishedHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello, peekToArray(handshakeBB))).asBytes();
+        byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
 
-        // verify_data = HMAC-SHA256(
-        //	  key = finished_key,
-        //	  msg = finished_hash)
-        byte[] verifyData = Hashing.hmacSha256(finishedKey).hashBytes(finishedHash).asBytes();
+        byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash, false);
 
         ServerHandshake.ServerHandshakeFinished fin = new ServerHandshake.ServerHandshakeFinished(verifyData);
         fin.write(handshakeBB);
 
+        // create 1-RTT AEAD
         handshake = Bytes.drainToArray(handshakeBB);
 
-        byte[] handshakeHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello, handshake)).asBytes();
-
-        AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
+        byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
         AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, true, false);
 
         return new ServerHelloAndHandshake(serverHello, handshake, handshakeAEAD, oneRttAEAD);
@@ -124,13 +116,13 @@ public class ServerTlsSession {
         ByteBuf bb = Unpooled.wrappedBuffer(msg);
         ClientFinished fin = ClientFinished.parse(bb);
 
-        byte[] helloHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello)).asBytes();
+        byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
         byte[] clientHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","c hs traffic", helloHash, 32);
 
-        byte[] handshakeHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello, handshake)).asBytes();
+        byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
 
-        boolean valid = ClientFinished.verify(fin.getVerificationData(), clientHandshakeTrafficSecret, handshakeHash, false);
+        boolean valid = VerifyData.verify(fin.getVerificationData(), clientHandshakeTrafficSecret, handshakeHash, false);
 
         if (!valid) {
             throw new RuntimeException("Invalid client verification");

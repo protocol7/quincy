@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.Writeable;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
@@ -15,7 +16,7 @@ import java.util.Optional;
 
 import static com.protocol7.nettyquick.utils.Hex.hex;
 
-public class ServerHello {
+public class ServerHello implements Writeable {
 
     private final static byte[] VERSION = new byte[]{0x03, 0x03};
     private final static byte[] CIPHER_SUITES = new byte[]{0x13, 0x01};
