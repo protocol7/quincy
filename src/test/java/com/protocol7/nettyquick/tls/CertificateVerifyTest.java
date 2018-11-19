@@ -25,7 +25,7 @@ public class CertificateVerifyTest {
         RSAPrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
         byte[] actual = CertificateVerify.sign(hash, privateKey, false);
 
-        PublicKey publicKey = KeyUtil.getPublicKeyFromCrt("src/test/resources/server.crt");
+        PublicKey publicKey = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getPublicKey();
 
         Assert.assertTrue(CertificateVerify.verify(actual, hash, publicKey, false));
     }

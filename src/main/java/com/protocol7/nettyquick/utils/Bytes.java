@@ -1,6 +1,8 @@
 package com.protocol7.nettyquick.utils;
 
+import com.protocol7.nettyquick.Writeable;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class Bytes {
 
@@ -61,5 +63,13 @@ public class Bytes {
       bb.setByte(position, (value >> 16) & 0xFF);
       bb.setByte(position + 1, (value >> 8)  & 0xFF);
       bb.setByte(position + 2, value & 0xFF);
+  }
+
+  public static byte[] write(Writeable... writeables) {
+      ByteBuf bb = Unpooled.buffer();
+      for (Writeable writeable : writeables) {
+          writeable.write(bb);
+      }
+      return drainToArray(bb);
   }
 }

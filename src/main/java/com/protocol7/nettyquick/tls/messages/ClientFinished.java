@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.hash.Hashing;
+import com.protocol7.nettyquick.tls.CryptoEquals;
 import com.protocol7.nettyquick.tls.HKDFUtil;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
@@ -9,13 +10,18 @@ import io.netty.buffer.ByteBuf;
 public class ClientFinished {
 
     public static ClientFinished create(byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
+        byte[] verifyData = createVerifyData(clientHandshakeTrafficSecret, finHash, quic);
+
+        return new ClientFinished(verifyData);
+    }
+
+    private static byte[] createVerifyData(byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
         String labelPrefix;
         if (quic) {
             labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
         } else {
             labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
         }
-
 
         // finished_key = HKDF-Expand-Label(
         //    key = client_handshake_traffic_secret,
@@ -29,12 +35,13 @@ public class ClientFinished {
         //verify_data = HMAC-SHA256(
         //	key = finished_key,
         //	msg = finished_hash)
-        System.out.println("------------" + Hex.hex(clientHandshakeTrafficSecret));
-        System.out.println("------------" + Hex.hex(finishedKey));
-        System.out.println("------------" + Hex.hex(finHash));
-        byte[] verifyData = Hashing.hmacSha256(finishedKey).hashBytes(finHash).asBytes();
+        return Hashing.hmacSha256(finishedKey).hashBytes(finHash).asBytes();
+    }
 
-        return new ClientFinished(verifyData);
+    public static boolean verify(byte[] verifyData, byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
+        byte[] actual = createVerifyData(clientHandshakeTrafficSecret, finHash, quic);
+
+        return CryptoEquals.isEqual(verifyData, actual);
     }
 
 

@@ -2,11 +2,17 @@ package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.Writeable;
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.TransportParameters;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
+import java.io.ByteArrayInputStream;
+import java.security.GeneralSecurityException;
+import java.security.cert.Certificate;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
@@ -54,7 +60,7 @@ public class ServerHandshake {
         return serverHandshakeFinished;
     }
 
-    public static class EncryptedExtensions {
+    public static class EncryptedExtensions implements Writeable {
 
         public static EncryptedExtensions defaults() {
             return new EncryptedExtensions(ImmutableList.of(TransportParameters.defaults()));
@@ -106,7 +112,7 @@ public class ServerHandshake {
         }
     }
 
-    public static class ServerCertificate {
+    public static class ServerCertificate implements Writeable {
 
         public static ServerCertificate parse(ByteBuf bb) {
             // server cert
@@ -162,6 +168,21 @@ public class ServerHandshake {
             return serverCertificates;
         }
 
+        public List<Certificate> getAsCertificiates() {
+            List<Certificate> certs = Lists.newArrayList();
+            try {
+                CertificateFactory f = CertificateFactory.getInstance("X.509");
+
+                for (byte[] certificate : serverCertificates) {
+                    X509Certificate cert = (X509Certificate) f.generateCertificate(new ByteArrayInputStream(certificate));
+                    certs.add(cert);
+                }
+                return certs;
+            } catch (GeneralSecurityException e) {
+                throw new RuntimeException(e);
+            }
+        }
+
         public void write(ByteBuf bb) {
             // server cert
             bb.writeByte(0x0b);
@@ -186,7 +207,7 @@ public class ServerHandshake {
         }
     }
 
-    public static class ServerCertificateVerify {
+    public static class ServerCertificateVerify implements Writeable {
 
         public static ServerCertificateVerify parse(ByteBuf bb) {
             // server cert verify
@@ -206,20 +227,20 @@ public class ServerHandshake {
             return new ServerCertificateVerify(signType, sign);
         }
 
-        private final int verificationSignatureType;
-        private final byte[] verificationSignature;
+        private final int type;
+        private final byte[] signature;
 
-        public ServerCertificateVerify(int verificationSignatureType, byte[] verificationSignature) {
-            this.verificationSignatureType = verificationSignatureType;
-            this.verificationSignature = verificationSignature;
+        public ServerCertificateVerify(int type, byte[] signature) {
+            this.type = type;
+            this.signature = signature;
         }
 
-        public int getVerificationSignatureType() {
-            return verificationSignatureType;
+        public int getType() {
+            return type;
         }
 
-        public byte[] getVerificationSignature() {
-            return verificationSignature;
+        public byte[] getSignature() {
+            return signature;
         }
 
         public void write(ByteBuf bb) {
@@ -229,15 +250,15 @@ public class ServerHandshake {
             int scvMsgLenPos = bb.writerIndex();
             write24(bb, 0);
 
-            bb.writeShort(verificationSignatureType);
-            bb.writeShort(verificationSignature.length);
-            bb.writeBytes(verificationSignature);
+            bb.writeShort(type);
+            bb.writeShort(signature.length);
+            bb.writeBytes(signature);
 
             write24(bb, bb.writerIndex() - scvMsgLenPos - 3, scvMsgLenPos);
         }
     }
 
-    public static class ServerHandshakeFinished {
+    public static class ServerHandshakeFinished implements Writeable {
 
         public static ServerHandshakeFinished parse(ByteBuf bb) {
             // server handshake finished

@@ -33,6 +33,7 @@ public class ServerTlsSession {
     private byte[] clientHello;
     private byte[] serverHello;
     private byte[] handshake;
+    private byte[] handshakeSecret;
 
     public ServerTlsSession(List<byte[]> certificates, PrivateKey privateKey) {
         this.privateKey = privateKey;
@@ -45,6 +46,7 @@ public class ServerTlsSession {
         clientHello = null;
         serverHello = null;
         handshake = null;
+        handshakeSecret = null;
     }
 
     public ServerHelloAndHandshake handleClientHello(byte[] msg) {
@@ -84,7 +86,7 @@ public class ServerTlsSession {
 
         byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
         byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
-        byte[] handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
+        handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
         byte[] serverHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","s hs traffic", helloHash, 32);
         // finished_key = HKDF-Expand-Label(
         //    key = server_handshake_traffic_secret,
@@ -112,6 +114,27 @@ public class ServerTlsSession {
         AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, true, false);
 
         return new ServerHelloAndHandshake(serverHello, handshake, handshakeAEAD, oneRttAEAD);
+    }
+
+    public synchronized void handleClientFinished(byte[] msg) {
+        if (clientHello == null || serverHello == null || handshake == null) {
+            throw new IllegalStateException("Got handshake in unexpected state");
+        }
+
+        ByteBuf bb = Unpooled.wrappedBuffer(msg);
+        ClientFinished fin = ClientFinished.parse(bb);
+
+        byte[] helloHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello)).asBytes();
+
+        byte[] clientHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","c hs traffic", helloHash, 32);
+
+        byte[] handshakeHash = SHA256.hashBytes(Bytes.concat(clientHello, serverHello, handshake)).asBytes();
+
+        boolean valid = ClientFinished.verify(fin.getVerificationData(), clientHandshakeTrafficSecret, handshakeHash, false);
+
+        if (!valid) {
+            throw new RuntimeException("Invalid client verification");
+        }
     }
 
     public static class ServerHelloAndHandshake {
@@ -144,17 +167,5 @@ public class ServerTlsSession {
         public AEAD getOneRttAEAD() {
             return oneRttAEAD;
         }
-    }
-
-
-    public synchronized void handleClientFinished(byte[] msg) {
-        if (clientHello == null || serverHello == null || handshake == null) {
-            throw new IllegalStateException("Got handshake in unexpected state");
-        }
-
-        ByteBuf bb = Unpooled.wrappedBuffer(msg);
-        ClientFinished fin = ClientFinished.parse(bb);
-
-        // TODO verify handshake
     }
 }

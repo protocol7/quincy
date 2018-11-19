@@ -41,8 +41,6 @@ public class ServerHelloTest {
 
         sh.write(bb);
 
-        Bytes.debug(bb);
-
         ServerHello parsed = ServerHello.parse(bb);
 
         assertArrayEquals(sh.getServerRandom(), parsed.getServerRandom());

@@ -17,6 +17,7 @@ import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.security.PublicKey;
 import java.util.Optional;
 
 public class ClientTlsSession {
@@ -92,7 +93,20 @@ public class ClientTlsSession {
         try {
             ServerHandshake handshake = ServerHandshake.parse(handshakeBuffer);
 
-            // TODO verify handshake
+            byte[] toVerify = Bytes.concat(
+                    clientHello,
+                    serverHello,
+                    Bytes.write(handshake.getEncryptedExtensions(), handshake.getServerCertificate()));
+
+            byte[] serverSig = handshake.getServerCertificateVerify().getSignature();
+            PublicKey serverKey = handshake.getServerCertificate().getAsCertificiates().get(0).getPublicKey();
+
+            boolean valid = CertificateVerify.verify(serverSig, toVerify, serverKey, false);
+            if (!valid) {
+                throw new RuntimeException("Invalid server certificate verify");
+            }
+
+            // TODO verify certificate
 
             handshakeBuffer.resetReaderIndex();
 

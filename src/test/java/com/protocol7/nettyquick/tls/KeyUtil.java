@@ -27,11 +27,10 @@ public class KeyUtil {
         return cert.getPublicKey();
     }
 
-    public static PublicKey getPublicKeyFromCrt(String path) throws FileNotFoundException, CertificateException {
+    public static X509Certificate getCertFromCrt(String path) throws FileNotFoundException, CertificateException {
         FileInputStream fin = new FileInputStream(path);
         CertificateFactory f = CertificateFactory.getInstance("X.509");
-        X509Certificate certificate = (X509Certificate)f.generateCertificate(fin);
-        return certificate.getPublicKey();
+        return (X509Certificate)f.generateCertificate(fin);
     }
 
     public static RSAPrivateKey getPrivateKeyFromPem(String path) throws IOException, NoSuchAlgorithmException, InvalidKeySpecException {

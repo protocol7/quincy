@@ -14,7 +14,6 @@ public interface Extension {
         List<Extension> extensions = Lists.newArrayList();
 
         while (bb.isReadable()) {
-            Bytes.debug(bb);
             Extension ext = Extension.parse(bb, isClient);
 
             extensions.add(ext);

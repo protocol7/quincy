@@ -31,8 +31,6 @@ public class Payload {
     List<Frame> frames = Lists.newArrayList();
     ByteBuf frameBuf = Unpooled.wrappedBuffer(raw);
 
-    Bytes.debug(frameBuf);
-
     while (frameBuf.isReadable()) {
       Frame frame = Frame.parse(frameBuf);
       // TODO ignore padding frames?
