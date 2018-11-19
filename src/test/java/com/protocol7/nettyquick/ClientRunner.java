@@ -25,8 +25,6 @@ public class ClientRunner {
         InetSocketAddress server2 = new InetSocketAddress("test.privateoctopus.com", 4433);
         InetSocketAddress server3 = new InetSocketAddress("127.0.0.1", 6121);
 
-        ClientTlsSession tlsEngine = new ClientTlsSession();
-
         NioEventLoopGroup group = new NioEventLoopGroup();
         ClientHandler handler = new ClientHandler();
         Bootstrap b = new Bootstrap();

@@ -15,6 +15,7 @@ import org.junit.Test;
 import java.util.Arrays;
 import java.util.List;
 
+import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static com.protocol7.nettyquick.utils.Hex.dehex;
 import static com.protocol7.nettyquick.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
@@ -38,7 +39,7 @@ public class ClientTlsSessionTest {
 
         assertEquals(32, hello.getClientRandom().length);
         assertEquals(0, hello.getSessionId().length);
-        assertEquals("1301", hex(hello.getCipherSuites()));
+        assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
 
         assertEquals(32, ((KeyShare)hello.geExtension(ExtensionType.key_share).get()).getKey(Group.X25519).get().length);
         assertEquals(ImmutableList.of(Group.X25519), ((SupportedGroups)hello.geExtension(ExtensionType.supported_groups).get()).getGroups());
@@ -56,7 +57,7 @@ public class ClientTlsSessionTest {
     public void serverHello() {
         List<Extension> ext = ImmutableList.of(keyshare(), SupportedVersions.TLS13,TransportParameters.defaults());
 
-        byte[] b = sh(new byte[32], dehex("1301"), ext);
+        byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
         AEAD aead = started.handleServerHello(b);
 
@@ -64,8 +65,8 @@ public class ClientTlsSessionTest {
         // TODO mock random and test AEAD keys
     }
 
-    private byte[] sh(byte[] serverRandom, byte[] ciphers, List<Extension> ext) {
-        ServerHello sh = new ServerHello(serverRandom, new byte[0], ciphers, ext);
+    private byte[] sh(byte[] serverRandom, CipherSuite cipherSuite, List<Extension> ext) {
+        ServerHello sh = new ServerHello(serverRandom, new byte[0], cipherSuite, ext);
         ByteBuf bb = Unpooled.buffer();
         sh.write(bb);
         return Bytes.drainToArray(bb);
@@ -83,22 +84,15 @@ public class ClientTlsSessionTest {
     }
 
     @Test(expected = IllegalArgumentException.class)
-    public void serverHelloUnknownCipherSuite() {
-        byte[] b = sh(new byte[32], dehex("9999"), ext(keyshare(), SupportedVersions.TLS13,TransportParameters.defaults()));
-
-        started.handleServerHello(b);
-    }
-
-    @Test(expected = IllegalArgumentException.class)
     public void serverHelloNoKeyShare() {
-        byte[] b = sh(new byte[32], dehex("1301"), ext(SupportedVersions.TLS13, TransportParameters.defaults()));
+        byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(SupportedVersions.TLS13, TransportParameters.defaults()));
 
         started.handleServerHello(b);
     }
 
     @Test(expected = IllegalArgumentException.class)
     public void serverHelloNoSupportedVersion() {
-        byte[] b = sh(new byte[32], dehex("1301"), ext(keyshare(),TransportParameters.defaults()));
+        byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(),TransportParameters.defaults()));
 
         started.handleServerHello(b);
     }

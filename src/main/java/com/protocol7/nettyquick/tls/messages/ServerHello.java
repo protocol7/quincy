@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.Writeable;
+import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
@@ -19,12 +20,11 @@ import static com.protocol7.nettyquick.utils.Hex.hex;
 public class ServerHello implements Writeable {
 
     private final static byte[] VERSION = new byte[]{0x03, 0x03};
-    private final static byte[] CIPHER_SUITES = new byte[]{0x13, 0x01};
 
     public static ServerHello defaults(KeyExchange ke, TransportParameters tps) {
         byte[] clientRandom = Rnd.rndBytes(32);
         byte[] sessionId = new byte[0];
-        byte[] cipherSuites = Hex.dehex("1301");
+        CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
         List<Extension> extensions = ImmutableList.of(
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
                 new SupportedGroups(Group.X25519),
@@ -56,11 +56,10 @@ public class ServerHello implements Writeable {
         int sessionIdLen = bb.readByte();
         byte[] sessionId = new byte[sessionIdLen];
 
-        byte[] cipherSuites = new byte[2];
-        bb.readBytes(cipherSuites); // cipher suite
+        Optional<CipherSuite> cipherSuite = CipherSuite.parseOne(bb);
         // TODO implement all know cipher suites
-        if (!Arrays.equals(cipherSuites, CIPHER_SUITES)) {
-            throw new IllegalArgumentException("Illegal cipher suite: " + hex(version));
+        if (!cipherSuite.isPresent()) {
+            throw new IllegalArgumentException("Illegal cipher suite");
         }
 
         bb.readByte(); // compressionMethod
@@ -69,7 +68,7 @@ public class ServerHello implements Writeable {
         ByteBuf extBB = bb.readBytes(extensionLen);
         try {
             List<Extension> extensions = Extension.parseAll(extBB, false);
-            return new ServerHello(serverRandom, sessionId, cipherSuites, extensions);
+            return new ServerHello(serverRandom, sessionId, cipherSuite.get(), extensions);
         } finally {
             extBB.release();
         }
@@ -86,7 +85,7 @@ public class ServerHello implements Writeable {
         bb.writeBytes(serverRandom);
         bb.writeByte(sessionId.length);
         bb.writeBytes(sessionId);
-        bb.writeBytes(cipherSuites);
+        bb.writeShort(cipherSuites.getValue());
         bb.writeByte(0);
 
         int extPosition = bb.writerIndex();
@@ -103,10 +102,10 @@ public class ServerHello implements Writeable {
 
     private final byte[] serverRandom;
     private final byte[] sessionId;
-    private final byte[] cipherSuites;
+    private final CipherSuite cipherSuites;
     private final List<Extension> extensions;
 
-    public ServerHello(byte[] serverRandom, byte[] sessionId, byte[] cipherSuites, List<Extension> extensions) {
+    public ServerHello(byte[] serverRandom, byte[] sessionId, CipherSuite cipherSuites, List<Extension> extensions) {
         this.serverRandom = serverRandom;
         this.sessionId = sessionId;
         this.cipherSuites = cipherSuites;
@@ -121,7 +120,7 @@ public class ServerHello implements Writeable {
         return sessionId;
     }
 
-    public byte[] getCipherSuites() {
+    public CipherSuite getCipherSuites() {
         return cipherSuites;
     }
 
@@ -143,7 +142,7 @@ public class ServerHello implements Writeable {
         return "ServerHello{" +
                 "serverRandom=" + hex(serverRandom) +
                 ", sessionId=" + hex(sessionId) +
-                ", cipherSuites=" + hex(cipherSuites) +
+                ", cipherSuites=" + cipherSuites +
                 ", extensions=" + extensions +
                 '}';
     }

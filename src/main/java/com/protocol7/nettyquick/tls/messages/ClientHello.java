@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.tls.messages;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
@@ -16,12 +17,14 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
+import static com.protocol7.nettyquick.utils.Bytes.write24;
+
 public class ClientHello {
 
     public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
         byte[] clientRandom = Rnd.rndBytes(32);
         byte[] sessionId = new byte[0];
-        byte[] cipherSuites = Hex.dehex("1301");
+        List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
         List<Extension> extensions = ImmutableList.of(
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
                 new SupportedGroups(Group.X25519),
@@ -30,18 +33,6 @@ public class ClientHello {
         );
 
         return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
-    }
-
-    public static byte[] extend(byte[] ch, Extension extension) {
-        ClientHello hello = parse(ch).addExtension(extension);
-
-        ByteBuf bb = Unpooled.buffer();
-        hello.write(bb);
-
-        byte[] b = new byte[bb.writerIndex()];
-        bb.readBytes(b);
-
-        return b;
     }
 
     public static ClientHello parse(byte[] ch) {
@@ -73,9 +64,7 @@ public class ClientHello {
         byte[] sessionId = new byte[sessionIdLen];
         bb.readBytes(sessionId); // session ID
 
-        int cipherSuiteLen = bb.readShort();
-        byte[] cipherSuites = new byte[cipherSuiteLen];
-        bb.readBytes(cipherSuites); // cipher suites
+        List<CipherSuite> cipherSuites = CipherSuite.parseKnown(bb);
 
         byte[] compression = new byte[2];
         bb.readBytes(compression);
@@ -95,10 +84,10 @@ public class ClientHello {
 
     private final byte[] clientRandom;
     private final byte[] sessionId;
-    private final byte[] cipherSuites;
+    private final List<CipherSuite> cipherSuites;
     private final List<Extension> extensions;
 
-    public ClientHello(byte[] clientRandom, byte[] sessionId, byte[] cipherSuites, List<Extension> extensions) {
+    public ClientHello(byte[] clientRandom, byte[] sessionId, List<CipherSuite> cipherSuites, List<Extension> extensions) {
         Preconditions.checkArgument(clientRandom.length == 32);
         this.clientRandom = clientRandom;
         this.sessionId = Preconditions.checkNotNull(sessionId);
@@ -114,7 +103,7 @@ public class ClientHello {
         return sessionId;
     }
 
-    public byte[] getCipherSuites() {
+    public List<CipherSuite> getCipherSuites() {
         return cipherSuites;
     }
 
@@ -147,8 +136,8 @@ public class ClientHello {
         extBuf.readBytes(ext);
 
         // payload length
-        int len = 2 + clientRandom.length + 1 + sessionId.length + 2 + cipherSuites.length + 2 + 2 + ext.length;
-        Bytes.write24(bb, len);
+        int lenPos = bb.writerIndex();
+        write24(bb, 0); // placeholder
 
         // version
         bb.writeByte(0x03);
@@ -159,8 +148,7 @@ public class ClientHello {
         bb.writeByte(sessionId.length);
         bb.writeBytes(sessionId);
 
-        bb.writeShort(cipherSuites.length);
-        bb.writeBytes(cipherSuites);
+        CipherSuite.writeAll(bb, cipherSuites);
 
         // compression
         bb.writeByte(0x01);
@@ -168,6 +156,8 @@ public class ClientHello {
 
         bb.writeShort(ext.length);
         bb.writeBytes(ext);
+
+        write24(bb, bb.writerIndex() - lenPos - 3, lenPos);
     }
 
     @Override
@@ -175,7 +165,7 @@ public class ClientHello {
         return "ClientHello{" +
                 "clientRandom=" + Hex.hex(clientRandom) +
                 ", sessionId=" + Hex.hex(sessionId) +
-                ", cipherSuites=" + Hex.hex(cipherSuites) +
+                ", cipherSuites=" + cipherSuites +
                 ", extensions=" + extensions +
                 '}';
     }

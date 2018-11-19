@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick;
 
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 import static com.protocol7.nettyquick.utils.Hex.hex;
@@ -25,6 +26,11 @@ public class TestUtil {
 
   public static void assertHex(String expectedHex, byte[] actual) {
     assertEquals(expectedHex, hex(actual));
+  }
+
+  public static void assertHex(String expectedHex, ByteBuf actual) {
+    byte[] actualBytes = Bytes.peekToArray(actual);
+    assertHex(expectedHex, actualBytes);
   }
 
   public static void assertHex(byte[] expected, byte[] actual) {

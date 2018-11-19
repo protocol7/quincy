@@ -1,6 +1,8 @@
 package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.TestUtil;
+import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
 import com.protocol7.nettyquick.utils.Hex;
@@ -11,6 +13,7 @@ import org.junit.Test;
 
 import java.util.List;
 
+import static com.protocol7.nettyquick.TestUtil.assertHex;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -23,9 +26,9 @@ public class ServerHelloTest {
 
         ServerHello hello = ServerHello.parse(bb);
 
-        assertEquals("7cdef17464db2589d38fd069fd8e593fd7deda108bb84e12720212c47b74f961", Hex.hex(hello.getServerRandom()));
-        assertEquals("", Hex.hex(hello.getSessionId()));
-        assertEquals("1301", Hex.hex(hello.getCipherSuites()));
+        assertHex("7cdef17464db2589d38fd069fd8e593fd7deda108bb84e12720212c47b74f961", hello.getServerRandom());
+        assertHex("", hello.getSessionId());
+        assertEquals(CipherSuite.TLS_AES_128_GCM_SHA256, hello.getCipherSuites());
 
         assertEquals(2, hello.getExtensions().size());
     }
@@ -33,7 +36,7 @@ public class ServerHelloTest {
     @Test
     public void roundtrip() {
         List<Extension> ext = ImmutableList.of(SupportedVersions.TLS13);
-        ServerHello sh = new ServerHello(Rnd.rndBytes(32), new byte[0], Hex.dehex("1301"), ext);
+        ServerHello sh = new ServerHello(Rnd.rndBytes(32), new byte[0], CipherSuite.TLS_AES_128_GCM_SHA256, ext);
 
         ByteBuf bb = Unpooled.buffer();
 
@@ -41,9 +44,9 @@ public class ServerHelloTest {
 
         ServerHello parsed = ServerHello.parse(bb);
 
-        assertArrayEquals(sh.getServerRandom(), parsed.getServerRandom());
-        assertArrayEquals(sh.getSessionId(), parsed.getSessionId());
-        assertArrayEquals(sh.getCipherSuites(), parsed.getCipherSuites());
+        assertHex(sh.getServerRandom(), parsed.getServerRandom());
+        assertHex(sh.getSessionId(), parsed.getSessionId());
+        assertEquals(sh.getCipherSuites(), parsed.getCipherSuites());
 
         assertEquals(ext, parsed.getExtensions());
 
