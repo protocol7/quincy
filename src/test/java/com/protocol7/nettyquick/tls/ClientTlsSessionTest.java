@@ -17,7 +17,8 @@ import java.util.List;
 
 import static com.protocol7.nettyquick.utils.Hex.dehex;
 import static com.protocol7.nettyquick.utils.Hex.hex;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 
 public class ClientTlsSessionTest {
 

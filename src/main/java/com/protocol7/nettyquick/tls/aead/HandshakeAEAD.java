@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls.aead;
 
 import com.protocol7.nettyquick.tls.HKDFUtil;
-import com.protocol7.nettyquick.utils.Hex;
 
 public class HandshakeAEAD {
 

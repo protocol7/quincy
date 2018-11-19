@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
 import com.google.common.primitives.Ints;
-import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;

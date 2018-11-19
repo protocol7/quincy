@@ -1,6 +1,5 @@
 package com.protocol7.nettyquick;
 
-import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 import static com.protocol7.nettyquick.utils.Hex.hex;

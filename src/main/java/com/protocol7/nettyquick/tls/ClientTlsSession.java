@@ -9,14 +9,12 @@ import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
 import com.protocol7.nettyquick.tls.extensions.TransportParameters;
 import com.protocol7.nettyquick.tls.messages.ClientFinished;
 import com.protocol7.nettyquick.tls.messages.ClientHello;
-import com.protocol7.nettyquick.tls.messages.ServerHandshake;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake.EncryptedExtensions;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificate;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerCertificateVerify;
 import com.protocol7.nettyquick.tls.messages.ServerHandshake.ServerHandshakeFinished;
 import com.protocol7.nettyquick.tls.messages.ServerHello;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 

@@ -2,8 +2,8 @@ package com.protocol7.nettyquick.tls;
 
 import org.junit.Test;
 
-import static com.protocol7.nettyquick.tls.Group.*;
 import static com.protocol7.nettyquick.tls.Group.X25519;
+import static com.protocol7.nettyquick.tls.Group.X448;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 

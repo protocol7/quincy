@@ -3,9 +3,7 @@ package com.protocol7.nettyquick.tls.extensions;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
-import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 
 import java.util.Arrays;
 import java.util.Objects;

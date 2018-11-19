@@ -1,9 +1,7 @@
 package com.protocol7.nettyquick.tls;
 
 import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Hex;
 import org.apache.commons.lang.StringUtils;
 
 import java.security.GeneralSecurityException;
