@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
@@ -10,14 +11,20 @@ import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 
 import static com.google.common.base.Preconditions.checkNotNull;
+import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
 
 public class ShortHeader implements Header {
 
   public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
     bb.markReaderIndex();
+
+    Bytes.debug(bb);
+
     byte firstByte = bb.readByte();
 
     boolean keyPhase = (firstByte & 0x40) == 0x40;
+
+    Bytes.debug(bb);
 
     Optional<ConnectionId> connId;
     if (connIdLength > 0) {
@@ -26,7 +33,11 @@ public class ShortHeader implements Header {
         connId = Optional.empty();
     }
 
-    PacketNumber packetNumber = PacketNumber.read(bb);
+    Bytes.debug(bb);
+
+    PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+
+    Bytes.debug(bb);
 
     byte[] aad = new byte[bb.readerIndex()];
     bb.resetReaderIndex();
@@ -35,7 +46,7 @@ public class ShortHeader implements Header {
     Bytes.debug("113 ", bb);
     System.out.println("114 " + Hex.hex(aad));
 
-    Payload payload = Payload.parse(bb, bb.readableBytes(), aead.forConnection(connId, PacketType.Short), packetNumber, aad);
+    Payload payload = Payload.parse(bb, bb.readableBytes(), aead.forConnection(connId, OneRtt), packetNumber, aad);
 
     return new ShortHeader(keyPhase,
                            connId,

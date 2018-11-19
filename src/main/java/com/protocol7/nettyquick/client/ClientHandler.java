@@ -13,7 +13,7 @@ import org.slf4j.MDC;
 public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
 
-  private Connection connection;
+  private ClientConnection connection;
 
   public void setConnection(final ClientConnection connection) {
     this.connection = connection;
@@ -24,7 +24,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
       Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber(),
-              (connId, packetType) -> connection.getAEAD(packetType), connection.getDestinationConnectionId().get().getLength());
+              (connId, packetType) -> connection.getAEAD(packetType), connection.getLastDestConnectionIdLength());
 
       MDC.put("actor", "client");
       if (packet instanceof FullPacket) {

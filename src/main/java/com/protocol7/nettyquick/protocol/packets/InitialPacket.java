@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.protocol.packets;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
@@ -85,7 +86,7 @@ public class InitialPacket implements FullPacket {
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId, PacketType.Initial);
+    AEAD aead = aeadProvider.forConnection(destConnId, EncryptionLevel.Initial);
 
     Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 

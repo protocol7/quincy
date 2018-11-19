@@ -1,11 +1,10 @@
 package com.protocol7.nettyquick.client;
 
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.protocol.packets.ShortPacket;
+import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -31,6 +30,7 @@ public class ClientConnection implements Connection {
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
   private Optional<ConnectionId> destConnectionId;
+  private int lastDestConnectionIdLength;
   private Optional<ConnectionId> srcConnectionId = Optional.empty();
   private final EventExecutorGroup group;
   private final Channel channel;
@@ -75,7 +75,7 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p, getAEAD(((FullPacket)p).getType()));
+    packetBuffer.send(p, getAEAD(EncryptionLevel.forPacket(p)));
     return p;
   }
 
@@ -105,9 +105,15 @@ public class ClientConnection implements Connection {
     initAEAD();
   }
 
+  public int getLastDestConnectionIdLength() {
+    System.out.println("!!!!!!!! Parsing with conn ID length: " + lastDestConnectionIdLength);
+
+    return lastDestConnectionIdLength;
+  }
+
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
-    packet.write(bb, getAEAD(((FullPacket)packet).getType()));
+    packet.write(bb, getAEAD(EncryptionLevel.forPacket(packet)));
     channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Client sent {}", packet);
   }
@@ -115,25 +121,26 @@ public class ClientConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Client got {}", packet);
 
+    if (packet.getDestinationConnectionId().isPresent()) {
+      lastDestConnectionIdLength = packet.getDestinationConnectionId().get().getLength();
+    } else {
+      lastDestConnectionIdLength = 0;
+    }
+
     packetBuffer.onPacket(packet, null);  // TODO assign aead for sent packet
     stateMachine.processPacket(packet);
   }
 
   @Override
-  public AEAD getAEAD(PacketType packetType) {
-    System.out.println("Initial " + initialAead);
-    System.out.println("Handshake " + handshakeAead);
-    System.out.println("1-RTT " + oneRttAead);
-
-
-    if (packetType == PacketType.Initial) {
-      System.out.println("Using initial AEAD" + packetType);
+  public AEAD getAEAD(EncryptionLevel level) {
+    if (level == EncryptionLevel.Initial) {
+      System.out.println("Using initial AEAD");
       return initialAead;
-    } else if (packetType == PacketType.Handshake) {
-      System.out.println("Using handshake AEAD" + packetType + " - " + oneRttAead);
+    } else if (level == EncryptionLevel.Handshake) {
+      System.out.println("Using handshake AEAD");
       return handshakeAead;
     } else {
-      System.out.println("Using 1-RTT AEAD for " + packetType);
+      System.out.println("Using 1-RTT AEAD for ");
       return oneRttAead;
     }
   }

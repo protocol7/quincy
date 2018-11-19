@@ -1,11 +1,10 @@
 package com.protocol7.nettyquick.server;
 
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.protocol.packets.ShortPacket;
+import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -104,10 +103,10 @@ public class ServerConnection implements Connection {
   }
 
   @Override
-  public AEAD getAEAD(PacketType packetType) {
-    if (packetType == PacketType.Initial) {
+  public AEAD getAEAD(EncryptionLevel level) {
+    if (level == EncryptionLevel.Initial) {
       return initialAead;
-    } else if (packetType == PacketType.Handshake) {
+    } else if (level == EncryptionLevel.Handshake) {
       throw new RuntimeException("Not implemented");
     } else {
       throw new RuntimeException("Not implemented");

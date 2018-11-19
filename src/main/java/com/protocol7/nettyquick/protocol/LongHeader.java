@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
@@ -37,7 +38,7 @@ public class LongHeader implements Header {
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    AEAD aead = aeadProvider.forConnection(destConnId, packetType);
+    AEAD aead = aeadProvider.forConnection(destConnId, EncryptionLevel.forPacketType(packetType));
 
     Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 

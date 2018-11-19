@@ -8,9 +8,7 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
-import com.protocol7.nettyquick.protocol.packets.FullPacket;
-import com.protocol7.nettyquick.protocol.packets.InitialPacket;
-import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -59,7 +57,6 @@ public class PacketBuffer {
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
-        System.out.println("!!!!!!!!! add acks " + ackFrame);
         sendImpl(((FullPacket)packet).addFrame(ackFrame), aead);
       } else {
         sendImpl(packet, aead);
@@ -92,7 +89,7 @@ public class PacketBuffer {
   }
 
   private boolean shouldFlush(Packet packet) {
-    if (packet instanceof InitialPacket) {
+    if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
       return false;
     } else if (packet instanceof FullPacket && acksOnly((FullPacket)packet)) {
       return false;
@@ -126,20 +123,18 @@ public class PacketBuffer {
   }
 
   private void flushAcks(AEAD aead) {
-//    if (connection.getDestinationConnectionId().isPresent()) { // TODO hack, check valid state to send acks
-//      List<AckBlock> blocks = drainAcks(ackQueue);
-//      if (!blocks.isEmpty()) {
-//        AckFrame ackFrame = new AckFrame(123, blocks);
-//        Packet packet = new ShortPacket(new ShortHeader(false,
-//                connection.getDestinationConnectionId(),
-//                connection.nextSendPacketNumber(),
-//                new ProtectedPayload(ackFrame)));
-//
-//        log.debug("Flushed acks {}", blocks);
-//
-//        sendImpl(packet, aead);
-//      }
-//    }
+      List<AckBlock> blocks = drainAcks(ackQueue);
+      if (!blocks.isEmpty()) {
+        AckFrame ackFrame = new AckFrame(123, blocks);
+        Packet packet = new ShortPacket(new ShortHeader(false,
+                connection.getDestinationConnectionId(),
+                connection.nextSendPacketNumber(),
+                new Payload(ackFrame)));
+
+        log.debug("Flushed acks {}", blocks);
+
+        sendImpl(packet, aead);
+      }
   }
 
   // TODO break out and test directly
