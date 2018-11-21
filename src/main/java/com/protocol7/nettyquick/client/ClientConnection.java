@@ -12,13 +12,6 @@ import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
-import com.protocol7.nettyquick.utils.Bytes;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.nio.NioEventLoopGroup;
-import io.netty.channel.socket.DatagramPacket;
-import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,16 +25,15 @@ public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
-  private Optional<ConnectionId> destConnectionId;
+  private ConnectionId destConnectionId;
   private int lastDestConnectionIdLength;
   private Optional<ConnectionId> srcConnectionId = Optional.empty();
-  private final EventExecutorGroup group;
-  private final Channel channel;
+  private final PacketSender packetSender;
   private final InetSocketAddress serverAddress;
   private final StreamListener streamListener;
 
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
-  private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(new PacketNumber(1)); // TODO fix
+  private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(new PacketNumber(0)); // TODO fix
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
@@ -52,13 +44,11 @@ public class ClientConnection implements Connection {
   private AEAD oneRttAead;
 
   public ClientConnection(final ConnectionId destConnectionId,
-                          final NioEventLoopGroup group,
-                          final Channel channel,
+                          final PacketSender packetSender,
                           final InetSocketAddress serverAddress,
                           final StreamListener streamListener) {
-    this.destConnectionId = Optional.ofNullable(destConnectionId);
-    this.group = group;
-    this.channel = channel;
+    this.destConnectionId = destConnectionId;
+    this.packetSender = packetSender;
     this.serverAddress = serverAddress;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
@@ -69,7 +59,7 @@ public class ClientConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.initialAead = NullAEAD.create(destConnectionId.get(), true);
+    this.initialAead = NullAEAD.create(destConnectionId, true);
   }
 
   public Future<Void> handshake() {
@@ -96,14 +86,14 @@ public class ClientConnection implements Connection {
 
   @Override
   public Optional<ConnectionId> getDestinationConnectionId() {
-    return destConnectionId;
+    return Optional.ofNullable(destConnectionId);
   }
 
   public void setSourceConnectionId(Optional<ConnectionId> srcConnId) {
     this.srcConnectionId = srcConnId;
   }
 
-  public void setDestinationConnectionId(Optional<ConnectionId> destConnId) {
+  public void setDestinationConnectionId(ConnectionId destConnId) {
     this.destConnectionId = destConnId;
     initAEAD();
   }
@@ -113,12 +103,8 @@ public class ClientConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    ByteBuf bb = Unpooled.buffer();
-    packet.write(bb, getAEAD(EncryptionLevel.forPacket(packet)));
+    packetSender.send(packet, serverAddress, getAEAD(EncryptionLevel.forPacket(packet))).awaitUninterruptibly(); // TODO fix
 
-    Bytes.debug("Sending ", bb);
-
-    channel.writeAndFlush(new DatagramPacket(bb, serverAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
     log.debug("Client sent {}", packet);
   }
 
@@ -132,7 +118,7 @@ public class ClientConnection implements Connection {
     }
 
     packetBuffer.onPacket(packet, null);  // TODO assign aead for sent packet
-    stateMachine.processPacket(packet);
+    stateMachine.handlePacket(packet);
   }
 
   @Override
@@ -169,6 +155,10 @@ public class ClientConnection implements Connection {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 
+  public void resetSendPacketNumber() {
+    sendPacketNumber.set(new PacketNumber(0));
+  }
+
   public Stream openStream() {
     return streams.openStream(true, true, streamListener);
   }
@@ -178,6 +168,6 @@ public class ClientConnection implements Connection {
   }
 
   public Future<?> close() {
-    return group.shutdownGracefully();
+    return packetSender.destroy();
   }
 }

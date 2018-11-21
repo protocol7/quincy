@@ -46,7 +46,7 @@ public class HandshakePacket implements FullPacket {
 
   private final LongHeader header;
 
-  public HandshakePacket(LongHeader header) {
+  private HandshakePacket(LongHeader header) {
     this.header = header;
   }
 

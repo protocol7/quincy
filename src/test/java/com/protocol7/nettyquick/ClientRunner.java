@@ -2,10 +2,10 @@ package com.protocol7.nettyquick;
 
 import com.protocol7.nettyquick.client.ClientConnection;
 import com.protocol7.nettyquick.client.ClientHandler;
+import com.protocol7.nettyquick.client.NettyPacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
-import com.protocol7.nettyquick.tls.ClientTlsSession;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
@@ -37,20 +37,23 @@ public class ClientRunner {
 
         ConnectionId connectionId = ConnectionId.random();
 
-        ClientConnection conn = new ClientConnection(connectionId, group, channelFuture.get(), server3, new StreamListener() {
-            @Override
-            public void onData(Stream stream, byte[] data) {
-                System.out.println(new String(data));
-            }
+        ClientConnection conn = new ClientConnection(
+                connectionId,
+                new NettyPacketSender(group, channelFuture.get()),
+                server3,
+                new StreamListener() {
+                    @Override
+                    public void onData(Stream stream, byte[] data) {
+                        System.out.println(new String(data));
+                    }
 
-            @Override
-            public void onDone() {
+                    @Override
+                    public void onDone() {
 
-            }
+                    }
 
-            @Override
-            public void onReset(Stream stream, int applicationErrorCode, long offset) {
-
+                    @Override
+                    public void onReset(Stream stream, int applicationErrorCode, long offset) {
             }
         });
         handler.setConnection(conn);

@@ -9,7 +9,6 @@ public class VerifyData {
         Preconditions.checkArgument(handshakeTrafficSecret.length == 32);
         Preconditions.checkArgument(finishedHash.length == 32);
 
-
         String labelPrefix;
         if (quic) {
             labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
@@ -31,6 +30,10 @@ public class VerifyData {
     }
 
     public static boolean verify(byte[] verifyData, byte[] handshakeTrafficSecret, byte[] finishedHash, boolean quic) {
+        Preconditions.checkArgument(verifyData.length > 0);
+        Preconditions.checkArgument(handshakeTrafficSecret.length == 32);
+        Preconditions.checkArgument(finishedHash.length == 32);
+
         byte[] actual = create(handshakeTrafficSecret, finishedHash, quic);
 
         return CryptoEquals.isEqual(verifyData, actual);

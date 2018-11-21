@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
@@ -69,13 +70,13 @@ public class ClientStateMachine {
     connection.sendPacket(InitialPacket.create(
             connection.getDestinationConnectionId(),
             connection.getSourceConnectionId(),
-            new PacketNumber(1),
-            Version.TLS_DEV,
+            connection.nextSendPacketNumber(),
+            Version.CURRENT,
             token,
             frames));
   }
 
-  public void processPacket(Packet packet) {
+  public void handlePacket(Packet packet) {
     log.info("Client got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
 
     synchronized (this) { // TODO refactor to make non-synchronized
@@ -83,7 +84,7 @@ public class ClientStateMachine {
       if (state == ClientState.WaitingForServerHello) {
         if (packet instanceof InitialPacket) {
 
-          connection.setDestinationConnectionId(packet.getSourceConnectionId());
+          connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
 
           for (Frame frame : ((InitialPacket)packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
@@ -95,12 +96,12 @@ public class ClientStateMachine {
             }
           }
 
-          handshakeFuture.setSuccess(null);
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {
           RetryPacket retryPacket = (RetryPacket) packet;
-          connection.setDestinationConnectionId(packet.getSourceConnectionId());
-          connection.setSourceConnectionId(Optional.empty());
+          connection.setDestinationConnectionId(ConnectionId.random());
+          connection.setSourceConnectionId(packet.getSourceConnectionId());
+          connection.resetSendPacketNumber();
 
           tlsEngine.reset();
 
@@ -122,11 +123,12 @@ public class ClientStateMachine {
                 connection.sendPacket(HandshakePacket.create(
                         connection.getDestinationConnectionId(),
                         connection.getSourceConnectionId(),
-                        new PacketNumber(2),
+                        connection.nextSendPacketNumber(),
                         Version.TLS_DEV,
                         new CryptoFrame(0, result.get().getFin())));
 
                 state = ClientState.Ready;
+                handshakeFuture.setSuccess(null);
               }
             }
           }

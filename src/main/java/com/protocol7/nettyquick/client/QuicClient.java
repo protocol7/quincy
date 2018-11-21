@@ -35,7 +35,7 @@ public class QuicClient {
                                                      channelFuture,
                                                      channel -> {
                                                        ClientConnection connection = new ClientConnection(ConnectionId.random(),
-                                                                                                          group, channel,
+                                                                                                          new NettyPacketSender(group, channel),
                                                                                                           serverAddress, streamListener);
                                                        handler.setConnection(connection); // TODO fix cyclic creation
                                                        return connection;

@@ -16,7 +16,7 @@ public class ReceiveStateMachine {
   private ReceiveStreamState state = Recv;
 
   public void onStream(boolean fin) {
-    if (state == Recv) {
+    if (state == Recv || state == SizeKnown) {
       if (fin) {
         state = SizeKnown;
       }

@@ -20,7 +20,6 @@ public class TlsSessions {
     @Before
     public void setUp() throws Exception {
         privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
-
         byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
 
         server = new ServerTlsSession(ImmutableList.of(serverCert), privateKey);
