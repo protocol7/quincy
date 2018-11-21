@@ -79,7 +79,7 @@ public class ServerConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p, initialAead);
+    packetBuffer.send(p);
     return p;
   }
 
@@ -100,7 +100,7 @@ public class ServerConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    packetBuffer.onPacket(packet, initialAead); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
+    packetBuffer.onPacket(packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
     stateMachine.processPacket(packet);
   }
 

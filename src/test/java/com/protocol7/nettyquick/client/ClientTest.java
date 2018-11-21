@@ -30,23 +30,22 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class ClientStateMachineTest {
+public class ClientTest {
 
-  private static final int HANDSHAKE_PACKETS = 3; // the number of packets sent during handshake
   private static final byte[] DATA = "Hello".getBytes();
   private static final byte[] DATA2 = "world".getBytes();
 
-  private final ConnectionId destConnectionId = ConnectionId.random();
-  private final ConnectionId srcConnectionId = ConnectionId.random();
-  @Mock private PacketSender packetSender;
   private ClientConnection connection;
-  @Mock private InetSocketAddress serverAddress;
-  @Mock private StreamListener streamListener;
-  private ClientStateMachine stm;
-  private PacketNumber packetNumber = new PacketNumber(0);
-  private StreamId streamId = StreamId.random(true, true);
   private ServerTlsSession serverTlsSession;
 
+  private final ConnectionId destConnectionId = ConnectionId.random();
+  private final ConnectionId srcConnectionId = ConnectionId.random();
+  private PacketNumber packetNumber = new PacketNumber(0);
+  private StreamId streamId = StreamId.random(true, true);
+
+  @Mock private PacketSender packetSender;
+  @Mock private InetSocketAddress serverAddress;
+  @Mock private StreamListener streamListener;
 
   @Before
   public void setUp() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
@@ -56,24 +55,19 @@ public class ClientStateMachineTest {
 
     connection = new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
 
-    stm = new ClientStateMachine(connection);
-
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
     byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
 
     serverTlsSession = new ServerTlsSession(ImmutableList.of(serverCert), privateKey);
-
   }
 
   @Test
   public void handshake() {
-    assertEquals(ClientStateMachine.ClientState.BeforeInitial, stm.getState());
-
     // start handshake
-    Future<Void> handshakeFuture = stm.handshake();
+    Future<Void> handshakeFuture = connection.handshake();
 
     // validate first packet sent
-    InitialPacket initialPacket = (InitialPacket) captureSentPacket();
+    InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
     assertEquals(1, initialPacket.getPacketNumber().asLong());
     assertEquals(destConnectionId, initialPacket.getDestinationConnectionId().get());
     assertFalse(initialPacket.getSourceConnectionId().isPresent());
@@ -82,14 +76,13 @@ public class ClientStateMachineTest {
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
     assertTrue(initialPacket.getPayload().getLength() >= 1200);
 
-    // verify statemachine state
+    // verify handshake state
     assertFalse(handshakeFuture.isDone());
-    assertEquals(ClientStateMachine.ClientState.WaitingForServerHello, stm.getState());
 
     byte[] retryToken = Rnd.rndBytes(20);
 
     // first packet did not contain token, so server send retry
-    stm.handlePacket(new RetryPacket(
+    connection.onPacket(new RetryPacket(
             Version.CURRENT,
             Optional.empty(),
             Optional.of(srcConnectionId),
@@ -97,7 +90,7 @@ public class ClientStateMachineTest {
             retryToken));
 
     // validate new initial packet sent
-    InitialPacket initialPacket2 = (InitialPacket) captureSentPacket();
+    InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
     assertEquals(1, initialPacket2.getPacketNumber().asLong());
     ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
     assertNotEquals(destConnectionId, newDestConnId);
@@ -111,14 +104,13 @@ public class ClientStateMachineTest {
 
     assertTrue(initialPacket2.getPayload().getLength() >= 1200);
 
-    // verify statemachine state
+    // verify handshake state
     assertFalse(handshakeFuture.isDone());
-    assertEquals(ClientStateMachine.ClientState.WaitingForServerHello, stm.getState());
 
     ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
 
     // receive server hello
-    stm.handlePacket(InitialPacket.create(
+    connection.onPacket(InitialPacket.create(
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
@@ -128,9 +120,11 @@ public class ClientStateMachineTest {
 
     // verify no packet sent here
     verify(packetSender, times(2)).send(any(), any(), any());
+    // verify handshake state
+    assertFalse(handshakeFuture.isDone());
 
     // receive server handshake
-    stm.handlePacket(HandshakePacket.create(
+    connection.onPacket(HandshakePacket.create(
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
@@ -138,7 +132,7 @@ public class ClientStateMachineTest {
             new CryptoFrame(0, shah.getServerHandshake())));
 
     // validate client fin handshake packet
-    HandshakePacket hp = (HandshakePacket) captureSentPacket();
+    HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
     assertEquals(2, hp.getPacketNumber().asLong());
     assertEquals(srcConnectionId, hp.getDestinationConnectionId().get()); // TODO quic-go requires this, but is it correct?
     assertEquals(srcConnectionId, hp.getSourceConnectionId().get());
@@ -146,29 +140,29 @@ public class ClientStateMachineTest {
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
-    assertEquals(ClientStateMachine.ClientState.Ready, stm.getState());
   }
 
   @Test
   public void streamFrame() {
     handshake();
 
-    stm.handlePacket(packet(new StreamFrame(streamId, 0, true, DATA)));
+    connection.onPacket(packet(new StreamFrame(streamId, 0, true, DATA)));
 
     ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener).onData(any(), dataCaptor.capture());
 
     assertArrayEquals(DATA, dataCaptor.getValue());
 
-    verifyPacketsSentAfterHandshake(0);
+    // verify ack
+    assertAck(4, 3, 3, 3);
   }
 
   @Test
   public void streamFrameInOrder() {
     handshake();
 
-    stm.handlePacket(packet(new StreamFrame(streamId, 0, false, DATA)));
-    stm.handlePacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
+    connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
+    connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
 
     ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
@@ -178,14 +172,19 @@ public class ClientStateMachineTest {
     assertEquals(2, datas.size());
     assertArrayEquals(DATA, datas.get(0));
     assertArrayEquals(DATA2, datas.get(1));
+
+    // verify ack
+    assertAck(4, 3, 3, 3);
+    // verify ack
+    assertAck(5, 4, 4, 4);
   }
 
   @Test
   public void streamFrameOutOfOrder() {
     handshake();
 
-    stm.handlePacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
-    stm.handlePacket(packet(new StreamFrame(streamId, 0, false, DATA)));
+    connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
+    connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
 
     ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
@@ -195,50 +194,57 @@ public class ClientStateMachineTest {
     assertEquals(2, datas.size());
     assertArrayEquals(DATA, datas.get(0));
     assertArrayEquals(DATA2, datas.get(1));
+
+    // verify acks
+    assertAck(4, 3, 3, 3);
+    assertAck(5, 4, 4, 4);
   }
 
   @Test
   public void resetStreamFrame() {
     handshake();
 
-    stm.handlePacket(packet(new RstStreamFrame(streamId, 123, 0)));
+    connection.onPacket(packet(new RstStreamFrame(streamId, 123, 0)));
 
     verify(streamListener).onReset(any(Stream.class), eq(123), eq(0L));
+
+    // verify ack
+    assertAck(4, 3, 3, 3);
   }
 
   @Test
   public void ping() {
     handshake();
 
-    stm.handlePacket(packet(PingFrame.INSTANCE));
+    connection.onPacket(packet(PingFrame.INSTANCE));
 
-    // nothing should happen
-    verifyPacketsSentAfterHandshake(0);
+    // verify ack
+    assertAck(4, 3, 3, 3);
+  }
+
+  private void assertAck(int number, int packetNumber, int smallest, int largest) {
+    ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
+    assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
+    assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
+    assertEquals(new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
   }
 
   @Test
   public void frameBeforeHandshake() {
     // not handshaking
-    assertEquals(ClientStateMachine.ClientState.BeforeInitial, stm.getState());
 
-    stm.handlePacket(packet(PingFrame.INSTANCE));
+    connection.onPacket(packet(PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
     verify(packetSender, never()).send(any(), any(), any());
-    assertEquals(ClientStateMachine.ClientState.BeforeInitial, stm.getState());
   }
 
-
-  private void verifyPacketsSentAfterHandshake(int number) {
-    verify(packetSender, times(HANDSHAKE_PACKETS + number)).send(any(), any(), any());
-  }
-
-  private Packet captureSentPacket() {
+  private Packet captureSentPacket(int number) {
     ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeastOnce()).send(packetCaptor.capture(), any(), any());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any(), any());
 
     List<Packet> values = packetCaptor.getAllValues();
-    return values.get(values.size() - 1);
+    return values.get(number - 1);
   }
 
   private Packet packet(Frame... frames) {

@@ -20,6 +20,10 @@ public class AckBlock {
     this.largest = largest;
   }
 
+  public AckBlock(final int smallest, final int largest) {
+    this(new PacketNumber(smallest), new PacketNumber(largest));
+  }
+
   public PacketNumber getSmallest() {
     return smallest;
   }

@@ -51,22 +51,22 @@ public class PacketBuffer {
     return largestAcked.get();
   }
 
-  public void send(Packet packet, AEAD aead) {
+  public void send(Packet packet) {
     if (packet instanceof FullPacket) {
       List<AckBlock> ackBlocks = drainAcks(ackQueue);
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
-        sendImpl(((FullPacket)packet).addFrame(ackFrame), aead);
+        sendImpl(((FullPacket)packet).addFrame(ackFrame));
       } else {
-        sendImpl(packet, aead);
+        sendImpl(packet);
       }
     } else {
-      sendImpl(packet, aead);
+      sendImpl(packet);
     }
   }
 
-  private void sendImpl(Packet packet, AEAD aead) {
+  private void sendImpl(Packet packet) {
     if (packet instanceof FullPacket) {
       buffer.put(((FullPacket)packet).getPacketNumber(), packet);
       log.debug("Buffered packet {}", ((FullPacket)packet).getPacketNumber());
@@ -74,7 +74,7 @@ public class PacketBuffer {
     sender.send(packet);
   }
 
-  public void onPacket(Packet packet, AEAD aead) {
+  public void onPacket(Packet packet) {
     if (packet instanceof FullPacket) {
       ackQueue.add(((FullPacket)packet).getPacketNumber());
       log.debug("Acked packet {}", ((FullPacket)packet).getPacketNumber());
@@ -83,7 +83,7 @@ public class PacketBuffer {
 
       if (shouldFlush(packet)) {
         log.debug("Directly acking packet");
-        flushAcks(aead);
+        flushAcks();
       }
     }
   }
@@ -122,7 +122,7 @@ public class PacketBuffer {
     }
   }
 
-  private void flushAcks(AEAD aead) {
+  private void flushAcks() {
       List<AckBlock> blocks = drainAcks(ackQueue);
       if (!blocks.isEmpty()) {
         AckFrame ackFrame = new AckFrame(123, blocks);
@@ -133,7 +133,7 @@ public class PacketBuffer {
 
         log.debug("Flushed acks {}", blocks);
 
-        sendImpl(packet, aead);
+        sendImpl(packet);
       }
   }
 

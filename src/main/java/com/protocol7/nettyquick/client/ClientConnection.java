@@ -68,7 +68,7 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    packetBuffer.send(p, getAEAD(EncryptionLevel.forPacket(p)));
+    packetBuffer.send(p);
     return p;
   }
 
@@ -117,7 +117,9 @@ public class ClientConnection implements Connection {
       lastDestConnectionIdLength = 0;
     }
 
-    packetBuffer.onPacket(packet, null);  // TODO assign aead for sent packet
+    if (stateMachine.getState() != ClientStateMachine.ClientState.BeforeInitial) {
+      packetBuffer.onPacket(packet);
+    }
     stateMachine.handlePacket(packet);
   }
 

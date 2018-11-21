@@ -27,7 +27,7 @@ public class ClientStateMachine {
     BeforeInitial,
     WaitingForServerHello,
     WaitingForHandshake,
-    Ready;
+    Ready
   }
 
   private ClientState state = ClientState.BeforeInitial;

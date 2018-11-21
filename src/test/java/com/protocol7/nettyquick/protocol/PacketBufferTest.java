@@ -29,10 +29,8 @@ public class PacketBufferTest {
 
   private PacketBuffer buffer;
 
-  private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
-
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
@@ -53,7 +51,7 @@ public class PacketBufferTest {
   public void dontAckOnlyAcks() {
     Packet ackPacket = packet(1, new AckFrame(123, AckBlock.fromLongs(7, 8)));
 
-    buffer.onPacket(ackPacket, aead);
+    buffer.onPacket(ackPacket);
 
     // should not send an ack
     verifyNoMoreInteractions(connection);
@@ -61,7 +59,7 @@ public class PacketBufferTest {
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.onPacket(pingPacket, aead);
+    buffer.onPacket(pingPacket);
 
     //Packet actual = verifySent();
 
@@ -82,7 +80,7 @@ public class PacketBufferTest {
   public void ackOnPing() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.onPacket(pingPacket, aead);
+    buffer.onPacket(pingPacket);
 
     // Packet actual = verifySent();
 
@@ -96,7 +94,7 @@ public class PacketBufferTest {
   public void send() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.send(pingPacket, aead);
+    buffer.send(pingPacket);
 
     Packet actual = verifySent();
 
@@ -110,12 +108,12 @@ public class PacketBufferTest {
     // send packet to buffer it
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
-    buffer.send(pingPacket, aead);
+    buffer.send(pingPacket);
     assertBuffered(2);
 
     // now ack the packet
     Packet ackPacket = packet(3, new AckFrame(123, AckBlock.fromLongs(2, 2)));
-    buffer.onPacket(ackPacket, aead);
+    buffer.onPacket(ackPacket);
 
     // all messages should now have been acked
     assertBufferEmpty();
