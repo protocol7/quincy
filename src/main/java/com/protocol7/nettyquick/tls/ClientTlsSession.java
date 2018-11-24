@@ -17,11 +17,15 @@ import com.protocol7.nettyquick.tls.messages.ServerHello;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.security.PublicKey;
 import java.util.Optional;
 
 public class ClientTlsSession {
+
+    private final Logger log = LoggerFactory.getLogger(ClientTlsSession.class);
 
     private KeyExchange kek;
 
@@ -137,7 +141,7 @@ public class ClientTlsSession {
             return Optional.of(new HandshakeResult(b, aead));
         } catch (IndexOutOfBoundsException e) {
             // wait for more data
-            System.out.println("Need more data, waiting...");
+            log.debug("Need more data, waiting...");
             handshakeBuffer.resetReaderIndex();
 
             return Optional.empty();
