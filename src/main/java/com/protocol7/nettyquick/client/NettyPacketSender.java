@@ -22,7 +22,7 @@ public class NettyPacketSender implements PacketSender {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    return channel.writeAndFlush(new DatagramPacket(bb, address)); // TODO fix
+    return channel.writeAndFlush(new DatagramPacket(bb, address));
   }
 
   @Override

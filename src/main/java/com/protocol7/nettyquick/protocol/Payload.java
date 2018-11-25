@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -67,16 +68,14 @@ public class Payload {
 
   public void write(ByteBuf bb, AEAD aead, PacketNumber pn, byte[] aad) {
     ByteBuf raw = Unpooled.buffer();
-
     for (Frame frame : frames) {
-      frame.write(raw);
+        frame.write(raw);
     }
-    byte[] b = new byte[raw.writerIndex()];
-    raw.readBytes(b);
+    byte[] b = Bytes.drainToArray(raw);
 
     try {
-      byte[] x = aead.seal(b, pn.asLong(), aad);
-      bb.writeBytes(x);
+      byte[] sealed = aead.seal(b, pn.asLong(), aad);
+      bb.writeBytes(sealed);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }

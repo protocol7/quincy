@@ -1,10 +1,11 @@
 package com.protocol7.nettyquick.tls.messages;
 
+import com.protocol7.nettyquick.Writeable;
 import com.protocol7.nettyquick.tls.VerifyData;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
-public class ClientFinished {
+public class ClientFinished implements Writeable {
 
     public static ClientFinished create(byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
         byte[] verifyData = VerifyData.create(clientHandshakeTrafficSecret, finHash, quic);

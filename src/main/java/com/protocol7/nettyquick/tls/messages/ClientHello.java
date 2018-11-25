@@ -3,10 +3,12 @@ package com.protocol7.nettyquick.tls.messages;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.Writeable;
 import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
@@ -16,9 +18,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static com.protocol7.nettyquick.utils.Bytes.write24;
-
-public class ClientHello {
+public class ClientHello implements Writeable {
 
     public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
         byte[] clientRandom = Rnd.rndBytes(32);
@@ -129,14 +129,9 @@ public class ClientHello {
     public void write(ByteBuf bb) {
         bb.writeByte(0x01);
 
-        ByteBuf extBuf = Unpooled.buffer();
-        Extension.writeAll(extensions, extBuf, true);
-        byte[] ext = new byte[extBuf.readableBytes()];
-        extBuf.readBytes(ext);
-
         // payload length
         int lenPos = bb.writerIndex();
-        write24(bb, 0); // placeholder
+        Bytes.write24(bb, 0); // placeholder
 
         // version
         bb.writeByte(0x03);
@@ -153,10 +148,13 @@ public class ClientHello {
         bb.writeByte(0x01);
         bb.writeByte(0x00);
 
-        bb.writeShort(ext.length);
-        bb.writeBytes(ext);
+        int extLenPos = bb.writerIndex();
+        bb.writeShort(0);
+        Extension.writeAll(extensions, bb, true);
 
-        write24(bb, bb.writerIndex() - lenPos - 3, lenPos);
+        bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
+
+        Bytes.set24(bb, lenPos, bb.writerIndex() - lenPos - 3);
     }
 
     @Override

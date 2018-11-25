@@ -1,9 +1,10 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import com.protocol7.nettyquick.Writeable;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public abstract class Frame {
+public abstract class Frame implements Writeable {
 
   public static Frame parse(ByteBuf bb) {
     byte typeByte = bb.getByte(bb.readerIndex());
@@ -43,7 +44,7 @@ public abstract class Frame {
   }
 
   public int calculateLength() {
-    // TODO improve
+    // TODO implement in subclasses, this is slow
     ByteBuf bb = Unpooled.buffer();
     try {
       write(bb);

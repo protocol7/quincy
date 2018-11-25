@@ -4,6 +4,9 @@ import com.protocol7.nettyquick.Writeable;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 public class Bytes {
 
     public static byte[] drainToArray(ByteBuf bb) {
@@ -45,13 +48,17 @@ public class Bytes {
         bb.writeByte(value & 0xFF);
     }
 
-    public static void write24(ByteBuf bb, int value, int position) {
+    public static void set24(ByteBuf bb, int position, int value) {
         bb.setByte(position, (value >> 16) & 0xFF);
         bb.setByte(position + 1, (value >> 8) & 0xFF);
         bb.setByte(position + 2, value & 0xFF);
     }
 
     public static byte[] write(Writeable... writeables) {
+        return write(Arrays.asList(writeables));
+    }
+
+    public static byte[] write(Collection<Writeable> writeables) {
         ByteBuf bb = Unpooled.buffer();
         for (Writeable writeable : writeables) {
             writeable.write(bb);

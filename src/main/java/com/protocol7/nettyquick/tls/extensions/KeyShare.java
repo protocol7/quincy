@@ -64,18 +64,20 @@ public class KeyShare implements Extension {
 
     @Override
     public void write(ByteBuf bb, boolean isClient) {
-        ByteBuf b = Unpooled.buffer();
-        for (Map.Entry<Group, byte[]> entry : keys.entrySet()) {
-            b.writeShort(entry.getKey().getValue());
-            b.writeShort(entry.getValue().length);
-            b.writeBytes(entry.getValue());
+        int lenPos = bb.writerIndex();
+        if (isClient) {
+            bb.writeShort(0);
         }
 
-        byte[] x = Bytes.drainToArray(b);
-        if (isClient) {
-            bb.writeShort(x.length);
+        for (Map.Entry<Group, byte[]> entry : keys.entrySet()) {
+            bb.writeShort(entry.getKey().getValue());
+            bb.writeShort(entry.getValue().length);
+            bb.writeBytes(entry.getValue());
         }
-        bb.writeBytes(x);
+
+        if (isClient) {
+            bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
+        }
     }
 
     @Override

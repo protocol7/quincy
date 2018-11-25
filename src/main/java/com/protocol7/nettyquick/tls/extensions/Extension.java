@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.collect.Lists;
+import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -46,12 +47,12 @@ public interface Extension {
         for (Extension extension : extensions) {
             bb.writeShort(extension.getType().getValue());
 
-            ByteBuf b = Unpooled.buffer();
-            extension.write(b, isClient);
-            byte[] x = new byte[b.readableBytes()];
-            b.readBytes(x);
-            bb.writeShort(x.length);
-            bb.writeBytes(x);
+            int lenPos = bb.writerIndex();
+            bb.writeShort(0);
+
+            extension.write(bb, isClient);
+
+            bb.setShort(lenPos, bb.writerIndex() -lenPos - 2);
         }
     }
 

@@ -40,7 +40,7 @@ public class ClientTlsSession {
 
     public void reset() {
         kek = KeyExchange.generate(Group.X25519);
-        handshakeBuffer = Unpooled.buffer();
+        handshakeBuffer = Unpooled.buffer(); // replace with position keeping buffer
         clientHello = null;
         serverHello = null;
         handshakeSecret = null;
@@ -52,10 +52,7 @@ public class ClientTlsSession {
         }
 
         ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
-        ByteBuf bb = Unpooled.buffer();
-        ch.write(bb);
-
-        clientHello = Bytes.drainToArray(bb);
+        clientHello = Bytes.write(ch);
         return clientHello;
     }
 
@@ -134,9 +131,7 @@ public class ClientTlsSession {
 
             ClientFinished clientFinished = ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash, false);
 
-            ByteBuf finBB = Unpooled.buffer();
-            clientFinished.write(finBB);
-            byte[] b = Bytes.drainToArray(finBB);
+            byte[] b = Bytes.write(clientFinished);
 
             return Optional.of(new HandshakeResult(b, aead));
         } catch (IndexOutOfBoundsException e) {

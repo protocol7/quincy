@@ -95,7 +95,7 @@ public class ServerHello implements Writeable {
 
 
         // update length
-        Bytes.write24(bb, bb.writerIndex() - lenPosition - 3, lenPosition);
+        Bytes.set24(bb, lenPosition, bb.writerIndex() - lenPosition - 3);
 
     }
 

@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.tls.aead;
 import at.favre.lib.crypto.HKDF;
 import com.google.common.base.Charsets;
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -50,9 +51,6 @@ public class NullAEAD {
         bb.writeBytes(label.getBytes(Charsets.US_ASCII));
         bb.writeByte(0);
 
-        byte[] b = new byte[bb.writerIndex()];
-        bb.readBytes(b);
-        return b;
+        return Bytes.drainToArray(bb);
     }
-
 }

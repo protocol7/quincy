@@ -16,8 +16,6 @@ import java.security.cert.X509Certificate;
 import java.util.Arrays;
 import java.util.List;
 
-import static com.protocol7.nettyquick.utils.Bytes.write24;
-
 public class ServerHandshake {
 
     public static ServerHandshake parse(ByteBuf bb) {
@@ -100,14 +98,14 @@ public class ServerHandshake {
             // EE
             bb.writeByte(0x08);
             int eeMsgLenPos = bb.writerIndex();
-            write24(bb, 0);
+            Bytes.write24(bb, 0);
 
             int extLenPos = bb.writerIndex();
             bb.writeShort(0);
 
             Extension.writeAll(extensions, bb, false);
 
-            write24(bb, bb.writerIndex() - eeMsgLenPos - 3, eeMsgLenPos);
+            Bytes.set24(bb, eeMsgLenPos, bb.writerIndex() - eeMsgLenPos - 3);
             bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
         }
     }
@@ -187,23 +185,23 @@ public class ServerHandshake {
             // server cert
             bb.writeByte(0x0b);
             int scMsgLenPos = bb.writerIndex();
-            write24(bb, 0);
+            Bytes.write24(bb, 0);
 
             bb.writeByte(requestContext.length);
             bb.writeBytes(requestContext);
 
             int certsLenPos = bb.writerIndex();
-            write24(bb, 0);
+            Bytes.write24(bb, 0);
 
             for (byte[] cert : serverCertificates) {
-                write24(bb, cert.length);
+                Bytes.write24(bb, cert.length);
                 bb.writeBytes(cert);
 
                 bb.writeShort(0); // TODO add support for cert extensions
             }
 
-            write24(bb, bb.writerIndex() - scMsgLenPos - 3, scMsgLenPos);
-            write24(bb, bb.writerIndex() - certsLenPos - 3, certsLenPos);
+            Bytes.set24(bb, scMsgLenPos, bb.writerIndex() - scMsgLenPos - 3);
+            Bytes.set24(bb, certsLenPos, bb.writerIndex() - certsLenPos - 3);
         }
     }
 
@@ -248,13 +246,13 @@ public class ServerHandshake {
             bb.writeByte(0x0f);
 
             int scvMsgLenPos = bb.writerIndex();
-            write24(bb, 0);
+            Bytes.write24(bb, 0);
 
             bb.writeShort(type);
             bb.writeShort(signature.length);
             bb.writeBytes(signature);
 
-            write24(bb, bb.writerIndex() - scvMsgLenPos - 3, scvMsgLenPos);
+            Bytes.set24(bb, scvMsgLenPos, bb.writerIndex() - scvMsgLenPos - 3);
         }
     }
 
@@ -288,7 +286,7 @@ public class ServerHandshake {
         public void write(ByteBuf bb) {
             // server handshake finished
             bb.writeByte(0x14);
-            write24(bb, verificationData.length);
+            Bytes.write24(bb, verificationData.length);
             bb.writeBytes(verificationData);
         }
     }

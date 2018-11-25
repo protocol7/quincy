@@ -92,7 +92,7 @@ public class ServerTlsSession {
         // create handshake AEAD
         AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
 
-        byte[] serverHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ","s hs traffic", helloHash, 32);
+        byte[] serverHandshakeTrafficSecret = HKDFUtil.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
 
         // finished_hash = SHA256(Client Hello ... Server Cert Verify)
         byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
