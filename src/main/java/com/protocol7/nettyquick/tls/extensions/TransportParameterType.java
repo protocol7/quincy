@@ -5,20 +5,21 @@ import com.google.common.primitives.Shorts;
 import java.util.EnumSet;
 
 public enum TransportParameterType {
-  initial_max_stream_data_bidi_local(0),
-  initial_max_data(1),
-  initial_max_bidi_streams(2),
-  idle_timeout(3),
-  preferred_address(4),
-  max_packet_size(5),
-  stateless_reset_token(6),
-  ack_delay_exponent(7),
-  initial_max_uni_streams(8),
-  disable_migration(9),
-  initial_max_stream_data_bidi_remote(10),
-  initial_max_stream_data_uni(11),
-  max_ack_delay(12),
-  original_connection_id(13);
+
+  ORIGINAL_CONNECTION_ID(0x0000),
+  IDLE_TIMEOUT(0x0001),
+  STATELESS_RESET_TOKEN(0x0002),
+  MAX_PACKET_SIZE(0x0003),
+  INITIAL_MAX_DATA(0x0004),
+  INITIAL_MAX_STREAM_DATA_BIDI_LOCAL(0x0005),
+  INITIAL_MAX_STREAM_DATA_BIDI_REMOTE(0x0006),
+  INITIAL_MAX_STREAM_DATA_UNI(0x0007),
+  INITIAL_MAX_BIDI_STREAMS(0x0008),
+  INITIAL_MAX_UNI_STREAMS(0x0009),
+  ACK_DELAY_EXPONENT(0x000a),
+  MAX_ACK_DELAY(0x000b),
+  DISABLE_MIGRATION(0x000c),
+  PREFERRED_ADDRESS(0x000d);
 
   public static TransportParameterType fromValue(byte[] value) {
     Preconditions.checkArgument(value.length == 2);

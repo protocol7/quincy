@@ -156,8 +156,6 @@ public class ClientHello implements Writeable {
     bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
 
     Bytes.set24(bb, lenPos, bb.writerIndex() - lenPos - 3);
-
-    Debug.buffer("CH ", bb);
   }
 
   @Override

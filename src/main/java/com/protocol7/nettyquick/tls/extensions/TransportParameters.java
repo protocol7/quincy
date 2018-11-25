@@ -15,7 +15,7 @@ public class TransportParameters implements Extension {
     private int initialMaxData = -1;
     private int initialMaxBidiStreams = -1;
     private int idleTimeout = -1;
-    // TODO preferred_address(4),
+    // TODO PREFERRED_ADDRESS(4),
     private int maxPacketSize = -1;
     private byte[] statelessResetToken = new byte[0];
     private int ackDelayExponent = -1;
@@ -128,8 +128,6 @@ public class TransportParameters implements Extension {
   }
 
   public static TransportParameters parse(ByteBuf bb) {
-    Debug.buffer(bb);
-
     byte[] version = new byte[4];
     bb.readBytes(version); // TODO validate version
 
@@ -156,43 +154,43 @@ public class TransportParameters implements Extension {
       TransportParameterType tp = TransportParameterType.fromValue(type);
 
       switch (tp) {
-        case initial_max_stream_data_bidi_local:
+        case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
           builder.withInitialMaxStreamDataBidiLocal(dataToInt(data));
           break;
-        case initial_max_data:
+        case INITIAL_MAX_DATA:
           builder.withInitialMaxData(dataToInt(data));
           break;
-        case initial_max_bidi_streams:
+        case INITIAL_MAX_BIDI_STREAMS:
           builder.withInitialMaxBidiStreams(dataToShort(data));
           break;
-        case idle_timeout:
+        case IDLE_TIMEOUT:
           builder.withIdleTimeout(dataToShort(data));
           break;
-        case max_packet_size:
+        case MAX_PACKET_SIZE:
           builder.withMaxPacketSize(dataToShort(data));
           break;
-        case stateless_reset_token:
+        case STATELESS_RESET_TOKEN:
           builder.withStatelessResetToken(data);
           break;
-        case ack_delay_exponent:
+        case ACK_DELAY_EXPONENT:
           builder.withAckDelayExponent(dataToByte(data));
           break;
-        case initial_max_uni_streams:
+        case INITIAL_MAX_UNI_STREAMS:
           builder.withInitialMaxUniStreams(dataToShort(data));
           break;
-        case disable_migration:
+        case DISABLE_MIGRATION:
           builder.withDisableMigration(true);
           break;
-        case initial_max_stream_data_bidi_remote:
+        case INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
           builder.withInitialMaxStreamDataBidiRemote(dataToInt(data));
           break;
-        case initial_max_stream_data_uni:
+        case INITIAL_MAX_STREAM_DATA_UNI:
           builder.withInitialMaxStreamDataUni(dataToInt(data));
           break;
-        case max_ack_delay:
+        case MAX_ACK_DELAY:
           builder.withMaxAckDelay(dataToByte(data));
           break;
-        case original_connection_id:
+        case ORIGINAL_CONNECTION_ID:
           builder.withOriginalConnectionId(data);
           break;
       }
@@ -216,7 +214,7 @@ public class TransportParameters implements Extension {
   private final int initialMaxData;
   private final int initialMaxBidiStreams;
   private final int idleTimeout;
-  // TODO preferred_address(4),
+  // TODO PREFERRED_ADDRESS(4),
   private final int maxPacketSize;
   private final byte[] statelessResetToken;
   private final int ackDelayExponent;
@@ -392,56 +390,56 @@ public class TransportParameters implements Extension {
     bb.writeShort(0);
 
     if (initialMaxStreamDataBidiLocal > -1) {
-      bb.writeBytes(initial_max_stream_data_bidi_local.asBytes());
+      bb.writeBytes(INITIAL_MAX_STREAM_DATA_BIDI_LOCAL.asBytes());
       writeVarint(bb, initialMaxStreamDataBidiLocal);
     }
     if (initialMaxData > -1) {
-      bb.writeBytes(initial_max_data.asBytes());
+      bb.writeBytes(INITIAL_MAX_DATA.asBytes());
       writeVarint(bb, initialMaxData);
     }
     if (initialMaxBidiStreams > -1) {
-      bb.writeBytes(initial_max_bidi_streams.asBytes());
+      bb.writeBytes(INITIAL_MAX_BIDI_STREAMS.asBytes());
       writeVarint(bb, initialMaxBidiStreams);
     }
     if (idleTimeout > -1) {
-      bb.writeBytes(idle_timeout.asBytes());
+      bb.writeBytes(IDLE_TIMEOUT.asBytes());
       writeVarint(bb, idleTimeout);
     }
     if (maxPacketSize > -1) {
-      bb.writeBytes(max_packet_size.asBytes());
+      bb.writeBytes(MAX_PACKET_SIZE.asBytes());
       writeVarint(bb, maxPacketSize);
     }
     if (statelessResetToken.length > 0) {
-      bb.writeBytes(stateless_reset_token.asBytes());
+      bb.writeBytes(STATELESS_RESET_TOKEN.asBytes());
       bb.writeShort(statelessResetToken.length);
       bb.writeBytes(statelessResetToken);
     }
     if (ackDelayExponent > -1) {
-      bb.writeBytes(ack_delay_exponent.asBytes());
+      bb.writeBytes(ACK_DELAY_EXPONENT.asBytes());
       writeVarint(bb, ackDelayExponent);
     }
     if (initialMaxUniStreams > -1) {
-      bb.writeBytes(initial_max_uni_streams.asBytes());
+      bb.writeBytes(INITIAL_MAX_UNI_STREAMS.asBytes());
       writeVarint(bb, initialMaxUniStreams);
     }
     if (disableMigration) {
-      bb.writeBytes(disable_migration.asBytes());
+      bb.writeBytes(DISABLE_MIGRATION.asBytes());
       bb.writeShort(0);
     }
     if (initialMaxStreamDataBidiRemote > -1) {
-      bb.writeBytes(initial_max_stream_data_bidi_remote.asBytes());
+      bb.writeBytes(INITIAL_MAX_STREAM_DATA_BIDI_REMOTE.asBytes());
       writeVarint(bb, initialMaxStreamDataBidiRemote);
     }
     if (initialMaxStreamDataUni > -1) {
-      bb.writeBytes(initial_max_stream_data_uni.asBytes());
+      bb.writeBytes(INITIAL_MAX_STREAM_DATA_UNI.asBytes());
       writeVarint(bb, initialMaxStreamDataUni);
     }
     if (maxAckDelay > -1) {
-      bb.writeBytes(max_ack_delay.asBytes());
+      bb.writeBytes(MAX_ACK_DELAY.asBytes());
       writeVarint(bb, maxAckDelay);
     }
     if (originalConnectionId.length > 0) {
-      bb.writeBytes(original_connection_id.asBytes());
+      bb.writeBytes(ORIGINAL_CONNECTION_ID.asBytes());
       bb.writeShort(originalConnectionId.length);
       bb.writeBytes(originalConnectionId);
     }
