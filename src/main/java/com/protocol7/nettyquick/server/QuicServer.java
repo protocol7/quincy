@@ -17,8 +17,7 @@ import java.net.InetSocketAddress;
 public class QuicServer {
 
   public static Future<QuicServer> bind(final InetSocketAddress address, StreamListener streamHandler) {
-    return Futures.thenSync(GlobalEventExecutor.INSTANCE,
-                            bindImpl(address, streamHandler),
+    return Futures.thenSync(bindImpl(address, streamHandler),
                             group1 -> new QuicServer(group1));
   }
 
@@ -37,7 +36,7 @@ public class QuicServer {
             });
 
     // Bind and start to accept incoming connections.
-    return Futures.thenSync(GlobalEventExecutor.INSTANCE, b.bind(address), aVoid -> group);
+    return Futures.thenSync(b.bind(address), aVoid -> group);
   }
 
   private final EventExecutorGroup group;

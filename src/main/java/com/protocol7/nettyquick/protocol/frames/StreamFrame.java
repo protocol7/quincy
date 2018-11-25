@@ -25,7 +25,7 @@ public class StreamFrame extends Frame {
 
     final int length;
     if (len) {
-      length = (int)Varint.read(bb).getValue();
+      length = (int)Varint.read(bb).longValue();
     } else {
       length = bb.readableBytes();
     }
@@ -33,7 +33,7 @@ public class StreamFrame extends Frame {
     final byte[] data = new byte[length];
     bb.readBytes(data);
 
-    return new StreamFrame(streamId, offset.getValue(), fin, data);
+    return new StreamFrame(streamId, offset.longValue(), fin, data);
   }
 
   private final StreamId streamId;

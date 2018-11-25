@@ -12,6 +12,7 @@ import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
+import com.protocol7.nettyquick.utils.Futures;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -20,6 +21,10 @@ import org.slf4j.MDC;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
+
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closed;
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closing;
 
 public class ClientConnection implements Connection {
 
@@ -68,6 +73,9 @@ public class ClientConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
+    if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
+      throw new IllegalStateException("Connection not open");
+    }
     packetBuffer.send(p);
     return p;
   }
@@ -169,7 +177,17 @@ public class ClientConnection implements Connection {
     return streams.getOrCreate(streamId, streamListener);
   }
 
-  public Future<?> close() {
+  public Future<Void> close() {
+    stateMachine.closeImmediate();
+
     return packetSender.destroy();
+  }
+
+  public Future<Void> closeByPeer() {
+    return packetSender.destroy();
+  }
+
+  public ClientStateMachine.ClientState getState() {
+    return stateMachine.getState();
   }
 }

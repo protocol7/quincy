@@ -67,7 +67,7 @@ public class InitialPacket implements FullPacket {
 
     Varint tokenLength = Varint.read(bb);
 
-    byte[] tokenBytes = new byte[(int) tokenLength.getValue()];
+    byte[] tokenBytes = new byte[(int) tokenLength.longValue()];
     bb.readBytes(tokenBytes);
     Optional<byte[]> token;
     if (tokenBytes.length > 0) {
@@ -76,7 +76,7 @@ public class InitialPacket implements FullPacket {
       token = Optional.empty();
     }
 
-    int length = (int) Varint.read(bb).getValue();
+    int length = (int) Varint.read(bb).longValue();
 
 
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);

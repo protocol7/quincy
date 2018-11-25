@@ -10,9 +10,7 @@ import com.protocol7.nettyquick.tls.KeyUtil;
 import com.protocol7.nettyquick.tls.ServerTlsSession;
 import com.protocol7.nettyquick.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquick.utils.Rnd;
-import io.netty.util.concurrent.DefaultEventExecutor;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.SucceededFuture;
+import io.netty.util.concurrent.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -28,6 +26,9 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
 
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Ready;
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.WaitingForHandshake;
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.WaitingForServerHello;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -54,6 +55,8 @@ public class ClientTest {
     MockitoAnnotations.initMocks(this);
 
     when(packetSender.send(any(), any(), any())).thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
+    when(packetSender.destroy()).thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
+
 
     connection = new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
 
@@ -80,6 +83,7 @@ public class ClientTest {
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
+    assertEquals(WaitingForServerHello, connection.getState());
 
     byte[] retryToken = Rnd.rndBytes(20);
 
@@ -108,6 +112,7 @@ public class ClientTest {
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
+    assertEquals(WaitingForServerHello, connection.getState());
 
     ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
 
@@ -122,8 +127,10 @@ public class ClientTest {
 
     // verify no packet sent here
     verify(packetSender, times(2)).send(any(), any(), any());
+
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
+    assertEquals(WaitingForHandshake, connection.getState());
 
     // receive server handshake
     connection.onPacket(HandshakePacket.create(
@@ -142,6 +149,7 @@ public class ClientTest {
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
+    assertEquals(Ready, connection.getState());
   }
 
   @Test
@@ -222,6 +230,41 @@ public class ClientTest {
 
     // verify ack
     assertAck(4, 3, 3, 3);
+  }
+
+  @Test
+  public void peerCloseConnection() {
+    handshake();
+
+    connection.onPacket(packet(new ConnectionCloseFrame(123, 124, "Closed")));
+
+    // verify ack
+    assertAck(4, 3, 3, 3);
+
+    assertEquals(ClientStateMachine.ClientState.Closed, connection.getState());
+
+    try {
+      connection.sendPacket(PingFrame.INSTANCE);
+      fail("Must throw IllegalStateException");
+    } catch (IllegalStateException e) {
+      // expected
+    }
+  }
+
+  @Test
+  public void immediateCloseConnection() {
+    handshake();
+
+    connection.close().awaitUninterruptibly();
+
+    assertEquals(ClientStateMachine.ClientState.Closed, connection.getState());
+
+    try {
+      connection.sendPacket(PingFrame.INSTANCE);
+      fail("Must throw IllegalStateException");
+    } catch (IllegalStateException e) {
+      // expected
+    }
   }
 
   private void assertAck(int number, int packetNumber, int smallest, int largest) {

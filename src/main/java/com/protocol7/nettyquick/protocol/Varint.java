@@ -47,8 +47,12 @@ public class Varint implements Comparable<Varint> {
 
   private final long value;
 
-  public long getValue() {
+  public long longValue() {
     return value;
+  }
+
+  public int intValue() {
+    return (int)value;
   }
 
   @Override

@@ -9,19 +9,13 @@ import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
 
 import java.net.InetSocketAddress;
+import java.util.function.Function;
 
 public class QuicClient {
 
   public static Future<QuicClient> connect(InetSocketAddress serverAddress, StreamListener streamListener) {
-    return Futures.thenSync(GlobalEventExecutor.INSTANCE,
-                            connectImpl(serverAddress, streamListener),
-                            v -> new QuicClient(v));
-  }
-
-  private static Future<ClientConnection> connectImpl(final InetSocketAddress serverAddress, StreamListener streamListener) {
     NioEventLoopGroup group = new NioEventLoopGroup();
     ClientHandler handler = new ClientHandler();
     Bootstrap b = new Bootstrap();
@@ -29,26 +23,27 @@ public class QuicClient {
             .channel(NioDatagramChannel.class)
             .handler(handler);
 
-    Future<Channel> channelFuture = Futures.thenChannel(GlobalEventExecutor.INSTANCE, b.bind(0));
+    Future<Channel> channelFuture = Futures.thenChannel(b.bind(0));
 
-    Future<ClientConnection> conn = Futures.thenSync(GlobalEventExecutor.INSTANCE,
-                                                     channelFuture,
+    Future<ClientConnection> conn = Futures.thenSync(channelFuture,
                                                      channel -> {
                                                        ClientConnection connection = new ClientConnection(ConnectionId.random(),
-                                                                                                          new NettyPacketSender(group, channel),
+                                                                                                          new NettyPacketSender(channel),
                                                                                                           serverAddress, streamListener);
                                                        handler.setConnection(connection); // TODO fix cyclic creation
                                                        return connection;
                                                      });
 
-    return Futures.thenAsync(GlobalEventExecutor.INSTANCE,
-                             conn,
-                             clientConnection -> Futures.thenSync(GlobalEventExecutor.INSTANCE, clientConnection.handshake(), aVoid -> clientConnection));
+    Future<ClientConnection> f = Futures.thenAsync(conn,
+                             clientConnection -> Futures.thenSync(clientConnection.handshake(), aVoid -> clientConnection));
+    return Futures.thenSync(f, v -> new QuicClient(group, v));
   }
 
+  private final NioEventLoopGroup group;
   private final ClientConnection connection;
 
-  private QuicClient(final ClientConnection connection) {
+  private QuicClient(NioEventLoopGroup group, final ClientConnection connection) {
+    this.group = group;
     this.connection = connection;
   }
 
@@ -57,6 +52,8 @@ public class QuicClient {
   }
 
   public Future<?> close() {
-    return connection.close();
+    return Futures.thenAsync(
+            connection.close(),
+            aVoid -> (Future<Void>) group.shutdownGracefully());
   }
 }

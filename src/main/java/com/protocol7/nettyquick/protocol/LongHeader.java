@@ -29,7 +29,7 @@ public class LongHeader implements Header {
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    int length = (int) Varint.read(bb).getValue();
+    int length = (int) Varint.read(bb).longValue();
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
 
     int payloadLength = length; // TODO pn length

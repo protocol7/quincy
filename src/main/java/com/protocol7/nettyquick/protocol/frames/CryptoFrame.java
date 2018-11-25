@@ -11,7 +11,7 @@ public class CryptoFrame extends Frame {
 
         Varint offset = Varint.read(bb);
         Varint length = Varint.read(bb);
-        byte[] cryptoData = new byte[(int) length.getValue()];
+        byte[] cryptoData = new byte[(int) length.longValue()];
         bb.readBytes(cryptoData);
         return new CryptoFrame(offset, cryptoData);
     }

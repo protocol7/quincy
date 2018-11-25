@@ -8,7 +8,7 @@ import static com.protocol7.nettyquick.utils.Bits.unset;
 public class StreamId {
 
   public static StreamId random(boolean client, boolean bidirectional) {
-    long id = Varint.random(1).getValue();
+    long id = Varint.random(1).longValue();
 
     id = encodeType(client, bidirectional, id);
 
@@ -59,11 +59,11 @@ public class StreamId {
   }
 
   public boolean isClient() {
-    return (id.getValue() & 1) == 0;
+    return (id.longValue() & 1) == 0;
   }
 
   public boolean isBidirectional() {
-    return (id.getValue() & 0b10) == 0;
+    return (id.longValue() & 0b10) == 0;
   }
 
   public void write(ByteBuf bb) {
@@ -82,7 +82,7 @@ public class StreamId {
 
   @Override
   public int hashCode() {
-    return (int) (id.getValue() ^ (id.getValue() >>> 32));
+    return (int) (id.longValue() ^ (id.longValue() >>> 32));
   }
 
   @Override
@@ -91,6 +91,6 @@ public class StreamId {
   }
 
   public long getValue() {
-    return id.getValue();
+    return id.longValue();
   }
 }

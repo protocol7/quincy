@@ -54,7 +54,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public PacketNumber next() {
-    return new PacketNumber(number.getValue() + 1);
+    return new PacketNumber(number.longValue() + 1);
   }
 
   public PacketNumber max(PacketNumber other) {
@@ -66,7 +66,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public long asLong() {
-    return number.getValue();
+    return number.longValue();
   }
 
   public Varint asVarint() {
@@ -74,7 +74,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public void write(final ByteBuf bb) {
-    int value = (int)number.getValue();
+    int value = (int)number.longValue();
     int from;
     int mask;
     if (value > 16383) {

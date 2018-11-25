@@ -21,6 +21,12 @@ public abstract class Frame {
       return PingFrame.parse(bb);
     } else if (type == FrameType.RETIRE_CONNECTION_ID) {
       return RetireConnectionIdFrame.parse(bb);
+    } else if (type == FrameType.RST_STREAM) {
+      return RstStreamFrame.parse(bb);
+    } else if (type == FrameType.CONNECTION_CLOSE) {
+      return ConnectionCloseFrame.parse(bb);
+    } else if (type == FrameType.APPLICATION_CLOSE) {
+      return ApplicationCloseFrame.parse(bb);
     } else {
       throw new RuntimeException("Unknown frame type " + type);
     }

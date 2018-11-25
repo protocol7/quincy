@@ -30,7 +30,7 @@ public class VarintTest {
   public void randomBounds() {
     for (int i = 0; i<1000_000; i++) {
       Varint v = Varint.random();
-      assertTrue(v.toString(), v.getValue() > 0 && v.getValue() < 4611686018427387903L);
+      assertTrue(v.toString(), v.longValue() > 0 && v.longValue() < 4611686018427387903L);
     }
   }
 
@@ -40,7 +40,7 @@ public class VarintTest {
 
     Varint vi = Varint.read(bb);
 
-    assertEquals(151288809941952652L, vi.getValue());
+    assertEquals(151288809941952652L, vi.longValue());
     assertFalse(bb.isReadable());
   }
 
@@ -50,7 +50,7 @@ public class VarintTest {
 
     Varint vi = Varint.read(bb);
 
-    assertEquals(494878333, vi.getValue());
+    assertEquals(494878333, vi.longValue());
     assertFalse(bb.isReadable());
   }
 
@@ -60,7 +60,7 @@ public class VarintTest {
 
     Varint vi = Varint.read(bb);
 
-    assertEquals(15293, vi.getValue());
+    assertEquals(15293, vi.longValue());
     assertFalse(bb.isReadable());
   }
 
@@ -70,7 +70,7 @@ public class VarintTest {
 
     Varint vi = Varint.read(bb);
 
-    assertEquals(37, vi.getValue());
+    assertEquals(37, vi.longValue());
     assertFalse(bb.isReadable());
   }
 

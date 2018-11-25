@@ -4,12 +4,14 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketNumber;
+import com.protocol7.nettyquick.protocol.TransportError;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.tls.ClientTlsSession;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.utils.Futures;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -18,6 +20,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class ClientStateMachine {
 
@@ -27,7 +30,9 @@ public class ClientStateMachine {
     BeforeInitial,
     WaitingForServerHello,
     WaitingForHandshake,
-    Ready
+    Ready,
+    Closing,
+    Closed
   }
 
   private ClientState state = ClientState.BeforeInitial;
@@ -111,49 +116,79 @@ public class ClientStateMachine {
         }
       } else if (state == ClientState.WaitingForHandshake) {
         if (packet instanceof HandshakePacket) {
-          for (Frame frame : ((HandshakePacket)packet).getPayload().getFrames()) {
-            if (frame instanceof CryptoFrame) {
-              CryptoFrame cf = (CryptoFrame) frame;
-
-              Optional<ClientTlsSession.HandshakeResult> result = tlsEngine.handleHandshake(cf.getCryptoData());
-
-              if (result.isPresent()) {
-                connection.setOneRttAead(result.get().getOneRttAead());
-
-                connection.sendPacket(HandshakePacket.create(
-                        connection.getDestinationConnectionId(),
-                        connection.getSourceConnectionId(),
-                        connection.nextSendPacketNumber(),
-                        Version.TLS_DEV,
-                        new CryptoFrame(0, result.get().getFin())));
-
-                state = ClientState.Ready;
-                handshakeFuture.setSuccess(null);
-              }
-            }
-          }
+          handleHandshake((HandshakePacket) packet);
         } else {
           log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
       } else if (state == ClientState.Ready) {
         for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {
-          if (frame instanceof StreamFrame) {
-            StreamFrame sf = (StreamFrame) frame;
-
-            Stream stream = connection.getOrCreateStream(sf.getStreamId());
-            stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-          } else if (frame instanceof RstStreamFrame) {
-            RstStreamFrame rsf = (RstStreamFrame) frame;
-            Stream stream = connection.getOrCreateStream(rsf.getStreamId());
-            stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
-          } else if (frame instanceof PingFrame) {
-            PingFrame pf = (PingFrame) frame;
-          }
+          handleFrame(frame);
         }
       } else {
         log.warn("Got packet in an unexpected state");
       }
     }
+  }
+
+  private void handleHandshake(HandshakePacket packet) {
+    for (Frame frame : packet.getPayload().getFrames()) {
+      if (frame instanceof CryptoFrame) {
+        CryptoFrame cf = (CryptoFrame) frame;
+
+        Optional<ClientTlsSession.HandshakeResult> result = tlsEngine.handleHandshake(cf.getCryptoData());
+
+        if (result.isPresent()) {
+          connection.setOneRttAead(result.get().getOneRttAead());
+
+          connection.sendPacket(HandshakePacket.create(
+                  connection.getDestinationConnectionId(),
+                  connection.getSourceConnectionId(),
+                  connection.nextSendPacketNumber(),
+                  Version.TLS_DEV,
+                  new CryptoFrame(0, result.get().getFin())));
+
+          state = ClientState.Ready;
+          handshakeFuture.setSuccess(null);
+        }
+      }
+    }
+  }
+
+  private void handleFrame(Frame frame) {
+    if (frame instanceof StreamFrame) {
+      StreamFrame sf = (StreamFrame) frame;
+
+      Stream stream = connection.getOrCreateStream(sf.getStreamId());
+      stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
+    } else if (frame instanceof RstStreamFrame) {
+      RstStreamFrame rsf = (RstStreamFrame) frame;
+      Stream stream = connection.getOrCreateStream(rsf.getStreamId());
+      stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+    } else if (frame instanceof PingFrame) {
+      // do nothing, will be acked
+    } else if (frame instanceof ConnectionCloseFrame || frame instanceof ApplicationCloseFrame) {
+      handlePeerClose();
+    }
+  }
+
+  private void handlePeerClose() {
+    log.debug("Peer closing connection");
+    state = ClientState.Closing;
+    connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
+    log.debug("Connection closed");
+    state = ClientState.Closed;
+  }
+
+  public void closeImmediate() {
+    System.out.println(getState());
+    connection.sendPacket(new ConnectionCloseFrame(
+            TransportError.NO_ERROR.getValue(),
+            0,
+            "Closing connection"));
+
+    state = ClientState.Closing;
+
+    state = ClientState.Closed;
   }
 
   @VisibleForTesting

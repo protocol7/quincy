@@ -10,11 +10,13 @@ import static java.util.Objects.requireNonNull;
 public class RstStreamFrame extends Frame {
 
   public static RstStreamFrame parse(final ByteBuf bb) {
+    bb.readByte();
+
     final StreamId streamId = StreamId.parse(bb);
     final int applicationErrorCode = bb.readUnsignedShort();
     final Varint offset = Varint.read(bb);
 
-    return new RstStreamFrame(streamId, applicationErrorCode, offset.getValue());
+    return new RstStreamFrame(streamId, applicationErrorCode, offset.longValue());
   }
 
   private final StreamId streamId;
@@ -51,6 +53,8 @@ public class RstStreamFrame extends Frame {
 
   @Override
   public void write(final ByteBuf bb) {
+    bb.writeByte(0x01);
+
     streamId.write(bb);
     bb.writeShort(applicationErrorCode);
     Varint.write(offset, bb);
