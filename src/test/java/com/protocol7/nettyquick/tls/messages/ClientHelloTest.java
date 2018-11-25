@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
@@ -11,9 +10,7 @@ import io.netty.buffer.Unpooled;
 import org.junit.Assert;
 import org.junit.Test;
 
-import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
-import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_256_GCM_SHA384;
-import static com.protocol7.nettyquick.tls.CipherSuite.TLS_CHACHA20_POLY1305_SHA256;
+import static com.protocol7.nettyquick.tls.CipherSuite.*;
 import static org.junit.Assert.assertEquals;
 
 public class ClientHelloTest {

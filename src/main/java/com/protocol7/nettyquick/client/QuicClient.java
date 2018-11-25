@@ -11,7 +11,6 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Future;
 
 import java.net.InetSocketAddress;
-import java.util.function.Function;
 
 public class QuicClient {
 

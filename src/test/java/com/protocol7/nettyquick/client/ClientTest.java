@@ -26,9 +26,7 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
 
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Ready;
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.WaitingForHandshake;
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.WaitingForServerHello;
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;

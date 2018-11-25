@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls.messages;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.tls.CipherSuite;
 import com.protocol7.nettyquick.tls.extensions.Extension;
 import com.protocol7.nettyquick.tls.extensions.SupportedVersions;
@@ -14,7 +13,6 @@ import org.junit.Test;
 import java.util.List;
 
 import static com.protocol7.nettyquick.TestUtil.assertHex;
-import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
 public class ServerHelloTest {

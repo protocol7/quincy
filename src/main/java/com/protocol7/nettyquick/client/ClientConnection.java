@@ -12,7 +12,6 @@ import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
-import com.protocol7.nettyquick.utils.Futures;
 import io.netty.util.concurrent.Future;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,7 +20,6 @@ import org.slf4j.MDC;
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Function;
 
 import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closed;
 import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closing;

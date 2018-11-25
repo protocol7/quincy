@@ -8,8 +8,6 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
-import com.protocol7.nettyquick.tls.aead.AEAD;
-import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;

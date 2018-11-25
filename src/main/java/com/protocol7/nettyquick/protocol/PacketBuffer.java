@@ -9,7 +9,6 @@ import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.packets.*;
-import com.protocol7.nettyquick.tls.aead.AEAD;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

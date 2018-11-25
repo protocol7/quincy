@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.tls;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -12,7 +11,8 @@ import java.util.List;
 import static com.protocol7.nettyquick.TestUtil.assertHex;
 import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_256_GCM_SHA384;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 public class CipherSuiteTest {
 
