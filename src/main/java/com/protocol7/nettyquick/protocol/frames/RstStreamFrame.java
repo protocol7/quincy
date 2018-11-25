@@ -14,9 +14,9 @@ public class RstStreamFrame extends Frame {
 
     final StreamId streamId = StreamId.parse(bb);
     final int applicationErrorCode = bb.readUnsignedShort();
-    final Varint offset = Varint.read(bb);
+    final long offset = Varint.readAsLong(bb);
 
-    return new RstStreamFrame(streamId, applicationErrorCode, offset.longValue());
+    return new RstStreamFrame(streamId, applicationErrorCode, offset);
   }
 
   private final StreamId streamId;

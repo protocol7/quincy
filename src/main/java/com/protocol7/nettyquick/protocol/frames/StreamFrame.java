@@ -16,16 +16,16 @@ public class StreamFrame extends Frame {
     final boolean fin = (firstByte & 0x01) == 0x01;
 
     final StreamId streamId = StreamId.parse(bb);
-    final Varint offset;
+    final long offset;
     if (off) {
-      offset = Varint.read(bb);
+      offset = Varint.readAsLong(bb);
     } else {
-      offset = new Varint(0);
+      offset = 0;
     }
 
     final int length;
     if (len) {
-      length = (int)Varint.read(bb).longValue();
+      length = Varint.readAsInt(bb);
     } else {
       length = bb.readableBytes();
     }
@@ -33,7 +33,7 @@ public class StreamFrame extends Frame {
     final byte[] data = new byte[length];
     bb.readBytes(data);
 
-    return new StreamFrame(streamId, offset.longValue(), fin, data);
+    return new StreamFrame(streamId, offset, fin, data);
   }
 
   private final StreamId streamId;

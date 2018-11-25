@@ -10,9 +10,9 @@ public class RetireConnectionIdFrame extends Frame {
   public static RetireConnectionIdFrame parse(ByteBuf bb) {
     bb.readByte();
 
-    Varint sequenceNumber = Varint.read(bb);
+    long sequenceNumber = Varint.readAsLong(bb);
 
-    return new RetireConnectionIdFrame(sequenceNumber.longValue()) ;
+    return new RetireConnectionIdFrame(sequenceNumber) ;
   }
 
   public RetireConnectionIdFrame(long sequenceNumber) {

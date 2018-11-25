@@ -1,6 +1,9 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.google.common.base.Preconditions;
 import io.netty.buffer.ByteBuf;
+
+import java.util.Objects;
 
 import static com.protocol7.nettyquick.utils.Bits.set;
 import static com.protocol7.nettyquick.utils.Bits.unset;
@@ -8,7 +11,7 @@ import static com.protocol7.nettyquick.utils.Bits.unset;
 public class StreamId {
 
   public static StreamId random(boolean client, boolean bidirectional) {
-    long id = Varint.random(1).longValue();
+    long id = Varint.random(1);
 
     id = encodeType(client, bidirectional, id);
 
@@ -45,52 +48,49 @@ public class StreamId {
   }
 
   public static StreamId parse(ByteBuf bb) {
-    return new StreamId(Varint.read(bb));
+    return new StreamId(Varint.readAsLong(bb));
   }
 
-  private final Varint id;
+  private final long id;
 
-  public StreamId(final Varint id) {
+  public StreamId(final long id) {
+    Preconditions.checkArgument(id >= 0);
+    Preconditions.checkArgument(id <= Varint.MAX);
+
     this.id = id;
   }
 
-  public StreamId(final long id) {
-    this.id = new Varint(id);
-  }
-
   public boolean isClient() {
-    return (id.longValue() & 1) == 0;
+    return (id & 1) == 0;
   }
 
   public boolean isBidirectional() {
-    return (id.longValue() & 0b10) == 0;
+    return (id & 0b10) == 0;
   }
 
   public void write(ByteBuf bb) {
-    id.write(bb);
+    Varint.write(id, bb);
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
-    final StreamId streamId = (StreamId) o;
-    return id.equals(streamId.id);
-
+    StreamId streamId = (StreamId) o;
+    return id == streamId.id;
   }
 
   @Override
   public int hashCode() {
-    return (int) (id.longValue() ^ (id.longValue() >>> 32));
+    return Objects.hash(id);
   }
 
   @Override
   public String toString() {
-    return id.toString();
+    return "StreamId{" + id + '}';
   }
 
   public long getValue() {
-    return id.longValue();
+    return id;
   }
 }

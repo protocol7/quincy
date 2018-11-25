@@ -24,7 +24,7 @@ public class ApplicationCloseFrame extends Frame {
 
     int errorCode = bb.readShort();
 
-    int reasonPhraseLength = Varint.read(bb).intValue();
+    int reasonPhraseLength = Varint.readAsInt(bb);
 
     byte[] reasonPhraseBytes = new byte[reasonPhraseLength];
     bb.readBytes(reasonPhraseBytes);

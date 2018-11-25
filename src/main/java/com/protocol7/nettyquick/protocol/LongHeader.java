@@ -29,7 +29,7 @@ public class LongHeader implements Header {
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    int length = (int) Varint.read(bb).longValue();
+    int length = (int) Varint.readAsLong(bb);
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
 
     int payloadLength = length; // TODO pn length
@@ -126,8 +126,7 @@ public class LongHeader implements Header {
   }
 
   public void writeSuffix(ByteBuf bb, AEAD aead) {
-    Varint length = new Varint(payload.getLength()); // TODO packet number length
-    length.write(bb);
+    Varint.write(payload.getLength(), bb); // TODO packet number length
 
     packetNumber.write(bb);
 

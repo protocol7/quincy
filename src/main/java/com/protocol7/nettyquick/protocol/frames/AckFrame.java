@@ -14,14 +14,14 @@ public class AckFrame extends Frame {
   public static AckFrame parse(ByteBuf bb) {
     bb.readByte();
 
-    final long largestAcknowledged = Varint.read(bb).longValue();
-    final Varint ackDelay = Varint.read(bb);
-    final long blockCount = Varint.read(bb).longValue();
+    final long largestAcknowledged = Varint.readAsLong(bb);
+    final long ackDelay = Varint.readAsLong(bb);
+    final long blockCount = Varint.readAsLong(bb);
 
     final List<AckBlock> blocks = Lists.newArrayList();
 
-    final Varint firstBlock = Varint.read(bb);
-    long smallest = largestAcknowledged - firstBlock.longValue();
+    final long firstBlock = Varint.readAsLong(bb);
+    long smallest = largestAcknowledged - firstBlock;
 
     blocks.add(AckBlock.fromLongs(smallest, largestAcknowledged));
 
@@ -30,16 +30,16 @@ public class AckFrame extends Frame {
     for (int i = 0; i<blockCount; i++) {
       if (i % 2 == 0) {
         // reading gap
-        Varint gap = Varint.read(bb);
-        largest = smallest - gap.longValue() - 1;
+        long gap = Varint.readAsLong(bb);
+        largest = smallest - gap - 1;
       } else {
-        Varint ackBlock = Varint.read(bb);
-        smallest = largest - ackBlock.longValue();
+        long ackBlock = Varint.readAsLong(bb);
+        smallest = largest - ackBlock;
         blocks.add(AckBlock.fromLongs(smallest, largest));
       }
     }
 
-    return new AckFrame(ackDelay.longValue(), blocks);
+    return new AckFrame(ackDelay, blocks);
   }
 
   private final long ackDelay;
@@ -86,7 +86,7 @@ public class AckFrame extends Frame {
 
     AckBlock firstBlock = blocks.get(0);
 
-    firstBlock.getLargest().asVarint().write(bb);
+    Varint.write(firstBlock.getLargest().asLong(), bb);
     Varint.write(ackDelay, bb);
     Varint.write((blocks.size() - 1) * 2, bb);
 

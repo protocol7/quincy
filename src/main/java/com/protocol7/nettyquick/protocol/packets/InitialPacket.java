@@ -65,9 +65,9 @@ public class InitialPacket implements FullPacket {
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    Varint tokenLength = Varint.read(bb);
+    int tokenLength = Varint.readAsInt(bb);
 
-    byte[] tokenBytes = new byte[(int) tokenLength.longValue()];
+    byte[] tokenBytes = new byte[tokenLength];
     bb.readBytes(tokenBytes);
     Optional<byte[]> token;
     if (tokenBytes.length > 0) {
@@ -76,7 +76,7 @@ public class InitialPacket implements FullPacket {
       token = Optional.empty();
     }
 
-    int length = (int) Varint.read(bb).longValue();
+    int length = Varint.readAsInt(bb);
 
 
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
@@ -124,10 +124,10 @@ public class InitialPacket implements FullPacket {
 
     if (token.isPresent()) {
       byte[] t = token.get();
-      new Varint(t.length).write(bb);
+      Varint.write(t.length, bb);
       bb.writeBytes(t);
     } else {
-      new Varint(0).write(bb);
+      Varint.write(0, bb);
     }
 
     header.writeSuffix(bb, aead);

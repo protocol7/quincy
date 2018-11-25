@@ -13,7 +13,7 @@ public class CryptoFrameTest {
 
     @Test
     public void roundtrip() {
-        CryptoFrame frame = new CryptoFrame(new Varint(123), Hex.dehex("1234"));
+        CryptoFrame frame = new CryptoFrame(123, Hex.dehex("1234"));
 
         ByteBuf bb = Unpooled.buffer();
         frame.write(bb);

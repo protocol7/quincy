@@ -26,14 +26,14 @@ public class ConnectionCloseFrame extends Frame {
     }
 
     int errorCode = bb.readShort();
-    Varint frameType = Varint.read(bb);
+    int frameType = Varint.readAsInt(bb);
 
-    int reasonPhraseLength = Varint.read(bb).intValue();
+    int reasonPhraseLength = Varint.readAsInt(bb);
 
     byte[] reasonPhraseBytes = new byte[reasonPhraseLength];
     bb.readBytes(reasonPhraseBytes);
 
-    return new ConnectionCloseFrame(errorCode, frameType.intValue(), new String(reasonPhraseBytes, Charsets.UTF_8));
+    return new ConnectionCloseFrame(errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
   }
 
   private final int errorCode;

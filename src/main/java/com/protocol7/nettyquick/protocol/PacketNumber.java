@@ -1,11 +1,13 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public class PacketNumber implements Comparable<PacketNumber> {
 
@@ -43,18 +45,17 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   public static final PacketNumber MIN = new PacketNumber(0);
 
-  private final Varint number;
+  private final long number;
 
   public PacketNumber(final long number) {
-    this.number = new Varint(number);
-  }
+    Preconditions.checkArgument(number >= 0);
+    Preconditions.checkArgument(number <= Varint.MAX);
 
-  public PacketNumber(final Varint number) {
     this.number = number;
   }
 
   public PacketNumber next() {
-    return new PacketNumber(number.longValue() + 1);
+    return new PacketNumber(number + 1);
   }
 
   public PacketNumber max(PacketNumber other) {
@@ -66,15 +67,11 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public long asLong() {
-    return number.longValue();
-  }
-
-  public Varint asVarint() {
     return number;
   }
 
   public void write(final ByteBuf bb) {
-    int value = (int)number.longValue();
+    int value = (int)number;
     int from;
     int mask;
     if (value > 16383) {
@@ -95,27 +92,25 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   @Override
-  public boolean equals(final Object o) {
+  public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
-    final PacketNumber that = (PacketNumber) o;
-
-    return number.equals(that.number);
+    PacketNumber that = (PacketNumber) o;
+    return number == that.number;
   }
 
   @Override
   public int hashCode() {
-    return number.hashCode();
+    return Objects.hash(number);
   }
 
   @Override
   public int compareTo(final PacketNumber o) {
-    return this.number.compareTo(o.number);
+    return Long.compare(this.number, o.number);
   }
 
   @Override
   public String toString() {
-    return number.toString();
+    return Long.toString(number);
   }
 }

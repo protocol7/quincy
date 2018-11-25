@@ -7,19 +7,27 @@ import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
 
-public class Varint implements Comparable<Varint> {
+public class Varint {
 
   public static final long MAX = 4611686018427387903L;
 
-  public static Varint random() {
+  public static long random() {
     return random(0);
   }
 
-  public static Varint random(int min) {
-    return new Varint(Rnd.rndInt(min, Integer.MAX_VALUE));
+  public static long random(int min) {
+    return Rnd.rndInt(min, Integer.MAX_VALUE);
   }
 
-  public static Varint read(ByteBuf bb) {
+  public static long readAsLong(ByteBuf bb) {
+    return read(bb);
+  }
+
+  public static int readAsInt(ByteBuf bb) {
+    return (int) read(bb);
+  }
+
+  private static long read(ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);
     int size = ((first & 0b11000000) & 0xFF) ;
     int rest = ((first & 0b00111111) & 0xFF) ;
@@ -31,52 +39,16 @@ public class Varint implements Comparable<Varint> {
     byte[] pad = new byte[7-len];
     byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, b);
 
-    return new Varint(Longs.fromByteArray(bs));
-  }
+    long value = Longs.fromByteArray(bs);
 
-  public static void write(long value, ByteBuf bb) {
-    new Varint(value).write(bb);
-  }
+    checkRange(value);
 
-  public Varint(final long value) {
-    if (value < 0 || value > MAX) {
-      throw new IllegalArgumentException("Varint out of bounds: " + value);
-    }
-    this.value = value;
-  }
-
-  private final long value;
-
-  public long longValue() {
     return value;
   }
 
-  public int intValue() {
-    return (int)value;
-  }
+  public static void write(long value, ByteBuf bb) {
+    checkRange(value);
 
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-
-    final Varint varint = (Varint) o;
-
-    return value == varint.value;
-
-  }
-
-  @Override
-  public int hashCode() {
-    return (int) (value ^ (value >>> 32));
-  }
-
-  @Override
-  public int compareTo(final Varint o) {
-    return Longs.compare(this.value, o.value);
-  }
-
-  public void write(ByteBuf bb) {
     int from;
     int mask;
     if (value > 1073741823) {
@@ -98,8 +70,9 @@ public class Varint implements Comparable<Varint> {
     bb.writeBytes(b);
   }
 
-  @Override
-  public String toString() {
-    return Long.toString(value);
+  private static void checkRange(long value) {
+    if (value < 0 || value > MAX) {
+      throw new IllegalArgumentException("Varint out of bounds: " + value);
+    }
   }
 }
