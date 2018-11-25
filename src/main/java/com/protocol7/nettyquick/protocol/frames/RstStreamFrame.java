@@ -1,11 +1,11 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
-
-import static java.util.Objects.requireNonNull;
 
 public class RstStreamFrame extends Frame {
 
@@ -23,7 +23,8 @@ public class RstStreamFrame extends Frame {
   private final int applicationErrorCode;
   private final long offset;
 
-  public RstStreamFrame(final StreamId streamId, final int applicationErrorCode, final long offset) {
+  public RstStreamFrame(
+      final StreamId streamId, final int applicationErrorCode, final long offset) {
     super(FrameType.RST_STREAM);
 
     requireNonNull(streamId);
@@ -70,7 +71,6 @@ public class RstStreamFrame extends Frame {
     if (applicationErrorCode != that.applicationErrorCode) return false;
     if (offset != that.offset) return false;
     return streamId.equals(that.streamId);
-
   }
 
   @Override

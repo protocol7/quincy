@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.protocol.frames;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 
 public class StreamFrame extends Frame {
@@ -41,7 +40,8 @@ public class StreamFrame extends Frame {
   private final boolean fin;
   private final byte[] data;
 
-  public StreamFrame(final StreamId streamId, final long offset, final boolean fin, final byte[] data) {
+  public StreamFrame(
+      final StreamId streamId, final long offset, final boolean fin, final byte[] data) {
     super(FrameType.STREAM);
     this.streamId = streamId;
     this.offset = offset;
@@ -69,13 +69,13 @@ public class StreamFrame extends Frame {
   public void write(final ByteBuf bb) {
     byte type = getType().getType();
     if (offset > 0) {
-      type = (byte)(type | 0x04);
+      type = (byte) (type | 0x04);
     }
     if (isFin()) {
-      type = (byte)(type | 0x01);
+      type = (byte) (type | 0x01);
     }
     // TODO only set len when needed
-    type = (byte)(type | 0x02);
+    type = (byte) (type | 0x02);
 
     bb.writeByte(type);
     streamId.write(bb);
@@ -99,7 +99,6 @@ public class StreamFrame extends Frame {
     if (fin != that.fin) return false;
     if (!streamId.equals(that.streamId)) return false;
     return Arrays.equals(data, that.data);
-
   }
 
   @Override
@@ -113,11 +112,15 @@ public class StreamFrame extends Frame {
 
   @Override
   public String toString() {
-    return "StreamFrame{" +
-            "streamId=" + streamId +
-            ", offset=" + offset +
-            ", fin=" + fin +
-            ", data=" + Arrays.toString(data) +
-            '}';
+    return "StreamFrame{"
+        + "streamId="
+        + streamId
+        + ", offset="
+        + offset
+        + ", fin="
+        + fin
+        + ", data="
+        + Arrays.toString(data)
+        + '}';
   }
 }

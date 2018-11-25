@@ -1,5 +1,10 @@
 package com.protocol7.nettyquick.client;
 
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.*;
+import static org.junit.Assert.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
+
 import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.*;
@@ -11,12 +16,6 @@ import com.protocol7.nettyquick.tls.ServerTlsSession;
 import com.protocol7.nettyquick.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.util.concurrent.*;
-import org.junit.Before;
-import org.junit.Test;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.NoSuchAlgorithmException;
@@ -25,11 +24,11 @@ import java.security.cert.CertificateException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
-
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.*;
-import static org.junit.Assert.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.*;
+import org.junit.Before;
+import org.junit.Test;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 public class ClientTest {
 
@@ -49,14 +48,17 @@ public class ClientTest {
   @Mock private StreamListener streamListener;
 
   @Before
-  public void setUp() throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
+  public void setUp()
+      throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
     MockitoAnnotations.initMocks(this);
 
-    when(packetSender.send(any(), any(), any())).thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
-    when(packetSender.destroy()).thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
+    when(packetSender.send(any(), any(), any()))
+        .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
+    when(packetSender.destroy())
+        .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
-
-    connection = new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
+    connection =
+        new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
 
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
     byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
@@ -86,7 +88,8 @@ public class ClientTest {
     byte[] retryToken = Rnd.rndBytes(20);
 
     // first packet did not contain token, so server send retry
-    connection.onPacket(new RetryPacket(
+    connection.onPacket(
+        new RetryPacket(
             Version.CURRENT,
             Optional.empty(),
             Optional.of(srcConnectionId),
@@ -115,7 +118,8 @@ public class ClientTest {
     ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
 
     // receive server hello
-    connection.onPacket(InitialPacket.create(
+    connection.onPacket(
+        InitialPacket.create(
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
@@ -131,7 +135,8 @@ public class ClientTest {
     assertEquals(WaitingForHandshake, connection.getState());
 
     // receive server handshake
-    connection.onPacket(HandshakePacket.create(
+    connection.onPacket(
+        HandshakePacket.create(
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
@@ -141,7 +146,9 @@ public class ClientTest {
     // validate client fin handshake packet
     HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
     assertEquals(2, hp.getPacketNumber().asLong());
-    assertEquals(srcConnectionId, hp.getDestinationConnectionId().get()); // TODO quic-go requires this, but is it correct?
+    assertEquals(
+        srcConnectionId,
+        hp.getDestinationConnectionId().get()); // TODO quic-go requires this, but is it correct?
     assertEquals(srcConnectionId, hp.getSourceConnectionId().get());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
 
@@ -269,7 +276,8 @@ public class ClientTest {
     ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
-    assertEquals(new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
+    assertEquals(
+        new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
   }
 
   @Test
@@ -291,10 +299,12 @@ public class ClientTest {
   }
 
   private Packet packet(Frame... frames) {
-    return new ShortPacket(new ShortHeader(false,
-                           Optional.of(srcConnectionId), // TODO correct?
-                           nextPacketNumber(),
-                           new Payload(frames)));
+    return new ShortPacket(
+        new ShortHeader(
+            false,
+            Optional.of(srcConnectionId), // TODO correct?
+            nextPacketNumber(),
+            new Payload(frames)));
   }
 
   private PacketNumber nextPacketNumber() {

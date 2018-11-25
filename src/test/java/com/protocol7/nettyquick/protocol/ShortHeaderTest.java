@@ -1,16 +1,15 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Test;
-
 import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import org.junit.Test;
 
 public class ShortHeaderTest {
 
@@ -21,10 +20,7 @@ public class ShortHeaderTest {
     ConnectionId connId = ConnectionId.random();
     PacketNumber pn = new PacketNumber(123);
     Payload payload = new Payload(PingFrame.INSTANCE);
-    ShortHeader p = new ShortHeader(false,
-                                    Optional.of(connId),
-                                    pn,
-                                    payload);
+    ShortHeader p = new ShortHeader(false, Optional.of(connId), pn, payload);
 
     ByteBuf bb = Unpooled.buffer();
     p.write(bb, aead);
@@ -36,5 +32,4 @@ public class ShortHeaderTest {
     assertEquals(pn, parsed.getPacketNumber());
     assertEquals(payload, parsed.getPayload());
   }
-
 }

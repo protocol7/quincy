@@ -7,7 +7,6 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
-
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
@@ -36,7 +35,11 @@ public class Stream {
   private final ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine();
   private final ReceivedDataBuffer receivedDataBuffer = new ReceivedDataBuffer();
 
-  public Stream(final StreamId id, final Connection connection, final StreamListener listener, StreamType streamType) {
+  public Stream(
+      final StreamId id,
+      final Connection connection,
+      final StreamListener listener,
+      StreamType streamType) {
     this.id = id;
     this.connection = connection;
     this.listener = listener;

@@ -5,7 +5,6 @@ import com.google.common.primitives.Ints;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -19,8 +18,8 @@ public class PacketNumber implements Comparable<PacketNumber> {
 
   public static PacketNumber parseVarint(final ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);
-    int size = ((first & 0b11000000) & 0xFF) ;
-    int rest = ((first & 0b00111111) & 0xFF) ;
+    int size = ((first & 0b11000000) & 0xFF);
+    int rest = ((first & 0b00111111) & 0xFF);
 
     int len;
     if (size == 0b10000000) {
@@ -33,12 +32,12 @@ public class PacketNumber implements Comparable<PacketNumber> {
       throw new RuntimeException("Unknown size marker");
     }
 
-    //int len = (int)Math.pow(2, size >> 6) - 1;
+    // int len = (int)Math.pow(2, size >> 6) - 1;
 
     byte[] b = new byte[len];
     bb.readBytes(b);
-    byte[] pad = new byte[3-len];
-    byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, b);
+    byte[] pad = new byte[3 - len];
+    byte[] bs = Bytes.concat(pad, new byte[] {(byte) rest}, b);
 
     return new PacketNumber(Ints.fromByteArray(bs));
   }
@@ -71,7 +70,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   public void write(final ByteBuf bb) {
-    int value = (int)number;
+    int value = (int) number;
     int from;
     int mask;
     if (value > 16383) {
@@ -87,7 +86,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
     byte[] bs = Ints.toByteArray(value);
     byte[] b = Arrays.copyOfRange(bs, from, 4);
 
-    b[0] = (byte)(b[0] | mask);
+    b[0] = (byte) (b[0] | mask);
     bb.writeBytes(b);
   }
 

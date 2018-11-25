@@ -1,12 +1,12 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.*;
+
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class VarintTest {
 
@@ -32,9 +32,9 @@ public class VarintTest {
 
   @Test
   public void randomBounds() {
-    for (int i = 0; i<1000_000; i++) {
+    for (int i = 0; i < 1000_000; i++) {
       long v = Varint.random();
-      assertTrue( v > 0 && v < 4611686018427387903L);
+      assertTrue(v > 0 && v < 4611686018427387903L);
     }
   }
 

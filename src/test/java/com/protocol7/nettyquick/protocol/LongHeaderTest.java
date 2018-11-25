@@ -1,15 +1,14 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.assertEquals;
+
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Test;
-
 import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
+import org.junit.Test;
 
 public class LongHeaderTest {
 
@@ -37,6 +36,4 @@ public class LongHeaderTest {
     assertEquals(pn, parsed.getPacketNumber());
     assertEquals(payload, parsed.getPayload());
   }
-
-
 }

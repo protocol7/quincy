@@ -10,7 +10,6 @@ import org.slf4j.MDC;
 
 public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-
   private ClientConnection connection;
 
   public void setConnection(final ClientConnection connection) {
@@ -21,14 +20,20 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
-      Packet packet = Packet.parse(msg.content(), connectionId -> connection.lastAckedPacketNumber(),
-              (connId, packetType) -> connection.getAEAD(packetType), connection.getLastDestConnectionIdLength());
+      Packet packet =
+          Packet.parse(
+              msg.content(),
+              connectionId -> connection.lastAckedPacketNumber(),
+              (connId, packetType) -> connection.getAEAD(packetType),
+              connection.getLastDestConnectionIdLength());
 
       MDC.put("actor", "client");
       if (packet instanceof FullPacket) {
         MDC.put("packetnumber", ((FullPacket) packet).getPacketNumber().toString());
       }
-      packet.getDestinationConnectionId().ifPresent(connId -> MDC.put("connectionid", connId.toString()));
+      packet
+          .getDestinationConnectionId()
+          .ifPresent(connId -> MDC.put("connectionid", connId.toString()));
 
       connection.onPacket(packet);
     }

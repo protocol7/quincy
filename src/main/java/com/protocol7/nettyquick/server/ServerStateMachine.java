@@ -31,47 +31,51 @@ public class ServerStateMachine {
   }
 
   public synchronized void processPacket(Packet packet) {
-    log.info("Server got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
+    log.info(
+        "Server got {} in state {} with connection ID {}",
+        packet.getClass().getName(),
+        state,
+        packet.getDestinationConnectionId());
 
-      // TODO check version
-      if (state == ServerState.BeforeInitial) {
-        if (packet instanceof InitialPacket) {
-          InitialPacket initialPacket = (InitialPacket) packet;
-          connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
+    // TODO check version
+    if (state == ServerState.BeforeInitial) {
+      if (packet instanceof InitialPacket) {
+        InitialPacket initialPacket = (InitialPacket) packet;
+        connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
 
-          CryptoFrame clientHello = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
+        CryptoFrame clientHello = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
-          throw new RuntimeException("Not implemented");
+        throw new RuntimeException("Not implemented");
 
-          //CryptoFrame serverHello = new CryptoFrame(0, tlsEngine.handleServerHello(clientHello.getCryptoData()));
+        // CryptoFrame serverHello = new CryptoFrame(0,
+        // tlsEngine.handleServerHello(clientHello.getCryptoData()));
 
-          // Packet handshakePacket = InitialPacket.create(packet.getSourceConnectionId(),
-          //                                                 connection.getSourceConnectionId(),
-          //                                                connection.nextSendPacketNumber(),
-          //                                                 initialPacket.getVersion(),
-          //                                                Optional.empty(),
-          //                                                 serverHello);
-          // connection.sendPacket(handshakePacket);
-          // state = ServerState.Ready;
-          // log.info("Server connection state ready");
-        } else {
-          throw new RuntimeException("Unexpected packet in BeforeInitial: " + packet);
-        }
-      } else if (state == ServerState.Ready) {
-        for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {
-          if (frame instanceof StreamFrame) {
-            StreamFrame sf = (StreamFrame) frame;
-            Stream stream = connection.getOrCreateStream(sf.getStreamId());
-            stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-          } else if (frame instanceof RstStreamFrame) {
-            RstStreamFrame rsf = (RstStreamFrame) frame;
-            Stream stream = connection.getOrCreateStream(rsf.getStreamId());
-            stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
-          } else if (frame instanceof PingFrame) {
-            PingFrame pf = (PingFrame) frame;
-          }
+        // Packet handshakePacket = InitialPacket.create(packet.getSourceConnectionId(),
+        //                                                 connection.getSourceConnectionId(),
+        //                                                connection.nextSendPacketNumber(),
+        //                                                 initialPacket.getVersion(),
+        //                                                Optional.empty(),
+        //                                                 serverHello);
+        // connection.sendPacket(handshakePacket);
+        // state = ServerState.Ready;
+        // log.info("Server connection state ready");
+      } else {
+        throw new RuntimeException("Unexpected packet in BeforeInitial: " + packet);
+      }
+    } else if (state == ServerState.Ready) {
+      for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
+        if (frame instanceof StreamFrame) {
+          StreamFrame sf = (StreamFrame) frame;
+          Stream stream = connection.getOrCreateStream(sf.getStreamId());
+          stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
+        } else if (frame instanceof RstStreamFrame) {
+          RstStreamFrame rsf = (RstStreamFrame) frame;
+          Stream stream = connection.getOrCreateStream(rsf.getStreamId());
+          stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+        } else if (frame instanceof PingFrame) {
+          PingFrame pf = (PingFrame) frame;
         }
       }
+    }
   }
-
 }

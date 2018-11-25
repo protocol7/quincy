@@ -1,11 +1,11 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import static org.junit.Assert.assertEquals;
+
 import com.protocol7.nettyquick.protocol.StreamId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
 
 public class RstStreamFrameTest {
 
@@ -25,9 +25,10 @@ public class RstStreamFrameTest {
   public void negativeAppErrorCode() {
     new RstStreamFrame(StreamId.random(true, true), -1, 456);
   }
+
   @Test(expected = IllegalArgumentException.class)
   public void tooLargeAppErrorCode() {
-    new RstStreamFrame(StreamId.random(true, true), 0xFFFF+1, 456);
+    new RstStreamFrame(StreamId.random(true, true), 0xFFFF + 1, 456);
   }
 
   @Test

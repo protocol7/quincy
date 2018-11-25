@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.utils;
 
 import com.google.common.primitives.UnsignedLong;
-
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
@@ -24,7 +23,7 @@ public class Rnd {
     return b;
   }
 
-  public static int rndInt(int min, int  max) {
+  public static int rndInt(int min, int max) {
     return rnd.nextInt(max - min) + min;
   }
 

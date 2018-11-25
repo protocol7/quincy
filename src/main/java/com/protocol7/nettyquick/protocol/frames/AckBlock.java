@@ -6,8 +6,7 @@ import com.protocol7.nettyquick.protocol.PacketNumber;
 public class AckBlock {
 
   public static AckBlock fromLongs(long smallest, long largest) {
-    return new AckBlock(new PacketNumber(smallest),
-                        new PacketNumber(largest));
+    return new AckBlock(new PacketNumber(smallest), new PacketNumber(largest));
   }
 
   private final PacketNumber smallest;
@@ -39,9 +38,9 @@ public class AckBlock {
 
     final AckBlock ackBlock = (AckBlock) o;
 
-    if (smallest != null ? !smallest.equals(ackBlock.smallest) : ackBlock.smallest != null) return false;
+    if (smallest != null ? !smallest.equals(ackBlock.smallest) : ackBlock.smallest != null)
+      return false;
     return largest != null ? largest.equals(ackBlock.largest) : ackBlock.largest == null;
-
   }
 
   @Override
@@ -53,9 +52,6 @@ public class AckBlock {
 
   @Override
   public String toString() {
-    return "AckBlock[" +
-            smallest +
-            ".." + largest +
-            ']';
+    return "AckBlock[" + smallest + ".." + largest + ']';
   }
 }

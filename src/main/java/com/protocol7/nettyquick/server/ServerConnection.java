@@ -16,19 +16,19 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ServerConnection implements Connection {
 
-  public static ServerConnection create(StreamListener handler,
-                                        Channel channel,
-                                        InetSocketAddress clientAddress,
-                                        ConnectionId srcConnId) {
+  public static ServerConnection create(
+      StreamListener handler,
+      Channel channel,
+      InetSocketAddress clientAddress,
+      ConnectionId srcConnId) {
     return new ServerConnection(handler, channel, clientAddress, srcConnId);
   }
 
@@ -40,17 +40,19 @@ public class ServerConnection implements Connection {
   private final Channel channel;
   private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
-  private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<PacketNumber> sendPacketNumber =
+      new AtomicReference<>(PacketNumber.MIN);
   private final Streams streams;
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
   private final AEAD initialAead;
 
-  public ServerConnection(final StreamListener handler,
-                          final Channel channel,
-                          final InetSocketAddress clientAddress,
-                          final ConnectionId srcConnId) {
+  public ServerConnection(
+      final StreamListener handler,
+      final Channel channel,
+      final InetSocketAddress clientAddress,
+      final ConnectionId srcConnId) {
     this.handler = handler;
     this.channel = channel;
     this.clientAddress = clientAddress;
@@ -66,6 +68,7 @@ public class ServerConnection implements Connection {
   public Optional<ConnectionId> getDestinationConnectionId() {
     return destConnectionId;
   }
+
   public Optional<ConnectionId> getSourceConnectionId() {
     return srcConnectionId;
   }
@@ -84,23 +87,32 @@ public class ServerConnection implements Connection {
   }
 
   public FullPacket sendPacket(Frame... frames) {
-    return (FullPacket)sendPacket(new ShortPacket(new ShortHeader(false,
-                                  getDestinationConnectionId(),
-                                  nextSendPacketNumber(),
-                                  new Payload(frames))));
+    return (FullPacket)
+        sendPacket(
+            new ShortPacket(
+                new ShortHeader(
+                    false,
+                    getDestinationConnectionId(),
+                    nextSendPacketNumber(),
+                    new Payload(frames))));
   }
 
   private void sendPacketUnbuffered(Packet packet) {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, initialAead);
-    channel.writeAndFlush(new DatagramPacket(bb, clientAddress)).syncUninterruptibly().awaitUninterruptibly(); // TODO fix
+    channel
+        .writeAndFlush(new DatagramPacket(bb, clientAddress))
+        .syncUninterruptibly()
+        .awaitUninterruptibly(); // TODO fix
     log.debug("Server sent {}", packet);
   }
 
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    packetBuffer.onPacket(packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled with incorrect conn ID
+    packetBuffer.onPacket(
+        packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled
+                 // with incorrect conn ID
     stateMachine.processPacket(packet);
   }
 

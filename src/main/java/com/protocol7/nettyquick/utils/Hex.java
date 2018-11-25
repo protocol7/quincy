@@ -11,7 +11,7 @@ public class Hex {
   }
 
   public static String hex(byte b) {
-    return HEX.encode(new byte[]{b});
+    return HEX.encode(new byte[] {b});
   }
 
   public static byte[] dehex(String s) {

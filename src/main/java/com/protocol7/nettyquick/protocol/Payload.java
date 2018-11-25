@@ -1,5 +1,8 @@
 package com.protocol7.nettyquick.protocol;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.frames.Frame;
@@ -7,13 +10,9 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class Payload {
 
@@ -21,7 +20,7 @@ public class Payload {
     byte[] cipherText = new byte[length];
     bb.readBytes(cipherText);
 
-    byte[]raw;
+    byte[] raw;
     try {
       raw = aead.open(cipherText, pn.asLong(), aad);
     } catch (GeneralSecurityException e) {
@@ -63,13 +62,14 @@ public class Payload {
   }
 
   public int getLength() {
-    return frames.stream().mapToInt(f -> f.calculateLength()).sum() + AEAD.OVERHEAD; // AEAD overhead
+    return frames.stream().mapToInt(f -> f.calculateLength()).sum()
+        + AEAD.OVERHEAD; // AEAD overhead
   }
 
   public void write(ByteBuf bb, AEAD aead, PacketNumber pn, byte[] aad) {
     ByteBuf raw = Unpooled.buffer();
     for (Frame frame : frames) {
-        frame.write(raw);
+      frame.write(raw);
     }
     byte[] b = Bytes.drainToArray(raw);
 
@@ -89,7 +89,6 @@ public class Payload {
     final Payload payload = (Payload) o;
 
     return frames != null ? frames.equals(payload.frames) : payload.frames == null;
-
   }
 
   @Override

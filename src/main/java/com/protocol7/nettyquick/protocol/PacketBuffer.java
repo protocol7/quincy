@@ -9,15 +9,14 @@ import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
 import com.protocol7.nettyquick.protocol.frames.AckFrame;
 import com.protocol7.nettyquick.protocol.packets.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 // TODO resends
 public class PacketBuffer {
@@ -30,12 +29,14 @@ public class PacketBuffer {
 
   private final Map<PacketNumber, Packet> buffer = Maps.newConcurrentMap();
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
-  private final AtomicReference<PacketNumber> largestAcked = new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<PacketNumber> largestAcked =
+      new AtomicReference<>(PacketNumber.MIN);
   private final Connection connection;
   private final Sender sender;
   private final AckListener ackListener;
 
-  public PacketBuffer(final Connection connection, final Sender sender, final AckListener ackListener) {
+  public PacketBuffer(
+      final Connection connection, final Sender sender, final AckListener ackListener) {
     this.connection = connection;
     this.sender = sender;
     this.ackListener = ackListener;
@@ -56,7 +57,7 @@ public class PacketBuffer {
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
-        sendImpl(((FullPacket)packet).addFrame(ackFrame));
+        sendImpl(((FullPacket) packet).addFrame(ackFrame));
       } else {
         sendImpl(packet);
       }
@@ -67,16 +68,16 @@ public class PacketBuffer {
 
   private void sendImpl(Packet packet) {
     if (packet instanceof FullPacket) {
-      buffer.put(((FullPacket)packet).getPacketNumber(), packet);
-      log.debug("Buffered packet {}", ((FullPacket)packet).getPacketNumber());
+      buffer.put(((FullPacket) packet).getPacketNumber(), packet);
+      log.debug("Buffered packet {}", ((FullPacket) packet).getPacketNumber());
     }
     sender.send(packet);
   }
 
   public void onPacket(Packet packet) {
     if (packet instanceof FullPacket) {
-      ackQueue.add(((FullPacket)packet).getPacketNumber());
-      log.debug("Acked packet {}", ((FullPacket)packet).getPacketNumber());
+      ackQueue.add(((FullPacket) packet).getPacketNumber());
+      log.debug("Acked packet {}", ((FullPacket) packet).getPacketNumber());
 
       handleAcks(packet);
 
@@ -90,7 +91,7 @@ public class PacketBuffer {
   private boolean shouldFlush(Packet packet) {
     if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
       return false;
-    } else if (packet instanceof FullPacket && acksOnly((FullPacket)packet)) {
+    } else if (packet instanceof FullPacket && acksOnly((FullPacket) packet)) {
       return false;
     } else {
       return true;
@@ -99,7 +100,12 @@ public class PacketBuffer {
 
   private void handleAcks(Packet packet) {
     if (packet instanceof FullPacket) {
-      ((FullPacket)packet).getPayload().getFrames().stream().filter(frame -> frame instanceof AckFrame).forEach(frame -> handleAcks((AckFrame) frame));
+      ((FullPacket) packet)
+          .getPayload()
+          .getFrames()
+          .stream()
+          .filter(frame -> frame instanceof AckFrame)
+          .forEach(frame -> handleAcks((AckFrame) frame));
     }
   }
 
@@ -111,7 +117,7 @@ public class PacketBuffer {
     // TODO optimize
     long smallest = block.getSmallest().asLong();
     long largest = block.getLargest().asLong();
-    for (long i = smallest; i<=largest; i++) {
+    for (long i = smallest; i <= largest; i++) {
       PacketNumber pn = new PacketNumber(i);
       if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
@@ -122,18 +128,21 @@ public class PacketBuffer {
   }
 
   private void flushAcks() {
-      List<AckBlock> blocks = drainAcks(ackQueue);
-      if (!blocks.isEmpty()) {
-        AckFrame ackFrame = new AckFrame(123, blocks);
-        Packet packet = new ShortPacket(new ShortHeader(false,
-                connection.getDestinationConnectionId(),
-                connection.nextSendPacketNumber(),
-                new Payload(ackFrame)));
+    List<AckBlock> blocks = drainAcks(ackQueue);
+    if (!blocks.isEmpty()) {
+      AckFrame ackFrame = new AckFrame(123, blocks);
+      Packet packet =
+          new ShortPacket(
+              new ShortHeader(
+                  false,
+                  connection.getDestinationConnectionId(),
+                  connection.nextSendPacketNumber(),
+                  new Payload(ackFrame)));
 
-        log.debug("Flushed acks {}", blocks);
+      log.debug("Flushed acks {}", blocks);
 
-        sendImpl(packet);
-      }
+      sendImpl(packet);
+    }
   }
 
   // TODO break out and test directly
@@ -144,7 +153,8 @@ public class PacketBuffer {
       return Collections.emptyList();
     }
 
-    List<Long> pnsLong = pns.stream().map(packetNumber -> packetNumber.asLong()).collect(Collectors.toList());
+    List<Long> pnsLong =
+        pns.stream().map(packetNumber -> packetNumber.asLong()).collect(Collectors.toList());
     Collections.sort(pnsLong);
 
     List<AckBlock> blocks = Lists.newArrayList();

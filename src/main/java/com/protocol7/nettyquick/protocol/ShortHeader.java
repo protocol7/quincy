@@ -1,19 +1,19 @@
 package com.protocol7.nettyquick.protocol;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
+
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Optional;
-
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
 
 public class ShortHeader implements Header {
 
-  public static ShortHeader parse(ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
+  public static ShortHeader parse(
+      ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
     bb.markReaderIndex();
 
     byte firstByte = bb.readByte();
@@ -22,9 +22,9 @@ public class ShortHeader implements Header {
 
     Optional<ConnectionId> connId;
     if (connIdLength > 0) {
-        connId = Optional.of(ConnectionId.read(connIdLength, bb));
+      connId = Optional.of(ConnectionId.read(connIdLength, bb));
     } else {
-        connId = Optional.empty();
+      connId = Optional.empty();
     }
 
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
@@ -33,19 +33,16 @@ public class ShortHeader implements Header {
     bb.resetReaderIndex();
     bb.readBytes(aad);
 
-    Payload payload = Payload.parse(bb, bb.readableBytes(), aead.forConnection(connId, OneRtt), packetNumber, aad);
+    Payload payload =
+        Payload.parse(
+            bb, bb.readableBytes(), aead.forConnection(connId, OneRtt), packetNumber, aad);
 
-    return new ShortHeader(keyPhase,
-                           connId,
-                           packetNumber,
-                           payload);
+    return new ShortHeader(keyPhase, connId, packetNumber, payload);
   }
 
   public static ShortHeader addFrame(ShortHeader packet, Frame frame) {
-    return new ShortHeader(packet.keyPhase,
-                           packet.connectionId,
-                           packet.packetNumber,
-                           packet.payload.addFrame(frame));
+    return new ShortHeader(
+        packet.keyPhase, packet.connectionId, packet.packetNumber, packet.payload.addFrame(frame));
   }
 
   private final boolean keyPhase;
@@ -53,7 +50,11 @@ public class ShortHeader implements Header {
   private final PacketNumber packetNumber;
   private final Payload payload;
 
-  public ShortHeader(final boolean keyPhase, final Optional<ConnectionId> connectionId, final PacketNumber packetNumber, final Payload payload) {
+  public ShortHeader(
+      final boolean keyPhase,
+      final Optional<ConnectionId> connectionId,
+      final PacketNumber packetNumber,
+      final Payload payload) {
     this.keyPhase = checkNotNull(keyPhase);
     this.connectionId = checkNotNull(connectionId);
     this.packetNumber = checkNotNull(packetNumber);
@@ -80,10 +81,10 @@ public class ShortHeader implements Header {
   public void write(ByteBuf bb, AEAD aead) {
     byte b = 0;
     if (keyPhase) {
-      b = (byte)(b | 0x40);
+      b = (byte) (b | 0x40);
     }
-    b = (byte)(b | 0x20); // constant
-    b = (byte)(b | 0x10); // constant
+    b = (byte) (b | 0x20); // constant
+    b = (byte) (b | 0x10); // constant
     bb.writeByte(b);
 
     connectionId.get().write(bb);
@@ -100,11 +101,15 @@ public class ShortHeader implements Header {
 
   @Override
   public String toString() {
-    return "ShortHeader{" +
-            "keyPhase=" + keyPhase +
-            ", connectionId=" + Opt.toString(connectionId) +
-            ", packetNumber=" + packetNumber +
-            ", payload=" + payload +
-            '}';
+    return "ShortHeader{"
+        + "keyPhase="
+        + keyPhase
+        + ", connectionId="
+        + Opt.toString(connectionId)
+        + ", packetNumber="
+        + packetNumber
+        + ", payload="
+        + payload
+        + '}';
   }
 }

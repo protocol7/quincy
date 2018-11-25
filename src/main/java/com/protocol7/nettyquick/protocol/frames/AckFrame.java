@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
@@ -25,9 +24,8 @@ public class AckFrame extends Frame {
 
     blocks.add(AckBlock.fromLongs(smallest, largestAcknowledged));
 
-
     long largest = largestAcknowledged;
-    for (int i = 0; i<blockCount; i++) {
+    for (int i = 0; i < blockCount; i++) {
       if (i % 2 == 0) {
         // reading gap
         long gap = Varint.readAsLong(bb);
@@ -94,7 +92,7 @@ public class AckFrame extends Frame {
     long smallest = firstBlock.getSmallest().asLong();
     Varint.write(largest - smallest, bb);
 
-    for (int i = 1; i<blocks.size(); i++) {
+    for (int i = 1; i < blocks.size(); i++) {
       AckBlock block = blocks.get(i);
 
       long gap = smallest - block.getLargest().asLong() - 1;
@@ -115,7 +113,6 @@ public class AckFrame extends Frame {
 
     if (ackDelay != ackFrame.ackDelay) return false;
     return blocks.equals(ackFrame.blocks);
-
   }
 
   @Override
@@ -127,9 +124,6 @@ public class AckFrame extends Frame {
 
   @Override
   public String toString() {
-    return "AckFrame{" +
-            "ackDelay=" + ackDelay +
-            ", blocks=" + blocks +
-            '}';
+    return "AckFrame{" + "ackDelay=" + ackDelay + ", blocks=" + blocks + '}';
   }
 }

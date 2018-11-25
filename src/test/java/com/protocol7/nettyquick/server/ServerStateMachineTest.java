@@ -1,5 +1,9 @@
 package com.protocol7.nettyquick.server;
 
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.*;
@@ -8,6 +12,7 @@ import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.server.ServerStateMachine.ServerState;
 import com.protocol7.nettyquick.streams.Stream;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -15,20 +20,13 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
 @Ignore
 public class ServerStateMachineTest {
 
   public static final byte[] DATA = "Hello".getBytes();
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
-  @Mock
-  private ServerConnection connection;
+  @Mock private ServerConnection connection;
   @Mock private Stream stream;
   private ServerStateMachine stm;
   private PacketNumber packetNumber = PacketNumber.random();
@@ -105,17 +103,16 @@ public class ServerStateMachineTest {
 
   private InitialPacket initialPacket(Frame... frames) {
     return InitialPacket.create(
-            Optional.of(destConnectionId),
-            Optional.of(srcConnectionId),
-            Optional.empty(),
-            Lists.newArrayList(frames));
+        Optional.of(destConnectionId),
+        Optional.of(srcConnectionId),
+        Optional.empty(),
+        Lists.newArrayList(frames));
   }
 
   private Packet packet(Frame... frames) {
-    return new ShortPacket(new ShortHeader(false,
-                           Optional.of(destConnectionId),
-                           incrPacketNumber(),
-                           new Payload(frames)));
+    return new ShortPacket(
+        new ShortHeader(
+            false, Optional.of(destConnectionId), incrPacketNumber(), new Payload(frames)));
   }
 
   private PacketNumber incrPacketNumber() {

@@ -6,7 +6,6 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Optional;
 
 public class LongHeader implements Header {
@@ -42,21 +41,17 @@ public class LongHeader implements Header {
 
     Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
-    return new LongHeader(packetType,
-                          destConnId,
-                          srcConnId,
-                          version,
-                          packetNumber,
-                          payload);
+    return new LongHeader(packetType, destConnId, srcConnId, version, packetNumber, payload);
   }
 
   public static LongHeader addFrame(LongHeader header, Frame frame) {
-    return new LongHeader(header.packetType,
-                          header.destinationConnectionId,
-                          header.sourceConnectionId,
-                          header.version,
-                          header.packetNumber,
-                          header.payload.addFrame(frame));
+    return new LongHeader(
+        header.packetType,
+        header.destinationConnectionId,
+        header.sourceConnectionId,
+        header.version,
+        header.packetNumber,
+        header.payload.addFrame(frame));
   }
 
   private final PacketType packetType;
@@ -66,12 +61,13 @@ public class LongHeader implements Header {
   private final PacketNumber packetNumber;
   private final Payload payload;
 
-  public LongHeader(final PacketType packetType,
-                    final Optional<ConnectionId> destinationConnectionId,
-                    final Optional<ConnectionId> sourceConnectionId,
-                    final Version version,
-                    final PacketNumber packetNumber,
-                    final Payload payload) {
+  public LongHeader(
+      final PacketType packetType,
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final Version version,
+      final PacketNumber packetNumber,
+      final Payload payload) {
     this.packetType = packetType; // TODO validate only those valid for LondHeaders are used
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -87,6 +83,7 @@ public class LongHeader implements Header {
   public Optional<ConnectionId> getDestinationConnectionId() {
     return destinationConnectionId;
   }
+
   public Optional<ConnectionId> getSourceConnectionId() {
     return sourceConnectionId;
   }
@@ -140,13 +137,19 @@ public class LongHeader implements Header {
 
   @Override
   public String toString() {
-    return "LongHeader{" +
-            "packetType=" + packetType +
-            ", destinationConnectionId=" + Opt.toString(destinationConnectionId) +
-            ", sourceConnectionId=" + Opt.toString(sourceConnectionId) +
-            ", version=" + version +
-            ", packetNumber=" + packetNumber +
-            ", payload=" + payload +
-            '}';
+    return "LongHeader{"
+        + "packetType="
+        + packetType
+        + ", destinationConnectionId="
+        + Opt.toString(destinationConnectionId)
+        + ", sourceConnectionId="
+        + Opt.toString(sourceConnectionId)
+        + ", version="
+        + version
+        + ", packetNumber="
+        + packetNumber
+        + ", payload="
+        + payload
+        + '}';
   }
 }

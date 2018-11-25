@@ -1,14 +1,14 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+
 import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 public class PacketNumberTest {
 
@@ -31,7 +31,7 @@ public class PacketNumberTest {
 
   @Test
   public void randomBounds() {
-    for (int i = 0; i<1000_000; i++) {
+    for (int i = 0; i < 1000_000; i++) {
       PacketNumber v = PacketNumber.random();
       assertTrue(v.toString(), v.asLong() > 0 && v.asLong() < 4294966271L);
     }
@@ -82,7 +82,7 @@ public class PacketNumberTest {
 
   @Test
   public void roundtripVarint() {
-    int pn = (int)PacketNumber.random().asLong();
+    int pn = (int) PacketNumber.random().asLong();
     ByteBuf bb = Unpooled.buffer();
     new PacketNumber(pn).write(bb);
 
@@ -108,5 +108,4 @@ public class PacketNumberTest {
   private ByteBuf bb(String h) {
     return Unpooled.wrappedBuffer(Hex.dehex(h));
   }
-
 }

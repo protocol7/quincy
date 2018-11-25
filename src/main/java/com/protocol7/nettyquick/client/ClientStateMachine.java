@@ -13,11 +13,10 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.List;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ClientStateMachine {
 
@@ -34,9 +33,9 @@ public class ClientStateMachine {
 
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
-  private final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);  // TODO use what event executor?
+  private final DefaultPromise<Void> handshakeFuture =
+      new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
   private final ClientTlsSession tlsEngine = new ClientTlsSession();
-
 
   public ClientStateMachine(final ClientConnection connection) {
     this.connection = connection;
@@ -65,11 +64,12 @@ public class ClientStateMachine {
     CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
     len -= clientHello.calculateLength();
     frames.add(clientHello);
-    for (int i = len; i>0; i--) {
+    for (int i = len; i > 0; i--) {
       frames.add(PaddingFrame.INSTANCE);
     }
 
-    connection.sendPacket(InitialPacket.create(
+    connection.sendPacket(
+        InitialPacket.create(
             connection.getDestinationConnectionId(),
             connection.getSourceConnectionId(),
             connection.nextSendPacketNumber(),
@@ -79,7 +79,11 @@ public class ClientStateMachine {
   }
 
   public void handlePacket(Packet packet) {
-    log.info("Client got {} in state {} with connection ID {}", packet.getClass().getName(), state, packet.getDestinationConnectionId());
+    log.info(
+        "Client got {} in state {} with connection ID {}",
+        packet.getClass().getName(),
+        state,
+        packet.getDestinationConnectionId());
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
@@ -88,7 +92,7 @@ public class ClientStateMachine {
 
           connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
 
-          for (Frame frame : ((InitialPacket)packet).getPayload().getFrames()) {
+          for (Frame frame : ((InitialPacket) packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
               CryptoFrame cf = (CryptoFrame) frame;
 
@@ -117,7 +121,9 @@ public class ClientStateMachine {
         } else {
           log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
-      } else if (state == ClientState.Ready || state == ClientState.Closing || state == ClientState.Closed) { // TODO don't allow when closed
+      } else if (state == ClientState.Ready
+          || state == ClientState.Closing
+          || state == ClientState.Closed) { // TODO don't allow when closed
         for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
           handleFrame(frame);
         }
@@ -132,12 +138,14 @@ public class ClientStateMachine {
       if (frame instanceof CryptoFrame) {
         CryptoFrame cf = (CryptoFrame) frame;
 
-        Optional<ClientTlsSession.HandshakeResult> result = tlsEngine.handleHandshake(cf.getCryptoData());
+        Optional<ClientTlsSession.HandshakeResult> result =
+            tlsEngine.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
           connection.setOneRttAead(result.get().getOneRttAead());
 
-          connection.sendPacket(HandshakePacket.create(
+          connection.sendPacket(
+              HandshakePacket.create(
                   connection.getDestinationConnectionId(),
                   connection.getSourceConnectionId(),
                   connection.nextSendPacketNumber(),
@@ -177,10 +185,8 @@ public class ClientStateMachine {
   }
 
   public void closeImmediate() {
-    connection.sendPacket(new ConnectionCloseFrame(
-            TransportError.NO_ERROR.getValue(),
-            0,
-            "Closing connection"));
+    connection.sendPacket(
+        new ConnectionCloseFrame(TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
 
     state = ClientState.Closing;
 

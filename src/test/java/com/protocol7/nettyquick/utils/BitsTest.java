@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.utils;
 
-import org.junit.Test;
-
 import static org.junit.Assert.assertEquals;
+
+import org.junit.Test;
 
 public class BitsTest {
 

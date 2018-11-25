@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.streams;
 
-import org.junit.Test;
-
 import static org.junit.Assert.*;
+
+import org.junit.Test;
 
 public class ReceivedDataBufferTest {
 
@@ -36,5 +36,4 @@ public class ReceivedDataBufferTest {
     assertArrayEquals(DATA2, buffer.read().get());
     assertTrue(buffer.isDone());
   }
-
 }

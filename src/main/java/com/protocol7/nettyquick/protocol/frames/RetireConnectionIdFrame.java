@@ -12,7 +12,7 @@ public class RetireConnectionIdFrame extends Frame {
 
     long sequenceNumber = Varint.readAsLong(bb);
 
-    return new RetireConnectionIdFrame(sequenceNumber) ;
+    return new RetireConnectionIdFrame(sequenceNumber);
   }
 
   public RetireConnectionIdFrame(long sequenceNumber) {

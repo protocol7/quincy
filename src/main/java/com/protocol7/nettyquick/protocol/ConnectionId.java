@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.protocol;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 import java.util.Optional;
 

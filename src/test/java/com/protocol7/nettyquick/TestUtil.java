@@ -1,11 +1,11 @@
 package com.protocol7.nettyquick;
 
-import com.protocol7.nettyquick.utils.Bytes;
-import io.netty.buffer.ByteBuf;
-
 import static com.protocol7.nettyquick.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+
+import com.protocol7.nettyquick.utils.Bytes;
+import io.netty.buffer.ByteBuf;
 
 public class TestUtil {
 

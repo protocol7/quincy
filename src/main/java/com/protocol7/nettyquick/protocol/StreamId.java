@@ -1,12 +1,11 @@
 package com.protocol7.nettyquick.protocol;
 
-import com.google.common.base.Preconditions;
-import io.netty.buffer.ByteBuf;
-
-import java.util.Objects;
-
 import static com.protocol7.nettyquick.utils.Bits.set;
 import static com.protocol7.nettyquick.utils.Bits.unset;
+
+import com.google.common.base.Preconditions;
+import io.netty.buffer.ByteBuf;
+import java.util.Objects;
 
 public class StreamId {
 

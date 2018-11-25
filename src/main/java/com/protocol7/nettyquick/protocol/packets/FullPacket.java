@@ -7,12 +7,11 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 
 public interface FullPacket extends Packet {
 
-    PacketType getType();
+  PacketType getType();
 
-    Packet addFrame(Frame frame);
+  Packet addFrame(Frame frame);
 
-    PacketNumber getPacketNumber();
+  PacketNumber getPacketNumber();
 
-    Payload getPayload();
-
+  Payload getPayload();
 }

@@ -6,7 +6,6 @@ import com.protocol7.nettyquick.protocol.PacketBuffer;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.streams.Stream.StreamType;
-
 import java.util.Map;
 
 public class Streams implements PacketBuffer.AckListener {
@@ -23,10 +22,7 @@ public class Streams implements PacketBuffer.AckListener {
     StreamType type = bidirectional ? StreamType.Bidirectional : StreamType.Sending;
     StreamId streamId = StreamId.next(maxId, client, bidirectional);
     this.maxId = streamId;
-    Stream stream = new Stream(streamId,
-                               connection,
-                               handler,
-                               type);
+    Stream stream = new Stream(streamId, connection, handler, type);
     streams.put(streamId, stream);
     return stream;
   }
@@ -34,7 +30,9 @@ public class Streams implements PacketBuffer.AckListener {
   public Stream getOrCreate(StreamId streamId, StreamListener handler) {
     Stream stream = streams.get(streamId);
     if (stream == null) {
-      stream = new Stream(streamId, connection, handler, StreamType.Bidirectional); // TODO support stream type
+      stream =
+          new Stream(
+              streamId, connection, handler, StreamType.Bidirectional); // TODO support stream type
       Stream existingStream = streams.putIfAbsent(streamId, stream);
       if (existingStream != null) {
         stream = existingStream;
@@ -48,5 +46,4 @@ public class Streams implements PacketBuffer.AckListener {
       stream.onAck(pn);
     }
   }
-
 }

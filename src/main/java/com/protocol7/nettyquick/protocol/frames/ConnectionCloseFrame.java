@@ -5,18 +5,18 @@ import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
 
 /*
-    0                   1                   2                   3
-    0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |           Error Code (16)     |
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                         Frame Type (i)                      ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                    Reason Phrase Length (i)                 ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
-   |                        Reason Phrase (*)                    ...
-   +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
- */
+   0                   1                   2                   3
+   0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 7 8 9 0 1
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |           Error Code (16)     |
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                         Frame Type (i)                      ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                    Reason Phrase Length (i)                 ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+  |                        Reason Phrase (*)                    ...
+  +-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+-+
+*/
 public class ConnectionCloseFrame extends Frame {
 
   public static ConnectionCloseFrame parse(ByteBuf bb) {
@@ -33,7 +33,8 @@ public class ConnectionCloseFrame extends Frame {
     byte[] reasonPhraseBytes = new byte[reasonPhraseLength];
     bb.readBytes(reasonPhraseBytes);
 
-    return new ConnectionCloseFrame(errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
+    return new ConnectionCloseFrame(
+        errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
   }
 
   private final int errorCode;

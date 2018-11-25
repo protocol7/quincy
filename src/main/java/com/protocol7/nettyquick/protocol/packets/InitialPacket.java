@@ -8,7 +8,6 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -16,35 +15,41 @@ public class InitialPacket implements FullPacket {
 
   public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
 
-  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
-                                     Optional<ConnectionId> srcConnectionId,
-                                     PacketNumber packetNumber,
-                                     Version version,
-                                     Optional<byte[]> token,
-                                     Frame... frames) { // TODO validate frame types
-    return create(destConnectionId, srcConnectionId, packetNumber, version, token, ImmutableList.copyOf(frames));
+  public static InitialPacket create(
+      Optional<ConnectionId> destConnectionId,
+      Optional<ConnectionId> srcConnectionId,
+      PacketNumber packetNumber,
+      Version version,
+      Optional<byte[]> token,
+      Frame... frames) { // TODO validate frame types
+    return create(
+        destConnectionId,
+        srcConnectionId,
+        packetNumber,
+        version,
+        token,
+        ImmutableList.copyOf(frames));
   }
 
-  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
-                                     Optional<ConnectionId> srcConnectionId,
-                                     PacketNumber packetNumber,
-                                     Version version,
-                                     Optional<byte[]> token,
-                                     List<Frame> frames) { // TODO validate frame types
+  public static InitialPacket create(
+      Optional<ConnectionId> destConnectionId,
+      Optional<ConnectionId> srcConnectionId,
+      PacketNumber packetNumber,
+      Version version,
+      Optional<byte[]> token,
+      List<Frame> frames) { // TODO validate frame types
     Payload payload = new Payload(frames);
-    return new InitialPacket(new LongHeader(PacketType.Initial,
-            destConnectionId,
-            srcConnectionId,
-            version,
-            packetNumber,
-            payload),
-            token);
+    return new InitialPacket(
+        new LongHeader(
+            PacketType.Initial, destConnectionId, srcConnectionId, version, packetNumber, payload),
+        token);
   }
 
-  public static InitialPacket create(Optional<ConnectionId> destConnectionId,
-                                     Optional<ConnectionId> srcConnectionId,
-                                     Optional<byte[]> token,
-                                     List<Frame> frames) { // TODO validate frame types
+  public static InitialPacket create(
+      Optional<ConnectionId> destConnectionId,
+      Optional<ConnectionId> srcConnectionId,
+      Optional<byte[]> token,
+      List<Frame> frames) { // TODO validate frame types
     Version version = Version.CURRENT;
     PacketNumber packetNumber = PacketNumber.random();
     return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
@@ -58,7 +63,9 @@ public class InitialPacket implements FullPacket {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    // server 	Long Header{Type: Initial, DestConnectionID: (empty), SrcConnectionID: 0x88f9f1ab, Token: (empty), PacketNumber: 0x1, PacketNumberLen: 2, PayloadLen: 181, Version: TLS dev version (WIP)}
+    // server 	Long Header{Type: Initial, DestConnectionID: (empty), SrcConnectionID: 0x88f9f1ab,
+    // Token: (empty), PacketNumber: 0x1, PacketNumberLen: 2, PayloadLen: 181, Version: TLS dev
+    // version (WIP)}
 
     int dcil = ConnectionId.firstLength(cil);
     int scil = ConnectionId.lastLength(cil);
@@ -78,7 +85,6 @@ public class InitialPacket implements FullPacket {
 
     int length = Varint.readAsInt(bb);
 
-
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
     int payloadLength = length; // TODO pn length
 
@@ -91,17 +97,11 @@ public class InitialPacket implements FullPacket {
     Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
     return InitialPacket.create(
-            destConnId,
-            srcConnId,
-            packetNumber,
-            version,
-            token,
-            payload.getFrames());
+        destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
   }
 
   private final LongHeader header;
   private final Optional<byte[]> token;
-
 
   public InitialPacket(LongHeader header, Optional<byte[]> token) {
     this.header = header;
@@ -163,9 +163,6 @@ public class InitialPacket implements FullPacket {
 
   @Override
   public String toString() {
-    return "InitialPacket{" +
-            "header=" + header +
-            ", token=" + Opt.toStringBytes(token) +
-            '}';
+    return "InitialPacket{" + "header=" + header + ", token=" + Opt.toStringBytes(token) + '}';
   }
 }

@@ -4,5 +4,5 @@ import io.netty.buffer.ByteBuf;
 
 public interface Writeable {
 
-    void write(ByteBuf bb);
+  void write(ByteBuf bb);
 }

@@ -4,7 +4,6 @@ import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 public enum FrameType {
-
   PADDING(0x00),
   RST_STREAM(0x01),
   CONNECTION_CLOSE(0x02),

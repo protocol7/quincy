@@ -5,7 +5,6 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -14,22 +13,25 @@ public class HandshakePacket implements FullPacket {
 
   public static int MARKER = 0x80 | PacketType.Handshake.getType();
 
-  public static HandshakePacket create(Optional<ConnectionId> destConnectionId,
-                                       Optional<ConnectionId> srcConnectionId,
-                                       PacketNumber packetNumber,
-                                       Version version,
-                                       Frame... frames) {
+  public static HandshakePacket create(
+      Optional<ConnectionId> destConnectionId,
+      Optional<ConnectionId> srcConnectionId,
+      PacketNumber packetNumber,
+      Version version,
+      Frame... frames) {
     return create(destConnectionId, srcConnectionId, packetNumber, version, Arrays.asList(frames));
   }
 
-
-  public static HandshakePacket create(Optional<ConnectionId> destConnectionId,
-                                       Optional<ConnectionId> srcConnectionId,
-                                       PacketNumber packetNumber,
-                                       Version version,
-                                       List<Frame> frames) {
+  public static HandshakePacket create(
+      Optional<ConnectionId> destConnectionId,
+      Optional<ConnectionId> srcConnectionId,
+      PacketNumber packetNumber,
+      Version version,
+      List<Frame> frames) {
     Payload payload = new Payload(frames);
-    return new HandshakePacket(new LongHeader(PacketType.Handshake,
+    return new HandshakePacket(
+        new LongHeader(
+            PacketType.Handshake,
             destConnectionId,
             srcConnectionId,
             version,
@@ -87,8 +89,6 @@ public class HandshakePacket implements FullPacket {
 
   @Override
   public String toString() {
-    return "HandshakePacket{" +
-            "header=" + header +
-            '}';
+    return "HandshakePacket{" + "header=" + header + '}';
   }
 }

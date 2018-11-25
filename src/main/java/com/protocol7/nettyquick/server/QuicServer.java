@@ -10,23 +10,25 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
-
 import java.net.InetSocketAddress;
 
 public class QuicServer {
 
-  public static Future<QuicServer> bind(final InetSocketAddress address, StreamListener streamHandler) {
-    return Futures.thenSync(bindImpl(address, streamHandler),
-                            group1 -> new QuicServer(group1));
+  public static Future<QuicServer> bind(
+      final InetSocketAddress address, StreamListener streamHandler) {
+    return Futures.thenSync(bindImpl(address, streamHandler), group1 -> new QuicServer(group1));
   }
 
-  private static Future<EventExecutorGroup> bindImpl(final InetSocketAddress address, final StreamListener streamHandler) {
+  private static Future<EventExecutorGroup> bindImpl(
+      final InetSocketAddress address, final StreamListener streamHandler) {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
     final Bootstrap b = new Bootstrap();
-    b.group(group).channel(NioDatagramChannel.class)
-            .option(ChannelOption.SO_BROADCAST, true)
-            .handler(new ChannelInitializer<NioDatagramChannel>() {
+    b.group(group)
+        .channel(NioDatagramChannel.class)
+        .option(ChannelOption.SO_BROADCAST, true)
+        .handler(
+            new ChannelInitializer<NioDatagramChannel>() {
               @Override
               public void initChannel(final NioDatagramChannel ch) throws Exception {
                 ChannelPipeline p = ch.pipeline();

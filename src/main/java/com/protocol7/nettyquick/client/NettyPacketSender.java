@@ -7,7 +7,6 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.concurrent.Future;
-
 import java.net.InetSocketAddress;
 
 public class NettyPacketSender implements PacketSender {

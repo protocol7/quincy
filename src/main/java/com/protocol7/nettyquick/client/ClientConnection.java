@@ -1,5 +1,8 @@
 package com.protocol7.nettyquick.client;
 
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closed;
+import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closing;
+
 import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
@@ -13,16 +16,12 @@ import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import io.netty.util.concurrent.Future;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-
 import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closed;
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closing;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
 
 public class ClientConnection implements Connection {
 
@@ -36,7 +35,8 @@ public class ClientConnection implements Connection {
   private final StreamListener streamListener;
 
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
-  private final AtomicReference<PacketNumber> sendPacketNumber = new AtomicReference<>(new PacketNumber(0)); // TODO fix
+  private final AtomicReference<PacketNumber> sendPacketNumber =
+      new AtomicReference<>(new PacketNumber(0)); // TODO fix
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
 
@@ -46,10 +46,11 @@ public class ClientConnection implements Connection {
   private AEAD handshakeAead;
   private AEAD oneRttAead;
 
-  public ClientConnection(final ConnectionId destConnectionId,
-                          final PacketSender packetSender,
-                          final InetSocketAddress serverAddress,
-                          final StreamListener streamListener) {
+  public ClientConnection(
+      final ConnectionId destConnectionId,
+      final PacketSender packetSender,
+      final InetSocketAddress serverAddress,
+      final StreamListener streamListener) {
     this.destConnectionId = destConnectionId;
     this.packetSender = packetSender;
     this.serverAddress = serverAddress;
@@ -79,10 +80,14 @@ public class ClientConnection implements Connection {
   }
 
   public FullPacket sendPacket(Frame... frames) {
-    return (FullPacket) sendPacket(new ShortPacket(new ShortHeader(false,
-                               getDestinationConnectionId(),
-                               nextSendPacketNumber(),
-                               new Payload(frames))));
+    return (FullPacket)
+        sendPacket(
+            new ShortPacket(
+                new ShortHeader(
+                    false,
+                    getDestinationConnectionId(),
+                    nextSendPacketNumber(),
+                    new Payload(frames))));
   }
 
   @Override
@@ -109,7 +114,9 @@ public class ClientConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    packetSender.send(packet, serverAddress, getAEAD(EncryptionLevel.forPacket(packet))).awaitUninterruptibly(); // TODO fix
+    packetSender
+        .send(packet, serverAddress, getAEAD(EncryptionLevel.forPacket(packet)))
+        .awaitUninterruptibly(); // TODO fix
 
     log.debug("Client sent {}", packet);
   }

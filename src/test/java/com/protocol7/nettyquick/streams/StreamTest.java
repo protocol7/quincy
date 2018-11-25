@@ -1,5 +1,10 @@
 package com.protocol7.nettyquick.streams;
 
+import static com.protocol7.nettyquick.streams.Stream.StreamType.Bidirectional;
+import static org.junit.Assert.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.*;
+
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketNumber;
@@ -8,24 +13,17 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Optional;
-
-import static com.protocol7.nettyquick.streams.Stream.StreamType.Bidirectional;
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.*;
-
 public class StreamTest {
 
   public static final byte[] DATA = "Hello".getBytes();
-  @Mock
-  private Connection connection;
+  @Mock private Connection connection;
   @Mock private StreamListener listener;
   @Mock private FullPacket packet;
   private final StreamId streamId = StreamId.random(true, true);
@@ -44,10 +42,7 @@ public class StreamTest {
 
   @Test
   public void write() {
-    Stream stream = new Stream(streamId,
-                               connection,
-                               listener,
-                               Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
 
     stream.write(DATA, false);
 
@@ -61,10 +56,7 @@ public class StreamTest {
 
   @Test
   public void writeWithOffset() {
-    Stream stream = new Stream(streamId,
-                               connection,
-                               listener,
-                               Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
 
     stream.write(DATA, false);
     StreamFrame frame1 = (StreamFrame) captureFrame();
@@ -77,10 +69,7 @@ public class StreamTest {
 
   @Test
   public void reset() {
-    Stream stream = new Stream(streamId,
-                               connection,
-                               listener,
-                               Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
 
     stream.write(DATA, false);
     captureFrame();
@@ -96,10 +85,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void resetOnClosed() {
-    Stream stream = new Stream(streamId,
-                               connection,
-                               listener,
-                               Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
 
     stream.reset(123);
     stream.reset(123);
@@ -107,10 +93,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void writeOnClosed() {
-    Stream stream = new Stream(streamId,
-                               connection,
-                               listener,
-                               Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
     stream.write(DATA, true);
     assertTrue(stream.isClosed());
     stream.write(DATA, true);

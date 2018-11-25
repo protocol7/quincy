@@ -4,7 +4,6 @@ import com.google.common.primitives.Longs;
 import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Arrays;
 
 public class Varint {
@@ -37,15 +36,15 @@ public class Varint {
 
   private static long read(ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);
-    int size = ((first & 0b11000000) & 0xFF) ;
-    int rest = ((first & 0b00111111) & 0xFF) ;
+    int size = ((first & 0b11000000) & 0xFF);
+    int rest = ((first & 0b00111111) & 0xFF);
 
-    int len = (int)Math.pow(2, size >> 6) - 1;
+    int len = (int) Math.pow(2, size >> 6) - 1;
 
     byte[] b = new byte[len];
     bb.readBytes(b);
-    byte[] pad = new byte[7-len];
-    byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, b);
+    byte[] pad = new byte[7 - len];
+    byte[] bs = Bytes.concat(pad, new byte[] {(byte) rest}, b);
 
     long value = Longs.fromByteArray(bs);
 
@@ -56,17 +55,17 @@ public class Varint {
 
   private static long read(byte[] b) {
     int first = (b[0] & 0xFF);
-    int size = ((first & 0b11000000) & 0xFF) ;
-    int rest = ((first & 0b00111111) & 0xFF) ;
+    int size = ((first & 0b11000000) & 0xFF);
+    int rest = ((first & 0b00111111) & 0xFF);
 
-    int len = (int)Math.pow(2, size >> 6) - 1;
+    int len = (int) Math.pow(2, size >> 6) - 1;
 
     if (b.length != (len + 1)) {
       throw new IllegalArgumentException("buffer not of correct length");
     }
 
-    byte[] pad = new byte[7-len];
-    byte[] bs = Bytes.concat(pad, new byte[]{(byte)rest}, Arrays.copyOfRange(b, 1, b.length));
+    byte[] pad = new byte[7 - len];
+    byte[] bs = Bytes.concat(pad, new byte[] {(byte) rest}, Arrays.copyOfRange(b, 1, b.length));
 
     long value = Longs.fromByteArray(bs);
 
@@ -99,7 +98,7 @@ public class Varint {
     }
     byte[] bs = Longs.toByteArray(value);
     byte[] b = Arrays.copyOfRange(bs, from, 8);
-    b[0] = (byte)(b[0] | mask);
+    b[0] = (byte) (b[0] | mask);
     return b;
   }
 

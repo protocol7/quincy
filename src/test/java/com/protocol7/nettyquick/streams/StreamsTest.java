@@ -1,13 +1,13 @@
 package com.protocol7.nettyquick.streams;
 
+import static org.junit.Assert.*;
+
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.StreamId;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import static org.junit.Assert.*;
 
 public class StreamsTest {
 

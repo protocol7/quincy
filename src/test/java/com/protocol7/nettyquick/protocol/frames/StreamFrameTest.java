@@ -1,12 +1,12 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import static org.junit.Assert.*;
+
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class StreamFrameTest {
 
@@ -14,10 +14,7 @@ public class StreamFrameTest {
 
   @Test
   public void roundtrip() {
-    StreamFrame frame = new StreamFrame(StreamId.random(true, true),
-                                        0,
-                                        true,
-                                        DATA);
+    StreamFrame frame = new StreamFrame(StreamId.random(true, true), 0, true, DATA);
 
     ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
@@ -65,19 +62,13 @@ public class StreamFrameTest {
 
   @Test
   public void lengthWithoutOffset() {
-    StreamFrame frame = new StreamFrame(new StreamId(123),
-                                        0,
-                                        false,
-                                        DATA);
+    StreamFrame frame = new StreamFrame(new StreamId(123), 0, false, DATA);
     assertEquals(9, frame.calculateLength());
   }
 
   @Test
   public void lengthWithOffset() {
-    StreamFrame frame = new StreamFrame(new StreamId(123),
-                                        123,
-                                        false,
-                                        DATA);
+    StreamFrame frame = new StreamFrame(new StreamId(123), 123, false, DATA);
     assertEquals(11, frame.calculateLength());
   }
 }

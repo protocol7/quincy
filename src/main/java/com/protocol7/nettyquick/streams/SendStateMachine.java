@@ -1,12 +1,11 @@
 package com.protocol7.nettyquick.streams;
 
+import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.*;
+
 import com.google.common.collect.Sets;
 import com.protocol7.nettyquick.protocol.PacketNumber;
-
 import java.util.Optional;
 import java.util.Set;
-
-import static com.protocol7.nettyquick.streams.SendStateMachine.SendStreamState.*;
 
 public class SendStateMachine {
 

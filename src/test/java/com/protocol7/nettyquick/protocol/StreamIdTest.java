@@ -1,10 +1,10 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.*;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
-
-import static org.junit.Assert.*;
 
 public class StreamIdTest {
 
@@ -27,7 +27,7 @@ public class StreamIdTest {
 
   @Test
   public void randomBounds() {
-    for (int i = 0; i<1000_000; i++) {
+    for (int i = 0; i < 1000_000; i++) {
       StreamId v = StreamId.random(true, true);
       assertTrue(v.toString(), v.getValue() > 1 && v.getValue() < 4611686018427387903L);
     }
@@ -35,7 +35,7 @@ public class StreamIdTest {
 
   @Test
   public void randomClient() {
-    for (int i = 0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       StreamId id = StreamId.random(true, true);
       assertTrue((id.getValue() & 1) == 0);
       assertTrue(id.isClient());
@@ -44,7 +44,7 @@ public class StreamIdTest {
 
   @Test
   public void randomServer() {
-    for (int i = 0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       StreamId id = StreamId.random(false, true);
       assertTrue((id.getValue() & 1) == 1);
       assertFalse(id.isClient());
@@ -53,7 +53,7 @@ public class StreamIdTest {
 
   @Test
   public void randomBidirectional() {
-    for (int i = 0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       StreamId id = StreamId.random(true, true);
       assertTrue((id.getValue() & 0b10) == 0);
       assertTrue(id.isBidirectional());
@@ -62,7 +62,7 @@ public class StreamIdTest {
 
   @Test
   public void randomUnidirectional() {
-    for (int i = 0; i<1000; i++) {
+    for (int i = 0; i < 1000; i++) {
       StreamId id = StreamId.random(true, false);
       assertTrue((id.getValue() & 0b10) == 0b10);
       assertFalse(id.isBidirectional());
@@ -87,5 +87,4 @@ public class StreamIdTest {
 
     assertEquals(streamId, parsed);
   }
-
 }

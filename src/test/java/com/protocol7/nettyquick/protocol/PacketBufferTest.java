@@ -1,5 +1,9 @@
 package com.protocol7.nettyquick.protocol;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.Sender;
 import com.protocol7.nettyquick.protocol.frames.AckBlock;
@@ -8,17 +12,12 @@ import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.ShortPacket;
+import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.Optional;
-
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.*;
 
 public class PacketBufferTest {
 
@@ -39,10 +38,9 @@ public class PacketBufferTest {
   }
 
   private Packet packet(long pn, Frame... frames) {
-    return new ShortPacket(new ShortHeader(false,
-                           Optional.of(ConnectionId.random()),
-                           new PacketNumber(pn),
-                           new Payload(frames)));
+    return new ShortPacket(
+        new ShortHeader(
+            false, Optional.of(ConnectionId.random()), new PacketNumber(pn), new Payload(frames)));
   }
 
   @Test
@@ -59,10 +57,10 @@ public class PacketBufferTest {
 
     buffer.onPacket(pingPacket);
 
-    //Packet actual = verifySent();
+    // Packet actual = verifySent();
 
-    //AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
-    //assertEquals(AckBlock.fromLongs(1, 2), actualFrame.getBlocks().get(0));
+    // AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
+    // assertEquals(AckBlock.fromLongs(1, 2), actualFrame.getBlocks().get(0));
 
     // assertBuffered(3);
   }

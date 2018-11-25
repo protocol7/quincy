@@ -5,12 +5,11 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.StreamListener;
 import io.netty.channel.Channel;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.net.InetSocketAddress;
 import java.util.Map;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Connections {
 
@@ -18,7 +17,11 @@ public class Connections {
 
   private final Map<ConnectionId, ServerConnection> connections = Maps.newConcurrentMap();
 
-  public ServerConnection get(Optional<ConnectionId> connIdOpt, StreamListener streamHandler, Channel channel, InetSocketAddress clientAddress) {
+  public ServerConnection get(
+      Optional<ConnectionId> connIdOpt,
+      StreamListener streamHandler,
+      Channel channel,
+      InetSocketAddress clientAddress) {
 
     ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
 

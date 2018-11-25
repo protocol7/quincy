@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.protocol;
 import io.netty.buffer.ByteBuf;
 
 public enum Version {
-
   VERSION_NEGOTIATION(0x00000000),
   FINAL(0x00000001),
   TLS_DEV(0x00000065),
@@ -26,7 +25,6 @@ public enum Version {
       throw new RuntimeException("Unknown version: " + l);
     }
   }
-
 
   private final int version;
 
