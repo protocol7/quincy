@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.tls.extensions;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
@@ -18,28 +19,25 @@ public interface Extension {
 
             extensions.add(ext);
         }
+
         return extensions;
     }
 
     static Extension parse(ByteBuf bb, boolean isClient) {
-
         ExtensionType type = ExtensionType.fromValue(bb.readShort());
 
         int len = bb.readShort();
+        ByteBuf b = bb.readBytes(len);
         if (type == ExtensionType.QUIC) {
-            return TransportParameters.parse(bb.readBytes(len));
+            return TransportParameters.parse(b);
         } else if (type == ExtensionType.key_share) {
-            return KeyShare.parse(bb.readBytes(len), isClient);
+            return KeyShare.parse(b, isClient);
         } else if (type == ExtensionType.supported_versions) {
-            return SupportedVersions.parse(bb.readBytes(len), isClient);
+            return SupportedVersions.parse(b, isClient);
         } else if (type == ExtensionType.supported_groups) {
-            return SupportedGroups.parse(bb.readBytes(len));
+            return SupportedGroups.parse(b);
         } else {
-
-            byte[] data = new byte[len];
-            bb.readBytes(data);
-
-            return RawExtension.parse(type, data);
+            return RawExtension.parse(type, b);
         }
     }
 

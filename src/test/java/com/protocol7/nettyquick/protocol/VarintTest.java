@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -38,7 +39,7 @@ public class VarintTest {
   }
 
   @Test
-  public void parse8() {
+  public void read8() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
 
     long vi = Varint.readAsLong(bb);
@@ -48,7 +49,14 @@ public class VarintTest {
   }
 
   @Test
-  public void parse4() {
+  public void read8Bytes() {
+    long vi = Varint.readAsLong(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
+
+    assertEquals(151288809941952652L, vi);
+  }
+
+  @Test
+  public void read4() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("9d 7f 3e 7d"));
 
     long vi = Varint.readAsLong(bb);
@@ -58,7 +66,14 @@ public class VarintTest {
   }
 
   @Test
-  public void parse2() {
+  public void read4Bytes() {
+    long vi = Varint.readAsLong(Hex.dehex("9d 7f 3e 7d"));
+
+    assertEquals(494878333, vi);
+  }
+
+  @Test
+  public void read2() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("7b bd"));
 
     long vi = Varint.readAsLong(bb);
@@ -68,7 +83,14 @@ public class VarintTest {
   }
 
   @Test
-  public void parse1() {
+  public void read2Bytes() {
+    long vi = Varint.readAsLong(Hex.dehex("7b bd"));
+
+    assertEquals(15293, vi);
+  }
+
+  @Test
+  public void read1() {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("25"));
 
     long vi = Varint.readAsLong(bb);
@@ -78,33 +100,64 @@ public class VarintTest {
   }
 
   @Test
+  public void read1Bytes() {
+    long vi = Varint.readAsLong(Hex.dehex("25"));
+
+    assertEquals(37, vi);
+  }
+
+  @Test
   public void write8() {
-    assertWrite(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"), 151288809941952652L, 8);
+    assertWrite(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"), 151288809941952652L);
+  }
+
+  @Test
+  public void write8Bytes() {
+    assertWriteBytes(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"), 151288809941952652L);
   }
 
   @Test
   public void write4() {
-    assertWrite(Hex.dehex("9d 7f 3e 7d"), 494878333, 4);
+    assertWrite(Hex.dehex("9d 7f 3e 7d"), 494878333);
+  }
+
+  @Test
+  public void write4Bytes() {
+    assertWriteBytes(Hex.dehex("9d 7f 3e 7d"), 494878333);
   }
 
   @Test
   public void write2() {
-    assertWrite(Hex.dehex("7b bd"), 15293, 2);
+    assertWrite(Hex.dehex("7b bd"), 15293);
+  }
+
+  @Test
+  public void write2Bytes() {
+    assertWriteBytes(Hex.dehex("7b bd"), 15293);
   }
 
   @Test
   public void write1() {
-    assertWrite(Hex.dehex("25"), 37, 1);
+    assertWrite(Hex.dehex("25"), 37);
   }
 
-  private void assertWrite(byte[] expected, long vi, int len) {
+  @Test
+  public void write1Bytes() {
+    assertWriteBytes(Hex.dehex("25"), 37);
+  }
+
+  private void assertWrite(byte[] expected, long vi) {
     ByteBuf bb = Unpooled.buffer();
     Varint.write(vi, bb);
 
-    byte[] b = new byte[len];
-    bb.readBytes(b);
+    byte[] b = Bytes.drainToArray(bb);
 
     assertArrayEquals(expected, b);
     assertFalse(bb.isReadable());
+  }
+
+  private void assertWriteBytes(byte[] expected, long vi) {
+    byte[] actual = Varint.write(vi);
+    assertArrayEquals(expected, actual);
   }
 }

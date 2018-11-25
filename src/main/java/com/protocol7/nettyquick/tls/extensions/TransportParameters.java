@@ -3,6 +3,8 @@ package com.protocol7.nettyquick.tls.extensions;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.google.common.primitives.Shorts;
+import com.protocol7.nettyquick.protocol.Varint;
+import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
 
 import java.util.Arrays;
@@ -129,6 +131,8 @@ public class TransportParameters implements Extension {
     }
 
     public static TransportParameters parse(ByteBuf bb) {
+        Debug.buffer(bb);
+
         byte[] version = new byte[4];
         bb.readBytes(version); // TODO validate version
 
@@ -200,24 +204,15 @@ public class TransportParameters implements Extension {
     }
 
     private static int dataToInt(byte[] data) {
-        return Ints.fromByteArray(data);
+        return Varint.readAsInt(data);
     }
 
     private static int dataToShort(byte[] data) {
-        return Shorts.fromByteArray(data);
+        return Varint.readAsInt(data);
     }
 
     private static int dataToByte(byte[] data) {
-        Preconditions.checkArgument(data.length == 1);
-        return data[0] & 0xFF;
-    }
-
-    private static byte[] intToData(int i) {
-        return Ints.toByteArray(i);
-    }
-
-    private static byte[] shortToData(int i) {
-        return Shorts.toByteArray((short)i);
+        return Varint.readAsInt(data);
     }
 
     private final int initialMaxStreamDataBidiLocal;
@@ -363,28 +358,24 @@ public class TransportParameters implements Extension {
 
         if (initialMaxStreamDataBidiLocal > -1) {
             bb.writeBytes(initial_max_stream_data_bidi_local.asBytes());
-            bb.writeShort(4);
-            bb.writeBytes(intToData(initialMaxStreamDataBidiLocal));
+            writeVarint(bb, initialMaxStreamDataBidiLocal);
         }
         if (initialMaxData > -1) {
             bb.writeBytes(initial_max_data.asBytes());
-            bb.writeShort(4);
-            bb.writeBytes(intToData(initialMaxData));
+            writeVarint(bb, initialMaxData);
         }
         if (initialMaxBidiStreams > -1) {
             bb.writeBytes(initial_max_bidi_streams.asBytes());
-            bb.writeShort(2);
-            bb.writeBytes(shortToData(initialMaxBidiStreams));
+            writeVarint(bb, initialMaxBidiStreams);
         }
         if (idleTimeout > -1) {
             bb.writeBytes(idle_timeout.asBytes());
-            bb.writeShort(2);
-            bb.writeBytes(shortToData(idleTimeout));
+            writeVarint(bb, idleTimeout);
+
         }
         if (maxPacketSize > -1) {
             bb.writeBytes(max_packet_size.asBytes());
-            bb.writeShort(2);
-            bb.writeBytes(shortToData(maxPacketSize));
+            writeVarint(bb, maxPacketSize);
         }
         if (statelessResetToken.length > 0) {
             bb.writeBytes(stateless_reset_token.asBytes());
@@ -393,13 +384,11 @@ public class TransportParameters implements Extension {
         }
         if (ackDelayExponent > -1) {
             bb.writeBytes(ack_delay_exponent.asBytes());
-            bb.writeShort(1);
-            bb.writeByte(ackDelayExponent);
+            writeVarint(bb, ackDelayExponent);
         }
         if (initialMaxUniStreams > -1) {
             bb.writeBytes(initial_max_uni_streams.asBytes());
-            bb.writeShort(2);
-            bb.writeBytes(shortToData(initialMaxUniStreams));
+            writeVarint(bb, initialMaxUniStreams);
         }
         if (disableMigration) {
             bb.writeBytes(disable_migration.asBytes());
@@ -407,18 +396,15 @@ public class TransportParameters implements Extension {
         }
         if (initialMaxStreamDataBidiRemote > -1) {
             bb.writeBytes(initial_max_stream_data_bidi_remote.asBytes());
-            bb.writeShort(4);
-            bb.writeBytes(intToData(initialMaxStreamDataBidiRemote));
+            writeVarint(bb, initialMaxStreamDataBidiRemote);
         }
         if (initialMaxStreamDataUni > -1) {
             bb.writeBytes(initial_max_stream_data_uni.asBytes());
-            bb.writeShort(4);
-            bb.writeBytes(intToData(initialMaxStreamDataUni));
+            writeVarint(bb, initialMaxStreamDataUni);
         }
         if (maxAckDelay > -1) {
             bb.writeBytes(max_ack_delay.asBytes());
-            bb.writeShort(1);
-            bb.writeByte(maxAckDelay);
+            writeVarint(bb, maxAckDelay);
         }
         if (originalConnectionId.length > 0) {
             bb.writeBytes(original_connection_id.asBytes());
@@ -427,5 +413,11 @@ public class TransportParameters implements Extension {
         }
 
         bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
+    }
+
+    private void writeVarint(ByteBuf bb, int value) {
+        byte[] b = Varint.write(value);
+        bb.writeShort(b.length);
+        bb.writeBytes(b);
     }
 }

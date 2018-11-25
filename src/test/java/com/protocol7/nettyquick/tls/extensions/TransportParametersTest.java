@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.tls.extensions;
 
+import com.protocol7.nettyquick.utils.Debug;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -51,7 +52,7 @@ public class TransportParametersTest {
 
     @Test
     public void parseKnown() {
-        byte[] data = Hex.dehex("00000000003c0000000400008000000a000400008000000b000400008000000100040000c00000020002006400080002006400030002001e0005000205ac00090000");
+        byte[] data = Hex.dehex("0000006508000000655a6a9a1a004f0000000480008000000a000480008000000b000480008000000100048000c000000200024064000800024064000300011e0005000245ac00090000000600102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a");
         ByteBuf bb = Unpooled.wrappedBuffer(data);
 
         TransportParameters parsed = TransportParameters.parse(bb);
@@ -67,29 +68,7 @@ public class TransportParametersTest {
         assertEquals(100, parsed.getInitialMaxUniStreams());
         assertEquals(-1, parsed.getMaxAckDelay());
         assertEquals(1452, parsed.getMaxPacketSize());
-        assertEquals(0, parsed.getStatelessResetToken().length);
-        assertEquals(0, parsed.getOriginalConnectionId().length);
-    }
-
-    @Test
-    public void parseKnown2() {
-        byte[] data = Hex.dehex("0000006508cacaca1a0000006500500000000400008000000a000400008000000b000400008000000100040000c00000020002006400080002006400030002001e0005000205ac00090000000600102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a");
-        ByteBuf bb = Unpooled.wrappedBuffer(data);
-
-        TransportParameters parsed = TransportParameters.parse(bb);
-
-        assertEquals(-1, parsed.getAckDelayExponent());
-        assertEquals(true, parsed.isDisableMigration());
-        assertEquals(30, parsed.getIdleTimeout());
-        assertEquals(100, parsed.getInitialMaxBidiStreams());
-        assertEquals(49152, parsed.getInitialMaxData());
-        assertEquals(32768, parsed.getInitialMaxStreamDataBidiLocal());
-        assertEquals(32768, parsed.getInitialMaxStreamDataBidiRemote());
-        assertEquals(32768, parsed.getInitialMaxStreamDataUni());
-        assertEquals(100, parsed.getInitialMaxUniStreams());
-        assertEquals(-1, parsed.getMaxAckDelay());
-        assertEquals(1452, parsed.getMaxPacketSize());
-        assertEquals("2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a", Hex.hex(parsed.getStatelessResetToken()));
+        assertEquals(16, parsed.getStatelessResetToken().length);
         assertEquals(0, parsed.getOriginalConnectionId().length);
     }
 }

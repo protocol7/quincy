@@ -1,11 +1,13 @@
 package com.protocol7.nettyquick.tls.extensions;
 
+import com.protocol7.nettyquick.utils.Bytes;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 
 public class RawExtension implements Extension {
 
-    public static RawExtension parse(ExtensionType type, byte[] b) {
+    public static RawExtension parse(ExtensionType type, ByteBuf bb) {
+        byte[] b = Bytes.peekToArray(bb);
         return new RawExtension(type, b);
     }
 

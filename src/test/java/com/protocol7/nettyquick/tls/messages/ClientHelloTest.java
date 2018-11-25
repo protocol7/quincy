@@ -7,32 +7,17 @@ import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Assert;
 import org.junit.Test;
 
-import static com.protocol7.nettyquick.tls.CipherSuite.*;
+import static com.protocol7.nettyquick.TestUtil.assertHex;
+import static com.protocol7.nettyquick.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static org.junit.Assert.assertEquals;
 
 public class ClientHelloTest {
 
     @Test
-    public void parseGoKnown() {
-        byte[] ch = Hex.dehex("010001470303a76cc637036e871b63c463a73175ca81a5f09b14e80f58715d52c8f5e90a794a10fe8a3d447a7ea799dfd5bdbffca6e5bc0026130113021303c02fc030c02bc02ccca8cca9c013c009c014c00a009c009d002f0035c012000a010000e8000000150013000010717569632e636c656d656e74652e696f000500050100000000000a000a0008001d001700180019000b00020100000d001800160804040104030805050105030806060106030201020300320012001004010403050105030601060302010203ff0100010000120000003300260024001d0020a62c058352d7a007efbf4b944fad2dbcdf80b6ab56504533fc04a360a06dcc20002b00030203040ff5004200000000003c0000000400008000000a000400008000000b000400008000000100040000c00000020002006400080002006400030002001e0005000205ac00090000");
-
-        ClientHello hello = ClientHello.parse(ch);
-
-        assertEquals("a76cc637036e871b63c463a73175ca81a5f09b14e80f58715d52c8f5e90a794a",
-                Hex.hex(hello.getClientRandom()));
-        assertEquals("fe8a3d447a7ea799dfd5bdbffca6e5bc",
-                Hex.hex(hello.getSessionId()));
-        assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384, TLS_CHACHA20_POLY1305_SHA256), hello.getCipherSuites());
-
-        assertEquals(11, hello.getExtensions().size());
-    }
-
-    @Test
     public void inverseRoundtrip() {
-        byte[] ch = Hex.dehex("010001210303a76cc637036e871b63c463a73175ca81a5f09b14e80f58715d52c8f5e90a794a10fe8a3d447a7ea799dfd5bdbffca6e5bc0006130113021303010000e20ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000003300260024001d0020a62c058352d7a007efbf4b944fad2dbcdf80b6ab56504533fc04a360a06dcc2000320012001004010403050105030601060302010203002b000302030400120000000d0018001608040401040308050501050308060601060302010203000b00020100000a00040002001d000500050100000000000000150013000010717569632e636c656d656e74652e696fff01000100");
+        byte[] ch = Hex.dehex("010000a903039b2dced3fa6d25973ccc18315e4df1cbd0bef7e587ed8472e9dca4686557a70300000213010100007e003300260024001d00203318def2702c981b7efc29c7dc78c383caefc80b12854272e7596a5eb6079236000a00040002001d002b00030203040ff5004100000000003b0000000480008000000100048000c000000200024064000300011e0005000245ac00080002406400090000000a000480008000000b000480008000");
 
         ClientHello hello = ClientHello.parse(ch);
 
@@ -42,7 +27,7 @@ public class ClientHelloTest {
         byte[] written = new byte[bb.writerIndex()];
         bb.readBytes(written);
 
-        Assert.assertEquals(Hex.hex(ch), Hex.hex(written));
+        assertHex(ch, written);
     }
 
     @Test
@@ -51,10 +36,8 @@ public class ClientHelloTest {
 
         ClientHello hello = ClientHello.parse(ch);
 
-        assertEquals("6ec8ad3d54ac887561d563e04b6f09d24f2e649be15c9164df95654e6e3fa4ba",
-                Hex.hex(hello.getClientRandom()));
-        assertEquals("a29ad438fded33463aa6c107ec92ce0fd112a1256fbcd9edf265ee82cab45b78",
-                Hex.hex(hello.getSessionId()));
+        assertHex("6ec8ad3d54ac887561d563e04b6f09d24f2e649be15c9164df95654e6e3fa4ba", hello.getClientRandom());
+        assertHex("a29ad438fded33463aa6c107ec92ce0fd112a1256fbcd9edf265ee82cab45b78", hello.getSessionId());
         assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
         assertEquals(7, hello.getExtensions().size());
     }

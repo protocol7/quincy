@@ -117,12 +117,12 @@ public class ClientStateMachine {
         } else {
           log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
-      } else if (state == ClientState.Ready) {
-        for (Frame frame : ((FullPacket)packet).getPayload().getFrames()) {
+      } else if (state == ClientState.Ready || state == ClientState.Closing || state == ClientState.Closed) { // TODO don't allow when closed
+        for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
           handleFrame(frame);
         }
       } else {
-        log.warn("Got packet in an unexpected state");
+        log.warn("Got packet in an unexpected state {} {}", state, packet);
       }
     }
   }
@@ -177,7 +177,6 @@ public class ClientStateMachine {
   }
 
   public void closeImmediate() {
-    System.out.println(getState());
     connection.sendPacket(new ConnectionCloseFrame(
             TransportError.NO_ERROR.getValue(),
             0,

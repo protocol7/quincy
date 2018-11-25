@@ -9,6 +9,7 @@ import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Bytes;
+import com.protocol7.nettyquick.utils.Debug;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
@@ -155,6 +156,8 @@ public class ClientHello implements Writeable {
         bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
 
         Bytes.set24(bb, lenPos, bb.writerIndex() - lenPos - 3);
+
+        Debug.buffer("CH ", bb);
     }
 
     @Override
