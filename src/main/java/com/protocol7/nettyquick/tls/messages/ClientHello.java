@@ -72,9 +72,14 @@ public class ClientHello implements Writeable {
     }
 
     int extensionsLen = bb.readShort();
-    List<Extension> ext = Extension.parseAll(bb.readBytes(extensionsLen), true);
+    ByteBuf extBB = bb.readBytes(extensionsLen);
+    try {
+      List<Extension> ext = Extension.parseAll(extBB, true);
 
-    return new ClientHello(clientRandom, sessionId, cipherSuites, ext);
+      return new ClientHello(clientRandom, sessionId, cipherSuites, ext);
+    } finally {
+      extBB.release();
+    }
   }
 
   private final byte[] clientRandom;
