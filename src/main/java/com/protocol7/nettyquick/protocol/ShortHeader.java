@@ -89,7 +89,7 @@ public class ShortHeader implements Header {
 
     connectionId.get().write(bb);
 
-    packetNumber.write(bb);
+    bb.writeBytes(packetNumber.write());
 
     byte[] aad = new byte[bb.writerIndex()];
     bb.markReaderIndex();

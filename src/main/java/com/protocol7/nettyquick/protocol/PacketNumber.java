@@ -32,8 +32,6 @@ public class PacketNumber implements Comparable<PacketNumber> {
       throw new RuntimeException("Unknown size marker");
     }
 
-    // int len = (int)Math.pow(2, size >> 6) - 1;
-
     byte[] b = new byte[len];
     bb.readBytes(b);
     byte[] pad = new byte[3 - len];
@@ -69,7 +67,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return number;
   }
 
-  public void write(final ByteBuf bb) {
+  public byte[] write() {
     int value = (int) number;
     int from;
     int mask;
@@ -87,7 +85,8 @@ public class PacketNumber implements Comparable<PacketNumber> {
     byte[] b = Arrays.copyOfRange(bs, from, 4);
 
     b[0] = (byte) (b[0] | mask);
-    bb.writeBytes(b);
+
+    return b;
   }
 
   @Override

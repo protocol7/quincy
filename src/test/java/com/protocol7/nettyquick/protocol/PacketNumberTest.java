@@ -33,15 +33,14 @@ public class PacketNumberTest {
   public void randomBounds() {
     for (int i = 0; i < 1000_000; i++) {
       PacketNumber v = PacketNumber.random();
-      assertTrue(v.toString(), v.asLong() > 0 && v.asLong() < 4294966271L);
+      assertTrue(v.toString(), v.asLong() >= 0 && v.asLong() <= 4294966271L);
     }
   }
 
   @Test
   public void write() {
-    ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(123).write(bb);
-    TestUtil.assertBuffer("807b", bb);
+    byte[] b = new PacketNumber(123).write();
+    TestUtil.assertHex("807b", b);
   }
 
   @Test
@@ -57,7 +56,7 @@ public class PacketNumberTest {
     PacketNumber pn = new PacketNumber(123);
     ByteBuf bb = Unpooled.buffer();
 
-    pn.write(bb);
+    bb.writeBytes(pn.write());
 
     PacketNumber parsed = PacketNumber.parseVarint(bb);
 
@@ -84,7 +83,7 @@ public class PacketNumberTest {
   public void roundtripVarint() {
     int pn = (int) PacketNumber.random().asLong();
     ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(pn).write(bb);
+    bb.writeBytes(new PacketNumber(pn).write());
 
     PacketNumber parsed = PacketNumber.parseVarint(bb);
 
@@ -98,7 +97,7 @@ public class PacketNumberTest {
 
   private void assertWrite(int pn, String expected) {
     ByteBuf bb = Unpooled.buffer();
-    new PacketNumber(pn).write(bb);
+    bb.writeBytes(new PacketNumber(pn).write());
 
     byte[] b = Bytes.drainToArray(bb);
 

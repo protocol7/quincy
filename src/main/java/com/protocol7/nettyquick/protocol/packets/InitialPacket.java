@@ -85,8 +85,9 @@ public class InitialPacket implements FullPacket {
 
     int length = Varint.readAsInt(bb);
 
+    int beforePnPos = bb.readerIndex();
     PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-    int payloadLength = length; // TODO pn length
+    int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract read pn length
 
     byte[] aad = new byte[bb.readerIndex()];
     bb.resetReaderIndex();
