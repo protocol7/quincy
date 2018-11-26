@@ -75,9 +75,13 @@ public class ServerHandshake {
       int extLen = bb.readShort();
 
       ByteBuf ext = bb.readBytes(extLen);
-      List<Extension> extensions = Extension.parseAll(ext, false);
+      try {
+        List<Extension> extensions = Extension.parseAll(ext, false);
 
-      return new EncryptedExtensions(extensions);
+        return new EncryptedExtensions(extensions);
+      } finally {
+        ext.release();
+      }
     }
 
     private final List<Extension> extensions;
@@ -127,23 +131,26 @@ public class ServerHandshake {
 
       int certsLen = Bytes.read24(bb);
       ByteBuf certBB = bb.readBytes(certsLen);
+      try {
+        List<byte[]> serverCertificates = Lists.newArrayList();
 
-      List<byte[]> serverCertificates = Lists.newArrayList();
+        while (certBB.isReadable()) {
+          int certLen = Bytes.read24(certBB);
 
-      while (certBB.isReadable()) {
-        int certLen = Bytes.read24(certBB);
+          byte[] cert = new byte[certLen];
+          certBB.readBytes(cert);
 
-        byte[] cert = new byte[certLen];
-        certBB.readBytes(cert);
+          serverCertificates.add(cert);
 
-        serverCertificates.add(cert);
+          int certExtLen = certBB.readShort();
+          byte[] certExt = new byte[certExtLen];
+          certBB.readBytes(certExt);
+        }
 
-        int certExtLen = certBB.readShort();
-        byte[] certExt = new byte[certExtLen];
-        certBB.readBytes(certExt);
+        return new ServerCertificate(requestContext, serverCertificates);
+      } finally {
+        certBB.release();
       }
-
-      return new ServerCertificate(requestContext, serverCertificates);
     }
 
     private final byte[] requestContext;

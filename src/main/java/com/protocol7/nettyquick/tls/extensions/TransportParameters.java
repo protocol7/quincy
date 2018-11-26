@@ -139,62 +139,66 @@ public class TransportParameters implements Extension {
     int bufLen = bb.readShort();
     ByteBuf tpBB = bb.readBytes(bufLen);
 
-    Builder builder = new Builder();
+    try {
+      Builder builder = new Builder();
 
-    while (tpBB.isReadable()) {
-      byte[] type = new byte[2];
-      tpBB.readBytes(type);
+      while (tpBB.isReadable()) {
+        byte[] type = new byte[2];
+        tpBB.readBytes(type);
 
-      int len = tpBB.readShort();
+        int len = tpBB.readShort();
 
-      byte[] data = new byte[len];
-      tpBB.readBytes(data);
+        byte[] data = new byte[len];
+        tpBB.readBytes(data);
 
-      TransportParameterType tp = TransportParameterType.fromValue(type);
+        TransportParameterType tp = TransportParameterType.fromValue(type);
 
-      switch (tp) {
-        case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
-          builder.withInitialMaxStreamDataBidiLocal(dataToInt(data));
-          break;
-        case INITIAL_MAX_DATA:
-          builder.withInitialMaxData(dataToInt(data));
-          break;
-        case INITIAL_MAX_BIDI_STREAMS:
-          builder.withInitialMaxBidiStreams(dataToShort(data));
-          break;
-        case IDLE_TIMEOUT:
-          builder.withIdleTimeout(dataToShort(data));
-          break;
-        case MAX_PACKET_SIZE:
-          builder.withMaxPacketSize(dataToShort(data));
-          break;
-        case STATELESS_RESET_TOKEN:
-          builder.withStatelessResetToken(data);
-          break;
-        case ACK_DELAY_EXPONENT:
-          builder.withAckDelayExponent(dataToByte(data));
-          break;
-        case INITIAL_MAX_UNI_STREAMS:
-          builder.withInitialMaxUniStreams(dataToShort(data));
-          break;
-        case DISABLE_MIGRATION:
-          builder.withDisableMigration(true);
-          break;
-        case INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
-          builder.withInitialMaxStreamDataBidiRemote(dataToInt(data));
-          break;
-        case INITIAL_MAX_STREAM_DATA_UNI:
-          builder.withInitialMaxStreamDataUni(dataToInt(data));
-          break;
-        case MAX_ACK_DELAY:
-          builder.withMaxAckDelay(dataToByte(data));
-          break;
-        case ORIGINAL_CONNECTION_ID:
-          builder.withOriginalConnectionId(data);
-          break;
+        switch (tp) {
+          case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
+            builder.withInitialMaxStreamDataBidiLocal(dataToInt(data));
+            break;
+          case INITIAL_MAX_DATA:
+            builder.withInitialMaxData(dataToInt(data));
+            break;
+          case INITIAL_MAX_BIDI_STREAMS:
+            builder.withInitialMaxBidiStreams(dataToShort(data));
+            break;
+          case IDLE_TIMEOUT:
+            builder.withIdleTimeout(dataToShort(data));
+            break;
+          case MAX_PACKET_SIZE:
+            builder.withMaxPacketSize(dataToShort(data));
+            break;
+          case STATELESS_RESET_TOKEN:
+            builder.withStatelessResetToken(data);
+            break;
+          case ACK_DELAY_EXPONENT:
+            builder.withAckDelayExponent(dataToByte(data));
+            break;
+          case INITIAL_MAX_UNI_STREAMS:
+            builder.withInitialMaxUniStreams(dataToShort(data));
+            break;
+          case DISABLE_MIGRATION:
+            builder.withDisableMigration(true);
+            break;
+          case INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
+            builder.withInitialMaxStreamDataBidiRemote(dataToInt(data));
+            break;
+          case INITIAL_MAX_STREAM_DATA_UNI:
+            builder.withInitialMaxStreamDataUni(dataToInt(data));
+            break;
+          case MAX_ACK_DELAY:
+            builder.withMaxAckDelay(dataToByte(data));
+            break;
+          case ORIGINAL_CONNECTION_ID:
+            builder.withOriginalConnectionId(data);
+            break;
+        }
       }
+      return builder.build();
+    } finally {
+      tpBB.release();
     }
-    return builder.build();
   }
 
   private static int dataToInt(byte[] data) {
