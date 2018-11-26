@@ -8,11 +8,16 @@ import java.security.PublicKey;
 import java.security.Signature;
 import java.security.spec.MGF1ParameterSpec;
 import java.security.spec.PSSParameterSpec;
-import org.apache.commons.lang.StringUtils;
+import java.util.Arrays;
 
 public class CertificateVerify {
 
-  private static final byte[] PADDING = StringUtils.repeat(" ", 64).getBytes(Charsets.US_ASCII);
+  private static final byte[] PADDING = new byte[64];
+
+  static {
+    Arrays.fill(PADDING, (byte) 32);
+  }
+
   private static final byte[] SERVER_CONTEXT =
       "TLS 1.3, server CertificateVerify".getBytes(Charsets.US_ASCII);
   private static final byte[] CLIENT_CONTEXT =
