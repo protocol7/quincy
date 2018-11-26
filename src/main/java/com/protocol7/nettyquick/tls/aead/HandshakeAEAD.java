@@ -6,12 +6,7 @@ public class HandshakeAEAD {
 
   public static AEAD create(
       byte[] handshakeSecret, byte[] helloHash, boolean quic, boolean isClient) {
-    String labelPrefix;
-    if (quic) {
-      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
-    } else {
-      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
-    }
+    String labelPrefix = getPrefix(quic);
 
     // client_handshake_traffic_secret = hkdf-Expand-Label(
     //    key = handshake_secret,
@@ -66,5 +61,15 @@ public class HandshakeAEAD {
     } else {
       return new AEAD(serverHandshakeKey, clientHandshakeKey, serverHandshakeIV, clientHandshakeIV);
     }
+  }
+
+  private static String getPrefix(boolean quic) {
+    String labelPrefix;
+    if (quic) {
+      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
+    } else {
+      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
+    }
+    return labelPrefix;
   }
 }

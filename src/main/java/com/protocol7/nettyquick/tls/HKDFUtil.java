@@ -1,10 +1,7 @@
 package com.protocol7.nettyquick.tls;
 
-import static com.protocol7.nettyquick.utils.Hex.dehex;
-
 import at.favre.lib.crypto.HKDF;
 import com.google.common.base.Charsets;
-import com.google.common.hash.Hashing;
 import com.protocol7.nettyquick.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -15,14 +12,12 @@ public class HKDFUtil {
   public static final String QUIC_LABEL_PREFIX = "quic ";
 
   public static final HKDF hkdf = at.favre.lib.crypto.HKDF.fromHmacSha256();
+
   // early_secret = hkdf-Extract(
   //         salt=00,
   //         key=00...)
-  private static final byte[] EARLY_SECRET =
-      hkdf.extract(
-          dehex("00"), dehex("0000000000000000000000000000000000000000000000000000000000000000"));
-  public static final byte[] EMPTY_HASH =
-      Hashing.sha256().hashString("", Charsets.US_ASCII).asBytes();
+  private static final byte[] EARLY_SECRET = hkdf.extract(new byte[1], new byte[32]);
+  public static final byte[] EMPTY_HASH = Hash.sha256("".getBytes(Charsets.US_ASCII));
 
   //         derived_secret = hkdf-Expand-Label(
   //                key = early_secret,

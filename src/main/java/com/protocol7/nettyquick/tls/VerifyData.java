@@ -9,12 +9,7 @@ public class VerifyData {
     Preconditions.checkArgument(handshakeTrafficSecret.length == 32);
     Preconditions.checkArgument(finishedHash.length == 32);
 
-    String labelPrefix;
-    if (quic) {
-      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
-    } else {
-      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
-    }
+    String labelPrefix = getPrefix(quic);
 
     // finished_key = HKDF-Expand-Label(
     //    key = client_handshake_traffic_secret,
@@ -28,6 +23,16 @@ public class VerifyData {
     //	key = finished_key,
     //	msg = finished_hash)
     return Hashing.hmacSha256(finishedKey).hashBytes(finishedHash).asBytes();
+  }
+
+  private static String getPrefix(boolean quic) {
+    String labelPrefix;
+    if (quic) {
+      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
+    } else {
+      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
+    }
+    return labelPrefix;
   }
 
   public static boolean verify(

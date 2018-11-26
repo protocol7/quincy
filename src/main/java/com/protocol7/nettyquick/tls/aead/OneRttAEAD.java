@@ -1,19 +1,15 @@
 package com.protocol7.nettyquick.tls.aead;
 
-import static com.protocol7.nettyquick.utils.Hex.dehex;
-
 import com.protocol7.nettyquick.tls.HKDFUtil;
 
 public class OneRttAEAD {
 
+  private static final byte[] ZEROS = new byte[32];
+  private static final byte[] EMPTY = new byte[0];
+
   public static AEAD create(
       byte[] handshakeSecret, byte[] handshakeHash, boolean quic, boolean isClient) {
-    String labelPrefix;
-    if (quic) {
-      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
-    } else {
-      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
-    }
+    String labelPrefix = getPrefix(quic);
 
     // derived_secret = HKDF-Expand-Label(
     //                key = handshake_secret,
@@ -26,10 +22,7 @@ public class OneRttAEAD {
     //        master_secret = HKDF-Extract(
     //                salt=derived_secret,
     //                key=00...)
-    byte[] masterSecret =
-        HKDFUtil.hkdf.extract(
-            derivedSecret,
-            dehex("0000000000000000000000000000000000000000000000000000000000000000"));
+    byte[] masterSecret = HKDFUtil.hkdf.extract(derivedSecret, ZEROS);
 
     // client_application_traffic_secret = HKDF-Expand-Label(
     //    key = master_secret,
@@ -53,7 +46,7 @@ public class OneRttAEAD {
     //    context = "",
     //    len = 16)
     byte[] clientApplicationKey =
-        HKDFUtil.expandLabel(clientApplicationTrafficSecret, labelPrefix, "key", new byte[0], 16);
+        HKDFUtil.expandLabel(clientApplicationTrafficSecret, labelPrefix, "key", EMPTY, 16);
 
     // server_application_key = HKDF-Expand-Label(
     //    key = server_application_traffic_secret,
@@ -61,7 +54,7 @@ public class OneRttAEAD {
     //    context = "",
     //    len = 16)
     byte[] serverApplicationKey =
-        HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "key", new byte[0], 16);
+        HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "key", EMPTY, 16);
 
     // client_application_iv = HKDF-Expand-Label(
     //    key = client_application_traffic_secret,
@@ -69,7 +62,7 @@ public class OneRttAEAD {
     //    context = "",
     //    len = 12)
     byte[] clientApplicationIV =
-        HKDFUtil.expandLabel(clientApplicationTrafficSecret, labelPrefix, "iv", new byte[0], 12);
+        HKDFUtil.expandLabel(clientApplicationTrafficSecret, labelPrefix, "iv", EMPTY, 12);
 
     // server_application_iv = HKDF-Expand-Label(
     //    key = server_application_traffic_secret,
@@ -77,7 +70,7 @@ public class OneRttAEAD {
     //    context = "",
     //    len = 12)
     byte[] serverApplicationIV =
-        HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "iv", new byte[0], 12);
+        HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "iv", EMPTY, 12);
 
     if (isClient) {
       return new AEAD(
@@ -86,5 +79,15 @@ public class OneRttAEAD {
       return new AEAD(
           serverApplicationKey, clientApplicationKey, serverApplicationIV, clientApplicationIV);
     }
+  }
+
+  private static String getPrefix(boolean quic) {
+    String labelPrefix;
+    if (quic) {
+      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
+    } else {
+      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
+    }
+    return labelPrefix;
   }
 }
