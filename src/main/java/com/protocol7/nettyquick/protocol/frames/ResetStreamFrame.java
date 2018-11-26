@@ -7,25 +7,28 @@ import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.Varint;
 import io.netty.buffer.ByteBuf;
 
-public class RstStreamFrame extends Frame {
+public class ResetStreamFrame extends Frame {
 
-  public static RstStreamFrame parse(final ByteBuf bb) {
-    bb.readByte();
+  public static ResetStreamFrame parse(final ByteBuf bb) {
+    byte type = bb.readByte();
+    if (type != FrameType.RESET_STREAM.getType()) {
+      throw new IllegalArgumentException("Illegal frame type");
+    }
 
     final StreamId streamId = StreamId.parse(bb);
     final int applicationErrorCode = bb.readUnsignedShort();
     final long offset = Varint.readAsLong(bb);
 
-    return new RstStreamFrame(streamId, applicationErrorCode, offset);
+    return new ResetStreamFrame(streamId, applicationErrorCode, offset);
   }
 
   private final StreamId streamId;
   private final int applicationErrorCode;
   private final long offset;
 
-  public RstStreamFrame(
+  public ResetStreamFrame(
       final StreamId streamId, final int applicationErrorCode, final long offset) {
-    super(FrameType.RST_STREAM);
+    super(FrameType.RESET_STREAM);
 
     requireNonNull(streamId);
     validateApplicationErrorCode(applicationErrorCode);
@@ -54,7 +57,7 @@ public class RstStreamFrame extends Frame {
 
   @Override
   public void write(final ByteBuf bb) {
-    bb.writeByte(0x01);
+    bb.writeByte(getType().getType());
 
     streamId.write(bb);
     bb.writeShort(applicationErrorCode);
@@ -66,7 +69,7 @@ public class RstStreamFrame extends Frame {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
 
-    final RstStreamFrame that = (RstStreamFrame) o;
+    final ResetStreamFrame that = (ResetStreamFrame) o;
 
     if (applicationErrorCode != that.applicationErrorCode) return false;
     if (offset != that.offset) return false;

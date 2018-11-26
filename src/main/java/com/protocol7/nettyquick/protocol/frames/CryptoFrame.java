@@ -7,7 +7,10 @@ import io.netty.buffer.ByteBuf;
 public class CryptoFrame extends Frame {
 
   public static CryptoFrame parse(ByteBuf bb) {
-    bb.readByte(); // TODO validate
+    byte type = bb.readByte();
+    if (type != FrameType.CRYPTO.getType()) {
+      throw new IllegalArgumentException("Illegal frame type");
+    }
 
     long offset = Varint.readAsLong(bb);
     int length = Varint.readAsInt(bb);

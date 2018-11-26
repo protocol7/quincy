@@ -10,7 +10,7 @@ import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
+import com.protocol7.nettyquick.protocol.frames.ResetStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import java.util.Optional;
@@ -76,7 +76,7 @@ public class StreamTest {
 
     stream.reset(123);
     assertTrue(stream.isClosed());
-    RstStreamFrame frame2 = (RstStreamFrame) captureFrame();
+    ResetStreamFrame frame2 = (ResetStreamFrame) captureFrame();
 
     assertEquals(streamId, frame2.getStreamId());
     assertEquals(123, frame2.getApplicationErrorCode());

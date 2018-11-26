@@ -41,20 +41,20 @@ public class FrameTest {
   }
 
   @Test
-  public void rstStreamFrame() {
-    assertFrame(new RstStreamFrame(new StreamId(123), 124, 125));
+  public void resetStreamFrame() {
+    assertFrame(new ResetStreamFrame(new StreamId(123), 124, 125));
   }
 
   @Test
   public void connectionCloseFrame() {
-    ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, 13, "hello");
+    ConnectionCloseFrame ccf = ConnectionCloseFrame.connection(12, 13, "hello");
     assertFrame(ccf);
   }
 
   @Test
   public void applicationCloseFrame() {
-    ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "hello");
-    assertFrame(acf);
+    ConnectionCloseFrame ccf = ConnectionCloseFrame.application(12, "hello");
+    assertFrame(ccf);
   }
 
   private void assertFrame(Frame frame) {

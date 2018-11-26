@@ -68,8 +68,8 @@ public class ServerStateMachine {
           StreamFrame sf = (StreamFrame) frame;
           Stream stream = connection.getOrCreateStream(sf.getStreamId());
           stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-        } else if (frame instanceof RstStreamFrame) {
-          RstStreamFrame rsf = (RstStreamFrame) frame;
+        } else if (frame instanceof ResetStreamFrame) {
+          ResetStreamFrame rsf = (ResetStreamFrame) frame;
           Stream stream = connection.getOrCreateStream(rsf.getStreamId());
           stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
         } else if (frame instanceof PingFrame) {

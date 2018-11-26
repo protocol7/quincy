@@ -64,7 +64,7 @@ public class ServerStateMachineTest {
   public void resetStreamFrame() {
     getReady();
 
-    stm.processPacket(packet(new RstStreamFrame(streamId, 123, 456)));
+    stm.processPacket(packet(new ResetStreamFrame(streamId, 123, 456)));
 
     verify(stream).onReset(123, 456);
   }

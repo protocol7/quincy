@@ -21,12 +21,17 @@ public class ConnectionCloseFrame extends Frame {
 
   public static ConnectionCloseFrame parse(ByteBuf bb) {
     byte type = bb.readByte();
-    if (type != 0x02) {
+    if (type != 0x1c && type != 0x1d) {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
+    boolean application = type == 0x1d;
+
     int errorCode = bb.readShort();
-    int frameType = Varint.readAsInt(bb);
+    int frameType = 0;
+    if (!application) {
+      frameType = Varint.readAsInt(bb);
+    }
 
     int reasonPhraseLength = Varint.readAsInt(bb);
 
@@ -34,15 +39,25 @@ public class ConnectionCloseFrame extends Frame {
     bb.readBytes(reasonPhraseBytes);
 
     return new ConnectionCloseFrame(
-        errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
+            application, errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
   }
 
+  public static ConnectionCloseFrame connection(int errorCode, int frameType, String reasonPhrase) {
+    return new ConnectionCloseFrame(false, errorCode, frameType, reasonPhrase);
+  }
+
+  public static ConnectionCloseFrame application(int errorCode, String reasonPhrase) {
+    return new ConnectionCloseFrame(true, errorCode, 0, reasonPhrase);
+  }
+
+  private final boolean application;
   private final int errorCode;
   private final int frameType;
   private final String reasonPhrase;
 
-  public ConnectionCloseFrame(int errorCode, int frameType, String reasonPhrase) {
+  private ConnectionCloseFrame(boolean application, int errorCode, int frameType, String reasonPhrase) {
     super(FrameType.CONNECTION_CLOSE);
+    this.application = application;
     this.errorCode = errorCode;
     this.frameType = frameType;
     this.reasonPhrase = reasonPhrase;
@@ -62,10 +77,16 @@ public class ConnectionCloseFrame extends Frame {
 
   @Override
   public void write(final ByteBuf bb) {
-    bb.writeByte(getType().getType());
+    if (application) {
+      bb.writeByte(0x1d);
+    } else {
+      bb.writeByte(0x1c);
+    }
 
     bb.writeShort(errorCode);
-    Varint.write(frameType, bb);
+    if (!application) {
+      Varint.write(frameType, bb);
+    }
 
     byte[] reasonPhraseBytes = reasonPhrase.getBytes(Charsets.UTF_8);
 

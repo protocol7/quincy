@@ -8,7 +8,10 @@ public class RetireConnectionIdFrame extends Frame {
   private final long sequenceNumber;
 
   public static RetireConnectionIdFrame parse(ByteBuf bb) {
-    bb.readByte();
+    byte type = bb.readByte();
+    if (type != FrameType.RETIRE_CONNECTION_ID.getType()) {
+      throw new IllegalArgumentException("Illegal frame type");
+    }
 
     long sequenceNumber = Varint.readAsLong(bb);
 

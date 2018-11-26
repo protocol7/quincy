@@ -11,7 +11,7 @@ public class ConnectionCloseFrameTest {
 
   @Test
   public void parseKnown() {
-    byte[] b = Hex.dehex("020019001b4e6f20726563656e74206e6574776f726b2061637469766974792e");
+    byte[] b = Hex.dehex("1c0019001b4e6f20726563656e74206e6574776f726b2061637469766974792e");
     ByteBuf bb = Unpooled.wrappedBuffer(b);
 
     ConnectionCloseFrame ccf = ConnectionCloseFrame.parse(bb);
@@ -22,8 +22,8 @@ public class ConnectionCloseFrameTest {
   }
 
   @Test
-  public void roundtrip() {
-    ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, 13, "Hello world");
+  public void roundtripConnection() {
+    ConnectionCloseFrame ccf = ConnectionCloseFrame.connection(12, 13, "Hello world");
 
     ByteBuf bb = Unpooled.buffer();
     ccf.write(bb);
@@ -32,6 +32,20 @@ public class ConnectionCloseFrameTest {
 
     assertEquals(ccf.getErrorCode(), parsed.getErrorCode());
     assertEquals(ccf.getFrameType(), parsed.getFrameType());
+    assertEquals(ccf.getReasonPhrase(), parsed.getReasonPhrase());
+  }
+
+  @Test
+  public void roundtripApplication() {
+    ConnectionCloseFrame ccf = ConnectionCloseFrame.application(12, "Hello world");
+
+    ByteBuf bb = Unpooled.buffer();
+    ccf.write(bb);
+
+    ConnectionCloseFrame parsed = ConnectionCloseFrame.parse(bb);
+
+    assertEquals(ccf.getErrorCode(), parsed.getErrorCode());
+    assertEquals(0, parsed.getFrameType());
     assertEquals(ccf.getReasonPhrase(), parsed.getReasonPhrase());
   }
 }

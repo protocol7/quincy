@@ -7,7 +7,10 @@ public class PingFrame extends Frame {
   public static final PingFrame INSTANCE = new PingFrame();
 
   public static PingFrame parse(ByteBuf bb) {
-    bb.readByte();
+    byte type = bb.readByte();
+    if (type != FrameType.PING.getType()) {
+      throw new IllegalArgumentException("Illegal frame type");
+    }
 
     return INSTANCE;
   }

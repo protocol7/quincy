@@ -4,7 +4,7 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.StreamId;
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.frames.RstStreamFrame;
+import com.protocol7.nettyquick.protocol.frames.ResetStreamFrame;
 import com.protocol7.nettyquick.protocol.frames.StreamFrame;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import java.util.Optional;
@@ -67,7 +67,7 @@ public class Stream {
   public void reset(int applicationErrorCode) {
     canReset();
 
-    final Frame frame = new RstStreamFrame(id, applicationErrorCode, offset.get());
+    final Frame frame = new ResetStreamFrame(id, applicationErrorCode, offset.get());
 
     final FullPacket p = connection.sendPacket(frame);
 

@@ -11,7 +11,10 @@ import java.util.Objects;
 public class AckFrame extends Frame {
 
   public static AckFrame parse(ByteBuf bb) {
-    bb.readByte();
+    byte type = bb.readByte();
+    if (type != FrameType.ACK.getType()) {
+      throw new IllegalArgumentException("Illegal frame type");
+    }
 
     final long largestAcknowledged = Varint.readAsLong(bb);
     final long ackDelay = Varint.readAsLong(bb);
@@ -48,7 +51,7 @@ public class AckFrame extends Frame {
   }
 
   public AckFrame(final long ackDelay, final List<AckBlock> blocks) {
-    super(FrameType.ACK_1);
+    super(FrameType.ACK);
 
     Objects.requireNonNull(ackDelay);
     Objects.requireNonNull(blocks);

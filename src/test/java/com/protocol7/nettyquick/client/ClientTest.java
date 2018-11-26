@@ -219,7 +219,7 @@ public class ClientTest {
   public void resetStreamFrame() {
     handshake();
 
-    connection.onPacket(packet(new RstStreamFrame(streamId, 123, 0)));
+    connection.onPacket(packet(new ResetStreamFrame(streamId, 123, 0)));
 
     verify(streamListener).onReset(any(Stream.class), eq(123), eq(0L));
 
@@ -241,7 +241,7 @@ public class ClientTest {
   public void peerCloseConnection() {
     handshake();
 
-    connection.onPacket(packet(new ConnectionCloseFrame(123, 124, "Closed")));
+    connection.onPacket(packet(ConnectionCloseFrame.connection(123, 124, "Closed")));
 
     // verify ack
     assertAck(4, 3, 3, 3);

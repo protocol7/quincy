@@ -149,7 +149,7 @@ public class ClientStateMachine {
                   connection.getDestinationConnectionId(),
                   connection.getSourceConnectionId(),
                   connection.nextSendPacketNumber(),
-                  Version.TLS_DEV,
+                  Version.QUIC_GO,
                   new CryptoFrame(0, result.get().getFin())));
 
           state = ClientState.Ready;
@@ -165,13 +165,13 @@ public class ClientStateMachine {
 
       Stream stream = connection.getOrCreateStream(sf.getStreamId());
       stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-    } else if (frame instanceof RstStreamFrame) {
-      RstStreamFrame rsf = (RstStreamFrame) frame;
+    } else if (frame instanceof ResetStreamFrame) {
+      ResetStreamFrame rsf = (ResetStreamFrame) frame;
       Stream stream = connection.getOrCreateStream(rsf.getStreamId());
       stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
     } else if (frame instanceof PingFrame) {
       // do nothing, will be acked
-    } else if (frame instanceof ConnectionCloseFrame || frame instanceof ApplicationCloseFrame) {
+    } else if (frame instanceof ConnectionCloseFrame) {
       handlePeerClose();
     }
   }
@@ -186,7 +186,7 @@ public class ClientStateMachine {
 
   public void closeImmediate() {
     connection.sendPacket(
-        new ConnectionCloseFrame(TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+        ConnectionCloseFrame.connection(TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
 
     state = ClientState.Closing;
 

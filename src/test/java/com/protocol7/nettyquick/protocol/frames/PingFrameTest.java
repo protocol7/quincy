@@ -29,6 +29,6 @@ public class PingFrameTest {
     PingFrame frame = PingFrame.INSTANCE;
     frame.write(bb);
 
-    TestUtil.assertBuffer("07", bb);
+    TestUtil.assertBuffer("01", bb);
   }
 }
