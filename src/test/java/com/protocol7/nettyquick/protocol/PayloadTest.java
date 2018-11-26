@@ -2,7 +2,6 @@ package com.protocol7.nettyquick.protocol;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.tls.aead.AEAD;

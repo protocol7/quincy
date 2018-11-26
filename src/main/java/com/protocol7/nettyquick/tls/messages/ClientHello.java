@@ -9,7 +9,6 @@ import com.protocol7.nettyquick.tls.Group;
 import com.protocol7.nettyquick.tls.KeyExchange;
 import com.protocol7.nettyquick.tls.extensions.*;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Debug;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;

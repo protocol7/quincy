@@ -112,7 +112,7 @@ public class ServerConnection implements Connection {
 
     packetBuffer.onPacket(
         packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled
-                 // with incorrect conn ID
+    // with incorrect conn ID
     stateMachine.processPacket(packet);
   }
 

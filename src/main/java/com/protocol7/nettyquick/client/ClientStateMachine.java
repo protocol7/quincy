@@ -186,7 +186,8 @@ public class ClientStateMachine {
 
   public void closeImmediate() {
     connection.sendPacket(
-        ConnectionCloseFrame.connection(TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+        ConnectionCloseFrame.connection(
+            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
 
     state = ClientState.Closing;
 

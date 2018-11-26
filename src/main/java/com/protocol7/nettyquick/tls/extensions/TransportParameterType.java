@@ -5,7 +5,6 @@ import com.google.common.primitives.Shorts;
 import java.util.EnumSet;
 
 public enum TransportParameterType {
-
   ORIGINAL_CONNECTION_ID(0x0000),
   IDLE_TIMEOUT(0x0001),
   STATELESS_RESET_TOKEN(0x0002),

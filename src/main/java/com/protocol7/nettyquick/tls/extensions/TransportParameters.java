@@ -3,7 +3,6 @@ package com.protocol7.nettyquick.tls.extensions;
 import static com.protocol7.nettyquick.tls.extensions.TransportParameterType.*;
 
 import com.protocol7.nettyquick.protocol.Varint;
-import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
