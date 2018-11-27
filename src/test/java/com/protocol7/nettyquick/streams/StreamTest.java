@@ -2,7 +2,7 @@ package com.protocol7.nettyquick.streams;
 
 import static com.protocol7.nettyquick.streams.Stream.StreamType.Bidirectional;
 import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquick.connection.Connection;
