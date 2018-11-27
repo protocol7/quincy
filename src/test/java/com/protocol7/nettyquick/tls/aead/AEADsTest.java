@@ -61,6 +61,6 @@ public class AEADsTest {
   }
 
   private void assertAEAD(AEAD expected, AEAD actual) {
-    assertArrayEquals(expected.getMyKey(), actual.getMyKey());
+    assertSame(expected, actual);
   }
 }
