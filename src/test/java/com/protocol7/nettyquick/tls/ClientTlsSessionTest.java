@@ -27,12 +27,12 @@ public class ClientTlsSessionTest {
 
   @Before
   public void setUp() {
-    started.start();
+    started.startHandshake();
   }
 
   @Test
   public void handshake() {
-    byte[] ch = engine.start();
+    byte[] ch = engine.startHandshake();
 
     ClientHello hello = ClientHello.parse(ch);
 

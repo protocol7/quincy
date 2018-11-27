@@ -26,7 +26,7 @@ public class TlsSessions {
 
   @Test
   public void handshake() {
-    byte[] clientHello = client.start();
+    byte[] clientHello = client.startHandshake();
 
     ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -38,7 +38,7 @@ public class TlsSessions {
 
   @Test(expected = RuntimeException.class)
   public void handshakeWithInvalidServerCertVerification() {
-    byte[] clientHello = client.start();
+    byte[] clientHello = client.startHandshake();
 
     ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -66,7 +66,7 @@ public class TlsSessions {
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidClientFin() {
-    byte[] clientHello = client.start();
+    byte[] clientHello = client.startHandshake();
 
     ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -81,7 +81,7 @@ public class TlsSessions {
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidServerFin() {
-    byte[] clientHello = client.start();
+    byte[] clientHello = client.startHandshake();
 
     ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 

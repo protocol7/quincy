@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.server;
 
 import com.protocol7.nettyquick.EncryptionLevel;
+import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
@@ -12,11 +13,9 @@ import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
-import io.netty.channel.Channel;
-import io.netty.channel.socket.DatagramPacket;
 import java.net.InetSocketAddress;
+import java.security.PrivateKey;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -24,20 +23,12 @@ import org.slf4j.LoggerFactory;
 
 public class ServerConnection implements Connection {
 
-  public static ServerConnection create(
-      StreamListener handler,
-      Channel channel,
-      InetSocketAddress clientAddress,
-      ConnectionId srcConnId) {
-    return new ServerConnection(handler, channel, clientAddress, srcConnId);
-  }
-
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
   private Optional<ConnectionId> destConnectionId = Optional.empty();
   private final Optional<ConnectionId> srcConnectionId;
   private final StreamListener handler;
-  private final Channel channel;
+  private final PacketSender packetSender;
   private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
   private final AtomicReference<PacketNumber> sendPacketNumber =
@@ -46,17 +37,21 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  private final AEAD initialAead;
+  private AEAD initialAead;
+  private AEAD handshakeAead;
+  private AEAD oneRttAead;
 
   public ServerConnection(
       final StreamListener handler,
-      final Channel channel,
+      final PacketSender packetSender,
       final InetSocketAddress clientAddress,
+      final List<byte[]> certificates,
+      final PrivateKey privateKey,
       final ConnectionId srcConnId) {
     this.handler = handler;
-    this.channel = channel;
+    this.packetSender = packetSender;
     this.clientAddress = clientAddress;
-    this.stateMachine = new ServerStateMachine(this);
+    this.stateMachine = new ServerStateMachine(this, certificates, privateKey);
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
@@ -98,20 +93,16 @@ public class ServerConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    ByteBuf bb = Unpooled.buffer();
-    packet.write(bb, initialAead);
-    channel
-        .writeAndFlush(new DatagramPacket(bb, clientAddress))
-        .syncUninterruptibly()
-        .awaitUninterruptibly(); // TODO fix
+    packetSender.send(packet, clientAddress, initialAead).awaitUninterruptibly(); // TODO fix
     log.debug("Server sent {}", packet);
   }
 
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    packetBuffer.onPacket(
-        packet); // TODO connection ID is not set yet for initial packet so will be acknowdgeled
+    if (stateMachine.getState() != ServerStateMachine.ServerState.BeforeInitial) {
+      packetBuffer.onPacket(packet);
+    }
     // with incorrect conn ID
     stateMachine.processPacket(packet);
   }
@@ -119,12 +110,23 @@ public class ServerConnection implements Connection {
   @Override
   public AEAD getAEAD(EncryptionLevel level) {
     if (level == EncryptionLevel.Initial) {
+      log.debug("Using initial AEAD: {}", initialAead);
       return initialAead;
     } else if (level == EncryptionLevel.Handshake) {
-      throw new RuntimeException("Not implemented");
+      log.debug("Using handshake AEAD: {}", handshakeAead);
+      return handshakeAead;
     } else {
-      throw new RuntimeException("Not implemented");
+      log.debug("Using 1-RTT AEAD: {}", oneRttAead);
+      return oneRttAead;
     }
+  }
+
+  public void setHandshakeAead(AEAD handshakeAead) {
+    this.handshakeAead = handshakeAead;
+  }
+
+  public void setOneRttAead(AEAD oneRttAead) {
+    this.oneRttAead = oneRttAead;
   }
 
   public Stream getOrCreateStream(StreamId streamId) {
@@ -137,5 +139,9 @@ public class ServerConnection implements Connection {
 
   public PacketNumber nextSendPacketNumber() {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
+  }
+
+  public ServerStateMachine.ServerState getState() {
+    return stateMachine.getState();
   }
 }

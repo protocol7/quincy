@@ -18,7 +18,7 @@ public class PacketTest {
 
   private final AEAD aead = TestAEAD.create();
   private final ConnectionId connId = ConnectionId.random();
-  private final PacketNumber pn = PacketNumber.random();
+  private final PacketNumber pn = new PacketNumber(123);
 
   @Test
   public void parseInitialPacket() {
@@ -26,14 +26,14 @@ public class PacketTest {
         InitialPacket.create(
             Optional.ofNullable(connId),
             empty(),
+            pn,
             Version.CURRENT,
             empty(),
             Lists.newArrayList(PingFrame.INSTANCE));
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    Packet parsed =
-        Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
+    Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
     assertTrue(parsed instanceof InitialPacket);
   }
 
@@ -44,8 +44,7 @@ public class PacketTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    Packet parsed =
-        Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
+    Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
     assertTrue(parsed instanceof VersionNegotiationPacket);
   }
 
@@ -60,8 +59,7 @@ public class PacketTest {
     bb.writeByte(0);
     Version.DRAFT_15.write(bb);
 
-    Packet parsed =
-        Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
+    Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
     assertTrue(parsed instanceof VersionNegotiationPacket);
   }
 
@@ -85,8 +83,7 @@ public class PacketTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    Packet parsed =
-        Packet.parse(bb, c -> PacketNumber.random(), (c, p) -> aead, connId.getLength());
+    Packet parsed = Packet.parse(bb, c -> pn, (c, p) -> aead, connId.getLength());
     assertTrue(parsed instanceof RetryPacket);
   }
 

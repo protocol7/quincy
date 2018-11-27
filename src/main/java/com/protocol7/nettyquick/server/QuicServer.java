@@ -11,17 +11,28 @@ import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
+import java.security.PrivateKey;
+import java.util.List;
 
 public class QuicServer {
 
   public static Future<QuicServer> bind(
-      final InetSocketAddress address, StreamListener streamHandler) {
-    return Futures.thenSync(bindImpl(address, streamHandler), group1 -> new QuicServer(group1));
+      final InetSocketAddress address,
+      StreamListener streamHandler,
+      List<byte[]> certificates,
+      PrivateKey privateKey) {
+    return Futures.thenSync(
+        bindImpl(address, streamHandler, certificates, privateKey), g -> new QuicServer(g));
   }
 
   private static Future<EventExecutorGroup> bindImpl(
-      final InetSocketAddress address, final StreamListener streamHandler) {
+      final InetSocketAddress address,
+      final StreamListener streamHandler,
+      List<byte[]> certificates,
+      PrivateKey privateKey) {
     NioEventLoopGroup group = new NioEventLoopGroup();
+
+    Connections connections = new Connections(certificates, privateKey);
 
     final Bootstrap b = new Bootstrap();
     b.group(group)
@@ -32,11 +43,11 @@ public class QuicServer {
               @Override
               public void initChannel(final NioDatagramChannel ch) throws Exception {
                 ChannelPipeline p = ch.pipeline();
-                p.addLast(new ServerHandler(streamHandler));
+                p.addLast(new ServerHandler(connections, streamHandler));
               }
             });
 
-    // Bind and start to accept incoming connections.
+    // Bind and startHandshake to accept incoming connections.
     return Futures.thenSync(b.bind(address), aVoid -> group);
   }
 

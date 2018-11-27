@@ -45,16 +45,6 @@ public class InitialPacket implements FullPacket {
         token);
   }
 
-  public static InitialPacket create(
-      Optional<ConnectionId> destConnectionId,
-      Optional<ConnectionId> srcConnectionId,
-      Version version,
-      Optional<byte[]> token,
-      List<Frame> frames) { // TODO validate frame types
-    PacketNumber packetNumber = PacketNumber.random();
-    return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
-  }
-
   public static InitialPacket parse(ByteBuf bb, AEADProvider aeadProvider) {
     bb.markReaderIndex();
 

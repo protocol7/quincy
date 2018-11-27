@@ -75,7 +75,7 @@ public class PacketBuffer {
   }
 
   public void onPacket(Packet packet) {
-    if (packet instanceof FullPacket) {
+    if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
       ackQueue.add(((FullPacket) packet).getPacketNumber());
       log.debug("Acked packet {}", ((FullPacket) packet).getPacketNumber());
 

@@ -1,7 +1,6 @@
 package com.protocol7.nettyquick.protocol;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import com.protocol7.nettyquick.TestUtil;
 import com.protocol7.nettyquick.utils.Bytes;
@@ -27,14 +26,6 @@ public class PacketNumberTest {
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooLarge() {
     new PacketNumber(4611686018427387904L);
-  }
-
-  @Test
-  public void randomBounds() {
-    for (int i = 0; i < 1000_000; i++) {
-      PacketNumber v = PacketNumber.random();
-      assertTrue(v.toString(), v.asLong() >= 0 && v.asLong() <= 4294966271L);
-    }
   }
 
   @Test
@@ -77,17 +68,6 @@ public class PacketNumberTest {
     assertWrite(0x3719, "b719");
     assertWrite(0x2589fa19, "e589fa19");
     assertWrite(1160621137, "c52dac51");
-  }
-
-  @Test
-  public void roundtripVarint() {
-    int pn = (int) PacketNumber.random().asLong();
-    ByteBuf bb = Unpooled.buffer();
-    bb.writeBytes(new PacketNumber(pn).write());
-
-    PacketNumber parsed = PacketNumber.parseVarint(bb);
-
-    assertEquals(pn, parsed.asLong());
   }
 
   private void assertRead(int expected, String h) {

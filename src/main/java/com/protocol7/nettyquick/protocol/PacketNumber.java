@@ -3,18 +3,11 @@ package com.protocol7.nettyquick.protocol;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.protocol7.nettyquick.utils.Bytes;
-import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
 
 public class PacketNumber implements Comparable<PacketNumber> {
-
-  private static final int INITIAL_MAX = 1073741823; // TODO fix
-
-  public static PacketNumber random() {
-    return new PacketNumber(Rnd.rndInt(0, INITIAL_MAX));
-  }
 
   public static PacketNumber parseVarint(final ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);

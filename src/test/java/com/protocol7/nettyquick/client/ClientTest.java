@@ -5,7 +5,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
@@ -16,12 +15,8 @@ import com.protocol7.nettyquick.tls.ServerTlsSession;
 import com.protocol7.nettyquick.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.util.concurrent.*;
-import java.io.IOException;
 import java.net.InetSocketAddress;
-import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
-import java.security.cert.CertificateException;
-import java.security.spec.InvalidKeySpecException;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -48,8 +43,7 @@ public class ClientTest {
   @Mock private StreamListener streamListener;
 
   @Before
-  public void setUp()
-      throws NoSuchAlgorithmException, IOException, InvalidKeySpecException, CertificateException {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     when(packetSender.send(any(), any(), any()))
@@ -61,14 +55,14 @@ public class ClientTest {
         new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
 
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
-    byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
+    List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
-    serverTlsSession = new ServerTlsSession(ImmutableList.of(serverCert), privateKey);
+    serverTlsSession = new ServerTlsSession(serverCert, privateKey);
   }
 
   @Test
   public void handshake() {
-    // start handshake
+    // startHandshake handshake
     Future<Void> handshakeFuture = connection.handshake();
 
     // validate first packet sent

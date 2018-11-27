@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.server;
 
+import com.protocol7.nettyquick.client.NettyPacketSender;
 import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
@@ -13,10 +14,11 @@ import org.slf4j.MDC;
 
 public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-  private final Connections connections = new Connections();
+  private final Connections connections;
   private final StreamListener streamHandler;
 
-  public ServerHandler(final StreamListener streamHandler) {
+  public ServerHandler(Connections connections, final StreamListener streamHandler) {
+    this.connections = connections;
     this.streamHandler = streamHandler;
   }
 
@@ -52,7 +54,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
           connections.get(
               packet.getDestinationConnectionId(),
               streamHandler,
-              ctx.channel(),
+              new NettyPacketSender(ctx.channel()),
               datagram.sender()); // TODO fix for when connId is omitted
 
       conn.onPacket(packet);

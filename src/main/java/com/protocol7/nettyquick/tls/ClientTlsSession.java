@@ -45,7 +45,7 @@ public class ClientTlsSession {
     handshakeSecret = null;
   }
 
-  public byte[] start() {
+  public byte[] startHandshake() {
     if (clientHello != null) {
       throw new IllegalStateException("Already started");
     }

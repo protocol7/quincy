@@ -34,7 +34,7 @@ public class StreamTest {
 
     when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.getSourceConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.nextSendPacketNumber()).thenReturn(PacketNumber.random());
+    when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(1));
 
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(123));
     when(connection.sendPacket(any(Frame.class))).thenReturn(packet);

@@ -61,7 +61,7 @@ public class ClientStateMachine {
 
     int len = 1200;
 
-    CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.start());
+    CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.startHandshake());
     len -= clientHello.calculateLength();
     frames.add(clientHello);
     for (int i = len; i > 0; i--) {

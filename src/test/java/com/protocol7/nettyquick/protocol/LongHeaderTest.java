@@ -20,7 +20,7 @@ public class LongHeaderTest {
     PacketType packetType = PacketType.Initial;
     Optional<ConnectionId> destConnId = Optional.of(ConnectionId.random());
     Optional<ConnectionId> srcConnId = Optional.of(ConnectionId.random());
-    PacketNumber pn = PacketNumber.random();
+    PacketNumber pn = new PacketNumber(123);
     Version version = Version.CURRENT;
     Payload payload = new Payload(PingFrame.INSTANCE);
 
