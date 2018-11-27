@@ -24,7 +24,11 @@ public class PacketTest {
   public void parseInitialPacket() {
     InitialPacket packet =
         InitialPacket.create(
-            Optional.ofNullable(connId), empty(), empty(), Lists.newArrayList(PingFrame.INSTANCE));
+            Optional.ofNullable(connId),
+            empty(),
+            Version.CURRENT,
+            empty(),
+            Lists.newArrayList(PingFrame.INSTANCE));
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
+import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.TestAEAD;
@@ -29,6 +30,7 @@ public class InitialPacketTest {
         InitialPacket.create(
             Optional.of(destConnId),
             Optional.of(srcConnId),
+            Version.CURRENT,
             Optional.of(token),
             Lists.newArrayList(PingFrame.INSTANCE));
 
@@ -53,6 +55,7 @@ public class InitialPacketTest {
         InitialPacket.create(
             Optional.ofNullable(destConnId),
             empty(),
+            Version.CURRENT,
             empty(),
             Lists.newArrayList(PingFrame.INSTANCE));
 

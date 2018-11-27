@@ -48,9 +48,9 @@ public class InitialPacket implements FullPacket {
   public static InitialPacket create(
       Optional<ConnectionId> destConnectionId,
       Optional<ConnectionId> srcConnectionId,
+      Version version,
       Optional<byte[]> token,
       List<Frame> frames) { // TODO validate frame types
-    Version version = Version.CURRENT;
     PacketNumber packetNumber = PacketNumber.random();
     return create(destConnectionId, srcConnectionId, packetNumber, version, token, frames);
   }

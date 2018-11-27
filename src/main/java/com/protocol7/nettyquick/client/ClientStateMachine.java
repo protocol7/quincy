@@ -73,7 +73,7 @@ public class ClientStateMachine {
             connection.getDestinationConnectionId(),
             connection.getSourceConnectionId(),
             connection.nextSendPacketNumber(),
-            Version.CURRENT,
+            connection.getVersion(),
             token,
             frames));
   }

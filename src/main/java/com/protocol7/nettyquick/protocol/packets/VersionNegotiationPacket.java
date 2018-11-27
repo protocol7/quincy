@@ -24,7 +24,11 @@ public class VersionNegotiationPacket implements Packet {
 
     List<Version> supported = Lists.newArrayList();
     while (bb.isReadable()) {
-      supported.add(Version.read(bb));
+      try {
+        supported.add(Version.read(bb));
+      } catch (IllegalArgumentException e) {
+        // ignore unknown versions
+      }
     }
     return new VersionNegotiationPacket(destConnId, srcConnId, supported);
   }

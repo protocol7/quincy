@@ -105,6 +105,7 @@ public class ServerStateMachineTest {
     return InitialPacket.create(
         Optional.of(destConnectionId),
         Optional.of(srcConnectionId),
+        Version.CURRENT,
         Optional.empty(),
         Lists.newArrayList(frames));
   }

@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.protocol;
+package com.protocol7.nettyquick.protocol.packets;
 
 public enum PacketType {
   Initial((byte) 0x7F),

@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.protocol;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquick.protocol.frames.PingFrame;
+import com.protocol7.nettyquick.protocol.packets.PacketType;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;

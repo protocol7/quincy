@@ -22,7 +22,7 @@ public enum Version {
     } else if (l == DRAFT_15.version) {
       return DRAFT_15;
     } else {
-      throw new RuntimeException("Unknown version: " + l);
+      throw new IllegalArgumentException("Unknown version: " + l);
     }
   }
 

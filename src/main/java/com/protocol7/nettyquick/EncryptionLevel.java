@@ -1,9 +1,9 @@
 package com.protocol7.nettyquick;
 
-import com.protocol7.nettyquick.protocol.PacketType;
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.PacketType;
 
 public enum EncryptionLevel {
   Initial,
