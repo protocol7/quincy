@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.server;
 
+import static com.protocol7.nettyquick.EncryptionLevel.Initial;
+
 import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.connection.Connection;
@@ -12,6 +14,7 @@ import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
@@ -37,9 +40,7 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  private AEAD initialAead;
-  private AEAD handshakeAead;
-  private AEAD oneRttAead;
+  private final AEADs aeads;
 
   public ServerConnection(
       final StreamListener handler,
@@ -57,7 +58,7 @@ public class ServerConnection implements Connection {
 
     this.srcConnectionId = Optional.of(srcConnId);
 
-    this.initialAead = NullAEAD.create(srcConnId, true);
+    this.aeads = new AEADs(NullAEAD.create(srcConnId, true));
   }
 
   public Optional<ConnectionId> getDestinationConnectionId() {
@@ -93,7 +94,7 @@ public class ServerConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    packetSender.send(packet, clientAddress, initialAead).awaitUninterruptibly(); // TODO fix
+    packetSender.send(packet, clientAddress, getAEAD(Initial)).awaitUninterruptibly(); // TODO fix
     log.debug("Server sent {}", packet);
   }
 
@@ -109,24 +110,15 @@ public class ServerConnection implements Connection {
 
   @Override
   public AEAD getAEAD(EncryptionLevel level) {
-    if (level == EncryptionLevel.Initial) {
-      log.debug("Using initial AEAD: {}", initialAead);
-      return initialAead;
-    } else if (level == EncryptionLevel.Handshake) {
-      log.debug("Using handshake AEAD: {}", handshakeAead);
-      return handshakeAead;
-    } else {
-      log.debug("Using 1-RTT AEAD: {}", oneRttAead);
-      return oneRttAead;
-    }
+    return aeads.get(level);
   }
 
   public void setHandshakeAead(AEAD handshakeAead) {
-    this.handshakeAead = handshakeAead;
+    aeads.setHandshakeAead(handshakeAead);
   }
 
   public void setOneRttAead(AEAD oneRttAead) {
-    this.oneRttAead = oneRttAead;
+    aeads.setOneRttAead(oneRttAead);
   }
 
   public Stream getOrCreateStream(StreamId streamId) {

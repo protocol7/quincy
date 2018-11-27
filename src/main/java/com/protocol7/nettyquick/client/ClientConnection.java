@@ -14,6 +14,7 @@ import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
@@ -42,9 +43,7 @@ public class ClientConnection implements Connection {
 
   private final Streams streams;
 
-  private AEAD initialAead;
-  private AEAD handshakeAead;
-  private AEAD oneRttAead;
+  private AEADs aeads;
 
   public ClientConnection(
       final ConnectionId destConnectionId,
@@ -63,7 +62,7 @@ public class ClientConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.initialAead = NullAEAD.create(destConnectionId, true);
+    this.aeads = new AEADs(NullAEAD.create(destConnectionId, true));
   }
 
   public Future<Void> handshake() {
@@ -138,24 +137,15 @@ public class ClientConnection implements Connection {
 
   @Override
   public AEAD getAEAD(EncryptionLevel level) {
-    if (level == EncryptionLevel.Initial) {
-      log.debug("Using initial AEAD: {}", initialAead);
-      return initialAead;
-    } else if (level == EncryptionLevel.Handshake) {
-      log.debug("Using handshake AEAD: {}", handshakeAead);
-      return handshakeAead;
-    } else {
-      log.debug("Using 1-RTT AEAD: {}", oneRttAead);
-      return oneRttAead;
-    }
+    return aeads.get(level);
   }
 
   public void setHandshakeAead(AEAD handshakeAead) {
-    this.handshakeAead = handshakeAead;
+    aeads.setHandshakeAead(handshakeAead);
   }
 
   public void setOneRttAead(AEAD oneRttAead) {
-    this.oneRttAead = oneRttAead;
+    aeads.setOneRttAead(oneRttAead);
   }
 
   public Version getVersion() {
