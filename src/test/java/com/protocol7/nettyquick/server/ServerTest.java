@@ -39,14 +39,14 @@ public class ServerTest {
   private final ConnectionId destConnectionId2 = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private ServerConnection connection;
-  @Mock private PacketSender packetSender;
-  @Mock private StreamListener streamListener;
   private PacketNumber packetNumber = new PacketNumber(0);
   private StreamId streamId = StreamId.random(true, true);
-  @Mock private InetSocketAddress clientAddress;
+
   private ClientTlsSession clientTlsSession = new ClientTlsSession();
-  private List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
-  private PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
+
+  @Mock private PacketSender packetSender;
+  @Mock private StreamListener streamListener;
+  @Mock private InetSocketAddress clientAddress;
 
   @Before
   public void setUp() {
@@ -56,6 +56,9 @@ public class ServerTest {
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
+
+    List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
+    PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
 
     connection =
         new ServerConnection(
