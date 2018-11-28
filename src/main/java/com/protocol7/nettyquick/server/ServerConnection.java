@@ -16,6 +16,7 @@ import com.protocol7.nettyquick.streams.Streams;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
+import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
@@ -43,12 +44,12 @@ public class ServerConnection implements Connection {
   private final AEADs aeads;
 
   public ServerConnection(
+      final InetSocketAddress clientAddress,
+      final ConnectionId srcConnId,
       final StreamListener handler,
       final PacketSender packetSender,
-      final InetSocketAddress clientAddress,
       final List<byte[]> certificates,
-      final PrivateKey privateKey,
-      final ConnectionId srcConnId) {
+      final PrivateKey privateKey) {
     this.handler = handler;
     this.packetSender = packetSender;
     this.clientAddress = clientAddress;
@@ -101,7 +102,7 @@ public class ServerConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    if (stateMachine.getState() != ServerStateMachine.ServerState.BeforeInitial) {
+    if (stateMachine.getState() != ServerState.BeforeInitial) {
       packetBuffer.onPacket(packet);
     }
     // with incorrect conn ID
@@ -133,7 +134,17 @@ public class ServerConnection implements Connection {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 
-  public ServerStateMachine.ServerState getState() {
+  public ServerState getState() {
     return stateMachine.getState();
+  }
+
+  public Future<Void> close() {
+    stateMachine.closeImmediate();
+
+    return packetSender.destroy();
+  }
+
+  public Future<Void> closeByPeer() {
+    return packetSender.destroy();
   }
 }

@@ -13,7 +13,6 @@ import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
-import com.protocol7.nettyquick.server.ServerStateMachine.ServerState;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.tls.ClientTlsSession;
 import com.protocol7.nettyquick.tls.ClientTlsSession.HandshakeResult;
@@ -62,7 +61,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            streamListener, packetSender, clientAddress, certificates, privateKey, srcConnectionId);
+            clientAddress, srcConnectionId, streamListener, packetSender, certificates, privateKey);
   }
 
   @Test

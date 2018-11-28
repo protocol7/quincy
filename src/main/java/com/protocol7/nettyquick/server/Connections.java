@@ -39,7 +39,7 @@ public class Connections {
       log.debug("Creating new server connection for {}", connId);
       conn =
           new ServerConnection(
-              streamHandler, packetSender, clientAddress, certificates, privateKey, connId);
+              clientAddress, connId, streamHandler, packetSender, certificates, privateKey);
       ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

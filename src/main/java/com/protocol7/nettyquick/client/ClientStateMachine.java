@@ -22,15 +22,6 @@ public class ClientStateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ClientStateMachine.class);
 
-  protected enum ClientState {
-    BeforeInitial,
-    WaitingForServerHello,
-    WaitingForHandshake,
-    Ready,
-    Closing,
-    Closed
-  }
-
   private ClientState state = ClientState.BeforeInitial;
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture =

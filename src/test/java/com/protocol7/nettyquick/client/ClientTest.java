@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.client;
 
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.*;
+import static com.protocol7.nettyquick.client.ClientState.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -52,7 +52,7 @@ public class ClientTest {
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
     connection =
-        new ClientConnection(destConnectionId, packetSender, serverAddress, streamListener);
+        new ClientConnection(serverAddress, destConnectionId, streamListener, packetSender);
 
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
@@ -240,7 +240,7 @@ public class ClientTest {
     // verify ack
     assertAck(4, 3, 3, 3);
 
-    assertEquals(ClientStateMachine.ClientState.Closed, connection.getState());
+    assertEquals(ClientState.Closed, connection.getState());
 
     try {
       connection.sendPacket(PingFrame.INSTANCE);
@@ -256,7 +256,7 @@ public class ClientTest {
 
     connection.close().awaitUninterruptibly();
 
-    assertEquals(ClientStateMachine.ClientState.Closed, connection.getState());
+    assertEquals(ClientState.Closed, connection.getState());
 
     try {
       connection.sendPacket(PingFrame.INSTANCE);

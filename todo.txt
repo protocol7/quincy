@@ -1,9 +1,6 @@
-* Closing connections
-* Pings and keep alive
-* Transport parameters
 * ver neg
 * ACK delay
 * Retransmits
 * Don't use byte[]
-* TLS
 * Flow control
+* Congestion control    

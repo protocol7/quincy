@@ -1,7 +1,7 @@
 package com.protocol7.nettyquick.client;
 
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closed;
-import static com.protocol7.nettyquick.client.ClientStateMachine.ClientState.Closing;
+import static com.protocol7.nettyquick.client.ClientState.Closed;
+import static com.protocol7.nettyquick.client.ClientState.Closing;
 
 import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.connection.Connection;
@@ -46,10 +46,10 @@ public class ClientConnection implements Connection {
   private AEADs aeads;
 
   public ClientConnection(
-      final ConnectionId destConnectionId,
-      final PacketSender packetSender,
       final InetSocketAddress serverAddress,
-      final StreamListener streamListener) {
+      final ConnectionId destConnectionId,
+      final StreamListener streamListener,
+      final PacketSender packetSender) {
     this.destConnectionId = destConnectionId;
     this.packetSender = packetSender;
     this.serverAddress = serverAddress;
@@ -129,7 +129,7 @@ public class ClientConnection implements Connection {
       lastDestConnectionIdLength = 0;
     }
 
-    if (stateMachine.getState() != ClientStateMachine.ClientState.BeforeInitial) {
+    if (stateMachine.getState() != ClientState.BeforeInitial) {
       packetBuffer.onPacket(packet);
     }
     stateMachine.handlePacket(packet);
@@ -182,7 +182,7 @@ public class ClientConnection implements Connection {
     return packetSender.destroy();
   }
 
-  public ClientStateMachine.ClientState getState() {
+  public ClientState getState() {
     return stateMachine.getState();
   }
 }

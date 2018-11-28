@@ -1,8 +1,9 @@
 package com.protocol7.nettyquick.server;
 
-import static com.protocol7.nettyquick.server.ServerStateMachine.ServerState.Ready;
-import static com.protocol7.nettyquick.server.ServerStateMachine.ServerState.WaitingForFinished;
+import static com.protocol7.nettyquick.server.ServerState.Ready;
+import static com.protocol7.nettyquick.server.ServerState.WaitingForFinished;
 
+import com.protocol7.nettyquick.protocol.TransportError;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
@@ -21,12 +22,6 @@ public class ServerStateMachine {
 
   public ServerState getState() {
     return state;
-  }
-
-  protected enum ServerState {
-    BeforeInitial,
-    WaitingForFinished,
-    Ready
   }
 
   private ServerState state = ServerState.BeforeInitial;
@@ -124,7 +119,27 @@ public class ServerStateMachine {
         stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
       } else if (frame instanceof PingFrame) {
         PingFrame pf = (PingFrame) frame;
+      } else if (frame instanceof ConnectionCloseFrame) {
+        handlePeerClose();
       }
     }
+  }
+
+  private void handlePeerClose() {
+    log.debug("Peer closing connection");
+    state = ServerState.Closing;
+    connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
+    log.debug("Connection closed");
+    state = ServerState.Closed;
+  }
+
+  public void closeImmediate() {
+    connection.sendPacket(
+        ConnectionCloseFrame.connection(
+            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+
+    state = ServerState.Closing;
+
+    state = ServerState.Closed;
   }
 }
