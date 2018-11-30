@@ -62,8 +62,7 @@ public class Payload {
   }
 
   public int getLength() {
-    return frames.stream().mapToInt(f -> f.calculateLength()).sum()
-        + AEAD.OVERHEAD; // AEAD overhead
+    return frames.stream().mapToInt(f -> f.calculateLength()).sum() + AEAD.OVERHEAD;
   }
 
   public void write(ByteBuf bb, AEAD aead, PacketNumber pn, byte[] aad) {

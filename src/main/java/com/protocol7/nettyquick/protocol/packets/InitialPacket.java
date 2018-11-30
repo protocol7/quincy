@@ -6,7 +6,6 @@ import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADProvider;
-import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
 import java.util.Objects;
@@ -41,12 +40,7 @@ public class InitialPacket extends LongHeaderPacket {
       List<Frame> frames) { // TODO validate frame types
     Payload payload = new Payload(frames);
     return new InitialPacket(
-        destConnectionId,
-        srcConnectionId,
-        version,
-        packetNumber,
-        payload,
-        token);
+        destConnectionId, srcConnectionId, version, packetNumber, payload, token);
   }
 
   public static HalfParsedPacket<InitialPacket> parse(ByteBuf bb) {
@@ -171,14 +165,21 @@ public class InitialPacket extends LongHeaderPacket {
 
   @Override
   public String toString() {
-    return "InitialPacket{" +
-            "packetType=" + getType() +
-            ", destinationConnectionId=" + getDestinationConnectionId() +
-            ", sourceConnectionId=" + getSourceConnectionId() +
-            ", version=" + getVersion() +
-            ", packetNumber=" + getPacketNumber() +
-            ", payload=" + getPayload() +
-            ", token=" + token +
-            '}';
+    return "InitialPacket{"
+        + "packetType="
+        + getType()
+        + ", destinationConnectionId="
+        + getDestinationConnectionId()
+        + ", sourceConnectionId="
+        + getSourceConnectionId()
+        + ", version="
+        + getVersion()
+        + ", packetNumber="
+        + getPacketNumber()
+        + ", payload="
+        + getPayload()
+        + ", token="
+        + token
+        + '}';
   }
 }

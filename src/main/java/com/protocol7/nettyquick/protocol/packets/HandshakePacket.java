@@ -119,13 +119,19 @@ public class HandshakePacket extends LongHeaderPacket {
 
   @Override
   public String toString() {
-    return "HandshakePacket{" +
-            "packetType=" + getType() +
-            ", destinationConnectionId=" + getDestinationConnectionId() +
-            ", sourceConnectionId=" + getSourceConnectionId() +
-            ", version=" + getVersion() +
-            ", packetNumber=" + getPacketNumber() +
-            ", payload=" + getPayload() +
-            '}';
+    return "HandshakePacket{"
+        + "packetType="
+        + getType()
+        + ", destinationConnectionId="
+        + getDestinationConnectionId()
+        + ", sourceConnectionId="
+        + getSourceConnectionId()
+        + ", version="
+        + getVersion()
+        + ", packetNumber="
+        + getPacketNumber()
+        + ", payload="
+        + getPayload()
+        + '}';
   }
 }
