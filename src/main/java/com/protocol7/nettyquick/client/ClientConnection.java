@@ -82,11 +82,7 @@ public class ClientConnection implements Connection {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
-                new ShortHeader(
-                    false,
-                    getDestinationConnectionId(),
-                    nextSendPacketNumber(),
-                    new Payload(frames))));
+                false, getDestinationConnectionId(), nextSendPacketNumber(), new Payload(frames)));
   }
 
   @Override

@@ -39,8 +39,7 @@ public class PacketBufferTest {
 
   private Packet packet(long pn, Frame... frames) {
     return new ShortPacket(
-        new ShortHeader(
-            false, Optional.of(ConnectionId.random()), new PacketNumber(pn), new Payload(frames)));
+        false, Optional.of(ConnectionId.random()), new PacketNumber(pn), new Payload(frames));
   }
 
   @Test

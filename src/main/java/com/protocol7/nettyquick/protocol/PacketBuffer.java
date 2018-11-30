@@ -133,11 +133,10 @@ public class PacketBuffer {
       AckFrame ackFrame = new AckFrame(123, blocks);
       Packet packet =
           new ShortPacket(
-              new ShortHeader(
-                  false,
-                  connection.getDestinationConnectionId(),
-                  connection.nextSendPacketNumber(),
-                  new Payload(ackFrame)));
+              false,
+              connection.getDestinationConnectionId(),
+              connection.nextSendPacketNumber(),
+              new Payload(ackFrame));
 
       log.debug("Flushed acks {}", blocks);
 

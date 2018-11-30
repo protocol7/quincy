@@ -163,8 +163,7 @@ public class ServerTest {
   }
 
   private Packet packet(ConnectionId destConnId, Frame... frames) {
-    return new ShortPacket(
-        new ShortHeader(false, Optional.of(destConnId), nextPacketNumber(), new Payload(frames)));
+    return new ShortPacket(false, Optional.of(destConnId), nextPacketNumber(), new Payload(frames));
   }
 
   private PacketNumber nextPacketNumber() {

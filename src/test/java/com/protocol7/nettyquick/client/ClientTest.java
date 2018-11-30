@@ -317,11 +317,10 @@ public class ClientTest {
 
   private Packet packet(Frame... frames) {
     return new ShortPacket(
-        new ShortHeader(
-            false,
-            Optional.of(srcConnectionId), // TODO correct?
-            nextPacketNumber(),
-            new Payload(frames)));
+        false,
+        Optional.of(srcConnectionId), // TODO correct?
+        nextPacketNumber(),
+        new Payload(frames));
   }
 
   private PacketNumber nextPacketNumber() {

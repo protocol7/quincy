@@ -47,15 +47,25 @@ public class ShortPacket implements FullPacket {
         Payload payload =
             Payload.parse(bb, bb.readableBytes(), aeadProvider.get(OneRtt), packetNumber, aad);
 
-        return new ShortPacket(new ShortHeader(keyPhase, connId, packetNumber, payload));
+        return new ShortPacket(keyPhase, connId, packetNumber, payload);
       }
     };
   }
 
-  private final ShortHeader header;
+  private final boolean keyPhase;
+  private final Optional<ConnectionId> connectionId;
+  private final PacketNumber packetNumber;
+  private final Payload payload;
 
-  public ShortPacket(ShortHeader header) {
-    this.header = header;
+  public ShortPacket(
+      boolean keyPhase,
+      Optional<ConnectionId> connectionId,
+      PacketNumber packetNumber,
+      Payload payload) {
+    this.keyPhase = keyPhase;
+    this.connectionId = connectionId;
+    this.packetNumber = packetNumber;
+    this.payload = payload;
   }
 
   @Override
@@ -65,17 +75,34 @@ public class ShortPacket implements FullPacket {
 
   @Override
   public Packet addFrame(Frame frame) {
-    return new ShortPacket(ShortHeader.addFrame(header, frame));
+    return new ShortPacket(keyPhase, connectionId, packetNumber, payload.addFrame(frame));
   }
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    header.write(bb, aead);
+    byte b = 0;
+    if (keyPhase) {
+      b = (byte) (b | 0x40);
+    }
+    b = (byte) (b | 0x20); // constant
+    b = (byte) (b | 0x10); // constant
+    bb.writeByte(b);
+
+    connectionId.get().write(bb);
+
+    bb.writeBytes(packetNumber.write());
+
+    byte[] aad = new byte[bb.writerIndex()];
+    bb.markReaderIndex();
+    bb.readBytes(aad);
+    bb.resetReaderIndex();
+
+    payload.write(bb, aead, packetNumber, aad);
   }
 
   @Override
   public PacketNumber getPacketNumber() {
-    return header.getPacketNumber();
+    return packetNumber;
   }
 
   @Override
@@ -85,16 +112,25 @@ public class ShortPacket implements FullPacket {
 
   @Override
   public Optional<ConnectionId> getDestinationConnectionId() {
-    return header.getDestinationConnectionId();
+    return connectionId;
   }
 
   @Override
   public Payload getPayload() {
-    return header.getPayload();
+    return payload;
   }
 
   @Override
   public String toString() {
-    return "ShortPacket{" + "header=" + header + '}';
+    return "ShortPacket{"
+        + "keyPhase="
+        + keyPhase
+        + ", connectionId="
+        + connectionId
+        + ", packetNumber="
+        + packetNumber
+        + ", payload="
+        + payload
+        + '}';
   }
 }

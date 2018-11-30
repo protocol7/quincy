@@ -90,8 +90,7 @@ public class PacketTest {
   @Test
   public void parseShortPacket() {
     ShortPacket packet =
-        new ShortPacket(
-            new ShortHeader(false, Optional.of(connId), pn, new Payload(PingFrame.INSTANCE)));
+        new ShortPacket(false, Optional.of(connId), pn, new Payload(PingFrame.INSTANCE));
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
