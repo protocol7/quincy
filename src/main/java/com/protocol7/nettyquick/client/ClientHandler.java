@@ -1,6 +1,7 @@
 package com.protocol7.nettyquick.client;
 
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
+import com.protocol7.nettyquick.protocol.packets.HalfParsedPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
@@ -20,12 +21,12 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
-      Packet packet =
+      HalfParsedPacket<?> halfParsed =
           Packet.parse(
               msg.content(),
-              connectionId -> connection.lastAckedPacketNumber(),
-              (connId, packetType) -> connection.getAEAD(packetType),
               connection.getLastDestConnectionIdLength());
+
+      Packet packet = halfParsed.complete(connection::getAEAD);
 
       MDC.put("actor", "client");
       if (packet instanceof FullPacket) {

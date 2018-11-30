@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.protocol.packets;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Opt;
 import com.protocol7.nettyquick.utils.Rnd;
@@ -13,7 +14,7 @@ public class RetryPacket implements Packet {
 
   public static int MARKER = 0x80 | PacketType.Retry.getType();
 
-  public static RetryPacket parse(ByteBuf bb) {
+  public static HalfParsedPacket<RetryPacket> parse(ByteBuf bb) {
     bb.readByte(); // TODO verify marker
     Version version = Version.read(bb);
 
@@ -30,7 +31,23 @@ public class RetryPacket implements Packet {
     byte[] retryToken = new byte[bb.readableBytes()];
     bb.readBytes(retryToken);
 
-    return new RetryPacket(version, destConnId, srcConnId, orgConnId, retryToken);
+    return new HalfParsedPacket<>() {
+
+      @Override
+      public Optional<Version> getVersion() {
+        return Optional.of(version);
+      }
+
+      @Override
+      public Optional<ConnectionId> getConnectionId() {
+        return destConnId;
+      }
+
+      @Override
+      public RetryPacket complete(AEADProvider aeadProvider) {
+        return new RetryPacket(version, destConnId, srcConnId, orgConnId, retryToken);
+      }
+    };
   }
 
   private final Version version;

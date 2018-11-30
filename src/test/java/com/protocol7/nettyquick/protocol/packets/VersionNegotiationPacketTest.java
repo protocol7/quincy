@@ -29,7 +29,7 @@ public class VersionNegotiationPacketTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb);
+    VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb).complete(l -> aead);
 
     assertEquals(dest, parsed.getDestinationConnectionId().get());
     assertEquals(src, parsed.getSourceConnectionId().get());

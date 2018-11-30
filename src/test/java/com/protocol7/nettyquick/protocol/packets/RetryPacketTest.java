@@ -28,7 +28,7 @@ public class RetryPacketTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    RetryPacket parsed = RetryPacket.parse(bb);
+    RetryPacket parsed = RetryPacket.parse(bb).complete(l -> aead);
 
     assertEquals(dest, parsed.getDestinationConnectionId().get());
     assertEquals(src, parsed.getSourceConnectionId().get());

@@ -1,6 +1,5 @@
-* ver neg
 * ACK delay
 * Retransmits
 * Don't use byte[]
 * Flow control
-* Congestion control    
+* Congestion control

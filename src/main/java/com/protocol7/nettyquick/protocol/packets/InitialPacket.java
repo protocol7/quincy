@@ -9,6 +9,7 @@ import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class InitialPacket implements FullPacket {
@@ -45,7 +46,7 @@ public class InitialPacket implements FullPacket {
         token);
   }
 
-  public static InitialPacket parse(ByteBuf bb, AEADProvider aeadProvider) {
+  public static HalfParsedPacket<InitialPacket> parse(ByteBuf bb) {
     bb.markReaderIndex();
 
     bb.readByte(); // TODO validate
@@ -73,22 +74,39 @@ public class InitialPacket implements FullPacket {
       token = Optional.empty();
     }
 
-    int length = Varint.readAsInt(bb);
+    return new HalfParsedPacket<>() {
+      @Override
+      public Optional<Version> getVersion() {
+        return Optional.of(version);
+      }
 
-    int beforePnPos = bb.readerIndex();
-    PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-    int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract read pn length
+      @Override
+      public Optional<ConnectionId> getConnectionId() {
+        return destConnId;
+      }
 
-    byte[] aad = new byte[bb.readerIndex()];
-    bb.resetReaderIndex();
-    bb.readBytes(aad);
+      @Override
+      public InitialPacket complete(AEADProvider aeadProvider) {
+        int length = Varint.readAsInt(bb);
 
-    AEAD aead = aeadProvider.forConnection(destConnId, EncryptionLevel.Initial);
+        int beforePnPos = bb.readerIndex();
+        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+        int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract read pn length
 
-    Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+        byte[] aad = new byte[bb.readerIndex()];
+        bb.resetReaderIndex();
+        bb.readBytes(aad);
 
-    return InitialPacket.create(
-        destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+        AEAD aead = aeadProvider.get(EncryptionLevel.Initial);
+
+        Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+
+        return InitialPacket.create(
+                destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+      }
+    };
+
+
   }
 
   private final LongHeader header;
@@ -150,6 +168,20 @@ public class InitialPacket implements FullPacket {
 
   public Optional<byte[]> getToken() {
     return token;
+  }
+
+  @Override
+  public boolean equals(Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    InitialPacket that = (InitialPacket) o;
+    return Objects.equals(header, that.header) &&
+            Objects.equals(token, that.token);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(header, token);
   }
 
   @Override

@@ -6,5 +6,5 @@ import java.util.Optional;
 
 public interface AEADProvider {
 
-  AEAD forConnection(Optional<ConnectionId> connId, EncryptionLevel level);
+  AEAD get(EncryptionLevel level);
 }

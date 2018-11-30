@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.server;
 
+import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.utils.Futures;
 import io.netty.bootstrap.Bootstrap;
@@ -33,6 +34,8 @@ public class QuicServer {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
     Connections connections = new Connections(certificates, privateKey);
+    PacketRouter router = new PacketRouter(Version.CURRENT, connections, streamHandler);
+
 
     final Bootstrap b = new Bootstrap();
     b.group(group)
@@ -43,7 +46,7 @@ public class QuicServer {
               @Override
               public void initChannel(final NioDatagramChannel ch) throws Exception {
                 ChannelPipeline p = ch.pipeline();
-                p.addLast(new ServerHandler(connections, streamHandler));
+                p.addLast(new ServerHandler(router));
               }
             });
 

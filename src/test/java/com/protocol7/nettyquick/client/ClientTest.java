@@ -62,7 +62,7 @@ public class ClientTest {
 
   @Test
   public void handshake() {
-    // startHandshake handshake
+    // start handshake
     Future<Void> handshakeFuture = connection.handshake();
 
     // validate first packet sent
@@ -264,6 +264,30 @@ public class ClientTest {
     } catch (IllegalStateException e) {
       // expected
     }
+  }
+
+  @Test
+  public void versionNegotiation() {
+    // start handshake
+    Future<Void> handshakeFuture = connection.handshake();
+
+    // validate first packet sent
+    InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
+
+    // server does not support this version and sends a VerNeg
+
+    VersionNegotiationPacket verNeg = new VersionNegotiationPacket(
+            Optional.of(destConnectionId),
+            Optional.of(srcConnectionId),
+            Version.FINAL);
+
+    connection.onPacket(verNeg);
+
+    // should not have sent any more packets
+    verify(packetSender, times(1)).send(any(), any(), any());
+
+    // should close connection
+    verify(packetSender).destroy();
   }
 
   private void assertAck(int number, int packetNumber, int smallest, int largest) {

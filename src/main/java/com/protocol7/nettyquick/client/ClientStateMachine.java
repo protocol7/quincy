@@ -103,6 +103,13 @@ public class ClientStateMachine {
           tlsEngine.reset();
 
           sendInitialPacket(Optional.of(retryPacket.getRetryToken()));
+        } else if (packet instanceof VersionNegotiationPacket) {
+          // we only support a single version, so nothing more to do
+          log.debug("Incompatible versions, closing connection");
+          state = ClientState.Closing;
+          connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
+          log.debug("Connection closed");
+          state = ClientState.Closed;
         } else {
           log.warn("Got packet in an unexpected state: {} - {}", state, packet);
         }
@@ -112,6 +119,7 @@ public class ClientStateMachine {
         } else {
           log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
+
       } else if (state == ClientState.Ready
           || state == ClientState.Closing
           || state == ClientState.Closed) { // TODO don't allow when closed

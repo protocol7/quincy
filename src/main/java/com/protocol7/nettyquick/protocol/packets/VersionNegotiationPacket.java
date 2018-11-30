@@ -4,6 +4,7 @@ import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.tls.aead.AEAD;
+import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
@@ -11,9 +12,13 @@ import java.util.Optional;
 
 public class VersionNegotiationPacket implements Packet {
 
-  public static VersionNegotiationPacket parse(ByteBuf bb) {
+  public static HalfParsedPacket<VersionNegotiationPacket> parse(ByteBuf bb) {
     bb.readByte(); // TODO verify marker
-    Version.read(bb); // TODO verify
+    Version version = Version.read(bb);
+
+    if (version != Version.VERSION_NEGOTIATION) {
+      throw new IllegalArgumentException("Invalid version");
+    }
 
     int cil = bb.readByte() & 0xFF;
     int dcil = ConnectionId.firstLength(cil);
@@ -30,7 +35,25 @@ public class VersionNegotiationPacket implements Packet {
         // ignore unknown versions
       }
     }
-    return new VersionNegotiationPacket(destConnId, srcConnId, supported);
+
+    return new HalfParsedPacket<>() {
+
+      @Override
+      public Optional<Version> getVersion() {
+        return Optional.of(version);
+      }
+
+      @Override
+      public Optional<ConnectionId> getConnectionId() {
+        return destConnId;
+      }
+
+      @Override
+      public VersionNegotiationPacket complete(AEADProvider aeadProvider) {
+        return new VersionNegotiationPacket(destConnId, srcConnId, supported);
+      }
+    };
+
   }
 
   private final Optional<ConnectionId> destinationConnectionId;
@@ -58,7 +81,7 @@ public class VersionNegotiationPacket implements Packet {
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD aead) {
+  public void write(ByteBuf bb, AEAD notUsed) {
     int marker = Rnd.rndInt() & 0xFF;
     marker |= 0b10000000;
     bb.writeByte(marker);

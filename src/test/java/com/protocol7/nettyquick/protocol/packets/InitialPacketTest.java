@@ -40,7 +40,7 @@ public class InitialPacketTest {
 
     packet.write(bb, aead);
 
-    InitialPacket parsed = InitialPacket.parse(bb, (c, p) -> aead);
+    InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
     assertEquals(srcConnId, parsed.getSourceConnectionId().get());
@@ -66,7 +66,7 @@ public class InitialPacketTest {
 
     packet.write(bb, aead);
 
-    InitialPacket parsed = InitialPacket.parse(bb, (c, p) -> aead);
+    InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
     assertFalse(parsed.getSourceConnectionId().isPresent());

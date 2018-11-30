@@ -7,11 +7,51 @@ import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 
+import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
+
 public class ShortPacket implements FullPacket {
 
-  public static ShortPacket parse(
-      ByteBuf bb, LastPacketNumber lastAcked, AEADProvider aead, int connidLength) {
-    return new ShortPacket(ShortHeader.parse(bb, lastAcked, aead, connidLength));
+  public static HalfParsedPacket<ShortPacket> parse(
+      ByteBuf bb, int connIdLength) {
+    bb.markReaderIndex();
+
+    byte firstByte = bb.readByte();
+
+    boolean keyPhase = (firstByte & 0x40) == 0x40;
+
+    Optional<ConnectionId> connId;
+    if (connIdLength > 0) {
+      connId = Optional.of(ConnectionId.read(connIdLength, bb));
+    } else {
+      connId = Optional.empty();
+    }
+
+    return new HalfParsedPacket<>() {
+      @Override
+      public Optional<Version> getVersion() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<ConnectionId> getConnectionId() {
+        return connId;
+      }
+
+      @Override
+      public ShortPacket complete(AEADProvider aeadProvider) {
+        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+
+        byte[] aad = new byte[bb.readerIndex()];
+        bb.resetReaderIndex();
+        bb.readBytes(aad);
+
+        Payload payload =
+                Payload.parse(
+                        bb, bb.readableBytes(), aeadProvider.get(OneRtt), packetNumber, aad);
+
+        return new ShortPacket(new ShortHeader(keyPhase, connId, packetNumber, payload));
+      }
+    };
   }
 
   private final ShortHeader header;

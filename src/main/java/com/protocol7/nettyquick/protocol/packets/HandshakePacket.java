@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol.packets;
 
+import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
@@ -39,17 +40,66 @@ public class HandshakePacket implements FullPacket {
             payload));
   }
 
-  public static HandshakePacket parse(ByteBuf bb, AEADProvider aeadProvider) {
+  public static HalfParsedPacket<HandshakePacket> parse(ByteBuf bb) {
     // TODO validate marker
 
-    LongHeader header = LongHeader.parse(bb, true, aeadProvider);
-    return new HandshakePacket(header);
+    bb.markReaderIndex();
+
+    byte firstByte = bb.readByte();
+    byte ptByte = (byte) ((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
+    PacketType packetType = PacketType.read(ptByte);
+
+    Version version = Version.read(bb);
+
+    int cil = bb.readByte() & 0xFF;
+    int dcil = ConnectionId.firstLength(cil);
+    int scil = ConnectionId.lastLength(cil);
+
+    Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
+    Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+
+    return new HalfParsedPacket<>() {
+      @Override
+      public Optional<Version> getVersion() {
+        return Optional.of(version);
+      }
+
+      @Override
+      public Optional<ConnectionId> getConnectionId() {
+        return destConnId;
+      }
+
+      @Override
+      public HandshakePacket complete(AEADProvider aeadProvider) {
+        int length = (int) Varint.readAsLong(bb);
+        int beforePnPos = bb.readerIndex();
+        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+
+        int payloadLength = length - (bb.readerIndex() - beforePnPos); // remove length read for pn
+
+        byte[] aad = new byte[bb.readerIndex()];
+        bb.resetReaderIndex();
+        bb.readBytes(aad);
+
+        AEAD aead = aeadProvider.get(EncryptionLevel.Handshake);
+
+        Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+
+        LongHeader header = new LongHeader(packetType, destConnId, srcConnId, version, packetNumber, payload);
+
+        return new HandshakePacket(header);
+      }
+    };
   }
 
   private final LongHeader header;
 
   private HandshakePacket(LongHeader header) {
     this.header = header;
+  }
+
+  public Version getVersion() {
+    return header.getVersion();
   }
 
   @Override

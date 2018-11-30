@@ -31,11 +31,12 @@ import org.mockito.MockitoAnnotations;
 
 public class ClientServerTest {
 
+  private static final byte[] PING = "ping".getBytes();
+  private static final byte[] PONG = "pong".getBytes();
+
   private ClientConnection clientConnection;
   private ServerConnection serverConnection;
 
-  public static final byte[] PING = "ping".getBytes();
-  public static final byte[] PONG = "pong".getBytes();
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private final ForwardingPacketSender clientSender = new ForwardingPacketSender();

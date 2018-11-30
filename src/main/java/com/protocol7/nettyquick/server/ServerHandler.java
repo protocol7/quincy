@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.server;
 
 import com.protocol7.nettyquick.client.NettyPacketSender;
 import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.streams.StreamListener;
@@ -14,50 +15,14 @@ import org.slf4j.MDC;
 
 public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
-  private final Connections connections;
-  private final StreamListener streamHandler;
+  private final PacketRouter router;
 
-  public ServerHandler(Connections connections, final StreamListener streamHandler) {
-    this.connections = connections;
-    this.streamHandler = streamHandler;
+  public ServerHandler(PacketRouter router) {
+    this.router = router;
   }
 
   @Override
-  protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram)
-      throws Exception {
-    final ByteBuf bb = datagram.content();
-
-    while (bb.isReadable()) {
-      Packet packet =
-          Packet.parse(
-              bb,
-              connectionId -> {
-                Optional<Connection> connection = connections.get(connectionId);
-                if (connection.isPresent()) {
-                  return connection.get().lastAckedPacketNumber();
-                } else {
-                  throw new IllegalStateException("Connection unknown: " + connectionId);
-                }
-              },
-              (connId, p) -> connections.get(connId.get()).get().getAEAD(p),
-              -1);
-
-      MDC.put("actor", "server");
-      if (packet instanceof FullPacket) {
-        MDC.put("packetnumber", ((FullPacket) packet).getPacketNumber().toString());
-      }
-      if (packet.getDestinationConnectionId().isPresent()) {
-        MDC.put("connectionid", packet.getDestinationConnectionId().get().toString());
-      }
-
-      ServerConnection conn =
-          connections.get(
-              packet.getDestinationConnectionId(),
-              streamHandler,
-              new NettyPacketSender(ctx.channel()),
-              datagram.sender()); // TODO fix for when connId is omitted
-
-      conn.onPacket(packet);
-    }
+  protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket datagram) {
+    router.route(datagram.content(), datagram.sender(), new NettyPacketSender(ctx.channel()));
   }
 }

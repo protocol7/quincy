@@ -12,34 +12,6 @@ import java.util.Optional;
 
 public class ShortHeader implements Header {
 
-  public static ShortHeader parse(
-      ByteBuf bb, LastPacketNumber lastAckedProvider, AEADProvider aead, int connIdLength) {
-    bb.markReaderIndex();
-
-    byte firstByte = bb.readByte();
-
-    boolean keyPhase = (firstByte & 0x40) == 0x40;
-
-    Optional<ConnectionId> connId;
-    if (connIdLength > 0) {
-      connId = Optional.of(ConnectionId.read(connIdLength, bb));
-    } else {
-      connId = Optional.empty();
-    }
-
-    PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-
-    byte[] aad = new byte[bb.readerIndex()];
-    bb.resetReaderIndex();
-    bb.readBytes(aad);
-
-    Payload payload =
-        Payload.parse(
-            bb, bb.readableBytes(), aead.forConnection(connId, OneRtt), packetNumber, aad);
-
-    return new ShortHeader(keyPhase, connId, packetNumber, payload);
-  }
-
   public static ShortHeader addFrame(ShortHeader packet, Frame frame) {
     return new ShortHeader(
         packet.keyPhase, packet.connectionId, packet.packetNumber, packet.payload.addFrame(frame));
