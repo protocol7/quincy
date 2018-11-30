@@ -53,7 +53,6 @@ public class VersionNegotiationPacket implements Packet {
         return new VersionNegotiationPacket(destConnId, srcConnId, supported);
       }
     };
-
   }
 
   private final Optional<ConnectionId> destinationConnectionId;

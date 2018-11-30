@@ -22,9 +22,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
     ByteBuf bb = msg.content();
     while (bb.isReadable()) {
       HalfParsedPacket<?> halfParsed =
-          Packet.parse(
-              msg.content(),
-              connection.getLastDestConnectionIdLength());
+          Packet.parse(msg.content(), connection.getLastDestConnectionIdLength());
 
       Packet packet = halfParsed.complete(connection::getAEAD);
 

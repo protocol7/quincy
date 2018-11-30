@@ -276,10 +276,9 @@ public class ClientTest {
 
     // server does not support this version and sends a VerNeg
 
-    VersionNegotiationPacket verNeg = new VersionNegotiationPacket(
-            Optional.of(destConnectionId),
-            Optional.of(srcConnectionId),
-            Version.FINAL);
+    VersionNegotiationPacket verNeg =
+        new VersionNegotiationPacket(
+            Optional.of(destConnectionId), Optional.of(srcConnectionId), Version.FINAL);
 
     connection.onPacket(verNeg);
 

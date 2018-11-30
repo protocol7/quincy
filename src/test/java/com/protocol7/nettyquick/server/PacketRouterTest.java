@@ -1,5 +1,12 @@
 package com.protocol7.nettyquick.server;
 
+import static java.util.Optional.empty;
+import static java.util.Optional.of;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
@@ -14,86 +21,92 @@ import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import org.junit.Assert;
+import java.net.InetSocketAddress;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.net.InetSocketAddress;
-
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
-import static org.junit.Assert.assertEquals;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 public class PacketRouterTest {
 
-    private AEAD aead = TestAEAD.create();
+  private AEAD aead = TestAEAD.create();
 
-    private PacketRouter router;
+  private PacketRouter router;
 
-    private ConnectionId destConnId = ConnectionId.random();
-    private ConnectionId srcConnId = ConnectionId.random();
-    @Mock private Connections connections;
-    @Mock private ServerConnection connection;
-    @Mock private StreamListener listener;
-    @Mock private InetSocketAddress clientAddress;
-    @Mock private PacketSender sender;
+  private ConnectionId destConnId = ConnectionId.random();
+  private ConnectionId srcConnId = ConnectionId.random();
+  @Mock private Connections connections;
+  @Mock private ServerConnection connection;
+  @Mock private StreamListener listener;
+  @Mock private InetSocketAddress clientAddress;
+  @Mock private PacketSender sender;
 
   @Before
   public void setUp() {
-      MockitoAnnotations.initMocks(this);
+    MockitoAnnotations.initMocks(this);
 
-      router = new PacketRouter(Version.CURRENT, connections, listener);
+    router = new PacketRouter(Version.CURRENT, connections, listener);
 
-      when(connections.get(any())).thenReturn(of(connection));
-      when(connections.get(any(), any(), any(), any())).thenReturn(connection);
+    when(connections.get(any())).thenReturn(of(connection));
+    when(connections.get(any(), any(), any(), any())).thenReturn(connection);
 
-      when(connection.getAEAD(any())).thenReturn(aead);
-      when(connection.getSourceConnectionId()).thenReturn(of(srcConnId));
+    when(connection.getAEAD(any())).thenReturn(aead);
+    when(connection.getSourceConnectionId()).thenReturn(of(srcConnId));
   }
 
   @Test
   public void route() {
-      InitialPacket packet = InitialPacket.create(of(destConnId), empty(), new PacketNumber(2), Version.CURRENT, empty(), PingFrame.INSTANCE);
+    InitialPacket packet =
+        InitialPacket.create(
+            of(destConnId),
+            empty(),
+            new PacketNumber(2),
+            Version.CURRENT,
+            empty(),
+            PingFrame.INSTANCE);
 
-      ByteBuf bb = Unpooled.buffer();
-      packet.write(bb, aead);
+    ByteBuf bb = Unpooled.buffer();
+    packet.write(bb, aead);
 
-      router.route(bb, clientAddress, sender);
+    router.route(bb, clientAddress, sender);
 
-      verify(connection).onPacket(packet);
+    verify(connection).onPacket(packet);
   }
 
   @Test(expected = RuntimeException.class)
   public void invalidPacket() {
-      ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
+    ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
 
-      router.route(bb, clientAddress, sender);
+    router.route(bb, clientAddress, sender);
   }
 
   @Test
   public void versionMismatch() {
-      InitialPacket packet = InitialPacket.create(of(destConnId), empty(), new PacketNumber(2), Version.FINAL, empty(), PingFrame.INSTANCE);
+    InitialPacket packet =
+        InitialPacket.create(
+            of(destConnId),
+            empty(),
+            new PacketNumber(2),
+            Version.FINAL,
+            empty(),
+            PingFrame.INSTANCE);
 
-      ByteBuf bb = Unpooled.buffer();
-      packet.write(bb, aead);
+    ByteBuf bb = Unpooled.buffer();
+    packet.write(bb, aead);
 
-      Debug.buffer(bb);
+    Debug.buffer(bb);
 
-      router.route(bb, clientAddress, sender);
+    router.route(bb, clientAddress, sender);
 
-      ArgumentCaptor<VersionNegotiationPacket> captor = ArgumentCaptor.forClass(VersionNegotiationPacket.class);
-      verify(sender).send(captor.capture(), any(), any());
+    ArgumentCaptor<VersionNegotiationPacket> captor =
+        ArgumentCaptor.forClass(VersionNegotiationPacket.class);
+    verify(sender).send(captor.capture(), any(), any());
 
-      VersionNegotiationPacket verNeg = captor.getValue();
+    VersionNegotiationPacket verNeg = captor.getValue();
 
-      assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
-      assertEquals(srcConnId, verNeg.getSourceConnectionId().get());
-      assertEquals(ImmutableList.of(Version.CURRENT), verNeg.getSupportedVersions());
+    assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
+    assertEquals(srcConnId, verNeg.getSourceConnectionId().get());
+    assertEquals(ImmutableList.of(Version.CURRENT), verNeg.getSupportedVersions());
   }
 }

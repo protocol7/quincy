@@ -1,8 +1,6 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.EncryptionLevel;
 import com.protocol7.nettyquick.client.PacketSender;
-import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;
@@ -10,14 +8,11 @@ import com.protocol7.nettyquick.protocol.packets.HalfParsedPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.nettyquick.streams.StreamListener;
-import com.protocol7.nettyquick.tls.aead.AEAD;
-import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
-import org.slf4j.MDC;
-
 import java.net.InetSocketAddress;
 import java.util.Optional;
+import org.slf4j.MDC;
 
 public class PacketRouter {
 

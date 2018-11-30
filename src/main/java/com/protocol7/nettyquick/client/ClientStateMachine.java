@@ -92,7 +92,6 @@ public class ClientStateMachine {
               state = ClientState.WaitingForHandshake;
             }
           }
-
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {
           RetryPacket retryPacket = (RetryPacket) packet;

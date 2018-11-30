@@ -85,7 +85,8 @@ public class HandshakePacket implements FullPacket {
 
         Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
-        LongHeader header = new LongHeader(packetType, destConnId, srcConnId, version, packetNumber, payload);
+        LongHeader header =
+            new LongHeader(packetType, destConnId, srcConnId, version, packetNumber, payload);
 
         return new HandshakePacket(header);
       }

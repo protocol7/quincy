@@ -5,7 +5,6 @@ import com.protocol7.nettyquick.protocol.packets.PacketType;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.utils.Opt;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Objects;
 import java.util.Optional;
 
@@ -111,17 +110,18 @@ public class LongHeader implements Header {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     LongHeader header = (LongHeader) o;
-    return packetType == header.packetType &&
-            Objects.equals(destinationConnectionId, header.destinationConnectionId) &&
-            Objects.equals(sourceConnectionId, header.sourceConnectionId) &&
-            version == header.version &&
-            Objects.equals(packetNumber, header.packetNumber) &&
-            Objects.equals(payload, header.payload);
+    return packetType == header.packetType
+        && Objects.equals(destinationConnectionId, header.destinationConnectionId)
+        && Objects.equals(sourceConnectionId, header.sourceConnectionId)
+        && version == header.version
+        && Objects.equals(packetNumber, header.packetNumber)
+        && Objects.equals(payload, header.payload);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(packetType, destinationConnectionId, sourceConnectionId, version, packetNumber, payload);
+    return Objects.hash(
+        packetType, destinationConnectionId, sourceConnectionId, version, packetNumber, payload);
   }
 
   @Override

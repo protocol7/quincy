@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.protocol.packets;
 
+import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
+
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.tls.aead.AEAD;
@@ -7,12 +9,9 @@ import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 
-import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
-
 public class ShortPacket implements FullPacket {
 
-  public static HalfParsedPacket<ShortPacket> parse(
-      ByteBuf bb, int connIdLength) {
+  public static HalfParsedPacket<ShortPacket> parse(ByteBuf bb, int connIdLength) {
     bb.markReaderIndex();
 
     byte firstByte = bb.readByte();
@@ -46,8 +45,7 @@ public class ShortPacket implements FullPacket {
         bb.readBytes(aad);
 
         Payload payload =
-                Payload.parse(
-                        bb, bb.readableBytes(), aeadProvider.get(OneRtt), packetNumber, aad);
+            Payload.parse(bb, bb.readableBytes(), aeadProvider.get(OneRtt), packetNumber, aad);
 
         return new ShortPacket(new ShortHeader(keyPhase, connId, packetNumber, payload));
       }

@@ -1,10 +1,8 @@
 package com.protocol7.nettyquick.protocol.packets;
 
 import com.protocol7.nettyquick.protocol.ConnectionId;
-import com.protocol7.nettyquick.protocol.LastPacketNumber;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.tls.aead.AEAD;
-import com.protocol7.nettyquick.tls.aead.AEADProvider;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 
@@ -16,8 +14,7 @@ public interface Packet {
     return (PACKET_TYPE_MASK & b) == PACKET_TYPE_MASK;
   }
 
-  static HalfParsedPacket parse(
-      ByteBuf bb, int connidLength) {
+  static HalfParsedPacket parse(ByteBuf bb, int connidLength) {
     bb.markReaderIndex();
     int firstByte = bb.readByte() & 0xFF;
 

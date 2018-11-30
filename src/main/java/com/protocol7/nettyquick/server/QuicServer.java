@@ -36,7 +36,6 @@ public class QuicServer {
     Connections connections = new Connections(certificates, privateKey);
     PacketRouter router = new PacketRouter(Version.CURRENT, connections, streamHandler);
 
-
     final Bootstrap b = new Bootstrap();
     b.group(group)
         .channel(NioDatagramChannel.class)

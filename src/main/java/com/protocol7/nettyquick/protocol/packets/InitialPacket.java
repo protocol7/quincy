@@ -102,11 +102,9 @@ public class InitialPacket implements FullPacket {
         Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
         return InitialPacket.create(
-                destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+            destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
       }
     };
-
-
   }
 
   private final LongHeader header;
@@ -175,8 +173,7 @@ public class InitialPacket implements FullPacket {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     InitialPacket that = (InitialPacket) o;
-    return Objects.equals(header, that.header) &&
-            Objects.equals(token, that.token);
+    return Objects.equals(header, that.header) && Objects.equals(token, that.token);
   }
 
   @Override
