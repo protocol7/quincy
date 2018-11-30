@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.protocol;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.protocol7.nettyquick.utils.Hex;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.buffer.ByteBuf;
@@ -9,7 +11,7 @@ import java.util.Optional;
 public class ConnectionId {
 
   public static ConnectionId random() {
-    byte[] id = new byte[13]; // TODO what length to use?
+    byte[] id = new byte[Rnd.rndInt(8, 16)];
     Rnd.rndBytes(id);
     return new ConnectionId(id);
   }
@@ -65,6 +67,9 @@ public class ConnectionId {
   private final byte[] id;
 
   public ConnectionId(final byte[] id) {
+    checkArgument(id.length >= 8);
+    checkArgument(id.length <= 15);
+
     this.id = id;
   }
 

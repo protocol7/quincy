@@ -21,6 +21,7 @@ public class VersionNegotiationPacket implements Packet {
     }
 
     int cil = bb.readByte() & 0xFF;
+
     int dcil = ConnectionId.firstLength(cil);
     int scil = ConnectionId.lastLength(cil);
 

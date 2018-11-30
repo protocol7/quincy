@@ -1,12 +1,22 @@
 package com.protocol7.nettyquick.protocol;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
 
 public class ConnectionIdTest {
+
+  @Test
+  public void randomLength() {
+    for (int i = 0; i < 1000; i++) {
+      ConnectionId connId = ConnectionId.random();
+      assertTrue(connId.getLength() >= 8);
+      assertTrue(connId.getLength() <= 15);
+    }
+  }
 
   @Test
   public void roundtrip() {
