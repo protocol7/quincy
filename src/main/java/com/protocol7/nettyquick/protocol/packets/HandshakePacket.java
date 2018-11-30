@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class HandshakePacket implements FullPacket {
+public class HandshakePacket extends LongHeaderPacket {
 
   public static int MARKER = 0x80 | PacketType.Handshake.getType();
 
@@ -30,14 +30,7 @@ public class HandshakePacket implements FullPacket {
       Version version,
       List<Frame> frames) {
     Payload payload = new Payload(frames);
-    return new HandshakePacket(
-        new LongHeader(
-            PacketType.Handshake,
-            destConnectionId,
-            srcConnectionId,
-            version,
-            packetNumber,
-            payload));
+    return new HandshakePacket(destConnectionId, srcConnectionId, version, packetNumber, payload);
   }
 
   public static HalfParsedPacket<HandshakePacket> parse(ByteBuf bb) {
@@ -48,6 +41,9 @@ public class HandshakePacket implements FullPacket {
     byte firstByte = bb.readByte();
     byte ptByte = (byte) ((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
     PacketType packetType = PacketType.read(ptByte);
+    if (packetType != PacketType.Handshake) {
+      throw new IllegalArgumentException("Invalid packet type");
+    }
 
     Version version = Version.read(bb);
 
@@ -85,61 +81,51 @@ public class HandshakePacket implements FullPacket {
 
         Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
-        LongHeader header =
-            new LongHeader(packetType, destConnId, srcConnId, version, packetNumber, payload);
-
-        return new HandshakePacket(header);
+        return new HandshakePacket(destConnId, srcConnId, version, packetNumber, payload);
       }
     };
   }
 
-  private final LongHeader header;
-
-  private HandshakePacket(LongHeader header) {
-    this.header = header;
-  }
-
-  public Version getVersion() {
-    return header.getVersion();
+  private HandshakePacket(
+      Optional<ConnectionId> destinationConnectionId,
+      Optional<ConnectionId> sourceConnectionId,
+      Version version,
+      PacketNumber packetNumber,
+      Payload payload) {
+    super(
+        PacketType.Handshake,
+        destinationConnectionId,
+        sourceConnectionId,
+        version,
+        packetNumber,
+        payload);
   }
 
   @Override
-  public PacketType getType() {
-    return PacketType.Handshake;
-  }
-
-  @Override
-  public Packet addFrame(Frame frame) {
-    return new HandshakePacket(LongHeader.addFrame(header, frame));
+  public HandshakePacket addFrame(Frame frame) {
+    return new HandshakePacket(
+        getDestinationConnectionId(),
+        getSourceConnectionId(),
+        getVersion(),
+        getPacketNumber(),
+        getPayload().addFrame(frame));
   }
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    header.write(bb, aead);
-  }
-
-  @Override
-  public PacketNumber getPacketNumber() {
-    return header.getPacketNumber();
-  }
-
-  @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
-    return header.getSourceConnectionId();
-  }
-
-  @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
-    return header.getDestinationConnectionId();
-  }
-
-  @Override
-  public Payload getPayload() {
-    return header.getPayload();
+    writePrefix(bb);
+    writeSuffix(bb, aead);
   }
 
   @Override
   public String toString() {
-    return "HandshakePacket{" + "header=" + header + '}';
+    return "HandshakePacket{" +
+            "packetType=" + getType() +
+            ", destinationConnectionId=" + getDestinationConnectionId() +
+            ", sourceConnectionId=" + getSourceConnectionId() +
+            ", version=" + getVersion() +
+            ", packetNumber=" + getPacketNumber() +
+            ", payload=" + getPayload() +
+            '}';
   }
 }

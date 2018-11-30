@@ -12,7 +12,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class InitialPacket implements FullPacket {
+public class InitialPacket extends LongHeaderPacket {
 
   public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
 
@@ -41,8 +41,11 @@ public class InitialPacket implements FullPacket {
       List<Frame> frames) { // TODO validate frame types
     Payload payload = new Payload(frames);
     return new InitialPacket(
-        new LongHeader(
-            PacketType.Initial, destConnectionId, srcConnectionId, version, packetNumber, payload),
+        destConnectionId,
+        srcConnectionId,
+        version,
+        packetNumber,
+        payload,
         token);
   }
 
@@ -54,10 +57,6 @@ public class InitialPacket implements FullPacket {
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
-    // server 	Long Header{Type: Initial, DestConnectionID: (empty), SrcConnectionID: 0x88f9f1ab,
-    // Token: (empty), PacketNumber: 0x1, PacketNumberLen: 2, PayloadLen: 181, Version: TLS dev
-    // version (WIP)}
-
     int dcil = ConnectionId.firstLength(cil);
     int scil = ConnectionId.lastLength(cil);
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
@@ -107,27 +106,39 @@ public class InitialPacket implements FullPacket {
     };
   }
 
-  private final LongHeader header;
   private final Optional<byte[]> token;
 
-  public InitialPacket(LongHeader header, Optional<byte[]> token) {
-    this.header = header;
+  public InitialPacket(
+      Optional<ConnectionId> destinationConnectionId,
+      Optional<ConnectionId> sourceConnectionId,
+      Version version,
+      PacketNumber packetNumber,
+      Payload payload,
+      Optional<byte[]> token) {
+    super(
+        PacketType.Initial,
+        destinationConnectionId,
+        sourceConnectionId,
+        version,
+        packetNumber,
+        payload);
     this.token = token;
   }
 
   @Override
-  public PacketType getType() {
-    return PacketType.Initial;
-  }
-
-  @Override
-  public Packet addFrame(Frame frame) {
-    return new InitialPacket(LongHeader.addFrame(header, frame), token);
+  public InitialPacket addFrame(Frame frame) {
+    return new InitialPacket(
+        getDestinationConnectionId(),
+        getSourceConnectionId(),
+        getVersion(),
+        getPacketNumber(),
+        getPayload().addFrame(frame),
+        token);
   }
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    header.writePrefix(bb);
+    writePrefix(bb);
 
     if (token.isPresent()) {
       byte[] t = token.get();
@@ -137,31 +148,7 @@ public class InitialPacket implements FullPacket {
       Varint.write(0, bb);
     }
 
-    header.writeSuffix(bb, aead);
-  }
-
-  @Override
-  public PacketNumber getPacketNumber() {
-    return header.getPacketNumber();
-  }
-
-  @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
-    return header.getSourceConnectionId();
-  }
-
-  @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
-    return header.getDestinationConnectionId();
-  }
-
-  @Override
-  public Payload getPayload() {
-    return header.getPayload();
-  }
-
-  public Version getVersion() {
-    return header.getVersion();
+    writeSuffix(bb, aead);
   }
 
   public Optional<byte[]> getToken() {
@@ -172,17 +159,26 @@ public class InitialPacket implements FullPacket {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
+    if (!super.equals(o)) return false;
     InitialPacket that = (InitialPacket) o;
-    return Objects.equals(header, that.header) && Objects.equals(token, that.token);
+    return Objects.equals(token, that.token);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(header, token);
+    return Objects.hash(super.hashCode(), token);
   }
 
   @Override
   public String toString() {
-    return "InitialPacket{" + "header=" + header + ", token=" + Opt.toStringBytes(token) + '}';
+    return "InitialPacket{" +
+            "packetType=" + getType() +
+            ", destinationConnectionId=" + getDestinationConnectionId() +
+            ", sourceConnectionId=" + getSourceConnectionId() +
+            ", version=" + getVersion() +
+            ", packetNumber=" + getPacketNumber() +
+            ", payload=" + getPayload() +
+            ", token=" + token +
+            '}';
   }
 }
