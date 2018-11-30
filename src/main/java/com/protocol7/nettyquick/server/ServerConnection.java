@@ -1,16 +1,16 @@
 package com.protocol7.nettyquick.server;
 
-import static com.protocol7.nettyquick.EncryptionLevel.Initial;
+import static com.protocol7.nettyquick.tls.EncryptionLevel.Initial;
 
-import com.protocol7.nettyquick.EncryptionLevel;
-import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
 import com.protocol7.nettyquick.protocol.packets.*;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
+import com.protocol7.nettyquick.tls.EncryptionLevel;
 import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;

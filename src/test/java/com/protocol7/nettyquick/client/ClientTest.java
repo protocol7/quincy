@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.*;
 import com.protocol7.nettyquick.protocol.packets.*;

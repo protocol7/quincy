@@ -1,9 +1,8 @@
-package com.protocol7.nettyquick;
+package com.protocol7.nettyquick.tls;
 
 import com.protocol7.nettyquick.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquick.protocol.packets.InitialPacket;
 import com.protocol7.nettyquick.protocol.packets.Packet;
-import com.protocol7.nettyquick.protocol.packets.PacketType;
 
 public enum EncryptionLevel {
   Initial,
@@ -14,16 +13,6 @@ public enum EncryptionLevel {
     if (packet instanceof InitialPacket) {
       return Initial;
     } else if (packet instanceof HandshakePacket) {
-      return Handshake;
-    } else {
-      return OneRtt;
-    }
-  }
-
-  public static EncryptionLevel forPacketType(PacketType packetType) {
-    if (packetType == PacketType.Initial) {
-      return Initial;
-    } else if (packetType == PacketType.Handshake) {
       return Handshake;
     } else {
       return OneRtt;

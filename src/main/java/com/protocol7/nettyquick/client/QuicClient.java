@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.client;
 
+import com.protocol7.nettyquick.connection.NettyPacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;

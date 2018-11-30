@@ -2,7 +2,7 @@ package com.protocol7.nettyquick.tls.aead;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.protocol7.nettyquick.EncryptionLevel;
+import com.protocol7.nettyquick.tls.EncryptionLevel;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

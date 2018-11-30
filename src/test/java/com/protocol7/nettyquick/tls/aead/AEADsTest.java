@@ -2,7 +2,7 @@ package com.protocol7.nettyquick.tls.aead;
 
 import static org.junit.Assert.*;
 
-import com.protocol7.nettyquick.EncryptionLevel;
+import com.protocol7.nettyquick.tls.EncryptionLevel;
 import org.junit.Test;
 
 public class AEADsTest {

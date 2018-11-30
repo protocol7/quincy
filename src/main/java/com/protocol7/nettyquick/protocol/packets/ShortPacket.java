@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.protocol.packets;
 
-import static com.protocol7.nettyquick.EncryptionLevel.OneRtt;
+import static com.protocol7.nettyquick.tls.EncryptionLevel.OneRtt;
 
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;

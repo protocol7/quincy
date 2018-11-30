@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.client.PacketSender;
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.Version;
 import com.protocol7.nettyquick.protocol.packets.FullPacket;

@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.server;
 
-import com.protocol7.nettyquick.client.NettyPacketSender;
+import com.protocol7.nettyquick.connection.NettyPacketSender;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.socket.DatagramPacket;

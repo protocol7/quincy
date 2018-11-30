@@ -1,8 +1,8 @@
 package com.protocol7.nettyquick.server;
 
 import com.google.common.collect.Maps;
-import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.StreamListener;
 import java.net.InetSocketAddress;

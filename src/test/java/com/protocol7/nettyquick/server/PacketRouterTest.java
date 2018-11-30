@@ -8,7 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquick.client.PacketSender;
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 import com.protocol7.nettyquick.protocol.Version;

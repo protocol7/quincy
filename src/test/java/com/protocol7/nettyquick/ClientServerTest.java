@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 
 import com.protocol7.nettyquick.client.ClientConnection;
 import com.protocol7.nettyquick.client.ClientState;
-import com.protocol7.nettyquick.client.PacketSender;
 import com.protocol7.nettyquick.connection.Connection;
+import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.protocol.packets.Packet;
 import com.protocol7.nettyquick.server.ServerConnection;
