@@ -16,7 +16,6 @@ import com.protocol7.nettyquick.tls.ServerTlsSession;
 import com.protocol7.nettyquick.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquick.utils.Rnd;
 import io.netty.util.concurrent.*;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -40,20 +39,18 @@ public class ClientTest {
   private StreamId streamId = StreamId.random(true, true);
 
   @Mock private PacketSender packetSender;
-  @Mock private InetSocketAddress serverAddress;
   @Mock private StreamListener streamListener;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(packetSender.send(any(), any(), any()))
+    when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
-    connection =
-        new ClientConnection(serverAddress, destConnectionId, streamListener, packetSender);
+    connection = new ClientConnection(destConnectionId, streamListener, packetSender);
 
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
@@ -123,7 +120,7 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHello())));
 
     // verify no packet sent here
-    verify(packetSender, times(2)).send(any(), any(), any());
+    verify(packetSender, times(2)).send(any(), any());
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
@@ -284,7 +281,7 @@ public class ClientTest {
     connection.onPacket(verNeg);
 
     // should not have sent any more packets
-    verify(packetSender, times(1)).send(any(), any(), any());
+    verify(packetSender, times(1)).send(any(), any());
 
     // should close connection
     verify(packetSender).destroy();
@@ -305,12 +302,12 @@ public class ClientTest {
     connection.onPacket(packet(PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
-    verify(packetSender, never()).send(any(), any(), any());
+    verify(packetSender, never()).send(any(), any());
   }
 
   private Packet captureSentPacket(int number) {
     ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any(), any());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
     List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);

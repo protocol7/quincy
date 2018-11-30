@@ -21,7 +21,6 @@ import com.protocol7.nettyquick.tls.aead.TestAEAD;
 import com.protocol7.nettyquick.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.net.InetSocketAddress;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -39,7 +38,6 @@ public class PacketRouterTest {
   @Mock private Connections connections;
   @Mock private ServerConnection connection;
   @Mock private StreamListener listener;
-  @Mock private InetSocketAddress clientAddress;
   @Mock private PacketSender sender;
 
   @Before
@@ -49,7 +47,7 @@ public class PacketRouterTest {
     router = new PacketRouter(Version.CURRENT, connections, listener);
 
     when(connections.get(any())).thenReturn(of(connection));
-    when(connections.get(any(), any(), any(), any())).thenReturn(connection);
+    when(connections.get(any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
     when(connection.getSourceConnectionId()).thenReturn(of(srcConnId));
@@ -69,7 +67,7 @@ public class PacketRouterTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    router.route(bb, clientAddress, sender);
+    router.route(bb, sender);
 
     verify(connection).onPacket(packet);
   }
@@ -78,7 +76,7 @@ public class PacketRouterTest {
   public void invalidPacket() {
     ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
 
-    router.route(bb, clientAddress, sender);
+    router.route(bb, sender);
   }
 
   @Test
@@ -97,11 +95,11 @@ public class PacketRouterTest {
 
     Debug.buffer(bb);
 
-    router.route(bb, clientAddress, sender);
+    router.route(bb, sender);
 
     ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);
-    verify(sender).send(captor.capture(), any(), any());
+    verify(sender).send(captor.capture(), any());
 
     VersionNegotiationPacket verNeg = captor.getValue();
 

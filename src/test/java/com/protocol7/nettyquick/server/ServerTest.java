@@ -2,9 +2,7 @@ package com.protocol7.nettyquick.server;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
@@ -21,7 +19,6 @@ import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.SucceededFuture;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -45,13 +42,12 @@ public class ServerTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
-  @Mock private InetSocketAddress clientAddress;
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(packetSender.send(any(), any(), any()))
+    when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
@@ -61,7 +57,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            clientAddress, srcConnectionId, streamListener, packetSender, certificates, privateKey);
+            srcConnectionId, streamListener, packetSender, certificates, privateKey);
   }
 
   @Test
@@ -147,7 +143,7 @@ public class ServerTest {
     connection.onPacket(packet(destConnectionId, PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
-    verify(packetSender, never()).send(any(), any(), any());
+    verify(packetSender, never()).send(any(), any());
     assertEquals(ServerState.BeforeInitial, connection.getState());
   }
 
@@ -173,7 +169,7 @@ public class ServerTest {
 
   private Packet captureSentPacket(int number) {
     ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any(), any());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
     List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);

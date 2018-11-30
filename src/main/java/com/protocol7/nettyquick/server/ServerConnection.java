@@ -6,7 +6,9 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.*;
 import com.protocol7.nettyquick.protocol.frames.Frame;
-import com.protocol7.nettyquick.protocol.packets.*;
+import com.protocol7.nettyquick.protocol.packets.FullPacket;
+import com.protocol7.nettyquick.protocol.packets.Packet;
+import com.protocol7.nettyquick.protocol.packets.ShortPacket;
 import com.protocol7.nettyquick.streams.Stream;
 import com.protocol7.nettyquick.streams.StreamListener;
 import com.protocol7.nettyquick.streams.Streams;
@@ -15,7 +17,6 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import io.netty.util.concurrent.Future;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -31,7 +32,6 @@ public class ServerConnection implements Connection {
   private final Optional<ConnectionId> srcConnectionId;
   private final StreamListener handler;
   private final PacketSender packetSender;
-  private final InetSocketAddress clientAddress;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(PacketNumber.MIN);
@@ -42,7 +42,6 @@ public class ServerConnection implements Connection {
   private final AEADs aeads;
 
   public ServerConnection(
-      final InetSocketAddress clientAddress,
       final ConnectionId srcConnId,
       final StreamListener handler,
       final PacketSender packetSender,
@@ -50,7 +49,6 @@ public class ServerConnection implements Connection {
       final PrivateKey privateKey) {
     this.handler = handler;
     this.packetSender = packetSender;
-    this.clientAddress = clientAddress;
     this.stateMachine = new ServerStateMachine(this, certificates, privateKey);
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
@@ -89,7 +87,7 @@ public class ServerConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    packetSender.send(packet, clientAddress, getAEAD(Initial)).awaitUninterruptibly(); // TODO fix
+    packetSender.send(packet, getAEAD(Initial)).awaitUninterruptibly(); // TODO fix
     log.debug("Server sent {}", packet);
   }
 

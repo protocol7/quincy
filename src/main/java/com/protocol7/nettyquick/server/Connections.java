@@ -5,7 +5,6 @@ import com.protocol7.nettyquick.connection.Connection;
 import com.protocol7.nettyquick.connection.PacketSender;
 import com.protocol7.nettyquick.protocol.ConnectionId;
 import com.protocol7.nettyquick.streams.StreamListener;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
@@ -27,19 +26,14 @@ public class Connections {
   }
 
   public ServerConnection get(
-      Optional<ConnectionId> connIdOpt,
-      StreamListener streamHandler,
-      PacketSender packetSender,
-      InetSocketAddress clientAddress) {
+      Optional<ConnectionId> connIdOpt, StreamListener streamHandler, PacketSender packetSender) {
 
     ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
 
     ServerConnection conn = connections.get(connId);
     if (conn == null) {
       log.debug("Creating new server connection for {}", connId);
-      conn =
-          new ServerConnection(
-              clientAddress, connId, streamHandler, packetSender, certificates, privateKey);
+      conn = new ServerConnection(connId, streamHandler, packetSender, certificates, privateKey);
       ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

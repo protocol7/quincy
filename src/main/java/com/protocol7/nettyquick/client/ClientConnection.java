@@ -18,7 +18,6 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import com.protocol7.nettyquick.tls.aead.AEADs;
 import com.protocol7.nettyquick.tls.aead.NullAEAD;
 import io.netty.util.concurrent.Future;
-import java.net.InetSocketAddress;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -33,7 +32,6 @@ public class ClientConnection implements Connection {
   private int lastDestConnectionIdLength;
   private Optional<ConnectionId> srcConnectionId = Optional.empty();
   private final PacketSender packetSender;
-  private final InetSocketAddress serverAddress;
   private final StreamListener streamListener;
 
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
@@ -47,13 +45,11 @@ public class ClientConnection implements Connection {
   private AEADs aeads;
 
   public ClientConnection(
-      final InetSocketAddress serverAddress,
       final ConnectionId destConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender) {
     this.destConnectionId = destConnectionId;
     this.packetSender = packetSender;
-    this.serverAddress = serverAddress;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
     this.streams = new Streams(this);
@@ -111,7 +107,7 @@ public class ClientConnection implements Connection {
 
   private void sendPacketUnbuffered(Packet packet) {
     packetSender
-        .send(packet, serverAddress, getAEAD(EncryptionLevel.forPacket(packet)))
+        .send(packet, getAEAD(EncryptionLevel.forPacket(packet)))
         .awaitUninterruptibly(); // TODO fix
 
     log.debug("Client sent {}", packet);

@@ -21,7 +21,6 @@ import com.protocol7.nettyquick.tls.aead.AEAD;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.SucceededFuture;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import org.junit.Before;
@@ -42,8 +41,6 @@ public class ClientServerTest {
   private final ForwardingPacketSender clientSender = new ForwardingPacketSender();
   private final ForwardingPacketSender serverSender = new ForwardingPacketSender();
 
-  private @Mock InetSocketAddress serverAddress;
-  private @Mock InetSocketAddress clientAddress;
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
 
@@ -58,7 +55,7 @@ public class ClientServerTest {
     }
 
     @Override
-    public Future<Void> send(Packet packet, InetSocketAddress address, AEAD aead) {
+    public Future<Void> send(Packet packet, AEAD aead) {
       executor.execute(() -> peer.onPacket(packet));
 
       return new SucceededFuture(executor, null);
@@ -74,15 +71,14 @@ public class ClientServerTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    clientConnection =
-        new ClientConnection(serverAddress, destConnectionId, clientListener, clientSender);
+    clientConnection = new ClientConnection(destConnectionId, clientListener, clientSender);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
 
     serverConnection =
         new ServerConnection(
-            clientAddress, srcConnectionId, serverListener, serverSender, certificates, privateKey);
+            srcConnectionId, serverListener, serverSender, certificates, privateKey);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);
