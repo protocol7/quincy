@@ -10,8 +10,7 @@ import java.util.Objects;
 public class StreamId {
 
   public static StreamId random(boolean client, boolean bidirectional) {
-    long id = Varint.random(1);
-
+    long id = Varint.random(4);
     id = encodeType(client, bidirectional, id);
 
     return new StreamId(id);
@@ -23,7 +22,6 @@ public class StreamId {
     } else {
       id = set(id, 0);
     }
-
     if (bidirectional) {
       id = unset(id, 1);
     } else {
