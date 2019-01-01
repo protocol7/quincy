@@ -6,15 +6,15 @@ import io.netty.buffer.ByteBuf;
 
 public class CryptoFrame extends Frame {
 
-  public static CryptoFrame parse(ByteBuf bb) {
-    byte type = bb.readByte();
+  public static CryptoFrame parse(final ByteBuf bb) {
+    final byte type = bb.readByte();
     if (type != FrameType.CRYPTO.getType()) {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    long offset = Varint.readAsLong(bb);
-    int length = Varint.readAsInt(bb);
-    byte[] cryptoData = new byte[length];
+    final long offset = Varint.readAsLong(bb);
+    final int length = Varint.readAsInt(bb);
+    final byte[] cryptoData = new byte[length];
     bb.readBytes(cryptoData);
     return new CryptoFrame(offset, cryptoData);
   }
@@ -22,7 +22,7 @@ public class CryptoFrame extends Frame {
   private final long offset;
   private final byte[] cryptoData;
 
-  public CryptoFrame(long offset, byte[] cryptoData) {
+  public CryptoFrame(final long offset, final byte[] cryptoData) {
     super(FrameType.CRYPTO);
     this.offset = offset;
     this.cryptoData = cryptoData;
@@ -37,7 +37,7 @@ public class CryptoFrame extends Frame {
   }
 
   @Override
-  public void write(ByteBuf bb) {
+  public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
     Varint.write(offset, bb);
     Varint.write(cryptoData.length, bb);

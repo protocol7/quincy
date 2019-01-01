@@ -19,34 +19,36 @@ import io.netty.buffer.ByteBuf;
 */
 public class ConnectionCloseFrame extends Frame {
 
-  public static ConnectionCloseFrame parse(ByteBuf bb) {
-    byte type = bb.readByte();
+  public static ConnectionCloseFrame parse(final ByteBuf bb) {
+    final byte type = bb.readByte();
     if (type != 0x1c && type != 0x1d) {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    boolean application = type == 0x1d;
+    final boolean application = type == 0x1d;
 
-    int errorCode = bb.readShort();
-    int frameType = 0;
+    final int errorCode = bb.readShort();
+    final int frameType;
     if (!application) {
       frameType = Varint.readAsInt(bb);
+    } else {
+      frameType = 0;
     }
 
-    int reasonPhraseLength = Varint.readAsInt(bb);
+    final int reasonPhraseLength = Varint.readAsInt(bb);
 
-    byte[] reasonPhraseBytes = new byte[reasonPhraseLength];
+    final byte[] reasonPhraseBytes = new byte[reasonPhraseLength];
     bb.readBytes(reasonPhraseBytes);
 
     return new ConnectionCloseFrame(
         application, errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
   }
 
-  public static ConnectionCloseFrame connection(int errorCode, int frameType, String reasonPhrase) {
+  public static ConnectionCloseFrame connection(final int errorCode, final int frameType, final String reasonPhrase) {
     return new ConnectionCloseFrame(false, errorCode, frameType, reasonPhrase);
   }
 
-  public static ConnectionCloseFrame application(int errorCode, String reasonPhrase) {
+  public static ConnectionCloseFrame application(final int errorCode, final String reasonPhrase) {
     return new ConnectionCloseFrame(true, errorCode, 0, reasonPhrase);
   }
 
@@ -56,7 +58,7 @@ public class ConnectionCloseFrame extends Frame {
   private final String reasonPhrase;
 
   private ConnectionCloseFrame(
-      boolean application, int errorCode, int frameType, String reasonPhrase) {
+          final boolean application, final int errorCode, final int frameType, final String reasonPhrase) {
     super(FrameType.CONNECTION_CLOSE);
     this.application = application;
     this.errorCode = errorCode;

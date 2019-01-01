@@ -24,7 +24,7 @@ public class PayloadTest {
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
 
-    Payload parsed = Payload.parse(bb, payload.getLength(), aead, pn, aad);
+    Payload parsed = Payload.parse(bb, payload.calculateLength(), aead, pn, aad);
 
     assertEquals(payload, parsed);
   }

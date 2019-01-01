@@ -67,7 +67,7 @@ public class ClientConnection implements Connection {
     return stateMachine.handshake();
   }
 
-  public Packet sendPacket(Packet p) {
+  public Packet sendPacket(final Packet p) {
     if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
       throw new IllegalStateException("Connection not open");
     }
@@ -75,7 +75,7 @@ public class ClientConnection implements Connection {
     return p;
   }
 
-  public FullPacket sendPacket(Frame... frames) {
+  public FullPacket sendPacket(final Frame... frames) {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
@@ -92,11 +92,11 @@ public class ClientConnection implements Connection {
     return Optional.ofNullable(destConnectionId);
   }
 
-  public void setSourceConnectionId(Optional<ConnectionId> srcConnId) {
+  public void setSourceConnectionId(final Optional<ConnectionId> srcConnId) {
     this.srcConnectionId = srcConnId;
   }
 
-  public void setDestinationConnectionId(ConnectionId destConnId) {
+  public void setDestinationConnectionId(final ConnectionId destConnId) {
     this.destConnectionId = destConnId;
     initAEAD();
   }
@@ -105,7 +105,7 @@ public class ClientConnection implements Connection {
     return lastDestConnectionIdLength;
   }
 
-  private void sendPacketUnbuffered(Packet packet) {
+  private void sendPacketUnbuffered(final Packet packet) {
     packetSender
         .send(packet, getAEAD(EncryptionLevel.forPacket(packet)))
         .awaitUninterruptibly(); // TODO fix
@@ -113,7 +113,7 @@ public class ClientConnection implements Connection {
     log.debug("Client sent {}", packet);
   }
 
-  public void onPacket(Packet packet) {
+  public void onPacket(final Packet packet) {
     log.debug("Client got {}", packet);
 
     if (packet.getDestinationConnectionId().isPresent()) {
@@ -129,15 +129,15 @@ public class ClientConnection implements Connection {
   }
 
   @Override
-  public AEAD getAEAD(EncryptionLevel level) {
+  public AEAD getAEAD(final EncryptionLevel level) {
     return aeads.get(level);
   }
 
-  public void setHandshakeAead(AEAD handshakeAead) {
+  public void setHandshakeAead(final AEAD handshakeAead) {
     aeads.setHandshakeAead(handshakeAead);
   }
 
-  public void setOneRttAead(AEAD oneRttAead) {
+  public void setOneRttAead(final AEAD oneRttAead) {
     aeads.setOneRttAead(oneRttAead);
   }
 
@@ -161,7 +161,7 @@ public class ClientConnection implements Connection {
     return streams.openStream(true, true, streamListener);
   }
 
-  public Stream getOrCreateStream(StreamId streamId) {
+  public Stream getOrCreateStream(final StreamId streamId) {
     return streams.getOrCreate(streamId, streamListener);
   }
 

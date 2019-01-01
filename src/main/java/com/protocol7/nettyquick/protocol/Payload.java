@@ -16,29 +16,34 @@ import java.util.List;
 
 public class Payload {
 
-  public static Payload parse(ByteBuf bb, int length, AEAD aead, PacketNumber pn, byte[] aad) {
-    byte[] cipherText = new byte[length];
+  public static Payload parse(
+      final ByteBuf bb,
+      final int length,
+      final AEAD aead,
+      final PacketNumber pn,
+      final byte[] aad) {
+    final byte[] cipherText = new byte[length];
     bb.readBytes(cipherText);
 
-    byte[] raw;
+    final byte[] raw;
     try {
       raw = aead.open(cipherText, pn.asLong(), aad);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
 
-    List<Frame> frames = Lists.newArrayList();
-    ByteBuf frameBuf = Unpooled.wrappedBuffer(raw);
+    final List<Frame> frames = Lists.newArrayList();
+    final ByteBuf frameBuf = Unpooled.wrappedBuffer(raw);
 
     while (frameBuf.isReadable()) {
-      Frame frame = Frame.parse(frameBuf);
+      final Frame frame = Frame.parse(frameBuf);
       // TODO ignore padding frames?
       frames.add(frame);
     }
     return new Payload(frames);
   }
 
-  public Payload addFrame(Frame frame) {
+  public Payload addFrame(final Frame frame) {
     List<Frame> newFrames = Lists.newArrayList(frames);
     newFrames.add(frame);
     return new Payload(newFrames);
@@ -54,26 +59,26 @@ public class Payload {
   }
 
   public Payload(final Frame... frames) {
-    this(Arrays.asList(frames));
+    this(ImmutableList.copyOf(frames));
   }
 
   public List<Frame> getFrames() {
     return frames;
   }
 
-  public int getLength() {
+  public int calculateLength() {
     return frames.stream().mapToInt(f -> f.calculateLength()).sum() + AEAD.OVERHEAD;
   }
 
-  public void write(ByteBuf bb, AEAD aead, PacketNumber pn, byte[] aad) {
-    ByteBuf raw = Unpooled.buffer();
-    for (Frame frame : frames) {
+  public void write(final ByteBuf bb, final AEAD aead, final PacketNumber pn, final byte[] aad) {
+    final ByteBuf raw = Unpooled.buffer();
+    for (final Frame frame : frames) {
       frame.write(raw);
     }
-    byte[] b = Bytes.drainToArray(raw);
+    final byte[] b = Bytes.drainToArray(raw);
 
     try {
-      byte[] sealed = aead.seal(b, pn.asLong(), aad);
+      final byte[] sealed = aead.seal(b, pn.asLong(), aad);
       bb.writeBytes(sealed);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);

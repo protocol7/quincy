@@ -4,7 +4,7 @@ import io.netty.buffer.ByteBuf;
 
 public class PaddingFrame extends Frame {
 
-  public static PaddingFrame parse(ByteBuf bb) {
+  public static PaddingFrame parse(final ByteBuf bb) {
     byte type = bb.readByte();
     if (type != FrameType.PADDING.getType()) {
       throw new IllegalArgumentException("Illegal frame type");

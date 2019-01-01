@@ -6,7 +6,7 @@ import io.netty.buffer.Unpooled;
 
 public abstract class Frame implements Writeable {
 
-  public static Frame parse(ByteBuf bb) {
+  public static Frame parse(final ByteBuf bb) {
     byte typeByte = bb.getByte(bb.readerIndex());
     FrameType type = FrameType.fromByte(typeByte);
 

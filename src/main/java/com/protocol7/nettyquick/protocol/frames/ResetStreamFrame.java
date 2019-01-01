@@ -1,5 +1,7 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
@@ -10,7 +12,7 @@ import io.netty.buffer.ByteBuf;
 public class ResetStreamFrame extends Frame {
 
   public static ResetStreamFrame parse(final ByteBuf bb) {
-    byte type = bb.readByte();
+    final byte type = bb.readByte();
     if (type != FrameType.RESET_STREAM.getType()) {
       throw new IllegalArgumentException("Illegal frame type");
     }
@@ -30,7 +32,7 @@ public class ResetStreamFrame extends Frame {
       final StreamId streamId, final int applicationErrorCode, final long offset) {
     super(FrameType.RESET_STREAM);
 
-    requireNonNull(streamId);
+    checkNotNull(streamId);
     validateApplicationErrorCode(applicationErrorCode);
 
     this.streamId = streamId;
@@ -39,8 +41,8 @@ public class ResetStreamFrame extends Frame {
   }
 
   private void validateApplicationErrorCode(final int code) {
-    Preconditions.checkArgument(code >= 0);
-    Preconditions.checkArgument(code <= 0xFFFF);
+    checkArgument(code >= 0);
+    checkArgument(code <= 0xFFFF);
   }
 
   public StreamId getStreamId() {

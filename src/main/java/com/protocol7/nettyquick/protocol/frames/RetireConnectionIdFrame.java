@@ -7,18 +7,18 @@ public class RetireConnectionIdFrame extends Frame {
 
   private final long sequenceNumber;
 
-  public static RetireConnectionIdFrame parse(ByteBuf bb) {
-    byte type = bb.readByte();
+  public static RetireConnectionIdFrame parse(final ByteBuf bb) {
+    final byte type = bb.readByte();
     if (type != FrameType.RETIRE_CONNECTION_ID.getType()) {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    long sequenceNumber = Varint.readAsLong(bb);
+    final long sequenceNumber = Varint.readAsLong(bb);
 
     return new RetireConnectionIdFrame(sequenceNumber);
   }
 
-  public RetireConnectionIdFrame(long sequenceNumber) {
+  public RetireConnectionIdFrame(final long sequenceNumber) {
     super(FrameType.RETIRE_CONNECTION_ID);
     this.sequenceNumber = sequenceNumber;
   }

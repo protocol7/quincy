@@ -79,7 +79,7 @@ public abstract class LongHeaderPacket implements FullPacket {
   protected void writeSuffix(ByteBuf bb, AEAD aead) {
     byte[] pn = packetNumber.write();
 
-    Varint.write(payload.getLength() + pn.length, bb);
+    Varint.write(payload.calculateLength() + pn.length, bb);
 
     bb.writeBytes(pn);
 

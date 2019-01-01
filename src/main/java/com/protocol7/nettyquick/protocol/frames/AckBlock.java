@@ -3,9 +3,11 @@ package com.protocol7.nettyquick.protocol.frames;
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquick.protocol.PacketNumber;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 public class AckBlock {
 
-  public static AckBlock fromLongs(long smallest, long largest) {
+  public static AckBlock fromLongs(final long smallest, final long largest) {
     return new AckBlock(new PacketNumber(smallest), new PacketNumber(largest));
   }
 
@@ -13,7 +15,7 @@ public class AckBlock {
   private final PacketNumber largest;
 
   public AckBlock(final PacketNumber smallest, final PacketNumber largest) {
-    Preconditions.checkArgument(largest.compareTo(smallest) >= 0);
+    checkArgument(largest.compareTo(smallest) >= 0);
 
     this.smallest = smallest;
     this.largest = largest;

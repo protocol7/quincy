@@ -1,5 +1,6 @@
 package com.protocol7.nettyquick.protocol.frames;
 
+import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquick.protocol.Varint;
@@ -8,10 +9,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 public class AckFrame extends Frame {
 
-  public static AckFrame parse(ByteBuf bb) {
-    byte type = bb.readByte();
+  public static AckFrame parse(final ByteBuf bb) {
+    final byte type = bb.readByte();
     if (type != FrameType.ACK.getType()) {
       throw new IllegalArgumentException("Illegal frame type");
     }
@@ -53,19 +56,19 @@ public class AckFrame extends Frame {
   public AckFrame(final long ackDelay, final List<AckBlock> blocks) {
     super(FrameType.ACK);
 
-    Objects.requireNonNull(ackDelay);
-    Objects.requireNonNull(blocks);
+    checkNotNull(ackDelay);
+    checkNotNull(blocks);
 
     this.ackDelay = ackDelay;
     this.blocks = orderBlocks(blocks);
   }
 
-  private List<AckBlock> orderBlocks(List<AckBlock> blocks) {
+  private List<AckBlock> orderBlocks(final List<AckBlock> blocks) {
     if (blocks.size() < 1) {
       throw new IllegalArgumentException("Must contain at least one block");
     }
 
-    List<AckBlock> sorted = Lists.newArrayList(blocks);
+    final List<AckBlock> sorted = Lists.newArrayList(blocks);
     sorted.sort((b1, b2) -> b2.getLargest().compareTo(b1.getLargest()));
 
     // TODO check overlaps
@@ -85,7 +88,7 @@ public class AckFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
 
-    AckBlock firstBlock = blocks.get(0);
+    final AckBlock firstBlock = blocks.get(0);
 
     Varint.write(firstBlock.getLargest().asLong(), bb);
     Varint.write(ackDelay, bb);
@@ -96,7 +99,7 @@ public class AckFrame extends Frame {
     Varint.write(largest - smallest, bb);
 
     for (int i = 1; i < blocks.size(); i++) {
-      AckBlock block = blocks.get(i);
+      final AckBlock block = blocks.get(i);
 
       long gap = smallest - block.getLargest().asLong() - 1;
       Varint.write(gap, bb);

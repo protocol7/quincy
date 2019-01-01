@@ -15,15 +15,15 @@ import java.net.InetSocketAddress;
 public class QuicClient {
 
   public static Future<QuicClient> connect(
-      InetSocketAddress serverAddress, StreamListener streamListener) {
-    NioEventLoopGroup group = new NioEventLoopGroup();
-    ClientHandler handler = new ClientHandler();
-    Bootstrap b = new Bootstrap();
+          final InetSocketAddress serverAddress, final StreamListener streamListener) {
+    final NioEventLoopGroup group = new NioEventLoopGroup();
+    final ClientHandler handler = new ClientHandler();
+    final Bootstrap b = new Bootstrap();
     b.group(group).channel(NioDatagramChannel.class).handler(handler);
 
-    Future<Channel> channelFuture = Futures.thenChannel(b.bind(0));
+    final Future<Channel> channelFuture = Futures.thenChannel(b.bind(0));
 
-    Future<ClientConnection> conn =
+    final Future<ClientConnection> conn =
         Futures.thenSync(
             channelFuture,
             channel -> {
@@ -36,7 +36,7 @@ public class QuicClient {
               return connection;
             });
 
-    Future<ClientConnection> f =
+    final Future<ClientConnection> f =
         Futures.thenAsync(
             conn,
             clientConnection ->
@@ -47,7 +47,7 @@ public class QuicClient {
   private final NioEventLoopGroup group;
   private final ClientConnection connection;
 
-  private QuicClient(NioEventLoopGroup group, final ClientConnection connection) {
+  private QuicClient(final NioEventLoopGroup group, final ClientConnection connection) {
     this.group = group;
     this.connection = connection;
   }

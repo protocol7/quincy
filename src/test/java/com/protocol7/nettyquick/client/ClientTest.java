@@ -71,7 +71,7 @@ public class ClientTest {
     assertFalse(initialPacket.getToken().isPresent());
     assertEquals(Version.CURRENT, initialPacket.getVersion());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
-    assertTrue(initialPacket.getPayload().getLength() >= 1200);
+    assertTrue(initialPacket.getPayload().calculateLength() >= 1200);
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
@@ -101,7 +101,7 @@ public class ClientTest {
 
     byte[] clientHello = cf.getCryptoData();
 
-    assertTrue(initialPacket2.getPayload().getLength() >= 1200);
+    assertTrue(initialPacket2.getPayload().calculateLength() >= 1200);
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());

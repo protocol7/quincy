@@ -24,7 +24,7 @@ public enum FrameType {
   PATH_RESPONSE(0x1b),
   CONNECTION_CLOSE(0x1c); // 0x1c-0x1d
 
-  public static FrameType fromByte(byte b) {
+  public static FrameType fromByte(final byte b) {
     if (b == PADDING.type) {
       return PADDING;
     } else if (b == RESET_STREAM.type) {

@@ -47,12 +47,12 @@ public class ClientStateMachine {
     return handshakeFuture;
   }
 
-  private void sendInitialPacket(Optional<byte[]> token) {
-    List<Frame> frames = Lists.newArrayList();
+  private void sendInitialPacket(final Optional<byte[]> token) {
+    final List<Frame> frames = Lists.newArrayList();
 
     int len = 1200;
 
-    CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.startHandshake());
+    final CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.startHandshake());
     len -= clientHello.calculateLength();
     frames.add(clientHello);
     for (int i = len; i > 0; i--) {
@@ -83,18 +83,18 @@ public class ClientStateMachine {
 
           connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
 
-          for (Frame frame : ((InitialPacket) packet).getPayload().getFrames()) {
+          for (final Frame frame : ((InitialPacket) packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
-              CryptoFrame cf = (CryptoFrame) frame;
+              final CryptoFrame cf = (CryptoFrame) frame;
 
-              AEAD handshakeAead = tlsEngine.handleServerHello(cf.getCryptoData());
+              final AEAD handshakeAead = tlsEngine.handleServerHello(cf.getCryptoData());
               connection.setHandshakeAead(handshakeAead);
               state = ClientState.WaitingForHandshake;
             }
           }
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {
-          RetryPacket retryPacket = (RetryPacket) packet;
+          final RetryPacket retryPacket = (RetryPacket) packet;
           connection.setDestinationConnectionId(ConnectionId.random());
           connection.setSourceConnectionId(packet.getSourceConnectionId());
           connection.resetSendPacketNumber();
@@ -131,12 +131,12 @@ public class ClientStateMachine {
     }
   }
 
-  private void handleHandshake(HandshakePacket packet) {
-    for (Frame frame : packet.getPayload().getFrames()) {
+  private void handleHandshake(final HandshakePacket packet) {
+    for (final Frame frame : packet.getPayload().getFrames()) {
       if (frame instanceof CryptoFrame) {
-        CryptoFrame cf = (CryptoFrame) frame;
+        final CryptoFrame cf = (CryptoFrame) frame;
 
-        Optional<ClientTlsSession.HandshakeResult> result =
+        final Optional<ClientTlsSession.HandshakeResult> result =
             tlsEngine.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
@@ -157,15 +157,15 @@ public class ClientStateMachine {
     }
   }
 
-  private void handleFrame(Frame frame) {
+  private void handleFrame(final Frame frame) {
     if (frame instanceof StreamFrame) {
-      StreamFrame sf = (StreamFrame) frame;
+      final StreamFrame sf = (StreamFrame) frame;
 
       Stream stream = connection.getOrCreateStream(sf.getStreamId());
       stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
     } else if (frame instanceof ResetStreamFrame) {
-      ResetStreamFrame rsf = (ResetStreamFrame) frame;
-      Stream stream = connection.getOrCreateStream(rsf.getStreamId());
+      final ResetStreamFrame rsf = (ResetStreamFrame) frame;
+      final Stream stream = connection.getOrCreateStream(rsf.getStreamId());
       stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
     } else if (frame instanceof PingFrame) {
       // do nothing, will be acked

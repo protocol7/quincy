@@ -47,7 +47,7 @@ public class InitialPacketTest {
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertArrayEquals(token, parsed.getToken().get());
-    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().getLength());
+    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
   }
 
@@ -73,7 +73,7 @@ public class InitialPacketTest {
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertFalse(parsed.getToken().isPresent());
-    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().getLength());
+    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
   }
 }
