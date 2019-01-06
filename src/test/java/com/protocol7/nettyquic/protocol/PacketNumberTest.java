@@ -30,8 +30,8 @@ public class PacketNumberTest {
 
   @Test
   public void write() {
-    byte[] b = new PacketNumber(123).write();
-    TestUtil.assertHex("807b", b);
+    byte[] b = new PacketNumber(123).write(4);
+    TestUtil.assertHex("0000007b", b);
   }
 
   @Test
@@ -47,9 +47,9 @@ public class PacketNumberTest {
     PacketNumber pn = new PacketNumber(123);
     ByteBuf bb = Unpooled.buffer();
 
-    bb.writeBytes(pn.write());
+    bb.writeBytes(pn.write(pn.getLength()));
 
-    PacketNumber parsed = PacketNumber.parseVarint(bb);
+    PacketNumber parsed = PacketNumber.parse(bb, pn.getLength());
 
     assertEquals(pn, parsed);
   }
@@ -57,27 +57,28 @@ public class PacketNumberTest {
   @Test
   public void parseVarint() {
     assertRead(0x19, "19");
-    assertRead(1, "8001");
-    assertRead(0x3719, "b719");
-    assertRead(0x2589fa19, "e589fa19");
+    assertRead(1, "0001");
+    assertRead(0x3719, "3719");
+    assertRead(0x2589fa19, "2589fa19");
   }
 
   @Test
   public void writeVarint() {
-    assertWrite(0x19, "19");
-    assertWrite(0x3719, "b719");
-    assertWrite(0x2589fa19, "e589fa19");
-    assertWrite(1160621137, "c52dac51");
+    assertWrite(0x19, "00000019");
+    assertWrite(0x3719, "00003719");
+    assertWrite(0x2589fa19, "2589fa19");
+    assertWrite(1160621137, "452dac51");
   }
 
   private void assertRead(int expected, String h) {
-    PacketNumber pn = PacketNumber.parseVarint(bb(h));
+    PacketNumber pn = PacketNumber.parse(bb(h), h.length() / 2);
     assertEquals(expected, pn.asLong());
   }
 
   private void assertWrite(int pn, String expected) {
     ByteBuf bb = Unpooled.buffer();
-    bb.writeBytes(new PacketNumber(pn).write());
+    PacketNumber p = new PacketNumber(pn);
+    bb.writeBytes(p.write(p.getLength()));
 
     byte[] b = Bytes.drainToArray(bb);
 

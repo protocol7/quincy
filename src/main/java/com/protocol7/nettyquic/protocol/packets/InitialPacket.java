@@ -13,8 +13,6 @@ import java.util.Optional;
 
 public class InitialPacket extends LongHeaderPacket {
 
-  public static int MARKER = (0x80 | PacketType.Initial.getType()) & 0xFF;
-
   public static InitialPacket create(
       Optional<ConnectionId> destConnectionId,
       Optional<ConnectionId> srcConnectionId,
@@ -46,7 +44,8 @@ public class InitialPacket extends LongHeaderPacket {
   public static HalfParsedPacket<InitialPacket> parse(ByteBuf bb) {
     bb.markReaderIndex();
 
-    bb.readByte(); // TODO validate
+    byte firstByte = bb.readByte(); // TODO validate
+    int pnLen = (firstByte & 0x3) + 1;
 
     Version version = Version.read(bb);
 
@@ -83,8 +82,8 @@ public class InitialPacket extends LongHeaderPacket {
         int length = Varint.readAsInt(bb);
 
         int beforePnPos = bb.readerIndex();
-        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
-        int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract read pn length
+        PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
+        int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract fromByte pn length
 
         byte[] aad = new byte[bb.readerIndex()];
         bb.resetReaderIndex();

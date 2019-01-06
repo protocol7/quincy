@@ -4,6 +4,7 @@ import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
+
 import java.util.Optional;
 
 public interface Packet {
@@ -21,17 +22,19 @@ public interface Packet {
     if (isLongHeader(firstByte)) {
       // Long header packet
 
+      int packetType = (firstByte & 0x30) >> 4;
+
       // might be a ver neg packet, so we must check the version
       Version version = Version.read(bb);
       bb.resetReaderIndex();
 
       if (version == Version.VERSION_NEGOTIATION) {
         return VersionNegotiationPacket.parse(bb);
-      } else if (firstByte == InitialPacket.MARKER) {
+      } else if (packetType == PacketType.Initial.getType()) {
         return InitialPacket.parse(bb);
-      } else if (firstByte == HandshakePacket.MARKER) {
+      } else if (packetType == PacketType.Handshake.getType()) {
         return HandshakePacket.parse(bb);
-      } else if (firstByte == RetryPacket.MARKER) {
+      } else if (packetType == PacketType.Retry.getType()) {
         return RetryPacket.parse(bb);
       } else {
         throw new RuntimeException("Unknown long header packet");

@@ -54,7 +54,8 @@ public class PacketTest {
     // packet
     // craft a special ver neg packet
     ByteBuf bb = Unpooled.buffer();
-    bb.writeByte(InitialPacket.MARKER);
+    int b = (0b10000000 | PacketType.Initial.getType() << 4) & 0xFF;
+    bb.writeByte(b);
     Version.VERSION_NEGOTIATION.write(bb);
     bb.writeByte(0);
     Version.DRAFT_15.write(bb);

@@ -12,10 +12,10 @@ import java.util.Optional;
 
 public class RetryPacket implements Packet {
 
-  public static int MARKER = 0x80 | PacketType.Retry.getType();
-
   public static HalfParsedPacket<RetryPacket> parse(ByteBuf bb) {
-    bb.readByte(); // TODO verify marker
+    byte b = bb.readByte(); // TODO verify reserved and packet types
+
+    int odcil = ConnectionId.lastLength(b & 0xFF);
     Version version = Version.read(bb);
 
     int cil = bb.readByte() & 0xFF;
@@ -25,7 +25,6 @@ public class RetryPacket implements Packet {
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    int odcil = ConnectionId.lastLength(bb.readByte() & 0xFF);
     ConnectionId orgConnId = ConnectionId.readOptional(odcil, bb).get();
 
     byte[] retryToken = new byte[bb.readableBytes()];
@@ -75,8 +74,11 @@ public class RetryPacket implements Packet {
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    int marker = 0b10000000 | PacketType.Retry.getType();
-    bb.writeByte(marker);
+    int b = (PACKET_TYPE_MASK | PacketType.Retry.getType() << 4) & 0xFF;
+    b = b | 0x40; // fixed
+
+    b |= ((originalConnectionId.getLength() - 3) & 0b1111);
+    bb.writeByte(b);
 
     version.write(bb);
 
@@ -88,9 +90,6 @@ public class RetryPacket implements Packet {
       sourceConnectionId.get().write(bb);
     }
 
-    int odcil = Rnd.rndInt() & 0xF0; // lower 4 bits must be 0
-    odcil |= ((originalConnectionId.getLength() - 3) & 0b1111);
-    bb.writeByte(odcil);
 
     originalConnectionId.write(bb);
 

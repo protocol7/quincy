@@ -1,12 +1,12 @@
 package com.protocol7.nettyquic.protocol.packets;
 
 public enum PacketType {
-  Initial((byte) 0x7F),
-  Retry((byte) 0x7E),
-  Handshake((byte) 0x7D),
-  Zero_RTT_Protected((byte) 0x7C);
+  Initial((byte) 0x0),
+  Zero_RTT_Protected((byte) 0x01),
+  Handshake((byte) 0x02),
+  Retry((byte) 0x03);
 
-  public static PacketType read(byte b) {
+  public static PacketType fromByte(byte b) {
 
     if (b == Initial.type) {
       return Initial;

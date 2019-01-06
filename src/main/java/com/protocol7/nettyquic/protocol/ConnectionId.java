@@ -67,7 +67,7 @@ public class ConnectionId {
   private final byte[] id;
 
   public ConnectionId(final byte[] id) {
-    checkArgument(id.length >= 8);
+    checkArgument(id.length >= 4);
     checkArgument(id.length <= 15);
 
     this.id = id;

@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.protocol.packets;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
+
 import java.util.Objects;
 import java.util.Optional;
 
@@ -60,7 +61,11 @@ public abstract class LongHeaderPacket implements FullPacket {
   }
 
   protected void writePrefix(ByteBuf bb) {
-    int b = (PACKET_TYPE_MASK | packetType.getType()) & 0xFF;
+    int b = (PACKET_TYPE_MASK | packetType.getType() << 4) & 0xFF;
+    b = b | 0x40; // fixed
+
+    int pnLen = packetNumber.getLength();
+    b = (byte) (b | (pnLen - 1)); // pn length
     bb.writeByte(b);
 
     version.write(bb);
@@ -77,7 +82,7 @@ public abstract class LongHeaderPacket implements FullPacket {
   }
 
   protected void writeSuffix(ByteBuf bb, AEAD aead) {
-    byte[] pn = packetNumber.write();
+    byte[] pn = packetNumber.write(packetNumber.getLength());
 
     Varint.write(payload.calculateLength() + pn.length, bb);
 

@@ -12,8 +12,6 @@ import java.util.Optional;
 
 public class HandshakePacket extends LongHeaderPacket {
 
-  public static int MARKER = 0x80 | PacketType.Handshake.getType();
-
   public static HandshakePacket create(
       Optional<ConnectionId> destConnectionId,
       Optional<ConnectionId> srcConnectionId,
@@ -39,11 +37,12 @@ public class HandshakePacket extends LongHeaderPacket {
     bb.markReaderIndex();
 
     byte firstByte = bb.readByte();
-    byte ptByte = (byte) ((firstByte & (~PACKET_TYPE_MASK)) & 0xFF);
-    PacketType packetType = PacketType.read(ptByte);
+    byte ptByte = (byte) ((firstByte & 0x30) >> 4);
+    PacketType packetType = PacketType.fromByte(ptByte);
     if (packetType != PacketType.Handshake) {
       throw new IllegalArgumentException("Invalid packet type");
     }
+    int pnLen = (firstByte & 0x3) + 1;
 
     Version version = Version.read(bb);
 
@@ -69,9 +68,9 @@ public class HandshakePacket extends LongHeaderPacket {
       public HandshakePacket complete(AEADProvider aeadProvider) {
         int length = (int) Varint.readAsLong(bb);
         int beforePnPos = bb.readerIndex();
-        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+        PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
 
-        int payloadLength = length - (bb.readerIndex() - beforePnPos); // remove length read for pn
+        int payloadLength = length - (bb.readerIndex() - beforePnPos); // remove length fromByte for pn
 
         byte[] aad = new byte[bb.readerIndex()];
         bb.resetReaderIndex();

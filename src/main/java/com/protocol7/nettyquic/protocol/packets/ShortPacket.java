@@ -16,7 +16,19 @@ public class ShortPacket implements FullPacket {
 
     byte firstByte = bb.readByte();
 
-    boolean keyPhase = (firstByte & 0x40) == 0x40;
+    boolean firstBit = (firstByte & 0x80) == 0x80;
+    if (firstBit) {
+      throw new IllegalArgumentException("First bit must be 0");
+    }
+
+    boolean reserved = (firstByte & 0x40) == 0x40;
+    if (!reserved) {
+      throw new IllegalArgumentException("Reserved bit must be 1");
+    }
+
+    boolean keyPhase = (firstByte & 0x4) == 0x4;
+
+    int pnLen = (firstByte & 0x03) + 1;
 
     Optional<ConnectionId> connId;
     if (connIdLength > 0) {
@@ -38,7 +50,7 @@ public class ShortPacket implements FullPacket {
 
       @Override
       public ShortPacket complete(AEADProvider aeadProvider) {
-        PacketNumber packetNumber = PacketNumber.parseVarint(bb);
+        PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
 
         byte[] aad = new byte[bb.readerIndex()];
         bb.resetReaderIndex();
@@ -81,16 +93,23 @@ public class ShortPacket implements FullPacket {
   @Override
   public void write(ByteBuf bb, AEAD aead) {
     byte b = 0;
+    b = (byte) (b | 0x40); // reserved must be 1
     if (keyPhase) {
-      b = (byte) (b | 0x40);
+      b = (byte) (b | 0x4);
     }
-    b = (byte) (b | 0x20); // constant
-    b = (byte) (b | 0x10); // constant
+    // TODO spin bit
+    // TODO reserved bits
+
+    int pnLen = packetNumber.getLength();
+
+    b = (byte) (b | (pnLen - 1)); // pn length
+
     bb.writeByte(b);
 
     connectionId.get().write(bb);
 
-    bb.writeBytes(packetNumber.write());
+    byte[] pn = packetNumber.write(pnLen);
+    bb.writeBytes(pn);
 
     byte[] aad = new byte[bb.writerIndex()];
     bb.markReaderIndex();
