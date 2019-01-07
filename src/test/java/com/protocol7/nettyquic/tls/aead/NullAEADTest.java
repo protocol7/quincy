@@ -17,5 +17,7 @@ public class NullAEADTest {
     Assert.assertEquals("bfa010b9339b3f09221521169d826362", Hex.hex(aead.getOtherKey()));
     Assert.assertEquals("d0844438e77ac16643d4080a", Hex.hex(aead.getMyIV()));
     Assert.assertEquals("f7daa3324ffce70f7c4cce9b", Hex.hex(aead.getOtherIV()));
+    Assert.assertEquals("66208e3ab041aebdf22fc1d675febba8", Hex.hex(aead.getMyPnKey()));
+    Assert.assertEquals("b69a4e13cf96e0c6cf50474cc13beed6", Hex.hex(aead.getOtherPnKey()));
   }
 }

@@ -56,10 +56,27 @@ public class HandshakeAEAD {
     byte[] serverHandshakeIV =
         HKDFUtil.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "iv", new byte[0], 12);
 
+    byte[] clientPnKey =
+        HKDFUtil.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
+    byte[] serverPnKey =
+        HKDFUtil.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
+
     if (isClient) {
-      return new AEAD(clientHandshakeKey, serverHandshakeKey, clientHandshakeIV, serverHandshakeIV);
+      return new AEAD(
+          clientHandshakeKey,
+          serverHandshakeKey,
+          clientHandshakeIV,
+          serverHandshakeIV,
+          clientPnKey,
+          serverPnKey);
     } else {
-      return new AEAD(serverHandshakeKey, clientHandshakeKey, serverHandshakeIV, clientHandshakeIV);
+      return new AEAD(
+          serverHandshakeKey,
+          clientHandshakeKey,
+          serverHandshakeIV,
+          clientHandshakeIV,
+          serverPnKey,
+          clientPnKey);
     }
   }
 

@@ -1,7 +1,9 @@
 package com.protocol7.nettyquic.tls.aead;
 
 import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
 
+import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.utils.Hex;
 import java.security.GeneralSecurityException;
 import javax.crypto.AEADBadTagException;
@@ -13,6 +15,10 @@ public class AEADTest {
   private final byte[] myKey = Hex.dehex("be0de0e5bbad5ed67f486f387454220f");
   private final byte[] otherIV = Hex.dehex("df060a12c035c37b2c568e19");
   private final byte[] myIV = Hex.dehex("1fd3e0b3df9cbff12eb94b62");
+
+  private final byte[] myPnKey = Hex.dehex("d71aff8a350696238696b01457ad2b53");
+  private final byte[] otherPnKey =
+      Hex.dehex("d71aff8a350696238696b01457ad2b53"); // same as above to allow for roundtrip test
 
   private final String aadStr = "ff00000065f0c6377cacd2f8dfc3db23154d303f8f16b4d00044938001";
 
@@ -31,46 +37,49 @@ public class AEADTest {
       Hex.dehex(
           "6044ad0284d98339a338cccda2357e9d55f04556c8b3b879508cdbb047484267b5aad7a2e8ac26151da93b9589cb98f1d397b4acd5f92a1dbe2885bb995016114e375bf17e75c2173cb20d128309811969b08c52de1dbd877c852087b2751b5c3a5165cd76c93e2cf600b167d76f469744832d474ff48eaa4860e67134151bd91105965b99e1e77a915c2deed5d88426b71fde9b752fd91b7b5aa1474f72cc16530c622d3d0183e965a96cd0014dc5178ac1beb46a60a80bf7eb083e5a9bea6b38c93c0bde0c48f126da7b0cd4838f501207aa047728b9765aad94979ea60bf84868f1230a5ce0753d92d4518318a336ec5a57b225bf6c4f2e729df15a71b3441700e3d8c0626e06861f35ec8eb3eb73dd29155b87d425091e39e5d65a3012d92f0927c22a5136eb185a0c15dccf67a5a35291623df355c5e486bdfa9ef3003c39363c835a331b35026b5dbf9eb9096890def3918ca84221b5850299dd929c8409d0e3165b206aac8aef4689a495acfc76014186628595cd3b0c57bffafc4759cb44eb9c62a111ca1e8c3b7e521e89a7958bdf960dd5d2f58ca4b1b9ed1c31ea6f12965b480743591d8fecb7f560ab0aaf3c7bd1c98a3dd023f7c1c083851c11d677c04e183cf50bd997763b824e2f659fd4f33b48cc1e955a8666e5002ebcf62e1eaddc7d0ccc78bdf93ceeee24f6aa0512a23bb88e16d05ed9493ddf2cd9cf0d2af7ac1e01076fdd3d06ba39b5e6f9f1e4e21be1dee384c2a21f5b9d2cb50d57b9268eb94fd61839c88a63f0a263a5947a3023fdcdb77cedfa153758cfacf95b45331e08c45b185eb16975f7f6493eda95aeda04e2d52b3ececddeba1be5402aa76f680dcafce657e8b1fe25eaf3c4c54b08d4b844492426dd0e892c05ac48459e5677479fc4a1c55faee2e0b353236b962b74bf777e81efcfb2074bb33d8d0b06364bf7c519b5353f6b1c09fb79d44f316090d89039ba2b389c2ab9168b556ee2af88e474438b165e15e894a9a37e22308001423598e4918b07a0bfd9b6ae335d633d713890c6019f4a90fe2ffd4146bcac133f7e5728e81940e8ec21ec8ae4253eef2e7ff5d38c0af311c39b19f4fd78271606e63a39de080235db7a9d63239329c4b1d1f42b0b48d19034363e42b50062889c64bc1f810b0175dd48a25799bc5e7f950c43ea27cac420f1108cc9b502bc525096a5cc2da8a7eca1363cf463b2184d3880f2183ac19362108848bf65d913d625fad1911fe751a4e18ca23042d5c8e3001ea37f4926ccf13e1a4940f857a20485516f085b3b2a5ba11823cd4a8ffe2e5d5588750eab65ee04697d52996fe39bfc804505853904352716392633570cbe399a46bf0dc609773f990d4d407129a5b93659f8680c4431dcd09d91400d2f03a011826c1dd07ff4040a50cdffcf9cde9a53a9bd69a8728bc8a34e1592ce17976c1099471bd6a667a1d264f7e363d2987791bcc10b0d56bc13c092e9ae29ddede1193c3f6ae71c0cc2e76f4e40ea51f74e8724e6320a6dc80781ab3460e46451b7388b4332874c4e8a421ef60f352678f49d7e357d54b970cf2c90244db23fc203bc09240087ef622d08e52be442c03be28c2e8aaf76a1db8cee838e599cbd440e37475cfb910d5148d8f64e951933");
 
-  private final AEAD aead = new AEAD(myKey, otherKey, myIV, otherIV);
+  private byte[] sample = Hex.dehex("9cd0989bf61cccdff8d6e9f97ac2ceb2");
+  private byte[] header = Hex.dehex("e300000002");
+
+  private final AEAD aead = new AEAD(myKey, otherKey, myIV, otherIV, myPnKey, otherPnKey);
 
   @Test(expected = IllegalArgumentException.class)
   public void myKeyInvalidLength() {
-    new AEAD(new byte[11], otherKey, myIV, otherIV);
+    new AEAD(new byte[11], otherKey, myIV, otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void myKeyNull() {
-    new AEAD(null, otherKey, myIV, otherIV);
+    new AEAD(null, otherKey, myIV, otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void otherKeyInvalidLength() {
-    new AEAD(myKey, new byte[11], myIV, otherIV);
+    new AEAD(myKey, new byte[11], myIV, otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void otherKeyNull() {
-    new AEAD(myKey, null, myIV, otherIV);
+    new AEAD(myKey, null, myIV, otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void myIVInvalidLength() {
-    new AEAD(myKey, otherKey, new byte[11], otherIV);
+    new AEAD(myKey, otherKey, new byte[11], otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void myIVNull() {
-    new AEAD(myKey, otherKey, null, otherIV);
+    new AEAD(myKey, otherKey, null, otherIV, myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void otherIVInvalidLength() {
-    new AEAD(myKey, otherKey, myIV, new byte[11]);
+    new AEAD(myKey, otherKey, myIV, new byte[11], myPnKey, otherPnKey);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void otherIVNull() {
-    new AEAD(myKey, otherKey, myIV, null);
+    new AEAD(myKey, otherKey, myIV, null, myPnKey, otherPnKey);
   }
 
   @Test
@@ -108,5 +117,28 @@ public class AEADTest {
     byte[] pt = testAEAD.open(ct, packetNumber, aad);
 
     assertArrayEquals(pt, plainText);
+  }
+
+  @Test
+  public void headerRoundtripLongHeader() throws GeneralSecurityException {
+
+    byte[] encrypted = aead.encryptHeader(sample, header, false);
+
+    assertEquals(header[0] & 0xF0, encrypted[0] & 0xF0);
+
+    byte[] decrypted = aead.decryptHeader(sample, encrypted, false);
+
+    TestUtil.assertHex(header, decrypted);
+  }
+
+  @Test
+  public void headerRoundtripShortHeader() throws GeneralSecurityException {
+    byte[] encrypted = aead.encryptHeader(sample, header, true);
+
+    assertEquals(header[0] & 0b11100000, encrypted[0] & 0b11100000);
+
+    byte[] decrypted = aead.decryptHeader(sample, encrypted, true);
+
+    TestUtil.assertHex(header, decrypted);
   }
 }

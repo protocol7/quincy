@@ -45,12 +45,22 @@ public class AEAD {
   private final byte[] otherKey;
   private final byte[] myIV;
   private final byte[] otherIV;
+  private final byte[] myPnKey;
+  private final byte[] otherPnKey;
 
-  public AEAD(final byte[] myKey, final byte[] otherKey, final byte[] myIV, final byte[] otherIV) {
+  public AEAD(
+      final byte[] myKey,
+      final byte[] otherKey,
+      final byte[] myIV,
+      final byte[] otherIV,
+      final byte[] myPnKey,
+      final byte[] otherPnKey) {
     this.myKey = prepareKey(myKey);
     this.otherKey = prepareKey(otherKey);
     this.myIV = prepareIV(myIV);
     this.otherIV = prepareIV(otherIV);
+    this.myPnKey = prepareKey(myPnKey);
+    this.otherPnKey = prepareKey(otherPnKey);
   }
 
   public byte[] open(final byte[] src, final long packetNumber, final byte[] aad)
@@ -63,7 +73,58 @@ public class AEAD {
     return process(src, packetNumber, aad, myKey, myIV, Cipher.ENCRYPT_MODE);
   }
 
-  private final ThreadLocal<Cipher> ciphers =
+  public int getSampleLength() {
+    return 16;
+  }
+
+  public byte[] decryptHeader(final byte[] sample, final byte[] bs, boolean shortHeader)
+      throws GeneralSecurityException {
+    return processHeader(sample, bs, shortHeader, otherPnKey);
+  }
+
+  public byte[] encryptHeader(final byte[] sample, final byte[] bs, boolean shortHeader)
+      throws GeneralSecurityException {
+    return processHeader(sample, bs, shortHeader, myPnKey);
+  }
+
+  private final ThreadLocal<Cipher> pnCiphers =
+      ThreadLocal.withInitial(
+          () -> {
+            try {
+              return Cipher.getInstance("AES/ECB/NoPadding", "SunJCE");
+            } catch (final GeneralSecurityException shouldNeverHappen) {
+              throw new RuntimeException(shouldNeverHappen);
+            }
+          });
+
+  private byte[] processHeader(
+      final byte[] sample, final byte[] bs, boolean shortHeader, byte[] key)
+      throws GeneralSecurityException {
+    byte[] out = Arrays.copyOf(bs, bs.length);
+
+    final Cipher cipher = pnCiphers.get();
+    final SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
+
+    cipher.init(Cipher.ENCRYPT_MODE, secretKey);
+
+    byte[] mask = cipher.doFinal(sample);
+
+    byte maskMask;
+    if (shortHeader) {
+      maskMask = 0x1f;
+    } else {
+      maskMask = 0xf;
+    }
+    out[0] ^= mask[0] & maskMask;
+
+    for (int i = 1; i < out.length; i++) {
+      out[i] ^= mask[i];
+    }
+
+    return out;
+  }
+
+  private final ThreadLocal<Cipher> aeadCiphers =
       ThreadLocal.withInitial(
           () -> {
             try {
@@ -81,7 +142,7 @@ public class AEAD {
       final byte[] iv,
       final int mode)
       throws GeneralSecurityException {
-    final Cipher cipher = ciphers.get();
+    final Cipher cipher = aeadCiphers.get();
     final SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
     byte[] nonce = makeNonce(iv, packetNumber);
     final GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
@@ -105,6 +166,14 @@ public class AEAD {
 
   public byte[] getOtherIV() {
     return otherIV;
+  }
+
+  public byte[] getMyPnKey() {
+    return myPnKey;
+  }
+
+  public byte[] getOtherPnKey() {
+    return otherPnKey;
   }
 
   @Override

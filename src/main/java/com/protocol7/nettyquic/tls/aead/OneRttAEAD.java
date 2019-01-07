@@ -72,12 +72,27 @@ public class OneRttAEAD {
     byte[] serverApplicationIV =
         HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "iv", EMPTY, 12);
 
+    byte[] clientPnKey =
+        HKDFUtil.expandLabel(clientApplicationTrafficSecret, labelPrefix, "hp", EMPTY, 16);
+    byte[] serverPnKey =
+        HKDFUtil.expandLabel(serverApplicationTrafficSecret, labelPrefix, "hp", EMPTY, 16);
+
     if (isClient) {
       return new AEAD(
-          clientApplicationKey, serverApplicationKey, clientApplicationIV, serverApplicationIV);
+          clientApplicationKey,
+          serverApplicationKey,
+          clientApplicationIV,
+          serverApplicationIV,
+          clientPnKey,
+          serverPnKey);
     } else {
       return new AEAD(
-          serverApplicationKey, clientApplicationKey, serverApplicationIV, clientApplicationIV);
+          serverApplicationKey,
+          clientApplicationKey,
+          serverApplicationIV,
+          clientApplicationIV,
+          serverPnKey,
+          clientPnKey);
     }
   }
 

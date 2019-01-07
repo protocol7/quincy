@@ -38,7 +38,10 @@ public class NullAEAD {
     byte[] otherKey = expand(hkdf, otherSecret, "quic key", 16);
     byte[] otherIV = expand(hkdf, otherSecret, "quic iv", 12);
 
-    return new AEAD(myKey, otherKey, myIV, otherIV);
+    byte[] myPnKey = expand(hkdf, mySecret, "quic hp", 16);
+    byte[] otherPnKey = expand(hkdf, otherSecret, "quic hp", 16);
+
+    return new AEAD(myKey, otherKey, myIV, otherIV, myPnKey, otherPnKey);
   }
 
   private static byte[] expand(HKDF hkdf, byte[] secret, String label, int length) {
