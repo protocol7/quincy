@@ -3,15 +3,12 @@ package com.protocol7.nettyquic.protocol;
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.protocol7.nettyquic.utils.Bytes;
-import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 
 public class PacketNumber implements Comparable<PacketNumber> {
 
-  public static PacketNumber parse(final ByteBuf bb, int length) {
-    byte[] b = new byte[length];
-    bb.readBytes(b);
-    byte[] pad = new byte[4 - length];
+  public static PacketNumber parse(final byte[] b) {
+    byte[] pad = new byte[4 - b.length];
     byte[] bs = Bytes.concat(pad, b);
 
     return new PacketNumber(Ints.fromByteArray(bs));

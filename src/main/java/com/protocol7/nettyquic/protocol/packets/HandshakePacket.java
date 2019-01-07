@@ -5,7 +5,9 @@ import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
+import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
+import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -32,6 +34,7 @@ public class HandshakePacket extends LongHeaderPacket {
   }
 
   public static HalfParsedPacket<HandshakePacket> parse(ByteBuf bb) {
+    // TODO merge with InitialPacket parsing
     // TODO validate marker
 
     bb.markReaderIndex();
@@ -42,7 +45,6 @@ public class HandshakePacket extends LongHeaderPacket {
     if (packetType != PacketType.Handshake) {
       throw new IllegalArgumentException("Invalid packet type");
     }
-    int pnLen = (firstByte & 0x3) + 1;
 
     Version version = Version.read(bb);
 
@@ -66,22 +68,53 @@ public class HandshakePacket extends LongHeaderPacket {
 
       @Override
       public HandshakePacket complete(AEADProvider aeadProvider) {
-        int length = (int) Varint.readAsLong(bb);
-        int beforePnPos = bb.readerIndex();
-        PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
-
-        int payloadLength =
-            length - (bb.readerIndex() - beforePnPos); // remove length fromByte for pn
-
-        byte[] aad = new byte[bb.readerIndex()];
-        bb.resetReaderIndex();
-        bb.readBytes(aad);
+        int length = Varint.readAsInt(bb);
 
         AEAD aead = aeadProvider.get(EncryptionLevel.Handshake);
 
-        Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+        int pnOffset = bb.readerIndex();
+        int sampleOffset = pnOffset + 4;
 
-        return new HandshakePacket(destConnId, srcConnId, version, packetNumber, payload);
+        byte[] sample = new byte[aead.getSampleLength()];
+
+        bb.getBytes(sampleOffset, sample);
+
+        // get 4 bytes for PN. Might be too long, but we'll handle that below
+        byte[] pn = new byte[4];
+        bb.getBytes(pnOffset, pn);
+
+        // decrypt the protected header parts
+        try {
+          byte[] decryptedHeader =
+              aead.decryptHeader(sample, Bytes.concat(new byte[] {firstByte}, pn), false);
+
+          byte decryptedFirstByte = decryptedHeader[0];
+          int pnLen = (decryptedFirstByte & 0x3) + 1;
+
+          byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
+
+          PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+
+          // move reader ahead by what the PN length actually was
+          bb.readerIndex(bb.readerIndex() + pnLen);
+          int payloadLength = length - (bb.readerIndex() - pnOffset); // subtract fromByte pn length
+
+          byte[] aad = new byte[bb.readerIndex()];
+          bb.resetReaderIndex();
+          bb.readBytes(aad);
+
+          // restore the AAD with the now removed header protected
+          aad[0] = decryptedFirstByte;
+          for (int i = 0; i < pnBytes.length; i++) {
+            aad[pnOffset + i] = pnBytes[i];
+          }
+
+          Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+
+          return new HandshakePacket(destConnId, srcConnId, version, packetNumber, payload);
+        } catch (GeneralSecurityException e) {
+          throw new RuntimeException(e);
+        }
       }
     };
   }

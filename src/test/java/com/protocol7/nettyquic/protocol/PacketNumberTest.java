@@ -45,11 +45,10 @@ public class PacketNumberTest {
   @Test
   public void roundtrip() {
     PacketNumber pn = new PacketNumber(123);
-    ByteBuf bb = Unpooled.buffer();
 
-    bb.writeBytes(pn.write(pn.getLength()));
+    byte[] b = pn.write(pn.getLength());
 
-    PacketNumber parsed = PacketNumber.parse(bb, pn.getLength());
+    PacketNumber parsed = PacketNumber.parse(b);
 
     assertEquals(pn, parsed);
   }
@@ -71,7 +70,7 @@ public class PacketNumberTest {
   }
 
   private void assertRead(int expected, String h) {
-    PacketNumber pn = PacketNumber.parse(bb(h), h.length() / 2);
+    PacketNumber pn = PacketNumber.parse(Hex.dehex(h));
     assertEquals(expected, pn.asLong());
   }
 

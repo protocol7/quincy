@@ -6,7 +6,10 @@ import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
+import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
+import java.security.GeneralSecurityException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -45,7 +48,6 @@ public class InitialPacket extends LongHeaderPacket {
     bb.markReaderIndex();
 
     byte firstByte = bb.readByte(); // TODO validate
-    int pnLen = (firstByte & 0x3) + 1;
 
     Version version = Version.read(bb);
 
@@ -81,21 +83,53 @@ public class InitialPacket extends LongHeaderPacket {
       public InitialPacket complete(AEADProvider aeadProvider) {
         int length = Varint.readAsInt(bb);
 
-        int beforePnPos = bb.readerIndex();
-        PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
-        int payloadLength =
-            length - (bb.readerIndex() - beforePnPos); // subtract fromByte pn length
-
-        byte[] aad = new byte[bb.readerIndex()];
-        bb.resetReaderIndex();
-        bb.readBytes(aad);
-
         AEAD aead = aeadProvider.get(EncryptionLevel.Initial);
 
-        Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+        int pnOffset = bb.readerIndex();
+        int sampleOffset = pnOffset + 4;
 
-        return InitialPacket.create(
-            destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+        byte[] sample = new byte[aead.getSampleLength()];
+
+        bb.getBytes(sampleOffset, sample);
+
+        // get 4 bytes for PN. Might be too long, but we'll handle that below
+        byte[] pn = new byte[4];
+        bb.getBytes(pnOffset, pn);
+
+        // decrypt the protected header parts
+        try {
+          byte[] decryptedHeader =
+              aead.decryptHeader(sample, Bytes.concat(new byte[] {firstByte}, pn), false);
+
+          byte decryptedFirstByte = decryptedHeader[0];
+          int pnLen = (decryptedFirstByte & 0x3) + 1;
+
+          byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
+
+          PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+
+          // move reader ahead by what the PN length actually was
+          bb.readerIndex(bb.readerIndex() + pnLen);
+          int payloadLength = length - (bb.readerIndex() - pnOffset); // subtract fromByte pn length
+
+          byte[] aad = new byte[bb.readerIndex()];
+          bb.resetReaderIndex();
+          bb.readBytes(aad);
+
+          // restore the AAD with the now removed header protected
+          aad[0] = decryptedFirstByte;
+          for (int i = 0; i < pnBytes.length; i++) {
+            aad[pnOffset + i] = pnBytes[i];
+          }
+
+          Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+
+          return InitialPacket.create(
+              destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+
+        } catch (GeneralSecurityException e) {
+          throw new RuntimeException(e);
+        }
       }
     };
   }

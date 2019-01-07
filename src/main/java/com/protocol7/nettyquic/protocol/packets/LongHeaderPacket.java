@@ -2,7 +2,9 @@ package com.protocol7.nettyquic.protocol.packets;
 
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
+import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -85,6 +87,9 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     Varint.write(payload.calculateLength() + pn.length, bb);
 
+    int pnOffset = bb.writerIndex();
+    int sampleOffset = pnOffset + 4;
+
     bb.writeBytes(pn);
 
     byte[] aad = new byte[bb.writerIndex()];
@@ -93,6 +98,19 @@ public abstract class LongHeaderPacket implements FullPacket {
     bb.resetReaderIndex();
 
     payload.write(bb, aead, packetNumber, aad);
+
+    byte[] sample = new byte[aead.getSampleLength()];
+    bb.getBytes(sampleOffset, sample);
+
+    byte firstBýte = bb.getByte(0);
+    byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
+    try {
+      byte[] encryptedHeader = aead.encryptHeader(sample, header, false);
+      bb.setByte(0, encryptedHeader[0]);
+      bb.setBytes(pnOffset, encryptedHeader, 1, encryptedHeader.length - 1);
+    } catch (GeneralSecurityException e) {
+      throw new RuntimeException(e);
+    }
   }
 
   @Override
