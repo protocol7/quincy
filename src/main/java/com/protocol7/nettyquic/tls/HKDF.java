@@ -35,12 +35,12 @@ public class HKDF {
 
   public static byte[] expandLabel(
       byte[] key, String labelPrefix, String label, byte[] context, int length) {
-    byte[] expandedLabel = makeLabel(labelPrefix, label, context, length);
+    byte[] expandedLabel = makeLabel(label, context, length);
     return hkdf.expand(key, expandedLabel, length);
   }
 
-  private static byte[] makeLabel(String labelPrefix, String label, byte[] context, int length) {
-    byte[] expandedLabel = (labelPrefix + label).getBytes(Charsets.US_ASCII);
+  private static byte[] makeLabel(String label, byte[] context, int length) {
+    byte[] expandedLabel = (TLS_13_LABEL_PREFIX + label).getBytes(Charsets.US_ASCII);
 
     ByteBuf bb = Unpooled.buffer();
     bb.writeShort(length);

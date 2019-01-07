@@ -18,19 +18,15 @@ public class VerifyDataTest {
 
   private final byte[] tlsVD =
       Hex.dehex("447cdde9e7321b90305f97755a1dcf630b9e0d03e3d5a0b9f99434eb677f319d");
-  private final byte[] quicVD =
-      Hex.dehex("1e21c0b40fe80e17214e1774d889b8278d908b80ff57ec88da657903d6295b44");
 
   @Test
   public void testCreate() {
     assertHex(tlsVD, create(handshakeTrafficSecret, finishedHash, false));
-    assertHex(quicVD, create(handshakeTrafficSecret, finishedHash, true));
   }
 
   @Test
   public void testVerify() {
     assertTrue(VerifyData.verify(tlsVD, handshakeTrafficSecret, finishedHash, false));
-    assertTrue(VerifyData.verify(quicVD, handshakeTrafficSecret, finishedHash, true));
 
     assertFalse(VerifyData.verify(Rnd.rndBytes(32), handshakeTrafficSecret, finishedHash, false));
   }

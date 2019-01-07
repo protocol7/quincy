@@ -23,19 +23,4 @@ public class HandshakeAEADTest {
     assertEquals("71abc2cae4c699d47c600268", hex(aead.getMyIV()));
     assertEquals("4c042ddc120a38d1417fc815", hex(aead.getOtherIV()));
   }
-
-  @Test
-  public void testKnownQuic() {
-    byte[] sharedSecret = dehex("c1a6e992dc90a4729325da67fc4f90d7ec853ca2481ae9a7bca6cd33eff8403c");
-    byte[] helloHash = dehex("96e0581a2ce8cb7154fd942ed2f2cd37861783fc8498d02e2b533d8ed927e27a");
-
-    byte[] handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
-
-    AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
-
-    assertEquals("106b616bfe8f1a7edca6f95321f6dbe4", hex(aead.getMyKey()));
-    assertEquals("e9ed76aa63fb170912bacd53329b8c20", hex(aead.getOtherKey()));
-    assertEquals("1c28f3edb0df229068c6e48f", hex(aead.getMyIV()));
-    assertEquals("f9dcc8ae4149ecd2985f9e96", hex(aead.getOtherIV()));
-  }
 }

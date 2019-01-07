@@ -22,19 +22,4 @@ public class OneRttAEADTest {
     assertEquals("bc4dd5f7b98acff85466261d", hex(aead.getMyIV()));
     assertEquals("1b13dd9f8d8f17091d34b349", hex(aead.getOtherIV()));
   }
-
-  @Test
-  public void knownQuic() {
-    byte[] handshakeSecret =
-        Hex.dehex("54beccbbf7307051b43b5a99b4f58face05bf67e9e1cd3e0ac7e3cd04f9f0f8e");
-    byte[] handshakeHash =
-        Hex.dehex("53c9436f0219891b0f4be411dfa186b5db4c498c256454184005040e7bf3ee60");
-
-    AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true, true);
-
-    assertEquals("3817066552b0555ac9f19fd03aaa1a75", hex(aead.getMyKey()));
-    assertEquals("92ce8ebfde01e1809ca645eda4531425", hex(aead.getOtherKey()));
-    assertEquals("47a328940d70e590f9dba411", hex(aead.getMyIV()));
-    assertEquals("f6e3224e9709c000034dbab7", hex(aead.getOtherIV()));
-  }
 }
