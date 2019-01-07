@@ -9,15 +9,15 @@ public class NullAEADTest {
 
   @Test
   public void testSecretsGenerator() {
-    ConnectionId connId = new ConnectionId(Hex.dehex("c574992996084bbe8e02b3cbb91fdd"));
+    ConnectionId connId = new ConnectionId(Hex.dehex("8394c8f03e515708")); // from RFC
 
     AEAD aead = NullAEAD.create(connId, true);
 
-    Assert.assertEquals("c3d413881123d5ba92583c5beb798ecf", Hex.hex(aead.getMyKey()));
-    Assert.assertEquals("bfa010b9339b3f09221521169d826362", Hex.hex(aead.getOtherKey()));
-    Assert.assertEquals("d0844438e77ac16643d4080a", Hex.hex(aead.getMyIV()));
-    Assert.assertEquals("f7daa3324ffce70f7c4cce9b", Hex.hex(aead.getOtherIV()));
-    Assert.assertEquals("66208e3ab041aebdf22fc1d675febba8", Hex.hex(aead.getMyPnKey()));
-    Assert.assertEquals("b69a4e13cf96e0c6cf50474cc13beed6", Hex.hex(aead.getOtherPnKey()));
+    Assert.assertEquals("98b0d7e5e7a402c67c33f350fa65ea54", Hex.hex(aead.getMyKey()));
+    Assert.assertEquals("9a8be902a9bdd91d16064ca118045fb4", Hex.hex(aead.getOtherKey()));
+    Assert.assertEquals("19e94387805eb0b46c03a788", Hex.hex(aead.getMyIV()));
+    Assert.assertEquals("0a82086d32205ba22241d8dc", Hex.hex(aead.getOtherIV()));
+    Assert.assertEquals("0edd982a6ac527f2eddcbb7348dea5d7", Hex.hex(aead.getMyPnKey()));
+    Assert.assertEquals("94b9452d2b3c7c7f6da7fdd8593537fd", Hex.hex(aead.getOtherPnKey()));
   }
 }

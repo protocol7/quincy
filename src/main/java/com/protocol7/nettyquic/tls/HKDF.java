@@ -31,6 +31,15 @@ public class HKDF {
     return hkdf.extract(DERIVED_SECRET, sharedSecret);
   }
 
+  public static byte[] extract(byte[] salt, byte[] inputKeyingMaterial) {
+    return hkdf.extract(salt, inputKeyingMaterial);
+  }
+
+  public static byte[] expandLabel(byte[] key, String label, int length) {
+    byte[] expandedLabel = (TLS_13_LABEL_PREFIX + label).getBytes(Charsets.US_ASCII);
+    return hkdf.expand(key, expandedLabel, length);
+  }
+
   public static byte[] expandLabel(byte[] key, String label, byte[] context, int length) {
     byte[] expandedLabel = makeLabel(label, context, length);
     return hkdf.expand(key, expandedLabel, length);
