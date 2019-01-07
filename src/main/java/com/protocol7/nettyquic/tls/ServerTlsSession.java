@@ -91,14 +91,14 @@ public class ServerTlsSession {
     // create server finished
     byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
     byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
-    handshakeSecret = HKDFUtil.calculateHandshakeSecret(sharedSecret);
+    handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
     byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     // create handshake AEAD
     AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
 
     byte[] serverHandshakeTrafficSecret =
-        HKDFUtil.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
 
     // finished_hash = SHA256(Client Hello ... Server Cert Verify)
     byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
@@ -128,7 +128,7 @@ public class ServerTlsSession {
     byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     byte[] clientHandshakeTrafficSecret =
-        HKDFUtil.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
 
     byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
 

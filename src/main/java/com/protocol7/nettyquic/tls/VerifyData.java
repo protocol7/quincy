@@ -17,7 +17,7 @@ public class VerifyData {
     //    context = "",
     //    len = 32)
     byte[] finishedKey =
-        HKDFUtil.expandLabel(handshakeTrafficSecret, labelPrefix, "finished", new byte[0], 32);
+        HKDF.expandLabel(handshakeTrafficSecret, labelPrefix, "finished", new byte[0], 32);
 
     // verify_data = HMAC-SHA256(
     //	key = finished_key,
@@ -28,9 +28,9 @@ public class VerifyData {
   private static String getPrefix(boolean quic) {
     String labelPrefix;
     if (quic) {
-      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
+      labelPrefix = HKDF.QUIC_LABEL_PREFIX;
     } else {
-      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
+      labelPrefix = HKDF.TLS_13_LABEL_PREFIX;
     }
     return labelPrefix;
   }

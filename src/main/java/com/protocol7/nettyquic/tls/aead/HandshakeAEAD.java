@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.tls.aead;
 
-import com.protocol7.nettyquic.tls.HKDFUtil;
+import com.protocol7.nettyquic.tls.HKDF;
 
 public class HandshakeAEAD {
 
@@ -14,7 +14,7 @@ public class HandshakeAEAD {
     //    context = hello_hash,
     //    len = 32)
     byte[] clientHandshakeTrafficSecret =
-        HKDFUtil.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
 
     // server_handshake_traffic_secret = hkdf-Expand-Label(
     //    key = handshake_secret,
@@ -22,7 +22,7 @@ public class HandshakeAEAD {
     //    context = hello_hash,
     //    len = 32)
     byte[] serverHandshakeTrafficSecret =
-        HKDFUtil.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
 
     // client_handshake_key = hkdf-Expand-Label(
     //    key = client_handshake_traffic_secret,
@@ -30,7 +30,7 @@ public class HandshakeAEAD {
     //    context = "",
     //    len = 16)
     byte[] clientHandshakeKey =
-        HKDFUtil.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "key", new byte[0], 16);
+        HKDF.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "key", new byte[0], 16);
 
     // server_handshake_key = hkdf-Expand-Label(
     //    key = server_handshake_traffic_secret,
@@ -38,7 +38,7 @@ public class HandshakeAEAD {
     //    context = "",
     //    len = 16)
     byte[] serverHandshakeKey =
-        HKDFUtil.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "key", new byte[0], 16);
+        HKDF.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "key", new byte[0], 16);
 
     // client_handshake_iv = hkdf-Expand-Label(
     //    key = client_handshake_traffic_secret,
@@ -46,7 +46,7 @@ public class HandshakeAEAD {
     //    context = "",
     //    len = 12)
     byte[] clientHandshakeIV =
-        HKDFUtil.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "iv", new byte[0], 12);
+        HKDF.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "iv", new byte[0], 12);
 
     // server_handshake_iv = hkdf-Expand-Label(
     //    key = server_handshake_traffic_secret,
@@ -54,12 +54,12 @@ public class HandshakeAEAD {
     //    context = "",
     //    len = 12)
     byte[] serverHandshakeIV =
-        HKDFUtil.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "iv", new byte[0], 12);
+        HKDF.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "iv", new byte[0], 12);
 
     byte[] clientPnKey =
-        HKDFUtil.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
+        HKDF.expandLabel(clientHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
     byte[] serverPnKey =
-        HKDFUtil.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
+        HKDF.expandLabel(serverHandshakeTrafficSecret, labelPrefix, "hp", new byte[0], 16);
 
     if (isClient) {
       return new AEAD(
@@ -83,9 +83,9 @@ public class HandshakeAEAD {
   private static String getPrefix(boolean quic) {
     String labelPrefix;
     if (quic) {
-      labelPrefix = HKDFUtil.QUIC_LABEL_PREFIX;
+      labelPrefix = HKDF.QUIC_LABEL_PREFIX;
     } else {
-      labelPrefix = HKDFUtil.TLS_13_LABEL_PREFIX;
+      labelPrefix = HKDF.TLS_13_LABEL_PREFIX;
     }
     return labelPrefix;
   }

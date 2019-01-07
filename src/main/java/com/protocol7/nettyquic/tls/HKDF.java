@@ -1,17 +1,16 @@
 package com.protocol7.nettyquic.tls;
 
-import at.favre.lib.crypto.HKDF;
 import com.google.common.base.Charsets;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 
-public class HKDFUtil {
+public class HKDF {
 
   public static final String TLS_13_LABEL_PREFIX = "tls13 ";
   public static final String QUIC_LABEL_PREFIX = "quic ";
 
-  public static final HKDF hkdf = at.favre.lib.crypto.HKDF.fromHmacSha256();
+  public static final at.favre.lib.crypto.HKDF hkdf = at.favre.lib.crypto.HKDF.fromHmacSha256();
 
   // early_secret = hkdf-Extract(
   //         salt=00,
