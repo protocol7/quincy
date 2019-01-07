@@ -17,7 +17,6 @@ public class AEAD {
     final byte[] nonce = new byte[iv.length];
 
     System.arraycopy(Longs.toByteArray(packetNumber), 0, nonce, nonce.length - 8, 8);
-
     for (int i = 0; i < iv.length; i++) {
       nonce[i] ^= iv[i];
     }

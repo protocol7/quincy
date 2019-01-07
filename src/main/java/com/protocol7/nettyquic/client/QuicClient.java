@@ -15,7 +15,7 @@ import java.net.InetSocketAddress;
 public class QuicClient {
 
   public static Future<QuicClient> connect(
-          final InetSocketAddress serverAddress, final StreamListener streamListener) {
+      final InetSocketAddress serverAddress, final StreamListener streamListener) {
     final NioEventLoopGroup group = new NioEventLoopGroup();
     final ClientHandler handler = new ClientHandler();
     final Bootstrap b = new Bootstrap();

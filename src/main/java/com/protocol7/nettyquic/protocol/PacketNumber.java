@@ -4,7 +4,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Objects;
 
 public class PacketNumber implements Comparable<PacketNumber> {

@@ -4,7 +4,6 @@ import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
-
 import java.util.Optional;
 
 public interface Packet {

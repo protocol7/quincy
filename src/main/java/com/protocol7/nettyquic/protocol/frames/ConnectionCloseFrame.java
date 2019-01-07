@@ -44,7 +44,8 @@ public class ConnectionCloseFrame extends Frame {
         application, errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
   }
 
-  public static ConnectionCloseFrame connection(final int errorCode, final int frameType, final String reasonPhrase) {
+  public static ConnectionCloseFrame connection(
+      final int errorCode, final int frameType, final String reasonPhrase) {
     return new ConnectionCloseFrame(false, errorCode, frameType, reasonPhrase);
   }
 
@@ -58,7 +59,10 @@ public class ConnectionCloseFrame extends Frame {
   private final String reasonPhrase;
 
   private ConnectionCloseFrame(
-          final boolean application, final int errorCode, final int frameType, final String reasonPhrase) {
+      final boolean application,
+      final int errorCode,
+      final int frameType,
+      final String reasonPhrase) {
     super(FrameType.CONNECTION_CLOSE);
     this.application = application;
     this.errorCode = errorCode;

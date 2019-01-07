@@ -6,7 +6,6 @@ import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Hex;
 import com.protocol7.nettyquic.utils.Opt;
-import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 
@@ -89,7 +88,6 @@ public class RetryPacket implements Packet {
     if (sourceConnectionId.isPresent()) {
       sourceConnectionId.get().write(bb);
     }
-
 
     originalConnectionId.write(bb);
 

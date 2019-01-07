@@ -70,7 +70,8 @@ public class HandshakePacket extends LongHeaderPacket {
         int beforePnPos = bb.readerIndex();
         PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
 
-        int payloadLength = length - (bb.readerIndex() - beforePnPos); // remove length fromByte for pn
+        int payloadLength =
+            length - (bb.readerIndex() - beforePnPos); // remove length fromByte for pn
 
         byte[] aad = new byte[bb.readerIndex()];
         bb.resetReaderIndex();

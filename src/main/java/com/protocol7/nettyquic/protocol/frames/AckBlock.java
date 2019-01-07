@@ -1,8 +1,8 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import com.protocol7.nettyquic.protocol.PacketNumber;
-
 import static com.google.common.base.Preconditions.checkArgument;
+
+import com.protocol7.nettyquic.protocol.PacketNumber;
 
 public class AckBlock {
 

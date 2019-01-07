@@ -83,7 +83,8 @@ public class InitialPacket extends LongHeaderPacket {
 
         int beforePnPos = bb.readerIndex();
         PacketNumber packetNumber = PacketNumber.parse(bb, pnLen);
-        int payloadLength = length - (bb.readerIndex() - beforePnPos); // subtract fromByte pn length
+        int payloadLength =
+            length - (bb.readerIndex() - beforePnPos); // subtract fromByte pn length
 
         byte[] aad = new byte[bb.readerIndex()];
         bb.resetReaderIndex();
