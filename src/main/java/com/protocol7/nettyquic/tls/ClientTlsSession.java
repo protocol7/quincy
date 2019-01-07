@@ -84,7 +84,7 @@ public class ClientTlsSession {
 
     handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
 
-    return HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
+    return HandshakeAEAD.create(handshakeSecret, helloHash, true);
   }
 
   public synchronized Optional<HandshakeResult> handleHandshake(byte[] msg) {
@@ -126,14 +126,14 @@ public class ClientTlsSession {
 
       byte[] handshakeHash = Hash.sha256(clientHello, serverHello, hs);
 
-      AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true, true);
+      AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
 
       // TODO dedup
       byte[] clientHandshakeTrafficSecret =
-          HKDF.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
+          HKDF.expandLabel(handshakeSecret, "c hs traffic", helloHash, 32);
 
       ClientFinished clientFinished =
-          ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash, false);
+          ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash);
 
       byte[] b = Bytes.write(clientFinished);
 
@@ -153,7 +153,7 @@ public class ClientTlsSession {
     byte[] finishedHash = Hash.sha256(clientHello, serverHello, finBytes);
 
     byte[] serverHandshakeTrafficSecret =
-        HKDF.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
 
     boolean valid =
         VerifyData.verify(

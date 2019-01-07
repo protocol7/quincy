@@ -29,8 +29,7 @@ public class ClientFinishedTest {
     ClientFinished fin =
         ClientFinished.create(
             Hex.dehex("ff0e5b965291c608c1e8cd267eefc0afcc5e98a2786373f0db47b04786d72aea"),
-            Hex.dehex("22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b"),
-            false);
+            Hex.dehex("22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b"));
 
     assertEquals(
         "976017a77ae47f1658e28f7085fe37d149d1e9c91f56e1aebbe0c6bb054bd92b",

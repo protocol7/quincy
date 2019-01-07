@@ -5,34 +5,21 @@ import com.google.common.hash.Hashing;
 
 public class VerifyData {
 
-  public static byte[] create(byte[] handshakeTrafficSecret, byte[] finishedHash, boolean quic) {
+  public static byte[] create(byte[] handshakeTrafficSecret, byte[] finishedHash) {
     Preconditions.checkArgument(handshakeTrafficSecret.length == 32);
     Preconditions.checkArgument(finishedHash.length == 32);
-
-    String labelPrefix = getPrefix(quic);
 
     // finished_key = HKDF-Expand-Label(
     //    key = client_handshake_traffic_secret,
     //    label = "finished",
     //    context = "",
     //    len = 32)
-    byte[] finishedKey =
-        HKDF.expandLabel(handshakeTrafficSecret, labelPrefix, "finished", new byte[0], 32);
+    byte[] finishedKey = HKDF.expandLabel(handshakeTrafficSecret, "finished", new byte[0], 32);
 
     // verify_data = HMAC-SHA256(
     //	key = finished_key,
     //	msg = finished_hash)
     return Hashing.hmacSha256(finishedKey).hashBytes(finishedHash).asBytes();
-  }
-
-  private static String getPrefix(boolean quic) {
-    String labelPrefix;
-    if (quic) {
-      labelPrefix = HKDF.QUIC_LABEL_PREFIX;
-    } else {
-      labelPrefix = HKDF.TLS_13_LABEL_PREFIX;
-    }
-    return labelPrefix;
   }
 
   public static boolean verify(
@@ -41,7 +28,7 @@ public class VerifyData {
     Preconditions.checkArgument(handshakeTrafficSecret.length == 32);
     Preconditions.checkArgument(finishedHash.length == 32);
 
-    byte[] actual = create(handshakeTrafficSecret, finishedHash, quic);
+    byte[] actual = create(handshakeTrafficSecret, finishedHash);
 
     return CryptoEquals.isEqual(verifyData, actual);
   }

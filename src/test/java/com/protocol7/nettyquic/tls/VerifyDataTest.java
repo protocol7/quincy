@@ -21,7 +21,7 @@ public class VerifyDataTest {
 
   @Test
   public void testCreate() {
-    assertHex(tlsVD, create(handshakeTrafficSecret, finishedHash, false));
+    assertHex(tlsVD, create(handshakeTrafficSecret, finishedHash));
   }
 
   @Test

@@ -7,9 +7,8 @@ import io.netty.buffer.ByteBuf;
 
 public class ClientFinished implements Writeable {
 
-  public static ClientFinished create(
-      byte[] clientHandshakeTrafficSecret, byte[] finHash, boolean quic) {
-    byte[] verifyData = VerifyData.create(clientHandshakeTrafficSecret, finHash, quic);
+  public static ClientFinished create(byte[] clientHandshakeTrafficSecret, byte[] finHash) {
+    byte[] verifyData = VerifyData.create(clientHandshakeTrafficSecret, finHash);
 
     return new ClientFinished(verifyData);
   }

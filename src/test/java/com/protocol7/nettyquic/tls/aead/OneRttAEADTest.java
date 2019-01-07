@@ -15,7 +15,7 @@ public class OneRttAEADTest {
     byte[] handshakeHash =
         Hex.dehex("22844b930e5e0a59a09d5ac35fc032fc91163b193874a265236e568077378d8b");
 
-    AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, false, true);
+    AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
 
     assertEquals("49134b95328f279f0183860589ac6707", hex(aead.getMyKey()));
     assertEquals("0b6d22c8ff68097ea871c672073773bf", hex(aead.getOtherKey()));

@@ -95,15 +95,15 @@ public class ServerTlsSession {
     byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     // create handshake AEAD
-    AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true, true);
+    AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true);
 
     byte[] serverHandshakeTrafficSecret =
-        HKDF.expandLabel(handshakeSecret, "tls13 ", "s hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
 
     // finished_hash = SHA256(Client Hello ... Server Cert Verify)
     byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
 
-    byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash, false);
+    byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash);
 
     ServerHandshakeFinished fin = new ServerHandshakeFinished(verifyData);
     fin.write(handshakeBB);
@@ -112,7 +112,7 @@ public class ServerTlsSession {
     handshake = Bytes.drainToArray(handshakeBB);
 
     byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
-    AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, true, false);
+    AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
 
     return new ServerHelloAndHandshake(serverHello, handshake, handshakeAEAD, oneRttAEAD);
   }
@@ -128,7 +128,7 @@ public class ServerTlsSession {
     byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     byte[] clientHandshakeTrafficSecret =
-        HKDF.expandLabel(handshakeSecret, "tls13 ", "c hs traffic", helloHash, 32);
+        HKDF.expandLabel(handshakeSecret, "c hs traffic", helloHash, 32);
 
     byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
 

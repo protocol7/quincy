@@ -16,7 +16,7 @@ public class HandshakeAEADTest {
 
     byte[] handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
 
-    AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, false, true);
+    AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, true);
 
     assertEquals("7154f314e6be7dc008df2c832baa1d39", hex(aead.getMyKey()));
     assertEquals("844780a7acad9f980fa25c114e43402a", hex(aead.getOtherKey()));

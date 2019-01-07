@@ -7,8 +7,7 @@ import io.netty.buffer.Unpooled;
 
 public class HKDF {
 
-  public static final String TLS_13_LABEL_PREFIX = "tls13 ";
-  public static final String QUIC_LABEL_PREFIX = "quic ";
+  private static final String TLS_13_LABEL_PREFIX = "tls13 ";
 
   public static final at.favre.lib.crypto.HKDF hkdf = at.favre.lib.crypto.HKDF.fromHmacSha256();
 
@@ -23,8 +22,7 @@ public class HKDF {
   //                label = "derived",
   //                context = empty_hash,
   //                len = 32)
-  private static final byte[] DERIVED_SECRET =
-      expandLabel(EARLY_SECRET, TLS_13_LABEL_PREFIX, "derived", EMPTY_HASH, 32);
+  private static final byte[] DERIVED_SECRET = expandLabel(EARLY_SECRET, "derived", EMPTY_HASH, 32);
 
   public static byte[] calculateHandshakeSecret(byte[] sharedSecret) {
     //         handshake_secret = hkdf-Extract(
@@ -33,8 +31,7 @@ public class HKDF {
     return hkdf.extract(DERIVED_SECRET, sharedSecret);
   }
 
-  public static byte[] expandLabel(
-      byte[] key, String labelPrefix, String label, byte[] context, int length) {
+  public static byte[] expandLabel(byte[] key, String label, byte[] context, int length) {
     byte[] expandedLabel = makeLabel(label, context, length);
     return hkdf.expand(key, expandedLabel, length);
   }
