@@ -7,7 +7,7 @@ import static org.junit.Assert.assertEquals;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
-import com.protocol7.nettyquic.tls.aead.NullAEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -21,7 +21,7 @@ public class RetryPacketTest {
   private byte[] token = Rnd.rndBytes(18);
   private RetryPacket packet = new RetryPacket(Version.DRAFT_15, of(dest), of(src), org, token);
 
-  private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
+  private final AEAD aead = InitialAEAD.create(ConnectionId.random(), true);
 
   @Test
   public void roundtrip() {

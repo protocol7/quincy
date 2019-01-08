@@ -17,9 +17,9 @@ public class OneRttAEADTest {
 
     AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
 
-    assertEquals("49134b95328f279f0183860589ac6707", hex(aead.getMyKey()));
-    assertEquals("0b6d22c8ff68097ea871c672073773bf", hex(aead.getOtherKey()));
-    assertEquals("bc4dd5f7b98acff85466261d", hex(aead.getMyIV()));
-    assertEquals("1b13dd9f8d8f17091d34b349", hex(aead.getOtherIV()));
+    assertEquals("3eb3fe82f5ac8e55458068f6f09a0e07", hex(aead.getMyKey()));
+    assertEquals("e285f91ba60eae359d767af707710e45", hex(aead.getOtherKey()));
+    assertEquals("fb51b454f6e2d176ae835d77", hex(aead.getMyIV()));
+    assertEquals("1f3f0add9b67d2c388143e44", hex(aead.getOtherIV()));
   }
 }

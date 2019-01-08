@@ -16,7 +16,7 @@ import com.protocol7.nettyquic.streams.Streams;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADs;
-import com.protocol7.nettyquic.tls.aead.NullAEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import io.netty.util.concurrent.Future;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -59,7 +59,7 @@ public class ClientConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.aeads = new AEADs(NullAEAD.create(destConnectionId, true));
+    this.aeads = new AEADs(InitialAEAD.create(destConnectionId, true));
   }
 
   public Future<Void> handshake() {

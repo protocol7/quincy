@@ -18,9 +18,9 @@ public class HandshakeAEADTest {
 
     AEAD aead = HandshakeAEAD.create(handshakeSecret, helloHash, true);
 
-    assertEquals("7154f314e6be7dc008df2c832baa1d39", hex(aead.getMyKey()));
-    assertEquals("844780a7acad9f980fa25c114e43402a", hex(aead.getOtherKey()));
-    assertEquals("71abc2cae4c699d47c600268", hex(aead.getMyIV()));
-    assertEquals("4c042ddc120a38d1417fc815", hex(aead.getOtherIV()));
+    assertEquals("25f3dd7e6173c9e01647cb9ef2f71c3d", hex(aead.getMyKey()));
+    assertEquals("7832ada4194357104157f645758e34fb", hex(aead.getOtherKey()));
+    assertEquals("034c31fe01a40f3734ae1420", hex(aead.getMyIV()));
+    assertEquals("c6a739c3e2d30f92e89a9289", hex(aead.getOtherIV()));
   }
 }

@@ -15,7 +15,7 @@ import com.protocol7.nettyquic.streams.Streams;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADs;
-import com.protocol7.nettyquic.tls.aead.NullAEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import io.netty.util.concurrent.Future;
 import java.security.PrivateKey;
 import java.util.List;
@@ -55,7 +55,7 @@ public class ServerConnection implements Connection {
 
     this.srcConnectionId = Optional.of(srcConnId);
 
-    this.aeads = new AEADs(NullAEAD.create(srcConnId, true));
+    this.aeads = new AEADs(InitialAEAD.create(srcConnId, true));
   }
 
   public Optional<ConnectionId> getDestinationConnectionId() {

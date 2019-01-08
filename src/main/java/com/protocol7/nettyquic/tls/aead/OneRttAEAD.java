@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.tls.aead;
 
+import static com.protocol7.nettyquic.tls.aead.Labels.*;
+
 import com.protocol7.nettyquic.tls.HKDF;
 
 public class OneRttAEAD {
@@ -14,7 +16,7 @@ public class OneRttAEAD {
     //                label = "derived",
     //                context = empty_hash,
     //                len = 32)
-    byte[] derivedSecret = HKDF.expandLabel(handshakeSecret, "derived", HKDF.EMPTY_HASH, 32);
+    byte[] derivedSecret = HKDF.expandLabel(handshakeSecret, DERIVED, HKDF.EMPTY_HASH, 32);
 
     //        master_secret = HKDF-Extract(
     //                salt=derived_secret,
@@ -27,7 +29,7 @@ public class OneRttAEAD {
     //    context = handshake_hash,
     //    len = 32)
     byte[] clientApplicationTrafficSecret =
-        HKDF.expandLabel(masterSecret, "c ap traffic", handshakeHash, 32);
+        HKDF.expandLabel(masterSecret, CLIENT_APPLICATION_TRAFFIC_SECRET, handshakeHash, 32);
 
     // server_application_traffic_secret = HKDF-Expand-Label(
     //    key = master_secret,
@@ -35,40 +37,38 @@ public class OneRttAEAD {
     //    context = handshake_hash,
     //    len = 32)
     byte[] serverApplicationTrafficSecret =
-        HKDF.expandLabel(masterSecret, "s ap traffic", handshakeHash, 32);
+        HKDF.expandLabel(masterSecret, SERVER_APPLICATION_TRAFFIC_SECRET, handshakeHash, 32);
 
     // client_application_key = HKDF-Expand-Label(
     //    key = client_application_traffic_secret,
     //    label = "key",
     //    context = "",
     //    len = 16)
-    byte[] clientApplicationKey =
-        HKDF.expandLabel(clientApplicationTrafficSecret, "key", EMPTY, 16);
+    byte[] clientApplicationKey = HKDF.expandLabel(clientApplicationTrafficSecret, KEY, EMPTY, 16);
 
     // server_application_key = HKDF-Expand-Label(
     //    key = server_application_traffic_secret,
     //    label = "key",
     //    context = "",
     //    len = 16)
-    byte[] serverApplicationKey =
-        HKDF.expandLabel(serverApplicationTrafficSecret, "key", EMPTY, 16);
+    byte[] serverApplicationKey = HKDF.expandLabel(serverApplicationTrafficSecret, KEY, EMPTY, 16);
 
     // client_application_iv = HKDF-Expand-Label(
     //    key = client_application_traffic_secret,
     //    label = "iv",
     //    context = "",
     //    len = 12)
-    byte[] clientApplicationIV = HKDF.expandLabel(clientApplicationTrafficSecret, "iv", EMPTY, 12);
+    byte[] clientApplicationIV = HKDF.expandLabel(clientApplicationTrafficSecret, IV, EMPTY, 12);
 
     // server_application_iv = HKDF-Expand-Label(
     //    key = server_application_traffic_secret,
     //    label = "iv",
     //    context = "",
     //    len = 12)
-    byte[] serverApplicationIV = HKDF.expandLabel(serverApplicationTrafficSecret, "iv", EMPTY, 12);
+    byte[] serverApplicationIV = HKDF.expandLabel(serverApplicationTrafficSecret, IV, EMPTY, 12);
 
-    byte[] clientPnKey = HKDF.expandLabel(clientApplicationTrafficSecret, "hp", EMPTY, 16);
-    byte[] serverPnKey = HKDF.expandLabel(serverApplicationTrafficSecret, "hp", EMPTY, 16);
+    byte[] clientPnKey = HKDF.expandLabel(clientApplicationTrafficSecret, HP_KEY, EMPTY, 16);
+    byte[] serverPnKey = HKDF.expandLabel(serverApplicationTrafficSecret, HP_KEY, EMPTY, 16);
 
     if (isClient) {
       return new AEAD(

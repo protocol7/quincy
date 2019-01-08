@@ -5,13 +5,13 @@ import com.protocol7.nettyquic.utils.Hex;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class NullAEADTest {
+public class InitialAEADTest {
 
   @Test
   public void testSecretsGenerator() {
     ConnectionId connId = new ConnectionId(Hex.dehex("8394c8f03e515708")); // from RFC
 
-    AEAD aead = NullAEAD.create(connId, true);
+    AEAD aead = InitialAEAD.create(connId, true);
 
     Assert.assertEquals("98b0d7e5e7a402c67c33f350fa65ea54", Hex.hex(aead.getMyKey()));
     Assert.assertEquals("9a8be902a9bdd91d16064ca118045fb4", Hex.hex(aead.getOtherKey()));

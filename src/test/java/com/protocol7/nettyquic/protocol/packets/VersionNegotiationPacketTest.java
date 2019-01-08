@@ -8,7 +8,7 @@ import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
-import com.protocol7.nettyquic.tls.aead.NullAEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.List;
@@ -22,7 +22,7 @@ public class VersionNegotiationPacketTest {
   private VersionNegotiationPacket packet =
       new VersionNegotiationPacket(of(dest), of(src), supported);
 
-  private final AEAD aead = NullAEAD.create(ConnectionId.random(), true);
+  private final AEAD aead = InitialAEAD.create(ConnectionId.random(), true);
 
   @Test
   public void roundtrip() {

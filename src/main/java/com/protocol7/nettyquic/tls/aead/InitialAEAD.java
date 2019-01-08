@@ -1,10 +1,12 @@
 package com.protocol7.nettyquic.tls.aead;
 
+import static com.protocol7.nettyquic.tls.aead.Labels.*;
+
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.tls.HKDF;
 import com.protocol7.nettyquic.utils.Hex;
 
-public class NullAEAD {
+public class InitialAEAD {
 
   private static final byte[] QUIC_VERSION_1_SALT =
       Hex.dehex("ef4fb0abb47470c41befcf8031334fae485e09a0");
@@ -14,8 +16,8 @@ public class NullAEAD {
 
     int length = 32;
 
-    byte[] clientSecret = expand(initialSecret, "client in", length);
-    byte[] serverSecret = expand(initialSecret, "server in", length);
+    byte[] clientSecret = expand(initialSecret, CLIENT_INITIAL, length);
+    byte[] serverSecret = expand(initialSecret, SERVER_INITIAL, length);
 
     byte[] mySecret;
     byte[] otherSecret;
@@ -27,14 +29,14 @@ public class NullAEAD {
       otherSecret = clientSecret;
     }
 
-    byte[] myKey = expand(mySecret, "quic key", 16);
-    byte[] myIV = expand(mySecret, "quic iv", 12);
+    byte[] myKey = expand(mySecret, KEY, 16);
+    byte[] myIV = expand(mySecret, IV, 12);
 
-    byte[] otherKey = expand(otherSecret, "quic key", 16);
-    byte[] otherIV = expand(otherSecret, "quic iv", 12);
+    byte[] otherKey = expand(otherSecret, KEY, 16);
+    byte[] otherIV = expand(otherSecret, IV, 12);
 
-    byte[] myPnKey = expand(mySecret, "quic hp", 16);
-    byte[] otherPnKey = expand(otherSecret, "quic hp", 16);
+    byte[] myPnKey = expand(mySecret, HP_KEY, 16);
+    byte[] otherPnKey = expand(otherSecret, HP_KEY, 16);
 
     return new AEAD(myKey, otherKey, myIV, otherIV, myPnKey, otherPnKey);
   }
