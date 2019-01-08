@@ -66,7 +66,7 @@ public class ExtensionType {
   public static final ExtensionType renegotiation_info =
       new ExtensionType("renegotiation_info", 65281);
 
-  public static final ExtensionType QUIC = new ExtensionType("QUIC", 4085);
+  public static final ExtensionType QUIC = new ExtensionType("QUIC", 0xffa5);
 
   private static final Set<ExtensionType> all =
       Sets.newHashSet(

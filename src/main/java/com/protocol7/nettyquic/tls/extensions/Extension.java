@@ -20,7 +20,7 @@ public interface Extension {
   }
 
   static Extension parse(ByteBuf bb, boolean isClient) {
-    ExtensionType type = ExtensionType.fromValue(bb.readShort());
+    ExtensionType type = ExtensionType.fromValue(bb.readShort() & 0xFFFF);
 
     int len = bb.readShort();
     ByteBuf b = bb.readBytes(len);
