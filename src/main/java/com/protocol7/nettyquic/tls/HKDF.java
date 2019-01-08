@@ -7,7 +7,7 @@ import io.netty.buffer.Unpooled;
 
 public class HKDF {
 
-  private static final String TLS_13_LABEL_PREFIX = "tls13 ";
+  private static final String LABEL_PREFIX = "tls13 ";
 
   public static final at.favre.lib.crypto.HKDF hkdf = at.favre.lib.crypto.HKDF.fromHmacSha256();
 
@@ -41,7 +41,7 @@ public class HKDF {
   }
 
   private static byte[] makeLabel(String label, byte[] context, int length) {
-    byte[] expandedLabel = (TLS_13_LABEL_PREFIX + label).getBytes(Charsets.US_ASCII);
+    byte[] expandedLabel = (LABEL_PREFIX + label).getBytes(Charsets.US_ASCII);
 
     ByteBuf bb = Unpooled.buffer();
     bb.writeShort(length);
