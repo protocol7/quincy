@@ -1,29 +1,27 @@
 package com.protocol7.nettyquic.tls;
 
 import com.google.common.collect.ImmutableList;
-import java.io.*;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.security.GeneralSecurityException;
 import java.security.KeyFactory;
+import java.security.PrivateKey;
 import java.security.PublicKey;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
-import java.security.interfaces.RSAPrivateKey;
 import java.security.spec.PKCS8EncodedKeySpec;
 import java.util.List;
-import org.bouncycastle.util.io.pem.PemObject;
-import org.bouncycastle.util.io.pem.PemReader;
 
 public class KeyUtil {
 
-  public static PublicKey getPublicKeyFromPem(String path) {
+  public static PublicKey getPublicKey(String path) {
     try {
-      PemReader reader = new PemReader(new FileReader(path));
-      PemObject pemObject = reader.readPemObject();
-      byte[] content = pemObject.getContent();
       CertificateFactory fact = CertificateFactory.getInstance("X.509");
 
-      Certificate cert = fact.generateCertificate(new ByteArrayInputStream(content));
+      Certificate cert = fact.generateCertificate(new FileInputStream(path));
       return cert.getPublicKey();
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);
@@ -51,14 +49,14 @@ public class KeyUtil {
     }
   }
 
-  public static RSAPrivateKey getPrivateKeyFromPem(String path) {
+  public static PrivateKey getPrivateKey(String path) {
     try {
-      PemReader reader = new PemReader(new FileReader(path));
-      PemObject pemObject = reader.readPemObject();
-      byte[] content = pemObject.getContent();
-      PKCS8EncodedKeySpec privKeySpec = new PKCS8EncodedKeySpec(content);
-      KeyFactory factory = KeyFactory.getInstance("RSA");
-      return (RSAPrivateKey) factory.generatePrivate(privKeySpec);
+      byte[] b = Files.readAllBytes(Path.of(path));
+      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(b);
+
+      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+      return keyFactory.generatePrivate(keySpec);
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);
     }

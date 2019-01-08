@@ -72,12 +72,6 @@
       <version>1.0.13</version>
       <scope>test</scope>
     </dependency>
-    <dependency>
-      <groupId>org.bouncycastle</groupId>
-      <artifactId>bctls-jdk15on</artifactId>
-      <version>1.57</version>
-      <scope>test</scope>
-    </dependency>
   </dependencies>
 
   <build>

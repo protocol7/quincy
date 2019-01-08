@@ -53,7 +53,7 @@ public class ServerTest {
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
-    PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
+    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     connection =
         new ServerConnection(

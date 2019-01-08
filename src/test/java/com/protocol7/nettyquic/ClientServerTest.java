@@ -74,7 +74,7 @@ public class ClientServerTest {
     clientConnection = new ClientConnection(destConnectionId, clientListener, clientSender);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
-    PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
+    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
         new ServerConnection(

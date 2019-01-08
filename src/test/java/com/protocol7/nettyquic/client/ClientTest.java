@@ -52,7 +52,7 @@ public class ClientTest {
 
     connection = new ClientConnection(destConnectionId, streamListener, packetSender);
 
-    PrivateKey privateKey = KeyUtil.getPrivateKeyFromPem("src/test/resources/server.key");
+    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
     serverTlsSession = new ServerTlsSession(serverCert, privateKey);
