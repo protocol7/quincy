@@ -17,5 +17,7 @@ public class Labels {
   public static final String IV = "quic iv";
   public static final String HP_KEY = "quic hp";
 
+  public static final String FINISHED = "finished";
+
   private Labels() {}
 }

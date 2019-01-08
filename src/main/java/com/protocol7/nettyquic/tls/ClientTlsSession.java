@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.tls;
 
+import static com.protocol7.nettyquic.tls.aead.Labels.CLIENT_HANDSHAKE_TRAFFIC_SECRET;
+
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
@@ -130,7 +132,7 @@ public class ClientTlsSession {
 
       // TODO dedup
       byte[] clientHandshakeTrafficSecret =
-          HKDF.expandLabel(handshakeSecret, "c hs traffic", helloHash, 32);
+          HKDF.expandLabel(handshakeSecret, CLIENT_HANDSHAKE_TRAFFIC_SECRET, helloHash, 32);
 
       ClientFinished clientFinished =
           ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash);

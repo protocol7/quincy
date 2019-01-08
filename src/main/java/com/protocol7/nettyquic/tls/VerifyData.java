@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.tls;
 
+import static com.protocol7.nettyquic.tls.aead.Labels.FINISHED;
+
 import com.google.common.base.Preconditions;
 import com.google.common.hash.Hashing;
 
@@ -14,7 +16,7 @@ public class VerifyData {
     //    label = "finished",
     //    context = "",
     //    len = 32)
-    byte[] finishedKey = HKDF.expandLabel(handshakeTrafficSecret, "finished", new byte[0], 32);
+    byte[] finishedKey = HKDF.expandLabel(handshakeTrafficSecret, FINISHED, new byte[0], 32);
 
     // verify_data = HMAC-SHA256(
     //	key = finished_key,
