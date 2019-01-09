@@ -34,7 +34,7 @@ public abstract class LongHeaderPacket implements FullPacket {
 
   @Override
   public PacketType getType() {
-    return PacketType.Initial;
+    return packetType;
   }
 
   @Override
