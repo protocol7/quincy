@@ -28,6 +28,16 @@ public abstract class Frame implements Writeable {
       return ConnectionCloseFrame.parse(bb);
     } else if (type == FrameType.MAX_STREAM_DATA) {
       return MaxStreamDataFrame.parse(bb);
+    } else if (type == FrameType.MAX_DATA) {
+      return MaxDataFrame.parse(bb);
+    } else if (type == FrameType.MAX_STREAMS) {
+      return MaxStreamsFrame.parse(bb);
+    } else if (type == FrameType.STREAM_DATA_BLOCKED) {
+      return StreamDataBlockedFrame.parse(bb);
+    } else if (type == FrameType.DATA_BLOCKED) {
+      return DataBlockedFrame.parse(bb);
+    } else if (type == FrameType.STREAMS_BLOCKED) {
+      return StreamsBlockedFrame.parse(bb);
     } else {
       throw new RuntimeException("Unknown frame type " + type);
     }

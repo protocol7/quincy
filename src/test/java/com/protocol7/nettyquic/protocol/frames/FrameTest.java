@@ -57,6 +57,36 @@ public class FrameTest {
     assertFrame(ccf);
   }
 
+  @Test
+  public void maxStreamDataFrame() {
+    assertFrame(new MaxStreamDataFrame(new StreamId(123), 456));
+  }
+
+  @Test
+  public void maxDataFrame() {
+    assertFrame(new MaxDataFrame(456));
+  }
+
+  @Test
+  public void maxStreamsFrame() {
+    assertFrame(new MaxStreamsFrame(456));
+  }
+
+  @Test
+  public void streamDataBlockedFrame() {
+    assertFrame(new StreamDataBlockedFrame(new StreamId(123), 456));
+  }
+
+  @Test
+  public void dataBlockedFrame() {
+    assertFrame(new DataBlockedFrame(456));
+  }
+
+  @Test
+  public void streamsBlockedFrame() {
+    assertFrame(new StreamsBlockedFrame(456));
+  }
+
   private void assertFrame(Frame frame) {
     ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
