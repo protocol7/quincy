@@ -69,7 +69,7 @@ public class FrameTest {
 
   @Test
   public void maxStreamsFrame() {
-    assertFrame(new MaxStreamsFrame(456));
+    assertFrame(new MaxStreamsFrame(456, true));
   }
 
   @Test
@@ -84,7 +84,7 @@ public class FrameTest {
 
   @Test
   public void streamsBlockedFrame() {
-    assertFrame(new StreamsBlockedFrame(456));
+    assertFrame(new StreamsBlockedFrame(456, true));
   }
 
   private void assertFrame(Frame frame) {
