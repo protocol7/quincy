@@ -8,7 +8,6 @@ import com.protocol7.nettyquic.protocol.packets.HalfParsedPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.nettyquic.streams.StreamListener;
-import com.protocol7.nettyquic.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
 import org.slf4j.MDC;
@@ -42,7 +41,6 @@ public class PacketRouter {
   public void route(ByteBuf bb, PacketSender sender) {
 
     while (bb.isReadable()) {
-      Debug.buffer(bb);
       HalfParsedPacket<?> halfParsed = Packet.parse(bb, -1);
 
       ServerConnection conn =

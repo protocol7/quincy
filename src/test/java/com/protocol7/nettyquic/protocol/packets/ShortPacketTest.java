@@ -10,7 +10,6 @@ import com.protocol7.nettyquic.protocol.frames.PingFrame;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.TestAEAD;
 import com.protocol7.nettyquic.utils.Bits;
-import com.protocol7.nettyquic.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -58,16 +57,5 @@ public class ShortPacketTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
     return bb;
-  }
-
-  @Test
-  public void name() {
-    System.out.println(Debug.binary(PacketType.Handshake.getType()));
-    System.out.println(Debug.binary(PacketType.Handshake.getType() << 4));
-    System.out.println(Debug.binary(PacketType.Retry.getType() << 4));
-    System.out.println(Debug.binary(PacketType.Initial.getType() << 4));
-    System.out.println(Debug.binary(PacketType.Zero_RTT_Protected.getType() << 4));
-    System.out.println(Debug.binary(255));
-    System.out.println(Debug.binary(255 & 0x30));
   }
 }

@@ -18,7 +18,6 @@ import com.protocol7.nettyquic.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.TestAEAD;
-import com.protocol7.nettyquic.utils.Debug;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Before;
@@ -92,8 +91,6 @@ public class PacketRouterTest {
 
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
-
-    Debug.buffer(bb);
 
     router.route(bb, sender);
 
