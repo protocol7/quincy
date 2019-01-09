@@ -68,8 +68,13 @@ public class FrameTest {
   }
 
   @Test
-  public void maxStreamsFrame() {
+  public void maxStreamsFrameBidi() {
     assertFrame(new MaxStreamsFrame(456, true));
+  }
+
+  @Test
+  public void maxStreamsFrameUni() {
+    assertFrame(new MaxStreamsFrame(456, false));
   }
 
   @Test
@@ -83,8 +88,13 @@ public class FrameTest {
   }
 
   @Test
-  public void streamsBlockedFrame() {
+  public void streamsBlockedFrameBidi() {
     assertFrame(new StreamsBlockedFrame(456, true));
+  }
+
+  @Test
+  public void streamsBlockedFrameUni() {
+    assertFrame(new StreamsBlockedFrame(456, false));
   }
 
   private void assertFrame(Frame frame) {
