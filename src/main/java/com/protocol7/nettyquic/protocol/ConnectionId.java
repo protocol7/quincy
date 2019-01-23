@@ -10,14 +10,17 @@ import java.util.Optional;
 
 public class ConnectionId {
 
+  private static final int MIN_LENGTH = 4;
+  private static final int MAX_LENGTH = 18;
+
   public static ConnectionId random() {
-    byte[] id = new byte[Rnd.rndInt(8, 16)];
+    final byte[] id = new byte[Rnd.rndInt(MIN_LENGTH, MAX_LENGTH)];
     Rnd.rndBytes(id);
     return new ConnectionId(id);
   }
 
   public static ConnectionId read(final int length, final ByteBuf bb) {
-    byte[] id = new byte[length];
+    final byte[] id = new byte[length];
     bb.readBytes(id);
     return new ConnectionId(id);
   }
@@ -30,7 +33,7 @@ public class ConnectionId {
     }
   }
 
-  public static int firstLength(int cil) {
+  public static int firstLength(final int cil) {
     int l = ((cil & 0b11110000) >> 4);
     if (l > 0) {
       return l + 3;
@@ -39,7 +42,7 @@ public class ConnectionId {
     }
   }
 
-  public static int lastLength(int cil) {
+  public static int lastLength(final int cil) {
     int l = ((cil & 0b00001111));
     if (l > 0) {
       return l + 3;
@@ -48,27 +51,18 @@ public class ConnectionId {
     }
   }
 
-  public static int joinLenghts(Optional<ConnectionId> id1, Optional<ConnectionId> id2) {
-    int dcil;
-    if (id1.isPresent()) {
-      dcil = (id1.get().getLength() & 0b1111) - 3;
-    } else {
-      dcil = 0;
-    }
-    int scil;
-    if (id2.isPresent()) {
-      scil = (id2.get().getLength() & 0b1111) - 3;
-    } else {
-      scil = 0;
-    }
+  public static int joinLenghts(
+      final Optional<ConnectionId> dcid, final Optional<ConnectionId> scid) {
+    final int dcil = dcid.map(id -> id.getLength() - 3).orElse(0);
+    final int scil = scid.map(id -> id.getLength() - 3).orElse(0);
     return (dcil << 4 | scil) & 0xFF;
   }
 
   private final byte[] id;
 
   public ConnectionId(final byte[] id) {
-    checkArgument(id.length >= 4);
-    checkArgument(id.length <= 15);
+    checkArgument(id.length >= MIN_LENGTH);
+    checkArgument(id.length <= MAX_LENGTH);
 
     this.id = id;
   }
