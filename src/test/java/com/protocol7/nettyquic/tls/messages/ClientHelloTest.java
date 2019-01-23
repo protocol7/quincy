@@ -52,7 +52,7 @@ public class ClientHelloTest {
   @Test
   public void defaults() {
     KeyExchange kek = KeyExchange.generate(Group.X25519);
-    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
+    ClientHello ch = ClientHello.defaults(kek, TlsTransportParameters.defaults());
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);
@@ -70,8 +70,8 @@ public class ClientHelloTest {
         (SupportedVersions) ch.geExtension(ExtensionType.supported_versions).get();
     assertEquals("0304", Hex.hex(supportedVersions.getVersion()));
 
-    TransportParameters transportParameters =
-        (TransportParameters) ch.geExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(), transportParameters);
+    TlsTransportParameters transportParameters =
+        (TlsTransportParameters) ch.geExtension(ExtensionType.QUIC).get();
+    assertEquals(TlsTransportParameters.defaults(), transportParameters);
   }
 }

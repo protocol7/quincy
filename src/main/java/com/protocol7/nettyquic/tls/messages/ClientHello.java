@@ -19,7 +19,7 @@ import java.util.Optional;
 
 public class ClientHello implements Writeable {
 
-  public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
+  public static ClientHello defaults(KeyExchange ke, TlsTransportParameters tps) {
     byte[] clientRandom = Rnd.rndBytes(32);
     byte[] sessionId = new byte[0];
     List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;

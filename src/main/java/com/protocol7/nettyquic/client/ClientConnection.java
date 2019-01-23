@@ -20,6 +20,7 @@ import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import io.netty.util.concurrent.Future;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
@@ -45,14 +46,14 @@ public class ClientConnection implements Connection {
   private AEADs aeads;
 
   public ClientConnection(
-      final ConnectionId destConnectionId,
-      final StreamListener streamListener,
-      final PacketSender packetSender) {
+          final ConnectionId destConnectionId,
+          final StreamListener streamListener,
+          final PacketSender packetSender) {
     this.destConnectionId = destConnectionId;
     this.packetSender = packetSender;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
-    this.streams = new Streams(this);
+    this.streams = new Streams(this, transportParameters, client);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
     initAEAD();

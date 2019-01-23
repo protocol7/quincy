@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.streams;
 
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.flow.FlowController;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -10,7 +11,7 @@ import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 
-public class Stream {
+public class Stream implements StreamInterface {
 
   public enum StreamType {
     Receiving,
@@ -34,16 +35,19 @@ public class Stream {
   private final SendStateMachine sendStateMachine = new SendStateMachine();
   private final ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine();
   private final ReceivedDataBuffer receivedDataBuffer = new ReceivedDataBuffer();
+  private final FlowController flowController;
 
   public Stream(
       final StreamId id,
       final Connection connection,
       final StreamListener listener,
-      StreamType streamType) {
+      final StreamType streamType,
+      final FlowController flowController) {
     this.id = id;
     this.connection = connection;
     this.listener = listener;
     this.streamType = streamType;
+    this.flowController = flowController;
   }
 
   public StreamId getId() {

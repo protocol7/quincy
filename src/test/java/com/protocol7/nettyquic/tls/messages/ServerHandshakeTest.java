@@ -4,7 +4,7 @@ import static com.protocol7.nettyquic.TestUtil.assertHex;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
+import com.protocol7.nettyquic.tls.extensions.TlsTransportParameters;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake.EncryptedExtensions;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake.ServerCertificate;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake.ServerCertificateVerify;
@@ -26,7 +26,7 @@ public class ServerHandshakeTest {
     EncryptedExtensions ee = EncryptedExtensions.parse(bb);
     assertEquals(1, ee.getExtensions().size());
 
-    TransportParameters tps = (TransportParameters) ee.getExtensions().get(0);
+    TlsTransportParameters tps = (TlsTransportParameters) ee.getExtensions().get(0);
     assertEquals(-1, tps.getAckDelayExponent());
     assertEquals(true, tps.isDisableMigration());
     assertEquals(30, tps.getIdleTimeout());

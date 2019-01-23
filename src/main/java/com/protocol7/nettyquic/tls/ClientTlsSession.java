@@ -8,7 +8,7 @@ import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
+import com.protocol7.nettyquic.tls.extensions.TlsTransportParameters;
 import com.protocol7.nettyquic.tls.messages.ClientFinished;
 import com.protocol7.nettyquic.tls.messages.ClientHello;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake.EncryptedExtensions;
@@ -52,7 +52,7 @@ public class ClientTlsSession {
       throw new IllegalStateException("Already started");
     }
 
-    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
+    ClientHello ch = ClientHello.defaults(kek, TlsTransportParameters.defaults());
     clientHello = Bytes.write(ch);
     return clientHello;
   }
@@ -100,6 +100,8 @@ public class ClientTlsSession {
     try {
       int pos = handshakeBuffer.readerIndex();
       EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer);
+
+      System.out.println(ee.getExtensions());
       ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
 
       byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];

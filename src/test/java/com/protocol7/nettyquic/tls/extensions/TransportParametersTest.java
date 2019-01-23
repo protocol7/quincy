@@ -12,8 +12,8 @@ public class TransportParametersTest {
 
   @Test
   public void roundtrip() {
-    TransportParameters tps =
-        TransportParameters.newBuilder()
+    TlsTransportParameters tps =
+        TlsTransportParameters.newBuilder()
             .withAckDelayExponent(130)
             .withDisableMigration(true)
             .withIdleTimeout(234)
@@ -33,7 +33,7 @@ public class TransportParametersTest {
 
     tps.write(bb, true);
 
-    TransportParameters parsed = TransportParameters.parse(bb);
+    TlsTransportParameters parsed = TlsTransportParameters.parse(bb);
 
     assertEquals(tps.getAckDelayExponent(), parsed.getAckDelayExponent());
     assertEquals(tps.isDisableMigration(), parsed.isDisableMigration());
@@ -58,7 +58,7 @@ public class TransportParametersTest {
             "0000006508caaa4afa00000065004f000500048000800000060004800080000007000480008000000400048000c000000800024064000900024064000100011e0003000245ac000c0000000200102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a");
     ByteBuf bb = Unpooled.wrappedBuffer(data);
 
-    TransportParameters parsed = TransportParameters.parse(bb);
+    TlsTransportParameters parsed = TlsTransportParameters.parse(bb);
 
     assertEquals(-1, parsed.getAckDelayExponent());
     assertEquals(true, parsed.isDisableMigration());

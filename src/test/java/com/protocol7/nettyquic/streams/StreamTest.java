@@ -42,7 +42,7 @@ public class StreamTest {
 
   @Test
   public void write() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
 
     stream.write(DATA, false);
 
@@ -56,7 +56,7 @@ public class StreamTest {
 
   @Test
   public void writeWithOffset() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
 
     stream.write(DATA, false);
     StreamFrame frame1 = (StreamFrame) captureFrame();
@@ -69,7 +69,7 @@ public class StreamTest {
 
   @Test
   public void reset() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
 
     stream.write(DATA, false);
     captureFrame();
@@ -85,7 +85,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void resetOnClosed() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
 
     stream.reset(123);
     stream.reset(123);
@@ -93,7 +93,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void writeOnClosed() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
     stream.write(DATA, true);
     assertTrue(stream.isClosed());
     stream.write(DATA, true);
@@ -107,7 +107,7 @@ public class StreamTest {
 
   @Test
   public void onData() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
     stream.onData(0, true, DATA);
 
     verify(listener).onData(stream, DATA);
@@ -115,7 +115,7 @@ public class StreamTest {
 
   @Test
   public void onReset() {
-    Stream stream = new Stream(streamId, connection, listener, Bidirectional);
+    Stream stream = new Stream(streamId, connection, listener, Bidirectional, flowController);
     stream.onReset(123, 456);
 
     verify(listener).onReset(stream, 123, 456);

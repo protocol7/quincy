@@ -71,14 +71,14 @@ public class ClientServerTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    clientConnection = new ClientConnection(destConnectionId, clientListener, clientSender);
+    clientConnection = new ClientConnection(destConnectionId, clientListener, clientSender, flowControllerSupplier);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
         new ServerConnection(
-            srcConnectionId, serverListener, serverSender, certificates, privateKey);
+            srcConnectionId, serverListener, serverSender, certificates, privateKey, flowControllerSupplier);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

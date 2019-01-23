@@ -19,7 +19,7 @@ public class ServerHello implements Writeable {
 
   private static final byte[] VERSION = new byte[] {0x03, 0x03};
 
-  public static ServerHello defaults(KeyExchange ke, TransportParameters tps) {
+  public static ServerHello defaults(KeyExchange ke, TlsTransportParameters tps) {
     byte[] clientRandom = Rnd.rndBytes(32);
     byte[] sessionId = new byte[0];
     CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;

@@ -55,8 +55,8 @@ public class ClientTlsSessionTest {
             ((SupportedVersions) hello.geExtension(ExtensionType.supported_versions).get())
                 .getVersion()));
 
-    TransportParameters tps = (TransportParameters) hello.geExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(), tps);
+    TlsTransportParameters tps = (TlsTransportParameters) hello.geExtension(ExtensionType.QUIC).get();
+    assertEquals(TlsTransportParameters.defaults(), tps);
   }
 
   private KeyShare keyshare() {
@@ -66,7 +66,7 @@ public class ClientTlsSessionTest {
   @Test
   public void serverHello() {
     List<Extension> ext =
-        ImmutableList.of(keyshare(), SupportedVersions.TLS13, TransportParameters.defaults());
+        ImmutableList.of(keyshare(), SupportedVersions.TLS13, TlsTransportParameters.defaults());
 
     byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
@@ -104,7 +104,7 @@ public class ClientTlsSessionTest {
         sh(
             new byte[32],
             TLS_AES_128_GCM_SHA256,
-            ext(SupportedVersions.TLS13, TransportParameters.defaults()));
+            ext(SupportedVersions.TLS13, TlsTransportParameters.defaults()));
 
     started.handleServerHello(b);
   }
@@ -112,7 +112,7 @@ public class ClientTlsSessionTest {
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
     byte[] b =
-        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TransportParameters.defaults()));
+        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TlsTransportParameters.defaults()));
 
     started.handleServerHello(b);
   }

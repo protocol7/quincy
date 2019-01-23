@@ -20,7 +20,7 @@ public class StreamsTest {
   public void setUp() throws Exception {
     MockitoAnnotations.initMocks(this);
 
-    this.streams = new Streams(connection);
+    this.streams = new Streams(connection, flowControllerSupplier, client);
   }
 
   @Test

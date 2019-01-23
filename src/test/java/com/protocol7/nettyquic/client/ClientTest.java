@@ -50,7 +50,7 @@ public class ClientTest {
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
-    connection = new ClientConnection(destConnectionId, streamListener, packetSender);
+    connection = new ClientConnection(destConnectionId, streamListener, packetSender, flowControllerSupplier);
 
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");

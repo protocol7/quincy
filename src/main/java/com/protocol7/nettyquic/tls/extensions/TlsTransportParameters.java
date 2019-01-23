@@ -2,12 +2,13 @@ package com.protocol7.nettyquic.tls.extensions;
 
 import static com.protocol7.nettyquic.tls.extensions.TransportParameterType.*;
 
+import com.protocol7.nettyquic.protocol.TransportParameters;
 import com.protocol7.nettyquic.protocol.Varint;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class TransportParameters implements Extension {
+public class TlsTransportParameters implements Extension, TransportParameters {
 
   public static class Builder {
     private int initialMaxStreamDataBidiLocal = -1;
@@ -90,8 +91,8 @@ public class TransportParameters implements Extension {
       return this;
     }
 
-    public TransportParameters build() {
-      return new TransportParameters(
+    public TlsTransportParameters build() {
+      return new TlsTransportParameters(
           initialMaxStreamDataBidiLocal,
           initialMaxData,
           initialMaxBidiStreams,
@@ -112,21 +113,32 @@ public class TransportParameters implements Extension {
     return new Builder();
   }
 
-  public static TransportParameters defaults() {
+  public static TlsTransportParameters defaults() {
     return new Builder()
-        .withInitialMaxStreamDataBidiLocal(32768)
+        // max data
         .withInitialMaxData(49152)
-        .withInitialMaxBidiStreams(100)
-        .withIdleTimeout(30)
-        .withMaxPacketSize(1452)
-        .withInitialMaxUniStreams(100)
-        .withDisableMigration(true)
+
+        // max stream data
+        .withInitialMaxStreamDataBidiLocal(32768)
         .withInitialMaxStreamDataBidiRemote(32768)
+
+        // max streams
         .withInitialMaxStreamDataUni(32768)
+        .withInitialMaxBidiStreams(100)
+        .withInitialMaxUniStreams(100)
+
+        // timeout
+        .withIdleTimeout(30)
+
+        // packet size
+        .withMaxPacketSize(1452)
+
+        // migration
+        .withDisableMigration(true)
         .build();
   }
 
-  public static TransportParameters parse(ByteBuf bb) {
+  public static TlsTransportParameters parse(ByteBuf bb) {
     byte[] version = new byte[4];
     bb.readBytes(version); // TODO validate version
 
@@ -228,7 +240,7 @@ public class TransportParameters implements Extension {
   private final int maxAckDelay;
   private final byte[] originalConnectionId;
 
-  private TransportParameters(
+  private TlsTransportParameters(
       int initialMaxStreamDataBidiLocal,
       int initialMaxData,
       int initialMaxBidiStreams,
@@ -318,7 +330,7 @@ public class TransportParameters implements Extension {
   public boolean equals(Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    TransportParameters that = (TransportParameters) o;
+    TlsTransportParameters that = (TlsTransportParameters) o;
     return initialMaxStreamDataBidiLocal == that.initialMaxStreamDataBidiLocal
         && initialMaxData == that.initialMaxData
         && initialMaxBidiStreams == that.initialMaxBidiStreams
@@ -356,7 +368,7 @@ public class TransportParameters implements Extension {
 
   @Override
   public String toString() {
-    return "TransportParameters{"
+    return "TlsTransportParameters{"
         + "initialMaxStreamDataBidiLocal="
         + initialMaxStreamDataBidiLocal
         + ", initialMaxData="

@@ -4,6 +4,7 @@ import static com.protocol7.nettyquic.utils.Bits.set;
 import static com.protocol7.nettyquic.utils.Bits.unset;
 
 import com.google.common.base.Preconditions;
+import com.protocol7.nettyquic.streams.Stream;
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 
@@ -30,13 +31,13 @@ public class StreamId {
     return id;
   }
 
-  public static StreamId next(StreamId prev, boolean client, boolean bidirectional) {
-    long v = prev.getValue();
+  public static StreamId next(long prev, boolean client, boolean bidirectional) {
+    long v = prev;
 
     v = encodeType(client, bidirectional, v);
 
     long tmp = v;
-    while (v <= prev.getValue()) {
+    while (v <= prev) {
       tmp++;
       v = encodeType(client, bidirectional, tmp);
     }

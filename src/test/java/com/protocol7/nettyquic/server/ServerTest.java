@@ -57,7 +57,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            srcConnectionId, streamListener, packetSender, certificates, privateKey);
+            srcConnectionId, streamListener, packetSender, certificates, privateKey, flowControllerSupplier);
   }
 
   @Test

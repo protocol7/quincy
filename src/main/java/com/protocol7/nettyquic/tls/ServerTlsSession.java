@@ -9,7 +9,7 @@ import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
+import com.protocol7.nettyquic.tls.extensions.TlsTransportParameters;
 import com.protocol7.nettyquic.tls.messages.ClientFinished;
 import com.protocol7.nettyquic.tls.messages.ClientHello;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake.EncryptedExtensions;
@@ -69,7 +69,7 @@ public class ServerTlsSession {
             ch.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
 
     // create ServerHello
-    serverHello = Bytes.write(ServerHello.defaults(kek, TransportParameters.defaults()));
+    serverHello = Bytes.write(ServerHello.defaults(kek, TlsTransportParameters.defaults()));
 
     ByteBuf handshakeBB = Unpooled.buffer();
 

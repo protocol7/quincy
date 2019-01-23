@@ -1,6 +1,8 @@
 package com.protocol7.nettyquic.client;
 
+import com.protocol7.nettyquic.Config;
 import com.protocol7.nettyquic.connection.NettyPacketSender;
+import com.protocol7.nettyquic.flow.FlowController;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -11,6 +13,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
+import java.util.function.Supplier;
 
 public class QuicClient {
 
@@ -45,7 +48,7 @@ public class QuicClient {
   }
 
   private final NioEventLoopGroup group;
-  private final ClientConnection connection;
+  public final ClientConnection connection;
 
   private QuicClient(final NioEventLoopGroup group, final ClientConnection connection) {
     this.group = group;
