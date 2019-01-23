@@ -7,6 +7,7 @@ import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Bytes;
+import com.protocol7.nettyquic.utils.Opt;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -213,7 +214,7 @@ public class InitialPacket extends LongHeaderPacket {
         + ", payload="
         + getPayload()
         + ", token="
-        + token
+        + Opt.toStringBytes(token)
         + '}';
   }
 }
