@@ -204,9 +204,9 @@ public class InitialPacket extends LongHeaderPacket {
         + "packetType="
         + getType()
         + ", destinationConnectionId="
-        + getDestinationConnectionId()
+        + Opt.toString(getDestinationConnectionId())
         + ", sourceConnectionId="
-        + getSourceConnectionId()
+        + Opt.toString(getSourceConnectionId())
         + ", version="
         + getVersion()
         + ", packetNumber="

@@ -67,7 +67,10 @@ public class ClientTest {
     InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
     assertEquals(1, initialPacket.getPacketNumber().asLong());
     assertEquals(destConnectionId, initialPacket.getDestinationConnectionId().get());
-    assertFalse(initialPacket.getSourceConnectionId().isPresent());
+    assertTrue(initialPacket.getSourceConnectionId().isPresent());
+
+    ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
+
     assertFalse(initialPacket.getToken().isPresent());
     assertEquals(Version.CURRENT, initialPacket.getVersion());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
@@ -92,8 +95,8 @@ public class ClientTest {
     InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
     assertEquals(1, initialPacket2.getPacketNumber().asLong());
     ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
-    assertNotEquals(destConnectionId, newDestConnId);
-    assertEquals(srcConnectionId, initialPacket2.getSourceConnectionId().get());
+    assertEquals(srcConnectionId, newDestConnId);
+    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertArrayEquals(retryToken, initialPacket2.getToken().get());
     assertEquals(Version.CURRENT, initialPacket2.getVersion());
 
@@ -138,10 +141,8 @@ public class ClientTest {
     // validate client fin handshake packet
     HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
     assertEquals(2, hp.getPacketNumber().asLong());
-    assertEquals(
-        srcConnectionId,
-        hp.getDestinationConnectionId().get()); // TODO quic-go requires this, but is it correct?
-    assertEquals(srcConnectionId, hp.getSourceConnectionId().get());
+    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
+    assertEquals(srcConnectionId, hp.getDestinationConnectionId().get());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
 
     // verify that handshake is complete

@@ -96,9 +96,14 @@ public class ClientConnection implements Connection {
     this.srcConnectionId = srcConnId;
   }
 
-  public void setDestinationConnectionId(final ConnectionId destConnId) {
+  public void setDestinationConnectionId(final ConnectionId destConnId, boolean retry) {
+    System.out.println("Setting dest conn ID: " + destConnId);
+
     this.destConnectionId = destConnId;
-    initAEAD();
+
+    if (retry) {
+      initAEAD();
+    }
   }
 
   public int getLastDestConnectionIdLength() {

@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
-import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.*;
@@ -81,7 +80,7 @@ public class ClientStateMachine {
       if (state == ClientState.WaitingForServerHello) {
         if (packet instanceof InitialPacket) {
 
-          connection.setDestinationConnectionId(packet.getSourceConnectionId().get());
+          connection.setDestinationConnectionId(packet.getSourceConnectionId().get(), false);
 
           for (final Frame frame : ((InitialPacket) packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
@@ -95,8 +94,7 @@ public class ClientStateMachine {
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {
           final RetryPacket retryPacket = (RetryPacket) packet;
-          connection.setDestinationConnectionId(ConnectionId.random());
-          connection.setSourceConnectionId(packet.getSourceConnectionId());
+          connection.setDestinationConnectionId(packet.getSourceConnectionId().get(), true);
           connection.resetSendPacketNumber();
 
           tlsEngine.reset();
