@@ -5,7 +5,7 @@ import io.netty.buffer.ByteBuf;
 public enum Version {
   VERSION_NEGOTIATION(0x00000000),
   FINAL(0x00000001),
-  QUIC_GO(0x00000065),
+  QUIC_GO(0x51474fff),
   DRAFT_15(0xff000000 + 15),
   DRAFT_17(0xff000000 + 17);
 

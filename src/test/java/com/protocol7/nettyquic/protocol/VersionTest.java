@@ -19,6 +19,15 @@ public class VersionTest {
   }
 
   @Test
+  public void writeQuicGo() {
+    ByteBuf bb = Unpooled.buffer();
+    Version.QUIC_GO.write(bb);
+
+    TestUtil.assertBuffer("51474fff", bb);
+    TestUtil.assertBufferExhusted(bb);
+  }
+
+  @Test
   public void roundtrip() {
     ByteBuf bb = Unpooled.buffer();
     Version.DRAFT_15.write(bb);
