@@ -187,6 +187,10 @@ public class AEAD {
         + Hex.hex(myIV)
         + ", otherIV="
         + Hex.hex(otherIV)
+        + ", myPnKey="
+        + Hex.hex(myPnKey)
+        + ", otherPnKey="
+        + Hex.hex(otherPnKey)
         + '}';
   }
 }
