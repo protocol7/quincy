@@ -30,7 +30,7 @@ public class ClientConnection implements Connection {
 
   private ConnectionId destConnectionId;
   private int lastDestConnectionIdLength;
-  private Optional<ConnectionId> srcConnectionId = Optional.empty();
+  private Optional<ConnectionId> srcConnectionId = Optional.of(ConnectionId.random());
   private final PacketSender packetSender;
   private final StreamListener streamListener;
 
