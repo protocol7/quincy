@@ -9,7 +9,7 @@ public enum Version {
   DRAFT_15(0xff000000 + 15),
   DRAFT_17(0xff000000 + 17);
 
-  public static final Version CURRENT = Version.DRAFT_17;
+  public static final Version CURRENT = Version.QUIC_GO;
 
   public static Version read(final ByteBuf bb) {
     long l = bb.readInt();
