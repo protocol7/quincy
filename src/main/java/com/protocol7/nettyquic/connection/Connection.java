@@ -29,4 +29,6 @@ public interface Connection {
   void onPacket(Packet packet);
 
   AEAD getAEAD(EncryptionLevel level);
+
+  Optional<byte[]> getToken();
 }

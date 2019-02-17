@@ -106,6 +106,11 @@ public class ServerConnection implements Connection {
     return aeads.get(level);
   }
 
+  @Override
+  public Optional<byte[]> getToken() {
+    return Optional.empty();
+  }
+
   public void setHandshakeAead(AEAD handshakeAead) {
     aeads.setHandshakeAead(handshakeAead);
   }
