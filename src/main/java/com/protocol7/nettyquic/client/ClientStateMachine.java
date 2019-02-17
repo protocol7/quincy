@@ -36,7 +36,7 @@ public class ClientStateMachine {
       // send initial packet
       if (state == ClientState.BeforeInitial) {
 
-        sendInitialPacket(Optional.empty());
+        sendInitialPacket();
         state = ClientState.WaitingForServerHello;
         log.info("Client connection state initial sent");
       } else {
@@ -46,7 +46,7 @@ public class ClientStateMachine {
     return handshakeFuture;
   }
 
-  private void sendInitialPacket(final Optional<byte[]> token) {
+  private void sendInitialPacket() {
     final List<Frame> frames = Lists.newArrayList();
 
     int len = 1200;
@@ -64,7 +64,7 @@ public class ClientStateMachine {
             connection.getSourceConnectionId(),
             connection.nextSendPacketNumber(),
             connection.getVersion(),
-            token,
+            connection.getToken(),
             frames));
   }
 
@@ -96,10 +96,11 @@ public class ClientStateMachine {
           final RetryPacket retryPacket = (RetryPacket) packet;
           connection.setDestinationConnectionId(packet.getSourceConnectionId().get(), true);
           connection.resetSendPacketNumber();
+          connection.setToken(retryPacket.getRetryToken());
 
           tlsEngine.reset();
 
-          sendInitialPacket(Optional.of(retryPacket.getRetryToken()));
+          sendInitialPacket();
         } else if (packet instanceof VersionNegotiationPacket) {
           // we only support a single version, so nothing more to do
           log.debug("Incompatible versions, closing connection");
