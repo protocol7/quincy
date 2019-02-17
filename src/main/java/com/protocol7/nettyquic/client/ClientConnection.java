@@ -134,9 +134,8 @@ public class ClientConnection implements Connection {
       lastDestConnectionIdLength = 0;
     }
 
-    if (stateMachine.getState() != ClientState.BeforeInitial) {
-      packetBuffer.onPacket(packet);
-    }
+    packetBuffer.onPacket(packet);
+
     stateMachine.handlePacket(packet);
   }
 
