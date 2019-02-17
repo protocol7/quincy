@@ -98,8 +98,6 @@ public class ClientConnection implements Connection {
   }
 
   public void setDestinationConnectionId(final ConnectionId destConnId, boolean retry) {
-    System.out.println("Setting dest conn ID: " + destConnId);
-
     this.destConnectionId = destConnId;
 
     if (retry) {
