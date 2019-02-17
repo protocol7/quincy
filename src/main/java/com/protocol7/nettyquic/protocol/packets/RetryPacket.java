@@ -7,6 +7,8 @@ import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Hex;
 import com.protocol7.nettyquic.utils.Opt;
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 public class RetryPacket implements Packet {
@@ -104,6 +106,26 @@ public class RetryPacket implements Packet {
 
   public byte[] getRetryToken() {
     return retryToken;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final RetryPacket that = (RetryPacket) o;
+    return version == that.version
+        && Objects.equals(destinationConnectionId, that.destinationConnectionId)
+        && Objects.equals(sourceConnectionId, that.sourceConnectionId)
+        && Objects.equals(originalConnectionId, that.originalConnectionId)
+        && Arrays.equals(retryToken, that.retryToken);
+  }
+
+  @Override
+  public int hashCode() {
+    int result =
+        Objects.hash(version, destinationConnectionId, sourceConnectionId, originalConnectionId);
+    result = 31 * result + Arrays.hashCode(retryToken);
+    return result;
   }
 
   @Override
