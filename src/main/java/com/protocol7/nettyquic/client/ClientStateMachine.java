@@ -69,11 +69,7 @@ public class ClientStateMachine {
   }
 
   public void handlePacket(Packet packet) {
-    log.info(
-        "Client got {} in state {} with connection ID {}",
-        packet.getClass().getName(),
-        state,
-        packet.getDestinationConnectionId());
+    log.info("Client got {} in state {}: {}", packet.getClass().getCanonicalName(), state, packet);
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
