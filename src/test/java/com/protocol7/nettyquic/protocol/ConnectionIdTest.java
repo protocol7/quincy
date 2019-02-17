@@ -14,9 +14,25 @@ public class ConnectionIdTest {
   public void randomLength() {
     for (int i = 0; i < 1000; i++) {
       ConnectionId connId = ConnectionId.random();
-      assertTrue(connId.getLength() >= 4);
+      assertTrue(connId.getLength() >= 8);
       assertTrue(connId.getLength() <= 18);
     }
+  }
+
+  @Test
+  public void cstrLengths() {
+    new ConnectionId(new byte[4]);
+    new ConnectionId(new byte[18]);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void cstrLengthsTooShort() {
+    new ConnectionId(new byte[3]);
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void cstrLengthsTooLong() {
+    new ConnectionId(new byte[19]);
   }
 
   @Test
