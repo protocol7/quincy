@@ -39,6 +39,7 @@ public class ClientConnection implements Connection {
       new AtomicReference<>(new PacketNumber(0));
   private final PacketBuffer packetBuffer;
   private final ClientStateMachine stateMachine;
+  private Optional<byte[]> token = Optional.empty();
 
   private final Streams streams;
 
@@ -104,6 +105,14 @@ public class ClientConnection implements Connection {
     if (retry) {
       initAEAD();
     }
+  }
+
+  public Optional<byte[]> getToken() {
+    return token;
+  }
+
+  public void setToken(byte[] token) {
+    this.token = Optional.of(token);
   }
 
   public int getLastDestConnectionIdLength() {
