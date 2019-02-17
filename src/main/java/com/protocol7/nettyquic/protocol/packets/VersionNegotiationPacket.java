@@ -8,6 +8,7 @@ import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class VersionNegotiationPacket implements Packet {
@@ -111,5 +112,20 @@ public class VersionNegotiationPacket implements Packet {
 
   public List<Version> getSupportedVersions() {
     return supportedVersions;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final VersionNegotiationPacket that = (VersionNegotiationPacket) o;
+    return Objects.equals(destinationConnectionId, that.destinationConnectionId)
+        && Objects.equals(sourceConnectionId, that.sourceConnectionId)
+        && Objects.equals(supportedVersions, that.supportedVersions);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(destinationConnectionId, sourceConnectionId, supportedVersions);
   }
 }
