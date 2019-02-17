@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.tls.extensions;
 import static com.protocol7.nettyquic.tls.extensions.TransportParameterType.*;
 
 import com.protocol7.nettyquic.protocol.Varint;
+import com.protocol7.nettyquic.protocol.Version;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
@@ -126,14 +127,13 @@ public class TransportParameters implements Extension {
         .build();
   }
 
-  public static TransportParameters parse(ByteBuf bb) {
-    byte[] version = new byte[4];
-    bb.readBytes(version); // TODO validate version
+  public static TransportParameters parse(ByteBuf bb, boolean isClient) {
+    Version version = Version.read(bb); // TODO verify version
 
-    if (Arrays.equals(version, new byte[] {0, 0, 0, 0x65})) {
-      int xLen = bb.readByte();
-      byte[] x = new byte[xLen];
-      bb.readBytes(x); // TODO figure out
+    if (isClient) {
+      int supportVerLen = bb.readByte();
+      byte[] supportedVersions = new byte[supportVerLen];
+      bb.readBytes(supportedVersions); // TODO handle
     }
 
     int bufLen = bb.readShort();
@@ -387,8 +387,12 @@ public class TransportParameters implements Extension {
   }
 
   public void write(ByteBuf bb, boolean isClient) {
+    Version.CURRENT.write(bb);
 
-    bb.writeBytes(new byte[] {00, 00, 00, 00}); // version
+    if (!isClient) {
+      bb.writeByte(0);
+    }
+
     int lenPos = bb.writerIndex();
     bb.writeShort(0);
 
