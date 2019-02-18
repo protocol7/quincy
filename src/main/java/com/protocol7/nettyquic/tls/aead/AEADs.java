@@ -19,6 +19,16 @@ public class AEADs {
     this.initialAead = checkNotNull(initialAead);
   }
 
+  public boolean available(final EncryptionLevel level) {
+    if (level == EncryptionLevel.Initial) {
+      return true;
+    } else if (level == EncryptionLevel.Handshake) {
+      return handshakeAead.get() != null;
+    } else {
+      return oneRttAead.get() != null;
+    }
+  }
+
   public AEAD get(final EncryptionLevel level) {
     checkNotNull(level);
 

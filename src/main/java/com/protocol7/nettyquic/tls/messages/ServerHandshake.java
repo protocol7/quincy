@@ -17,10 +17,10 @@ import java.util.List;
 
 public class ServerHandshake {
 
-  public static ServerHandshake parse(ByteBuf bb) {
+  public static ServerHandshake parse(ByteBuf bb, boolean isClient) {
 
     return new ServerHandshake(
-        EncryptedExtensions.parse(bb),
+        EncryptedExtensions.parse(bb, isClient),
         ServerCertificate.parse(bb),
         ServerCertificateVerify.parse(bb),
         ServerHandshakeFinished.parse(bb));
@@ -64,7 +64,7 @@ public class ServerHandshake {
       return new EncryptedExtensions(ImmutableList.of(TransportParameters.defaults()));
     }
 
-    public static EncryptedExtensions parse(ByteBuf bb) {
+    public static EncryptedExtensions parse(ByteBuf bb, boolean isClient) {
       // EE
       int eeType = bb.readByte();
       if (eeType != 0x08) {
@@ -76,7 +76,7 @@ public class ServerHandshake {
 
       ByteBuf ext = bb.readBytes(extLen);
       try {
-        List<Extension> extensions = Extension.parseAll(ext, false);
+        List<Extension> extensions = Extension.parseAll(ext, isClient);
 
         return new EncryptedExtensions(extensions);
       } finally {

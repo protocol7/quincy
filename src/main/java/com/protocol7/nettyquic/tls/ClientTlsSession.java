@@ -53,7 +53,7 @@ public class ClientTlsSession {
     }
 
     ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
-    clientHello = Bytes.write(ch);
+    clientHello = Bytes.write(bb -> ch.write(bb, true));
     return clientHello;
   }
 
@@ -65,7 +65,7 @@ public class ClientTlsSession {
     serverHello = msg;
 
     ByteBuf bb = Unpooled.wrappedBuffer(msg);
-    ServerHello hello = ServerHello.parse(bb);
+    ServerHello hello = ServerHello.parse(bb, true);
 
     SupportedVersions version =
         (SupportedVersions)
@@ -99,7 +99,7 @@ public class ClientTlsSession {
     handshakeBuffer.markReaderIndex();
     try {
       int pos = handshakeBuffer.readerIndex();
-      EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer);
+      EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer, true);
       ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
 
       byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];

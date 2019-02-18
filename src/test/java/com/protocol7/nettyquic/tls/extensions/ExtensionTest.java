@@ -19,7 +19,7 @@ public class ExtensionTest {
         Hex.dehex(
             "002b0002030400330024001d0020ae3492c510ba781d6e30ff69b66d47c710f7ef060f846e28bda2f995b4fb4645");
 
-    List<Extension> ext = Extension.parseAll(Unpooled.wrappedBuffer(b), false);
+    List<Extension> ext = Extension.parseAll(Unpooled.wrappedBuffer(b), true);
 
     Iterator<Extension> iter = ext.iterator();
 

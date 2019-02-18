@@ -1,8 +1,6 @@
 package com.protocol7.nettyquic.tls;
 
-import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
-import com.protocol7.nettyquic.protocol.packets.InitialPacket;
-import com.protocol7.nettyquic.protocol.packets.Packet;
+import com.protocol7.nettyquic.protocol.packets.*;
 
 public enum EncryptionLevel {
   Initial,
@@ -10,7 +8,9 @@ public enum EncryptionLevel {
   OneRtt;
 
   public static EncryptionLevel forPacket(Packet packet) {
-    if (packet instanceof InitialPacket) {
+    if (packet instanceof InitialPacket
+        || packet instanceof RetryPacket
+        || packet instanceof VersionNegotiationPacket) {
       return Initial;
     } else if (packet instanceof HandshakePacket) {
       return Handshake;

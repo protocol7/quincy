@@ -45,7 +45,7 @@ public class TlsSessions {
     client.handleServerHello(shah.getServerHello());
 
     ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
-    ServerHandshake handshake = ServerHandshake.parse(bb);
+    ServerHandshake handshake = ServerHandshake.parse(bb, true);
 
     byte[] sig = handshake.getServerCertificateVerify().getSignature();
 
@@ -88,7 +88,7 @@ public class TlsSessions {
     client.handleServerHello(shah.getServerHello());
 
     ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
-    ServerHandshake handshake = ServerHandshake.parse(bb);
+    ServerHandshake handshake = ServerHandshake.parse(bb, true);
 
     byte[] vd = handshake.getServerHandshakeFinished().getVerificationData();
 

@@ -23,7 +23,7 @@ public class ServerHelloTest {
             "0200005603037cdef17464db2589d38fd069fd8e593fd7deda108bb84e12720212c47b74f96100130100002e002b0002030400330024001d0020bc3dd7c4c45142be87d00e1b3dd1a02d43b0be4ab41b71e1e6dfbea39c385417");
     ByteBuf bb = Unpooled.wrappedBuffer(sh);
 
-    ServerHello hello = ServerHello.parse(bb);
+    ServerHello hello = ServerHello.parse(bb, true);
 
     assertHex(
         "7cdef17464db2589d38fd069fd8e593fd7deda108bb84e12720212c47b74f961",
@@ -44,7 +44,7 @@ public class ServerHelloTest {
 
     sh.write(bb);
 
-    ServerHello parsed = ServerHello.parse(bb);
+    ServerHello parsed = ServerHello.parse(bb, true);
 
     assertHex(sh.getServerRandom(), parsed.getServerRandom());
     assertHex(sh.getSessionId(), parsed.getSessionId());

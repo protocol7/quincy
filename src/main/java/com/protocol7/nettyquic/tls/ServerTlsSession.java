@@ -53,7 +53,7 @@ public class ServerTlsSession {
   public ServerHelloAndHandshake handleClientHello(byte[] msg) {
     clientHello = msg;
 
-    ClientHello ch = ClientHello.parse(msg);
+    ClientHello ch = ClientHello.parse(msg, false);
 
     // verify expected extensions
     SupportedVersions version =

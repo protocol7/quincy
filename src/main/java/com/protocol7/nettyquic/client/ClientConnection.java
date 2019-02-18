@@ -134,9 +134,14 @@ public class ClientConnection implements Connection {
       lastDestConnectionIdLength = 0;
     }
 
-    packetBuffer.onPacket(packet);
+    EncryptionLevel encLevel = EncryptionLevel.forPacket(packet);
+    if (aeads.available(encLevel)) {
+      packetBuffer.onPacket(packet);
 
-    stateMachine.handlePacket(packet);
+      stateMachine.handlePacket(packet);
+    } else {
+      // TODO handle unencryptable packet
+    }
   }
 
   @Override

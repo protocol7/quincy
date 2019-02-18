@@ -33,7 +33,7 @@ public class ServerHello implements Writeable {
     return new ServerHello(clientRandom, sessionId, cipherSuites, extensions);
   }
 
-  public static ServerHello parse(ByteBuf bb) {
+  public static ServerHello parse(ByteBuf bb, boolean isClient) {
     int messageType = bb.readByte(); // server hello
     if (messageType != 0x02) {
       throw new IllegalArgumentException("Not a server hello");
@@ -64,7 +64,7 @@ public class ServerHello implements Writeable {
     int extensionLen = bb.readShort();
     ByteBuf extBB = bb.readBytes(extensionLen);
     try {
-      List<Extension> extensions = Extension.parseAll(extBB, false);
+      List<Extension> extensions = Extension.parseAll(extBB, isClient);
       return new ServerHello(serverRandom, sessionId, cipherSuite.get(), extensions);
     } finally {
       extBB.release();

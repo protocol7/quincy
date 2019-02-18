@@ -12,7 +12,7 @@ import java.util.SortedMap;
 public class KeyShare implements Extension {
 
   public static KeyShare parse(ByteBuf bb, boolean isClient) {
-    if (isClient) {
+    if (!isClient) {
       bb.readShort();
     }
 

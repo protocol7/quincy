@@ -1,6 +1,5 @@
 package com.protocol7.nettyquic.tls.extensions;
 
-import com.protocol7.nettyquic.utils.Bytes;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -10,11 +9,13 @@ public class SupportedVersions implements Extension {
   public static final SupportedVersions TLS13 = new SupportedVersions(new byte[] {3, 4});
 
   public static SupportedVersions parse(ByteBuf bb, boolean isClient) {
-    if (isClient) {
-      bb.readByte();
+    int len = 2;
+    if (!isClient) {
+      len = bb.readByte();
     }
 
-    byte[] version = Bytes.drainToArray(bb);
+    byte[] version = new byte[len];
+    bb.readBytes(version);
 
     return new SupportedVersions(version);
   }

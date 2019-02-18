@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.tls.messages;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
-import com.protocol7.nettyquic.Writeable;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
@@ -17,7 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ClientHello implements Writeable {
+public class ClientHello {
 
   public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
     byte[] clientRandom = Rnd.rndBytes(32);
@@ -33,7 +32,7 @@ public class ClientHello implements Writeable {
     return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
   }
 
-  public static ClientHello parse(byte[] ch) {
+  public static ClientHello parse(byte[] ch, boolean isClient) {
     ByteBuf bb = Unpooled.wrappedBuffer(ch);
 
     byte handshakeType = bb.readByte();
@@ -74,7 +73,7 @@ public class ClientHello implements Writeable {
     int extensionsLen = bb.readShort();
     ByteBuf extBB = bb.readBytes(extensionsLen);
     try {
-      List<Extension> ext = Extension.parseAll(extBB, true);
+      List<Extension> ext = Extension.parseAll(extBB, isClient);
 
       return new ClientHello(clientRandom, sessionId, cipherSuites, ext);
     } finally {
@@ -131,7 +130,7 @@ public class ClientHello implements Writeable {
     return new ClientHello(clientRandom, sessionId, cipherSuites, newExtensionMap);
   }
 
-  public void write(ByteBuf bb) {
+  public void write(ByteBuf bb, boolean isClient) {
     bb.writeByte(0x01);
 
     // payload length
@@ -155,7 +154,7 @@ public class ClientHello implements Writeable {
 
     int extLenPos = bb.writerIndex();
     bb.writeShort(0);
-    Extension.writeAll(extensions, bb, true);
+    Extension.writeAll(extensions, bb, isClient);
 
     bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
 

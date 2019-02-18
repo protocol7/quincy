@@ -34,7 +34,7 @@ public class ClientTlsSessionTest {
   public void handshake() {
     byte[] ch = engine.startHandshake();
 
-    ClientHello hello = ClientHello.parse(ch);
+    ClientHello hello = ClientHello.parse(ch, false);
 
     assertEquals(32, hello.getClientRandom().length);
     assertEquals(0, hello.getSessionId().length);
