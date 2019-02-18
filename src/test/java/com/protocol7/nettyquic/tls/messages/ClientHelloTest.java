@@ -4,7 +4,6 @@ import static com.protocol7.nettyquic.TestUtil.assertHex;
 import static com.protocol7.nettyquic.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
@@ -12,6 +11,7 @@ import com.protocol7.nettyquic.tls.extensions.*;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import org.junit.Test;
 
 public class ClientHelloTest {
@@ -46,7 +46,7 @@ public class ClientHelloTest {
         hello.getClientRandom());
     assertHex(
         "a29ad438fded33463aa6c107ec92ce0fd112a1256fbcd9edf265ee82cab45b78", hello.getSessionId());
-    assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
+    assertEquals(List.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
     assertEquals(7, hello.getExtensions().size());
   }
 
@@ -57,7 +57,7 @@ public class ClientHelloTest {
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);
-    assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), ch.getCipherSuites());
+    assertEquals(List.of(TLS_AES_128_GCM_SHA256), ch.getCipherSuites());
 
     KeyShare keyShare = (KeyShare) ch.geExtension(ExtensionType.key_share).get();
     assertEquals(1, keyShare.getKeys().size());
@@ -65,7 +65,7 @@ public class ClientHelloTest {
 
     SupportedGroups supportedGroups =
         (SupportedGroups) ch.geExtension(ExtensionType.supported_groups).get();
-    assertEquals(ImmutableList.of(Group.X25519), supportedGroups.getGroups());
+    assertEquals(List.of(Group.X25519), supportedGroups.getGroups());
 
     SupportedVersions supportedVersions =
         (SupportedVersions) ch.geExtension(ExtensionType.supported_versions).get();

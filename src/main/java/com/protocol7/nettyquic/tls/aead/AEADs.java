@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.tls.aead;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import java.util.concurrent.atomic.AtomicReference;
@@ -16,7 +16,7 @@ public class AEADs {
   private final AtomicReference<AEAD> oneRttAead = new AtomicReference<>();
 
   public AEADs(final AEAD initialAead) {
-    this.initialAead = checkNotNull(initialAead);
+    this.initialAead = requireNonNull(initialAead);
   }
 
   public boolean available(final EncryptionLevel level) {
@@ -30,7 +30,7 @@ public class AEADs {
   }
 
   public AEAD get(final EncryptionLevel level) {
-    checkNotNull(level);
+    requireNonNull(level);
 
     if (level == EncryptionLevel.Initial) {
       log.debug("Using initial AEAD: {}", initialAead);
@@ -55,10 +55,10 @@ public class AEADs {
   }
 
   public void setHandshakeAead(final AEAD handshakeAead) {
-    this.handshakeAead.set(checkNotNull(handshakeAead));
+    this.handshakeAead.set(requireNonNull(handshakeAead));
   }
 
   public void setOneRttAead(final AEAD oneRttAead) {
-    this.oneRttAead.set(checkNotNull(oneRttAead));
+    this.oneRttAead.set(requireNonNull(oneRttAead));
   }
 }

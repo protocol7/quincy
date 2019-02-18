@@ -1,7 +1,6 @@
 package com.protocol7.nettyquic.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.*;
@@ -12,6 +11,7 @@ import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
@@ -47,7 +47,7 @@ public class ClientStateMachine {
   }
 
   private void sendInitialPacket() {
-    final List<Frame> frames = Lists.newArrayList();
+    final List<Frame> frames = new ArrayList<>();
 
     int len = 1200;
 

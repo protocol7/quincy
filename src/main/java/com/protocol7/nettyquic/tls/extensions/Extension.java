@@ -1,14 +1,14 @@
 package com.protocol7.nettyquic.tls.extensions;
 
-import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
 public interface Extension {
 
   static List<Extension> parseAll(ByteBuf bb, boolean isClient) {
-    List<Extension> extensions = Lists.newArrayList();
+    List<Extension> extensions = new ArrayList<>();
 
     while (bb.isReadable()) {
       Extension ext = Extension.parse(bb, isClient);

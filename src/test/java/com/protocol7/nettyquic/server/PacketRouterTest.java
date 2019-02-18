@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
@@ -20,6 +19,7 @@ import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -102,6 +102,6 @@ public class PacketRouterTest {
 
     assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
     assertEquals(srcConnId, verNeg.getSourceConnectionId().get());
-    assertEquals(ImmutableList.of(Version.CURRENT), verNeg.getSupportedVersions());
+    assertEquals(List.of(Version.CURRENT), verNeg.getSupportedVersions());
   }
 }

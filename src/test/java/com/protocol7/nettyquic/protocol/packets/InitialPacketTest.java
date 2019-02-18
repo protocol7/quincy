@@ -4,7 +4,6 @@ import static java.util.Optional.empty;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.*;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Version;
@@ -14,6 +13,7 @@ import com.protocol7.nettyquic.tls.aead.TestAEAD;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -34,7 +34,7 @@ public class InitialPacketTest {
             new PacketNumber(123),
             Version.CURRENT,
             Optional.of(token),
-            Lists.newArrayList(PingFrame.INSTANCE));
+            List.of(PingFrame.INSTANCE));
 
     ByteBuf bb = Unpooled.buffer();
 
@@ -60,7 +60,7 @@ public class InitialPacketTest {
             new PacketNumber(123),
             Version.CURRENT,
             empty(),
-            Lists.newArrayList(PingFrame.INSTANCE));
+            List.of(PingFrame.INSTANCE));
 
     ByteBuf bb = Unpooled.buffer();
 

@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.Varint;
@@ -26,7 +26,7 @@ public class MaxStreamDataFrame extends Frame {
   public MaxStreamDataFrame(final StreamId streamId, final long maxStreamData) {
     super(FrameType.MAX_STREAM_DATA);
 
-    checkNotNull(streamId);
+    requireNonNull(streamId);
 
     this.streamId = streamId;
     this.maxStreamData = maxStreamData;

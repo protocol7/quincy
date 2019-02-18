@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.tls.messages;
 import static com.protocol7.nettyquic.TestUtil.assertHex;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.extensions.Extension;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
@@ -36,7 +35,7 @@ public class ServerHelloTest {
 
   @Test
   public void roundtrip() {
-    List<Extension> ext = ImmutableList.of(SupportedVersions.TLS13);
+    List<Extension> ext = List.of(SupportedVersions.TLS13);
     ServerHello sh =
         new ServerHello(Rnd.rndBytes(32), new byte[0], CipherSuite.TLS_AES_128_GCM_SHA256, ext);
 

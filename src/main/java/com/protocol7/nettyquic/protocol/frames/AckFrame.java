@@ -1,11 +1,10 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.Varint;
 import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -21,7 +20,7 @@ public class AckFrame extends Frame {
     final long ackDelay = Varint.readAsLong(bb);
     final long blockCount = Varint.readAsLong(bb);
 
-    final List<AckBlock> blocks = Lists.newArrayList();
+    final List<AckBlock> blocks = new ArrayList<>();
 
     final long firstBlock = Varint.readAsLong(bb);
     long smallest = largestAcknowledged - firstBlock;
@@ -54,8 +53,8 @@ public class AckFrame extends Frame {
   public AckFrame(final long ackDelay, final List<AckBlock> blocks) {
     super(FrameType.ACK);
 
-    checkNotNull(ackDelay);
-    checkNotNull(blocks);
+    requireNonNull(ackDelay);
+    requireNonNull(blocks);
 
     this.ackDelay = ackDelay;
     this.blocks = orderBlocks(blocks);
@@ -66,12 +65,12 @@ public class AckFrame extends Frame {
       throw new IllegalArgumentException("Must contain at least one block");
     }
 
-    final List<AckBlock> sorted = Lists.newArrayList(blocks);
+    final List<AckBlock> sorted = new ArrayList<>(blocks);
     sorted.sort((b1, b2) -> b2.getLargest().compareTo(b1.getLargest()));
 
     // TODO check overlaps
 
-    return ImmutableList.copyOf(sorted);
+    return List.copyOf(sorted);
   }
 
   public long getAckDelay() {

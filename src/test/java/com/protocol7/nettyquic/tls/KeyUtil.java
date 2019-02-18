@@ -1,6 +1,5 @@
 package com.protocol7.nettyquic.tls;
 
-import com.google.common.collect.ImmutableList;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -43,7 +42,7 @@ public class KeyUtil {
       FileInputStream fin = new FileInputStream(path);
       CertificateFactory f = CertificateFactory.getInstance("X.509");
       Certificate cert = f.generateCertificate(fin);
-      return ImmutableList.of(cert.getEncoded());
+      return List.of(cert.getEncoded());
     } catch (GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);
     }

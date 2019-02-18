@@ -1,13 +1,12 @@
 package com.protocol7.nettyquic.streams;
 
-import com.google.common.collect.Maps;
 import java.util.Optional;
 import java.util.TreeMap;
 
 // TODO optimize
 public class ReceivedDataBuffer {
 
-  private final TreeMap<Long, byte[]> buffer = Maps.newTreeMap();
+  private final TreeMap<Long, byte[]> buffer = new TreeMap<>();
   private long largestOffset = 0;
   private long readOffset = 0;
 

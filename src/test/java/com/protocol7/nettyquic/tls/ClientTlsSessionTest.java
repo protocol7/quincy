@@ -6,7 +6,6 @@ import static com.protocol7.nettyquic.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.extensions.*;
@@ -39,7 +38,7 @@ public class ClientTlsSessionTest {
 
     assertEquals(32, hello.getClientRandom().length);
     assertEquals(0, hello.getSessionId().length);
-    assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
+    assertEquals(List.of(TLS_AES_128_GCM_SHA256), hello.getCipherSuites());
 
     assertEquals(
         32,
@@ -48,7 +47,7 @@ public class ClientTlsSessionTest {
             .get()
             .length);
     assertEquals(
-        ImmutableList.of(Group.X25519),
+        List.of(Group.X25519),
         ((SupportedGroups) hello.geExtension(ExtensionType.supported_groups).get()).getGroups());
     assertEquals(
         "0304",
@@ -67,8 +66,7 @@ public class ClientTlsSessionTest {
   @Test
   public void serverHello() {
     List<Extension> ext =
-        ImmutableList.of(
-            keyshare(), SupportedVersions.TLS13, TransportParameters.defaults(Version.CURRENT));
+        List.of(keyshare(), SupportedVersions.TLS13, TransportParameters.defaults(Version.CURRENT));
 
     byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 

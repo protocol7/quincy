@@ -1,12 +1,7 @@
 package com.protocol7.nettyquic.tls;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import io.netty.buffer.ByteBuf;
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 public enum CipherSuite {
   TLS_AES_128_GCM_SHA256(0x1301),
@@ -15,12 +10,12 @@ public enum CipherSuite {
 
   private static final EnumSet<CipherSuite> ALL = EnumSet.allOf(CipherSuite.class);
 
-  public static final List<CipherSuite> SUPPORTED = ImmutableList.of(TLS_AES_128_GCM_SHA256);
+  public static final List<CipherSuite> SUPPORTED = List.of(TLS_AES_128_GCM_SHA256);
 
   public static List<CipherSuite> parseKnown(ByteBuf bb) {
     int len = bb.readShort() / 2;
 
-    List<CipherSuite> css = Lists.newArrayListWithCapacity(len);
+    List<CipherSuite> css = new ArrayList<>(len);
     for (int i = 0; i < len; i++) {
       fromValue(bb.readShort()).ifPresent(css::add);
     }

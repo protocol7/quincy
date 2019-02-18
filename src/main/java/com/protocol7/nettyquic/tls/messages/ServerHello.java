@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.tls.messages;
 
 import static com.protocol7.nettyquic.utils.Hex.hex;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.Writeable;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.Group;
@@ -24,7 +23,7 @@ public class ServerHello implements Writeable {
     byte[] sessionId = new byte[0];
     CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
     List<Extension> extensions =
-        ImmutableList.of(
+        List.of(
             KeyShare.of(ke.getGroup(), ke.getPublicKey()),
             new SupportedGroups(Group.X25519),
             SupportedVersions.TLS13,

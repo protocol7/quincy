@@ -1,9 +1,9 @@
 package com.protocol7.nettyquic.tls;
 
-import com.google.common.base.Charsets;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.nio.charset.StandardCharsets;
 
 public class HKDF {
 
@@ -15,7 +15,7 @@ public class HKDF {
   //         salt=00,
   //         key=00...)
   private static final byte[] EARLY_SECRET = hkdf.extract(new byte[1], new byte[32]);
-  public static final byte[] EMPTY_HASH = Hash.sha256("".getBytes(Charsets.US_ASCII));
+  public static final byte[] EMPTY_HASH = Hash.sha256("".getBytes(StandardCharsets.US_ASCII));
 
   //         derived_secret = hkdf-Expand-Label(
   //                key = early_secret,
@@ -41,7 +41,7 @@ public class HKDF {
   }
 
   private static byte[] makeLabel(String label, byte[] context, int length) {
-    byte[] expandedLabel = (LABEL_PREFIX + label).getBytes(Charsets.US_ASCII);
+    byte[] expandedLabel = (LABEL_PREFIX + label).getBytes(StandardCharsets.US_ASCII);
 
     ByteBuf bb = Unpooled.buffer();
     bb.writeShort(length);

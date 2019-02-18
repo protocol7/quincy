@@ -6,7 +6,6 @@ import static com.protocol7.nettyquic.tls.CipherSuite.TLS_AES_256_GCM_SHA384;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -18,7 +17,7 @@ public class CipherSuiteTest {
   @Test
   public void parseKnown() {
     ByteBuf bb = Unpooled.wrappedBuffer(Hex.dehex("00 04 13 01 99 99"));
-    assertEquals(ImmutableList.of(TLS_AES_128_GCM_SHA256), CipherSuite.parseKnown(bb));
+    assertEquals(List.of(TLS_AES_128_GCM_SHA256), CipherSuite.parseKnown(bb));
   }
 
   @Test
@@ -35,8 +34,7 @@ public class CipherSuiteTest {
 
   @Test
   public void writeAll() {
-    List<CipherSuite> cipherSuites =
-        ImmutableList.of(TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384);
+    List<CipherSuite> cipherSuites = List.of(TLS_AES_128_GCM_SHA256, TLS_AES_256_GCM_SHA384);
 
     ByteBuf bb = Unpooled.buffer();
     CipherSuite.writeAll(bb, cipherSuites);

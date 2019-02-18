@@ -2,10 +2,11 @@ package com.protocol7.nettyquic.streams;
 
 import static com.protocol7.nettyquic.streams.SendStateMachine.SendStreamState.*;
 
-import com.google.common.collect.Sets;
 import com.protocol7.nettyquic.protocol.PacketNumber;
+import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SendStateMachine {
 
@@ -23,7 +24,8 @@ public class SendStateMachine {
   }
 
   private SendStreamState state = Open;
-  private final Set<PacketNumber> outstandingStreamPackets = Sets.newConcurrentHashSet();
+  private final Set<PacketNumber> outstandingStreamPackets =
+      Collections.newSetFromMap(new ConcurrentHashMap<>());
   private Optional<PacketNumber> outstandingResetPacket = Optional.empty();
 
   public void onStream(PacketNumber pn, boolean fin) {

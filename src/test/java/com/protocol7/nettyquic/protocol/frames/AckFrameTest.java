@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.protocol.frames;
 
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.utils.Bytes;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
@@ -15,8 +14,7 @@ public class AckFrameTest {
   @Test
   public void roundtrip() {
     List<AckBlock> blocks =
-        Lists.newArrayList(
-            AckBlock.fromLongs(1, 5), AckBlock.fromLongs(7, 8), AckBlock.fromLongs(12, 100));
+        List.of(AckBlock.fromLongs(1, 5), AckBlock.fromLongs(7, 8), AckBlock.fromLongs(12, 100));
     AckFrame frame = new AckFrame(1234, blocks);
 
     ByteBuf bb = Unpooled.buffer();
@@ -30,7 +28,7 @@ public class AckFrameTest {
 
   @Test
   public void roundtripSinglePacket() {
-    List<AckBlock> blocks = Lists.newArrayList(AckBlock.fromLongs(100, 100));
+    List<AckBlock> blocks = List.of(AckBlock.fromLongs(100, 100));
     AckFrame frame = new AckFrame(1234, blocks);
 
     ByteBuf bb = Unpooled.buffer();
@@ -44,7 +42,7 @@ public class AckFrameTest {
 
   @Test
   public void writeSinglePacket() {
-    List<AckBlock> blocks = Lists.newArrayList(AckBlock.fromLongs(100, 100));
+    List<AckBlock> blocks = List.of(AckBlock.fromLongs(100, 100));
     AckFrame frame = new AckFrame(1234, blocks);
 
     ByteBuf bb = Unpooled.buffer();

@@ -1,16 +1,15 @@
 package com.protocol7.nettyquic.protocol;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.GeneralSecurityException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Payload {
@@ -31,7 +30,7 @@ public class Payload {
       throw new RuntimeException(e);
     }
 
-    final List<Frame> frames = Lists.newArrayList();
+    final List<Frame> frames = new ArrayList<>();
     final ByteBuf frameBuf = Unpooled.wrappedBuffer(raw);
 
     while (frameBuf.isReadable()) {
@@ -43,7 +42,7 @@ public class Payload {
   }
 
   public Payload addFrame(final Frame frame) {
-    List<Frame> newFrames = Lists.newArrayList(frames);
+    List<Frame> newFrames = new ArrayList<>(frames);
     newFrames.add(frame);
     return new Payload(newFrames);
   }
@@ -51,14 +50,14 @@ public class Payload {
   private final List<Frame> frames;
 
   public Payload(final List<Frame> frames) {
-    checkNotNull(frames);
+    requireNonNull(frames);
     checkArgument(!frames.isEmpty());
 
-    this.frames = ImmutableList.copyOf(frames);
+    this.frames = List.copyOf(frames);
   }
 
   public Payload(final Frame... frames) {
-    this(ImmutableList.copyOf(frames));
+    this(List.of(frames));
   }
 
   public List<Frame> getFrames() {

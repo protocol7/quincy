@@ -1,7 +1,7 @@
 package com.protocol7.nettyquic.protocol.frames;
 
 import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.Varint;
@@ -30,7 +30,7 @@ public class ResetStreamFrame extends Frame {
       final StreamId streamId, final int applicationErrorCode, final long offset) {
     super(FrameType.RESET_STREAM);
 
-    checkNotNull(streamId);
+    requireNonNull(streamId);
     validateApplicationErrorCode(applicationErrorCode);
 
     this.streamId = streamId;

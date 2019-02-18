@@ -1,7 +1,5 @@
 package com.protocol7.nettyquic.tls.messages;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.Writeable;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.extensions.Extension;
@@ -13,6 +11,7 @@ import java.security.GeneralSecurityException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -62,7 +61,7 @@ public class ServerHandshake {
   public static class EncryptedExtensions implements Writeable {
 
     public static EncryptedExtensions defaults(Version version) {
-      return new EncryptedExtensions(ImmutableList.of(TransportParameters.defaults(version)));
+      return new EncryptedExtensions(List.of(TransportParameters.defaults(version)));
     }
 
     public static EncryptedExtensions parse(ByteBuf bb, boolean isClient) {
@@ -133,7 +132,7 @@ public class ServerHandshake {
       int certsLen = Bytes.read24(bb);
       ByteBuf certBB = bb.readBytes(certsLen);
       try {
-        List<byte[]> serverCertificates = Lists.newArrayList();
+        List<byte[]> serverCertificates = new ArrayList<>();
 
         while (certBB.isReadable()) {
           int certLen = Bytes.read24(certBB);
@@ -175,7 +174,7 @@ public class ServerHandshake {
     }
 
     public List<Certificate> getAsCertificiates() {
-      List<Certificate> certs = Lists.newArrayList();
+      List<Certificate> certs = new ArrayList<>();
       try {
         CertificateFactory f = CertificateFactory.getInstance("X.509");
 

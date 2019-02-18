@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import static java.util.Objects.requireNonNull;
 
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.Varint;
@@ -26,7 +26,7 @@ public class StreamDataBlockedFrame extends Frame {
   public StreamDataBlockedFrame(final StreamId streamId, final long streamDataLimit) {
     super(FrameType.STREAM_DATA_BLOCKED);
 
-    checkNotNull(streamId);
+    requireNonNull(streamId);
 
     this.streamId = streamId;
     this.streamDataLimit = streamDataLimit;

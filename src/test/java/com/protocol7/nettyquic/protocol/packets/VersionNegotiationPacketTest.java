@@ -4,7 +4,6 @@ import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
@@ -18,7 +17,7 @@ public class VersionNegotiationPacketTest {
 
   private ConnectionId dest = ConnectionId.random();
   private ConnectionId src = ConnectionId.random();
-  private List<Version> supported = Lists.newArrayList(Version.DRAFT_15, Version.FINAL);
+  private List<Version> supported = List.of(Version.DRAFT_15, Version.FINAL);
   private VersionNegotiationPacket packet =
       new VersionNegotiationPacket(of(dest), of(src), supported);
 

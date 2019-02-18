@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.protocol.packets;
 import static java.util.Optional.empty;
 import static org.junit.Assert.assertTrue;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.PingFrame;
 import com.protocol7.nettyquic.tls.aead.AEAD;
@@ -11,6 +10,7 @@ import com.protocol7.nettyquic.tls.aead.TestAEAD;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class PacketTest {
             pn,
             Version.CURRENT,
             empty(),
-            Lists.newArrayList(PingFrame.INSTANCE));
+            List.of(PingFrame.INSTANCE));
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

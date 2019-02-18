@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
@@ -155,7 +154,7 @@ public class ServerTest {
         nextPacketNumber(),
         Version.CURRENT,
         token,
-        Lists.newArrayList(frames));
+        List.of(frames));
   }
 
   private Packet packet(ConnectionId destConnId, Frame... frames) {

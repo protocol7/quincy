@@ -1,8 +1,8 @@
 package com.protocol7.nettyquic.tls.messages;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.base.Preconditions;
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
@@ -23,7 +23,7 @@ public class ClientHello {
     byte[] sessionId = new byte[0];
     List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
     List<Extension> extensions =
-        ImmutableList.of(
+        List.of(
             KeyShare.of(ke.getGroup(), ke.getPublicKey()),
             new SupportedGroups(Group.X25519),
             SupportedVersions.TLS13,
@@ -93,8 +93,8 @@ public class ClientHello {
       List<Extension> extensions) {
     Preconditions.checkArgument(clientRandom.length == 32);
     this.clientRandom = clientRandom;
-    this.sessionId = Preconditions.checkNotNull(sessionId);
-    this.cipherSuites = Preconditions.checkNotNull(cipherSuites);
+    this.sessionId = requireNonNull(sessionId);
+    this.cipherSuites = requireNonNull(cipherSuites);
     this.extensions = extensions;
   }
 
@@ -121,13 +121,6 @@ public class ClientHello {
       }
     }
     return Optional.empty();
-  }
-
-  public ClientHello addExtension(Extension extension) {
-    List<Extension> newExtensionMap = Lists.newArrayList(extensions);
-    newExtensionMap.add(extension);
-
-    return new ClientHello(clientRandom, sessionId, cipherSuites, newExtensionMap);
   }
 
   public void write(ByteBuf bb, boolean isClient) {

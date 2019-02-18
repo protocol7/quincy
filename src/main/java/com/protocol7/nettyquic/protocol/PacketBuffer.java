@@ -1,18 +1,18 @@
 package com.protocol7.nettyquic.protocol;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.Sender;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -27,7 +27,7 @@ public class PacketBuffer {
 
   private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
 
-  private final Map<PacketNumber, Packet> buffer = Maps.newConcurrentMap();
+  private final Map<PacketNumber, Packet> buffer = new ConcurrentHashMap<>();
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
@@ -146,7 +146,7 @@ public class PacketBuffer {
 
   // TODO break out and test directly
   private List<AckBlock> drainAcks(BlockingQueue<PacketNumber> queue) {
-    List<PacketNumber> pns = Lists.newArrayList();
+    List<PacketNumber> pns = new ArrayList<>();
     ackQueue.drainTo(pns);
     if (pns.isEmpty()) {
       return Collections.emptyList();
@@ -156,7 +156,7 @@ public class PacketBuffer {
         pns.stream().map(packetNumber -> packetNumber.asLong()).collect(Collectors.toList());
     Collections.sort(pnsLong);
 
-    List<AckBlock> blocks = Lists.newArrayList();
+    List<AckBlock> blocks = new ArrayList<>();
     long lower = -1;
     long upper = -1;
     for (long pn : pnsLong) {

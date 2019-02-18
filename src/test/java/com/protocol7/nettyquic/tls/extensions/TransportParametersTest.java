@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.tls.extensions;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
@@ -58,7 +57,7 @@ public class TransportParametersTest {
 
   @Test
   public void roundtripSupportedVersionsServerToClient() {
-    List<Version> supportedVersions = ImmutableList.of(Version.DRAFT_15, Version.DRAFT_17);
+    List<Version> supportedVersions = List.of(Version.DRAFT_15, Version.DRAFT_17);
 
     TransportParameters tps =
         TransportParameters.newBuilder(Version.CURRENT)
@@ -74,7 +73,7 @@ public class TransportParametersTest {
 
   @Test(expected = IllegalStateException.class)
   public void roundtripSupportedVersionsClientToServer() {
-    List<Version> supportedVersions = ImmutableList.of(Version.DRAFT_15, Version.DRAFT_17);
+    List<Version> supportedVersions = List.of(Version.DRAFT_15, Version.DRAFT_17);
 
     TransportParameters tps =
         TransportParameters.newBuilder(Version.CURRENT)

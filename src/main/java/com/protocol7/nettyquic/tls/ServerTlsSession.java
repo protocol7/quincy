@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.tls;
 
 import static com.protocol7.nettyquic.utils.Bytes.peekToArray;
+import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquic.protocol.Version;
@@ -39,7 +40,7 @@ public class ServerTlsSession {
     Preconditions.checkArgument(!certificates.isEmpty());
 
     this.privateKey = privateKey;
-    this.certificates = Preconditions.checkNotNull(certificates);
+    this.certificates = requireNonNull(certificates);
     reset();
   }
 

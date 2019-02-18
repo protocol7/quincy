@@ -1,6 +1,5 @@
 package com.protocol7.nettyquic.server;
 
-import com.google.common.collect.Maps;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
@@ -9,6 +8,7 @@ import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,7 @@ public class Connections {
 
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
-  private final Map<ConnectionId, ServerConnection> connections = Maps.newConcurrentMap();
+  private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
 
   public Connections(List<byte[]> certificates, PrivateKey privateKey) {
     this.certificates = certificates;

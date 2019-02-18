@@ -1,12 +1,12 @@
 package com.protocol7.nettyquic.tls;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PrivateKey;
+import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -21,7 +21,7 @@ public class TlsSessions {
     privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
 
-    server = new ServerTlsSession(ImmutableList.of(serverCert), privateKey);
+    server = new ServerTlsSession(List.of(serverCert), privateKey);
   }
 
   @Test

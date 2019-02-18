@@ -1,8 +1,8 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import com.google.common.base.Charsets;
 import com.protocol7.nettyquic.protocol.Varint;
 import io.netty.buffer.ByteBuf;
+import java.nio.charset.StandardCharsets;
 
 /*
    0                   1                   2                   3
@@ -41,7 +41,7 @@ public class ConnectionCloseFrame extends Frame {
     bb.readBytes(reasonPhraseBytes);
 
     return new ConnectionCloseFrame(
-        application, errorCode, frameType, new String(reasonPhraseBytes, Charsets.UTF_8));
+        application, errorCode, frameType, new String(reasonPhraseBytes, StandardCharsets.UTF_8));
   }
 
   public static ConnectionCloseFrame connection(
@@ -95,7 +95,7 @@ public class ConnectionCloseFrame extends Frame {
       Varint.write(frameType, bb);
     }
 
-    byte[] reasonPhraseBytes = reasonPhrase.getBytes(Charsets.UTF_8);
+    byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
 
     Varint.write(reasonPhraseBytes.length, bb);
     bb.writeBytes(reasonPhraseBytes);

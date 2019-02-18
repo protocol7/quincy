@@ -1,12 +1,12 @@
 package com.protocol7.nettyquic.protocol.packets;
 
-import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public class VersionNegotiationPacket implements Packet {
     Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
     Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    List<Version> supported = Lists.newArrayList();
+    List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
       try {
         supported.add(Version.read(bb));
@@ -65,7 +65,7 @@ public class VersionNegotiationPacket implements Packet {
       Optional<ConnectionId> destinationConnectionId,
       Optional<ConnectionId> sourceConnectionId,
       Version... supportedVersions) {
-    this(destinationConnectionId, sourceConnectionId, Lists.newArrayList(supportedVersions));
+    this(destinationConnectionId, sourceConnectionId, List.of(supportedVersions));
   }
 
   public VersionNegotiationPacket(

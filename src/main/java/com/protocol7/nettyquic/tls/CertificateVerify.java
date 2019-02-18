@@ -1,7 +1,7 @@
 package com.protocol7.nettyquic.tls;
 
-import com.google.common.base.Charsets;
 import com.protocol7.nettyquic.utils.Bytes;
+import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.PrivateKey;
 import java.security.PublicKey;
@@ -19,9 +19,9 @@ public class CertificateVerify {
   }
 
   private static final byte[] SERVER_CONTEXT =
-      "TLS 1.3, server CertificateVerify".getBytes(Charsets.US_ASCII);
+      "TLS 1.3, server CertificateVerify".getBytes(StandardCharsets.US_ASCII);
   private static final byte[] CLIENT_CONTEXT =
-      "TLS 1.3, client CertificateVerify".getBytes(Charsets.US_ASCII);
+      "TLS 1.3, client CertificateVerify".getBytes(StandardCharsets.US_ASCII);
   private static final byte[] SEPARATOR = new byte[1];
   private static final byte[] SERVER_PREFIX = Bytes.concat(PADDING, SERVER_CONTEXT, SEPARATOR);
   private static final byte[] CLIENT_PREFIX = Bytes.concat(PADDING, CLIENT_CONTEXT, SEPARATOR);
