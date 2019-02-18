@@ -2,15 +2,20 @@ package com.protocol7.nettyquic.tls.extensions;
 
 import static com.protocol7.nettyquic.tls.extensions.TransportParameterType.*;
 
+import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.protocol.Varint;
 import com.protocol7.nettyquic.protocol.Version;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 
 public class TransportParameters implements Extension {
 
   public static class Builder {
+    private final Version version;
+    private List<Version> supportedVersions = Collections.emptyList();
     private int initialMaxStreamDataBidiLocal = -1;
     private int initialMaxData = -1;
     private int initialMaxBidiStreams = -1;
@@ -26,73 +31,84 @@ public class TransportParameters implements Extension {
     private int maxAckDelay = -1;
     private byte[] originalConnectionId = new byte[0];
 
-    public Builder withInitialMaxStreamDataBidiLocal(int initialMaxStreamDataBidiLocal) {
+    public Builder(final Version version) {
+      this.version = version;
+    }
+
+    public Builder withSupportedVersions(final List<Version> supportedVersions) {
+      this.supportedVersions = supportedVersions;
+      return this;
+    }
+
+    public Builder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
       this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
       return this;
     }
 
-    public Builder withInitialMaxData(int initialMaxData) {
+    public Builder withInitialMaxData(final int initialMaxData) {
       this.initialMaxData = initialMaxData;
       return this;
     }
 
-    public Builder withInitialMaxBidiStreams(int initialMaxBidiStreams) {
+    public Builder withInitialMaxBidiStreams(final int initialMaxBidiStreams) {
       this.initialMaxBidiStreams = initialMaxBidiStreams;
       return this;
     }
 
-    public Builder withIdleTimeout(int idleTimeout) {
+    public Builder withIdleTimeout(final int idleTimeout) {
       this.idleTimeout = idleTimeout;
       return this;
     }
 
-    public Builder withMaxPacketSize(int maxPacketSize) {
+    public Builder withMaxPacketSize(final int maxPacketSize) {
       this.maxPacketSize = maxPacketSize;
       return this;
     }
 
-    public Builder withStatelessResetToken(byte[] statelessResetToken) {
+    public Builder withStatelessResetToken(final byte[] statelessResetToken) {
       this.statelessResetToken = statelessResetToken;
       return this;
     }
 
-    public Builder withAckDelayExponent(int ackDelayExponent) {
+    public Builder withAckDelayExponent(final int ackDelayExponent) {
       this.ackDelayExponent = ackDelayExponent;
       return this;
     }
 
-    public Builder withInitialMaxUniStreams(int initialMaxUniStreams) {
+    public Builder withInitialMaxUniStreams(final int initialMaxUniStreams) {
       this.initialMaxUniStreams = initialMaxUniStreams;
       return this;
     }
 
-    public Builder withDisableMigration(boolean disableMigration) {
+    public Builder withDisableMigration(final boolean disableMigration) {
       this.disableMigration = disableMigration;
       return this;
     }
 
-    public Builder withInitialMaxStreamDataBidiRemote(int initialMaxStreamDataBidiRemote) {
+    public Builder withInitialMaxStreamDataBidiRemote(final int initialMaxStreamDataBidiRemote) {
       this.initialMaxStreamDataBidiRemote = initialMaxStreamDataBidiRemote;
       return this;
     }
 
-    public Builder withInitialMaxStreamDataUni(int initialMaxStreamDataUni) {
+    public Builder withInitialMaxStreamDataUni(final int initialMaxStreamDataUni) {
       this.initialMaxStreamDataUni = initialMaxStreamDataUni;
       return this;
     }
 
-    public Builder withMaxAckDelay(int maxAckDelay) {
+    public Builder withMaxAckDelay(final int maxAckDelay) {
       this.maxAckDelay = maxAckDelay;
       return this;
     }
 
-    public Builder withOriginalConnectionId(byte[] originalConnectionId) {
+    public Builder withOriginalConnectionId(final byte[] originalConnectionId) {
       this.originalConnectionId = originalConnectionId;
       return this;
     }
 
     public TransportParameters build() {
       return new TransportParameters(
+          version,
+          supportedVersions,
           initialMaxStreamDataBidiLocal,
           initialMaxData,
           initialMaxBidiStreams,
@@ -109,12 +125,12 @@ public class TransportParameters implements Extension {
     }
   }
 
-  public static Builder newBuilder() {
-    return new Builder();
+  public static Builder newBuilder(final Version version) {
+    return new Builder(version);
   }
 
-  public static TransportParameters defaults() {
-    return new Builder()
+  public static TransportParameters defaults(final Version version) {
+    return new Builder(version)
         .withInitialMaxStreamDataBidiLocal(32768)
         .withInitialMaxData(49152)
         .withInitialMaxBidiStreams(100)
@@ -127,31 +143,35 @@ public class TransportParameters implements Extension {
         .build();
   }
 
-  public static TransportParameters parse(ByteBuf bb, boolean isClient) {
-    Version version = Version.read(bb); // TODO verify version
+  public static TransportParameters parse(final ByteBuf bb, final boolean isClient) {
+    final Version version = Version.read(bb);
+    final ImmutableList.Builder<Version> supportedVersions = ImmutableList.builder();
 
     if (isClient) {
-      int supportVerLen = bb.readByte();
-      byte[] supportedVersions = new byte[supportVerLen];
-      bb.readBytes(supportedVersions); // TODO handle
+      final int supportVerLen = bb.readByte() / 4;
+
+      for (int i = 0; i < supportVerLen; i++) {
+        supportedVersions.add(Version.read(bb));
+      }
     }
 
-    int bufLen = bb.readShort();
-    ByteBuf tpBB = bb.readBytes(bufLen);
+    final int bufLen = bb.readShort();
+    final ByteBuf tpBB = bb.readBytes(bufLen);
 
     try {
-      Builder builder = new Builder();
+      final Builder builder = new Builder(version);
+      builder.withSupportedVersions(supportedVersions.build());
 
       while (tpBB.isReadable()) {
-        byte[] type = new byte[2];
+        final byte[] type = new byte[2];
         tpBB.readBytes(type);
 
-        int len = tpBB.readShort();
+        final int len = tpBB.readShort();
 
-        byte[] data = new byte[len];
+        final byte[] data = new byte[len];
         tpBB.readBytes(data);
 
-        TransportParameterType tp = TransportParameterType.fromValue(type);
+        final TransportParameterType tp = TransportParameterType.fromValue(type);
 
         switch (tp) {
           case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
@@ -201,18 +221,20 @@ public class TransportParameters implements Extension {
     }
   }
 
-  private static int dataToInt(byte[] data) {
+  private static int dataToInt(final byte[] data) {
     return Varint.readAsInt(data);
   }
 
-  private static int dataToShort(byte[] data) {
+  private static int dataToShort(final byte[] data) {
     return Varint.readAsInt(data);
   }
 
-  private static int dataToByte(byte[] data) {
+  private static int dataToByte(final byte[] data) {
     return Varint.readAsInt(data);
   }
 
+  private final Version version;
+  private final List<Version> supportedVersions;
   private final int initialMaxStreamDataBidiLocal;
   private final int initialMaxData;
   private final int initialMaxBidiStreams;
@@ -229,19 +251,23 @@ public class TransportParameters implements Extension {
   private final byte[] originalConnectionId;
 
   private TransportParameters(
-      int initialMaxStreamDataBidiLocal,
-      int initialMaxData,
-      int initialMaxBidiStreams,
-      int idleTimeout,
-      int maxPacketSize,
-      byte[] statelessResetToken,
-      int ackDelayExponent,
-      int initialMaxUniStreams,
-      boolean disableMigration,
-      int initialMaxStreamDataBidiRemote,
-      int initialMaxStreamDataUni,
-      int maxAckDelay,
-      byte[] originalConnectionId) {
+      final Version version,
+      final List<Version> supportedVersions,
+      final int initialMaxStreamDataBidiLocal,
+      final int initialMaxData,
+      final int initialMaxBidiStreams,
+      final int idleTimeout,
+      final int maxPacketSize,
+      final byte[] statelessResetToken,
+      final int ackDelayExponent,
+      final int initialMaxUniStreams,
+      final boolean disableMigration,
+      final int initialMaxStreamDataBidiRemote,
+      final int initialMaxStreamDataUni,
+      final int maxAckDelay,
+      final byte[] originalConnectionId) {
+    this.version = version;
+    this.supportedVersions = supportedVersions;
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
     this.initialMaxBidiStreams = initialMaxBidiStreams;
@@ -260,6 +286,14 @@ public class TransportParameters implements Extension {
   @Override
   public ExtensionType getType() {
     return ExtensionType.QUIC;
+  }
+
+  public Version getVersion() {
+    return version;
+  }
+
+  public List<Version> getSupportedVersions() {
+    return supportedVersions;
   }
 
   public int getInitialMaxStreamDataBidiLocal() {
@@ -315,11 +349,13 @@ public class TransportParameters implements Extension {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    TransportParameters that = (TransportParameters) o;
-    return initialMaxStreamDataBidiLocal == that.initialMaxStreamDataBidiLocal
+    final TransportParameters that = (TransportParameters) o;
+    return Objects.equals(version, that.version)
+        && Objects.equals(supportedVersions, that.supportedVersions)
+        && initialMaxStreamDataBidiLocal == that.initialMaxStreamDataBidiLocal
         && initialMaxData == that.initialMaxData
         && initialMaxBidiStreams == that.initialMaxBidiStreams
         && idleTimeout == that.idleTimeout
@@ -338,6 +374,8 @@ public class TransportParameters implements Extension {
   public int hashCode() {
     int result =
         Objects.hash(
+            version,
+            supportedVersions,
             initialMaxStreamDataBidiLocal,
             initialMaxData,
             initialMaxBidiStreams,
@@ -357,6 +395,10 @@ public class TransportParameters implements Extension {
   @Override
   public String toString() {
     return "TransportParameters{"
+        + "version="
+        + version
+        + "suppoerdVersions="
+        + supportedVersions
         + "initialMaxStreamDataBidiLocal="
         + initialMaxStreamDataBidiLocal
         + ", initialMaxData="
@@ -387,13 +429,20 @@ public class TransportParameters implements Extension {
   }
 
   public void write(ByteBuf bb, boolean isClient) {
-    Version.CURRENT.write(bb);
+    version.write(bb);
 
     if (!isClient) {
-      bb.writeByte(0);
+      bb.writeByte(supportedVersions.size() * 4);
+      for (final Version supportedVersion : supportedVersions) {
+        supportedVersion.write(bb);
+      }
+    } else {
+      if (!supportedVersions.isEmpty()) {
+        throw new IllegalStateException("Supported version can not be set for clients");
+      }
     }
 
-    int lenPos = bb.writerIndex();
+    final int lenPos = bb.writerIndex();
     bb.writeShort(0);
 
     if (initialMaxStreamDataBidiLocal > -1) {
@@ -455,7 +504,7 @@ public class TransportParameters implements Extension {
   }
 
   private void writeVarint(ByteBuf bb, int value) {
-    byte[] b = Varint.write(value);
+    final byte[] b = Varint.write(value);
     bb.writeShort(b.length);
     bb.writeBytes(b);
   }

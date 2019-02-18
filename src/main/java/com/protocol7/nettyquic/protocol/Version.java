@@ -7,7 +7,8 @@ public enum Version {
   FINAL(0x00000001),
   QUIC_GO(0x51474fff),
   DRAFT_15(0xff000000 + 15),
-  DRAFT_17(0xff000000 + 17);
+  DRAFT_17(0xff000000 + 17),
+  UNKNOWN(-1);
 
   public static final Version CURRENT = Version.QUIC_GO;
 
@@ -25,7 +26,7 @@ public enum Version {
     } else if (l == DRAFT_17.version) {
       return DRAFT_17;
     } else {
-      throw new IllegalArgumentException("Unknown version: " + l);
+      return UNKNOWN;
     }
   }
 

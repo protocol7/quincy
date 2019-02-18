@@ -3,9 +3,12 @@ package com.protocol7.nettyquic.tls.extensions;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import org.junit.Test;
 
 public class TransportParametersTest {
@@ -13,7 +16,7 @@ public class TransportParametersTest {
   @Test
   public void roundtrip() {
     TransportParameters tps =
-        TransportParameters.newBuilder()
+        TransportParameters.newBuilder(Version.CURRENT)
             .withAckDelayExponent(130)
             .withDisableMigration(true)
             .withIdleTimeout(234)
@@ -35,6 +38,8 @@ public class TransportParametersTest {
 
     TransportParameters parsed = TransportParameters.parse(bb, false);
 
+    assertEquals(tps.getVersion(), parsed.getVersion());
+    assertEquals(tps.getSupportedVersions(), parsed.getSupportedVersions());
     assertEquals(tps.getAckDelayExponent(), parsed.getAckDelayExponent());
     assertEquals(tps.isDisableMigration(), parsed.isDisableMigration());
     assertEquals(tps.getIdleTimeout(), parsed.getIdleTimeout());
@@ -49,6 +54,35 @@ public class TransportParametersTest {
     assertEquals(tps.getMaxPacketSize(), parsed.getMaxPacketSize());
     assertArrayEquals(tps.getStatelessResetToken(), parsed.getStatelessResetToken());
     assertArrayEquals(tps.getOriginalConnectionId(), parsed.getOriginalConnectionId());
+  }
+
+  @Test
+  public void roundtripSupportedVersionsServerToClient() {
+    List<Version> supportedVersions = ImmutableList.of(Version.DRAFT_15, Version.DRAFT_17);
+
+    TransportParameters tps =
+        TransportParameters.newBuilder(Version.CURRENT)
+            .withSupportedVersions(supportedVersions)
+            .build();
+    ByteBuf bb = Unpooled.buffer();
+
+    tps.write(bb, false);
+
+    TransportParameters parsed = TransportParameters.parse(bb, true);
+    assertEquals(tps.getSupportedVersions(), parsed.getSupportedVersions());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void roundtripSupportedVersionsClientToServer() {
+    List<Version> supportedVersions = ImmutableList.of(Version.DRAFT_15, Version.DRAFT_17);
+
+    TransportParameters tps =
+        TransportParameters.newBuilder(Version.CURRENT)
+            .withSupportedVersions(supportedVersions)
+            .build();
+    ByteBuf bb = Unpooled.buffer();
+
+    tps.write(bb, true);
   }
 
   @Test

@@ -5,6 +5,7 @@ import static com.protocol7.nettyquic.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static org.junit.Assert.assertEquals;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
 import com.protocol7.nettyquic.tls.extensions.*;
@@ -52,7 +53,7 @@ public class ClientHelloTest {
   @Test
   public void defaults() {
     KeyExchange kek = KeyExchange.generate(Group.X25519);
-    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
+    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults(Version.CURRENT));
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);
@@ -72,6 +73,6 @@ public class ClientHelloTest {
 
     TransportParameters transportParameters =
         (TransportParameters) ch.geExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(), transportParameters);
+    assertEquals(TransportParameters.defaults(Version.CURRENT), transportParameters);
   }
 }

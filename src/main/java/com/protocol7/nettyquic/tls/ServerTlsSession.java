@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.tls;
 import static com.protocol7.nettyquic.utils.Bytes.peekToArray;
 
 import com.google.common.base.Preconditions;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
@@ -69,11 +70,12 @@ public class ServerTlsSession {
             ch.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
 
     // create ServerHello
-    serverHello = Bytes.write(ServerHello.defaults(kek, TransportParameters.defaults()));
+    serverHello =
+        Bytes.write(ServerHello.defaults(kek, TransportParameters.defaults(Version.CURRENT)));
 
     ByteBuf handshakeBB = Unpooled.buffer();
 
-    EncryptedExtensions ee = EncryptedExtensions.defaults();
+    EncryptedExtensions ee = EncryptedExtensions.defaults(Version.CURRENT);
     ee.write(handshakeBB);
 
     ServerCertificate sc = new ServerCertificate(new byte[0], certificates);

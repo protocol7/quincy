@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.tls.messages;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.protocol7.nettyquic.Writeable;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.extensions.Extension;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Bytes;
@@ -60,8 +61,8 @@ public class ServerHandshake {
 
   public static class EncryptedExtensions implements Writeable {
 
-    public static EncryptedExtensions defaults() {
-      return new EncryptedExtensions(ImmutableList.of(TransportParameters.defaults()));
+    public static EncryptedExtensions defaults(Version version) {
+      return new EncryptedExtensions(ImmutableList.of(TransportParameters.defaults(version)));
     }
 
     public static EncryptedExtensions parse(ByteBuf bb, boolean isClient) {

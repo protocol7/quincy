@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.tls;
 
 import static com.protocol7.nettyquic.tls.aead.Labels.CLIENT_HANDSHAKE_TRAFFIC_SECRET;
 
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
@@ -52,7 +53,7 @@ public class ClientTlsSession {
       throw new IllegalStateException("Already started");
     }
 
-    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults());
+    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults(Version.CURRENT));
     clientHello = Bytes.write(bb -> ch.write(bb, true));
     return clientHello;
   }

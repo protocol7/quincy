@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.extensions.*;
 import com.protocol7.nettyquic.tls.messages.ClientHello;
@@ -56,7 +57,7 @@ public class ClientTlsSessionTest {
                 .getVersion()));
 
     TransportParameters tps = (TransportParameters) hello.geExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(), tps);
+    assertEquals(TransportParameters.defaults(Version.CURRENT), tps);
   }
 
   private KeyShare keyshare() {
@@ -66,7 +67,8 @@ public class ClientTlsSessionTest {
   @Test
   public void serverHello() {
     List<Extension> ext =
-        ImmutableList.of(keyshare(), SupportedVersions.TLS13, TransportParameters.defaults());
+        ImmutableList.of(
+            keyshare(), SupportedVersions.TLS13, TransportParameters.defaults(Version.CURRENT));
 
     byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
@@ -104,7 +106,7 @@ public class ClientTlsSessionTest {
         sh(
             new byte[32],
             TLS_AES_128_GCM_SHA256,
-            ext(SupportedVersions.TLS13, TransportParameters.defaults()));
+            ext(SupportedVersions.TLS13, TransportParameters.defaults(Version.CURRENT)));
 
     started.handleServerHello(b);
   }
@@ -112,7 +114,10 @@ public class ClientTlsSessionTest {
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
     byte[] b =
-        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TransportParameters.defaults()));
+        sh(
+            new byte[32],
+            TLS_AES_128_GCM_SHA256,
+            ext(keyshare(), TransportParameters.defaults(Version.CURRENT)));
 
     started.handleServerHello(b);
   }
