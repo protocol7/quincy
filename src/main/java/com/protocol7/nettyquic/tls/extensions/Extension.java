@@ -23,17 +23,21 @@ public interface Extension {
     ExtensionType type = ExtensionType.fromValue(bb.readShort() & 0xFFFF);
 
     int len = bb.readShort();
-    ByteBuf b = bb.readBytes(len);
-    if (type == ExtensionType.QUIC) {
-      return TransportParameters.parse(b, isClient);
-    } else if (type == ExtensionType.key_share) {
-      return KeyShare.parse(b, isClient);
-    } else if (type == ExtensionType.supported_versions) {
-      return SupportedVersions.parse(b, isClient);
-    } else if (type == ExtensionType.supported_groups) {
-      return SupportedGroups.parse(b);
-    } else {
-      return RawExtension.parse(type, b);
+    final ByteBuf b = bb.readBytes(len);
+    try {
+      if (type == ExtensionType.QUIC) {
+        return TransportParameters.parse(b, isClient);
+      } else if (type == ExtensionType.key_share) {
+        return KeyShare.parse(b, isClient);
+      } else if (type == ExtensionType.supported_versions) {
+        return SupportedVersions.parse(b, isClient);
+      } else if (type == ExtensionType.supported_groups) {
+        return SupportedGroups.parse(b);
+      } else {
+        return RawExtension.parse(type, b);
+      }
+    } finally {
+      b.release();
     }
   }
 
