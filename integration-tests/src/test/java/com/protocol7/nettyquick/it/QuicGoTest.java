@@ -7,6 +7,7 @@ import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
+import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
@@ -23,7 +24,8 @@ public class QuicGoTest {
   @Rule
   public GenericContainer quicGo =
       new GenericContainer<>(
-              new ImageFromDockerfile().withFileFromClasspath("Dockerfile", "Dockerfile"))
+              new ImageFromDockerfile("quic-go", false)
+                  .withFileFromClasspath("Dockerfile", "Dockerfile"))
           .withExposedPorts(6121)
           .waitingFor(Wait.forLogMessage(".*server Listening for udp connections on.*\\n", 1));
 
@@ -38,32 +40,42 @@ public class QuicGoTest {
             .getHostPortSpec());
   }
 
-  @Test
-  public void cont() throws ExecutionException, InterruptedException {
+  private InetSocketAddress serverAddress;
+
+  @Before
+  public void setUp() {
     Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
     quicGo.followOutput(logConsumer);
 
-    InetSocketAddress server = new InetSocketAddress(quicGo.getContainerIpAddress(), getUdpPort());
+    serverAddress = new InetSocketAddress(quicGo.getContainerIpAddress(), getUdpPort());
+  }
 
-    QuicClient client =
-        QuicClient.connect(
-                server,
-                new StreamListener() {
-                  @Override
-                  public void onData(Stream stream, byte[] data) {
-                    System.out.println(new String(data));
-                  }
+  @Test
+  public void test() throws ExecutionException, InterruptedException {
+    QuicClient client = null;
+    try {
+      client =
+          QuicClient.connect(
+                  serverAddress,
+                  new StreamListener() {
+                    @Override
+                    public void onData(Stream stream, byte[] data) {
+                      System.out.println(new String(data));
+                    }
 
-                  @Override
-                  public void onDone() {}
+                    @Override
+                    public void onDone() {}
 
-                  @Override
-                  public void onReset(Stream stream, int applicationErrorCode, long offset) {}
-                })
-            .get();
+                    @Override
+                    public void onReset(Stream stream, int applicationErrorCode, long offset) {}
+                  })
+              .get();
 
-    client.openStream().write("Hello world".getBytes(), true);
-
-    client.close();
+      client.openStream().write("Hello world".getBytes(), true);
+    } finally {
+      if (client != null) {
+        client.close();
+      }
+    }
   }
 }
