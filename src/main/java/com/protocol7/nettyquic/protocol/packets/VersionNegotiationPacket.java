@@ -13,7 +13,7 @@ import java.util.Optional;
 
 public class VersionNegotiationPacket implements Packet {
 
-  public static final int MARKER = 0b10000000;
+  private static final int MARKER = 0b10000000;
 
   public static HalfParsedPacket<VersionNegotiationPacket> parse(ByteBuf bb) {
     final byte marker = bb.readByte();
