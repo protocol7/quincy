@@ -13,28 +13,33 @@ import java.util.Optional;
 
 public class VersionNegotiationPacket implements Packet {
 
+  public static final int MARKER = 0b10000000;
+
   public static HalfParsedPacket<VersionNegotiationPacket> parse(ByteBuf bb) {
-    bb.readByte(); // TODO verify marker
-    Version version = Version.read(bb);
+    final byte marker = bb.readByte();
+    if ((marker & MARKER) != MARKER) {
+      throw new IllegalArgumentException("Illegal marker");
+    }
+
+    final Version version = Version.read(bb);
 
     if (version != Version.VERSION_NEGOTIATION) {
       throw new IllegalArgumentException("Invalid version");
     }
 
-    int cil = bb.readByte() & 0xFF;
+    final int cil = bb.readByte() & 0xFF;
 
-    int dcil = ConnectionId.firstLength(cil);
-    int scil = ConnectionId.lastLength(cil);
+    final int dcil = ConnectionId.firstLength(cil);
+    final int scil = ConnectionId.lastLength(cil);
 
-    Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
-    Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+    final Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
+    final Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
 
-    List<Version> supported = new ArrayList<>();
+    final List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
-      try {
-        supported.add(Version.read(bb));
-      } catch (IllegalArgumentException e) {
-        // ignore unknown versions
+      final Version v = Version.read(bb);
+      if (v != Version.UNKNOWN) {
+        supported.add(v);
       }
     }
 
@@ -62,16 +67,16 @@ public class VersionNegotiationPacket implements Packet {
   private final List<Version> supportedVersions;
 
   public VersionNegotiationPacket(
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      Version... supportedVersions) {
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final Version... supportedVersions) {
     this(destinationConnectionId, sourceConnectionId, List.of(supportedVersions));
   }
 
   public VersionNegotiationPacket(
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      List<Version> supportedVersions) {
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final List<Version> supportedVersions) {
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
 
@@ -82,11 +87,13 @@ public class VersionNegotiationPacket implements Packet {
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD notUsed) {
+  public void write(final ByteBuf bb, final AEAD notUsed) {
     int marker = Rnd.rndInt() & 0xFF;
-    marker |= 0b10000000;
+    marker |= MARKER;
     bb.writeByte(marker);
+
     Version.VERSION_NEGOTIATION.write(bb);
+
     bb.writeByte(ConnectionId.joinLenghts(destinationConnectionId, sourceConnectionId));
     if (destinationConnectionId.isPresent()) {
       destinationConnectionId.get().write(bb);
@@ -95,7 +102,7 @@ public class VersionNegotiationPacket implements Packet {
       sourceConnectionId.get().write(bb);
     }
 
-    for (Version version : supportedVersions) {
+    for (final Version version : supportedVersions) {
       version.write(bb);
     }
   }

@@ -35,6 +35,15 @@ public class VersionNegotiationPacketTest {
     assertEquals(supported, parsed.getSupportedVersions());
   }
 
+  @Test(expected = IllegalArgumentException.class)
+  public void readInvalidMarker() {
+    ByteBuf bb = Unpooled.buffer();
+    packet.write(bb, aead);
+    bb.setByte(0, 0);
+
+    VersionNegotiationPacket.parse(bb);
+  }
+
   @Test
   public void randomMarker() {
     // marker must be random except for first bit
