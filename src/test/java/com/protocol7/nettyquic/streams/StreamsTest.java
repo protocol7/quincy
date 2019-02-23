@@ -17,7 +17,7 @@ public class StreamsTest {
   private Streams streams;
 
   @Before
-  public void setUp() throws Exception {
+  public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     this.streams = new Streams(connection);

@@ -43,7 +43,7 @@ public class QuicServer {
         .handler(
             new ChannelInitializer<NioDatagramChannel>() {
               @Override
-              public void initChannel(final NioDatagramChannel ch) throws Exception {
+              public void initChannel(final NioDatagramChannel ch) {
                 ChannelPipeline p = ch.pipeline();
                 p.addLast(new ServerHandler(router));
               }

@@ -16,7 +16,7 @@ public class Futures {
     future.addListener(
         new GenericFutureListener<Future<V>>() {
           @Override
-          public void operationComplete(final Future<V> future) throws Exception {
+          public void operationComplete(final Future<V> future) {
             result.setSuccess(f.apply(future.getNow())); // TODO handle exception
           }
         });
