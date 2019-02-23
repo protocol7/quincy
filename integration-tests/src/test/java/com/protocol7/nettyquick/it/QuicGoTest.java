@@ -2,23 +2,19 @@ package com.protocol7.nettyquick.it;
 
 import com.github.dockerjava.api.model.ExposedPort;
 import com.github.dockerjava.api.model.InternetProtocol;
-import com.protocol7.nettyquic.client.ClientConnection;
 import com.protocol7.nettyquic.client.QuicClient;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
+import java.net.InetSocketAddress;
+import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
-
-import java.io.File;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
 
 public class QuicGoTest {
 
@@ -27,8 +23,7 @@ public class QuicGoTest {
   @Rule
   public GenericContainer quicGo =
       new GenericContainer<>(
-              new ImageFromDockerfile()
-                      .withFileFromClasspath("Dockerfile", "Dockerfile"))
+              new ImageFromDockerfile().withFileFromClasspath("Dockerfile", "Dockerfile"))
           .withExposedPorts(6121)
           .waitingFor(Wait.forLogMessage(".*server Listening for udp connections on.*\\n", 1));
 
