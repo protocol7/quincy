@@ -32,7 +32,7 @@ public class FrameTest {
 
   @Test
   public void paddingFrame() {
-    assertFrame(PaddingFrame.INSTANCE);
+    assertFrame(new PaddingFrame(1));
   }
 
   @Test

@@ -19,7 +19,7 @@ public class PayloadTest {
 
   @Test
   public void roundtrip() {
-    Payload payload = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
@@ -31,7 +31,7 @@ public class PayloadTest {
 
   @Test
   public void write() {
-    Payload payload = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
     ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
@@ -44,7 +44,7 @@ public class PayloadTest {
     ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("e1eca61dcd946af283d48c55a5d25967efd6"));
     Payload parsed = Payload.parse(bb, bb.writerIndex(), aead, pn, aad);
 
-    Payload expected = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
     assertEquals(expected, parsed);
   }
 
@@ -52,9 +52,9 @@ public class PayloadTest {
   public void addFrame() {
     Payload payload = new Payload(PingFrame.INSTANCE);
 
-    Payload withAdded = payload.addFrame(PaddingFrame.INSTANCE);
+    Payload withAdded = payload.addFrame(new PaddingFrame(1));
 
-    Payload expected = new Payload(PingFrame.INSTANCE, PaddingFrame.INSTANCE);
+    Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
     assertEquals(expected, withAdded);
     assertEquals(new Payload(PingFrame.INSTANCE), payload); // must not been mutated

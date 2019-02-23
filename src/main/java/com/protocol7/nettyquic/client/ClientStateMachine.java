@@ -54,9 +54,7 @@ public class ClientStateMachine {
     final CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.startHandshake());
     len -= clientHello.calculateLength();
     frames.add(clientHello);
-    for (int i = len; i > 0; i--) {
-      frames.add(PaddingFrame.INSTANCE);
-    }
+    frames.add(new PaddingFrame(len));
 
     connection.sendPacket(
         InitialPacket.create(

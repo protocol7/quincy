@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.utils.Hex;
@@ -12,7 +12,7 @@ public class PaddingFrameTest {
 
   @Test
   public void roundtrip() {
-    PaddingFrame frame = PaddingFrame.INSTANCE;
+    PaddingFrame frame = new PaddingFrame(10);
 
     ByteBuf bb = Unpooled.buffer();
 
@@ -20,12 +20,12 @@ public class PaddingFrameTest {
 
     PaddingFrame parsed = PaddingFrame.parse(bb);
 
-    assertSame(frame, parsed);
+    assertEquals(frame, parsed);
   }
 
   @Test
-  public void write() {
-    PaddingFrame frame = PaddingFrame.INSTANCE;
+  public void writeOne() {
+    PaddingFrame frame = new PaddingFrame(1);
     ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
@@ -33,9 +33,40 @@ public class PaddingFrameTest {
   }
 
   @Test
-  public void parse() {
+  public void parseOne() {
     PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("00")));
 
-    assertSame(PaddingFrame.INSTANCE, frame);
+    assertEquals(new PaddingFrame(1), frame);
+  }
+
+  @Test
+  public void parseMulti() {
+    PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("000000000000")));
+
+    assertEquals(new PaddingFrame(6), frame);
+  }
+
+  @Test
+  public void parseTrailing() {
+    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("000000000000FF"));
+    PaddingFrame frame = PaddingFrame.parse(bb);
+
+    assertEquals(new PaddingFrame(6), frame);
+    assertEquals(1, bb.readableBytes());
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void parseIllegal() {
+    PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("FF")));
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void cantBeEmpty() {
+    new PaddingFrame(0);
+  }
+
+  @Test
+  public void calculateLength() {
+    assertEquals(10, new PaddingFrame(10).calculateLength());
   }
 }
