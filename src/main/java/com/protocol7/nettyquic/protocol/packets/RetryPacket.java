@@ -6,6 +6,7 @@ import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Hex;
 import com.protocol7.nettyquic.utils.Opt;
+import com.protocol7.nettyquic.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
@@ -19,12 +20,10 @@ public class RetryPacket implements Packet {
     int odcil = ConnectionId.lastLength(b & 0xFF);
     Version version = Version.read(bb);
 
-    int cil = bb.readByte() & 0xFF;
-    int dcil = ConnectionId.firstLength(cil);
-    int scil = ConnectionId.lastLength(cil);
+    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
-    Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
-    Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+    final Optional<ConnectionId> destConnId = cids.getFirst();
+    final Optional<ConnectionId> srcConnId = cids.getSecond();
 
     ConnectionId orgConnId = ConnectionId.readOptional(odcil, bb).get();
 
@@ -83,13 +82,7 @@ public class RetryPacket implements Packet {
 
     version.write(bb);
 
-    bb.writeByte(ConnectionId.joinLenghts(destinationConnectionId, sourceConnectionId));
-    if (destinationConnectionId.isPresent()) {
-      destinationConnectionId.get().write(bb);
-    }
-    if (sourceConnectionId.isPresent()) {
-      sourceConnectionId.get().write(bb);
-    }
+    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
 
     originalConnectionId.write(bb);
 

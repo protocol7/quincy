@@ -6,6 +6,7 @@ import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
 import com.protocol7.nettyquic.utils.Bytes;
+import com.protocol7.nettyquic.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -48,12 +49,10 @@ public class HandshakePacket extends LongHeaderPacket {
 
     Version version = Version.read(bb);
 
-    int cil = bb.readByte() & 0xFF;
-    int dcil = ConnectionId.firstLength(cil);
-    int scil = ConnectionId.lastLength(cil);
+    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
-    Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
-    Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+    final Optional<ConnectionId> destConnId = cids.getFirst();
+    final Optional<ConnectionId> srcConnId = cids.getSecond();
 
     return new HalfParsedPacket<>() {
       @Override

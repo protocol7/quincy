@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.protocol;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.protocol7.nettyquic.utils.Hex;
+import com.protocol7.nettyquic.utils.Pair;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -34,8 +35,16 @@ public class ConnectionId {
     }
   }
 
-  public static int firstLength(final int cil) {
-    int l = ((cil & 0b11110000) >> 4);
+  public static Pair<Optional<ConnectionId>, Optional<ConnectionId>> readPair(final ByteBuf bb) {
+    final int cil = bb.readByte() & 0xFF;
+    final int dcil = firstLength(cil);
+    final int scil = lastLength(cil);
+
+    return new Pair(readOptional(dcil, bb), readOptional(scil, bb));
+  }
+
+  private static int firstLength(final int cil) {
+    final int l = ((cil & 0b11110000) >> 4);
     if (l > 0) {
       return l + 3;
     } else {
@@ -44,7 +53,7 @@ public class ConnectionId {
   }
 
   public static int lastLength(final int cil) {
-    int l = ((cil & 0b00001111));
+    final int l = ((cil & 0b00001111));
     if (l > 0) {
       return l + 3;
     } else {
@@ -52,11 +61,16 @@ public class ConnectionId {
     }
   }
 
-  public static int joinLenghts(
-      final Optional<ConnectionId> dcid, final Optional<ConnectionId> scid) {
-    final int dcil = dcid.map(id -> id.getLength() - 3).orElse(0);
-    final int scil = scid.map(id -> id.getLength() - 3).orElse(0);
-    return (dcil << 4 | scil) & 0xFF;
+  public static void write(
+      final Optional<ConnectionId> first, final Optional<ConnectionId> second, final ByteBuf bb) {
+    final int dcil = first.map(id -> id.getLength() - 3).orElse(0);
+    final int scil = second.map(id -> id.getLength() - 3).orElse(0);
+    final int cil = (dcil << 4 | scil) & 0xFF;
+
+    bb.writeByte(cil);
+
+    first.ifPresent(c -> c.write(bb));
+    second.ifPresent(c -> c.write(bb));
   }
 
   private final byte[] id;

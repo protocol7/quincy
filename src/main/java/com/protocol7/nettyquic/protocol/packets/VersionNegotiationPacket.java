@@ -4,6 +4,7 @@ import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADProvider;
+import com.protocol7.nettyquic.utils.Pair;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
@@ -27,13 +28,10 @@ public class VersionNegotiationPacket implements Packet {
       throw new IllegalArgumentException("Invalid version");
     }
 
-    final int cil = bb.readByte() & 0xFF;
+    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
-    final int dcil = ConnectionId.firstLength(cil);
-    final int scil = ConnectionId.lastLength(cil);
-
-    final Optional<ConnectionId> destConnId = ConnectionId.readOptional(dcil, bb);
-    final Optional<ConnectionId> srcConnId = ConnectionId.readOptional(scil, bb);
+    final Optional<ConnectionId> destConnId = cids.getFirst();
+    final Optional<ConnectionId> srcConnId = cids.getSecond();
 
     final List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
@@ -94,13 +92,7 @@ public class VersionNegotiationPacket implements Packet {
 
     Version.VERSION_NEGOTIATION.write(bb);
 
-    bb.writeByte(ConnectionId.joinLenghts(destinationConnectionId, sourceConnectionId));
-    if (destinationConnectionId.isPresent()) {
-      destinationConnectionId.get().write(bb);
-    }
-    if (sourceConnectionId.isPresent()) {
-      sourceConnectionId.get().write(bb);
-    }
+    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
 
     for (final Version version : supportedVersions) {
       version.write(bb);

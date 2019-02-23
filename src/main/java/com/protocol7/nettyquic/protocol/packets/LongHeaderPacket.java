@@ -71,15 +71,7 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     version.write(bb);
 
-    int cil = ConnectionId.joinLenghts(destinationConnectionId, sourceConnectionId);
-    bb.writeByte(cil);
-
-    if (destinationConnectionId.isPresent()) {
-      destinationConnectionId.get().write(bb);
-    }
-    if (sourceConnectionId.isPresent()) {
-      sourceConnectionId.get().write(bb);
-    }
+    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
   }
 
   protected void writeSuffix(ByteBuf bb, AEAD aead) {
