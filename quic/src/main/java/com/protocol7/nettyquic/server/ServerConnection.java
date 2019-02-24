@@ -55,7 +55,7 @@ public class ServerConnection implements Connection {
 
     this.srcConnectionId = Optional.of(srcConnId);
 
-    this.aeads = new AEADs(InitialAEAD.create(srcConnId, true));
+    this.aeads = new AEADs(InitialAEAD.create(srcConnId, false));
   }
 
   public Optional<ConnectionId> getDestinationConnectionId() {
