@@ -25,6 +25,7 @@ public class ClientHello {
     List<Extension> extensions =
         List.of(
             KeyShare.of(ke.getGroup(), ke.getPublicKey()),
+            SignatureAlgorithms.defaults(),
             new SupportedGroups(Group.X25519),
             SupportedVersions.TLS13,
             tps);
