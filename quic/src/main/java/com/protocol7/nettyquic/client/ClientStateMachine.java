@@ -58,8 +58,8 @@ public class ClientStateMachine {
 
     connection.sendPacket(
         InitialPacket.create(
-            connection.getDestinationConnectionId(),
-            connection.getSourceConnectionId(),
+            connection.getRemoteConnectionId(),
+            connection.getLocalConnectionId(),
             connection.nextSendPacketNumber(),
             connection.getVersion(),
             connection.getToken(),
@@ -74,7 +74,7 @@ public class ClientStateMachine {
       if (state == ClientState.WaitingForServerHello) {
         if (packet instanceof InitialPacket) {
 
-          connection.setDestinationConnectionId(packet.getSourceConnectionId().get(), false);
+          connection.setRemoteConnectionId(packet.getSourceConnectionId().get(), false);
 
           for (final Frame frame : ((InitialPacket) packet).getPayload().getFrames()) {
             if (frame instanceof CryptoFrame) {
@@ -88,7 +88,7 @@ public class ClientStateMachine {
           log.info("Client connection state ready");
         } else if (packet instanceof RetryPacket) {
           final RetryPacket retryPacket = (RetryPacket) packet;
-          connection.setDestinationConnectionId(packet.getSourceConnectionId().get(), true);
+          connection.setRemoteConnectionId(packet.getSourceConnectionId().get(), true);
           connection.resetSendPacketNumber();
           connection.setToken(retryPacket.getRetryToken());
 
@@ -137,8 +137,8 @@ public class ClientStateMachine {
 
           connection.sendPacket(
               HandshakePacket.create(
-                  connection.getDestinationConnectionId(),
-                  connection.getSourceConnectionId(),
+                  connection.getRemoteConnectionId(),
+                  connection.getLocalConnectionId(),
                   connection.nextSendPacketNumber(),
                   Version.QUIC_GO,
                   new CryptoFrame(0, result.get().getFin())));

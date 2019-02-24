@@ -49,7 +49,7 @@ public class PacketRouterTest {
     when(connections.get(any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
-    when(connection.getSourceConnectionId()).thenReturn(of(srcConnId));
+    when(connection.getLocalConnectionId()).thenReturn(of(srcConnId));
   }
 
   @Test

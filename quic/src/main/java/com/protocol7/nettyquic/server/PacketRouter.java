@@ -49,7 +49,7 @@ public class PacketRouter {
               listener,
               sender); // TODO fix for when connId is omitted
 
-      if (validateVersion(halfParsed, sender, conn.getSourceConnectionId())) {
+      if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
 
         Packet packet = halfParsed.complete(conn::getAEAD);
 

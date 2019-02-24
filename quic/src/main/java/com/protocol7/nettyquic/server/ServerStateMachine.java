@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.server.ServerState.Ready;
 import static com.protocol7.nettyquic.server.ServerState.WaitingForFinished;
 
+import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -49,7 +50,7 @@ public class ServerStateMachine {
         if (initialPacket.getToken().isPresent()) {
           //  TODO validate token
 
-          connection.setDestinationConnectionId(packet.getDestinationConnectionId().get());
+          connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
 
           CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
@@ -60,8 +61,8 @@ public class ServerStateMachine {
 
           InitialPacket serverHello =
               InitialPacket.create(
-                  connection.getDestinationConnectionId(),
-                  connection.getSourceConnectionId(),
+                  connection.getRemoteConnectionId(),
+                  connection.getLocalConnectionId(),
                   connection.nextSendPacketNumber(),
                   connection.getVersion(),
                   Optional.empty(),
@@ -70,8 +71,8 @@ public class ServerStateMachine {
 
           HandshakePacket handshake =
               HandshakePacket.create(
-                  connection.getDestinationConnectionId(),
-                  connection.getSourceConnectionId(),
+                  connection.getRemoteConnectionId(),
+                  connection.getLocalConnectionId(),
                   connection.nextSendPacketNumber(),
                   connection.getVersion(),
                   new CryptoFrame(0, shah.getServerHandshake()));
@@ -81,11 +82,14 @@ public class ServerStateMachine {
         } else {
           byte[] retryToken = Rnd.rndBytes(34); // TODO generate a useful token
 
+          ConnectionId newLocalConnectionId = ConnectionId.random();
+          connection.setLocalConnectionId(newLocalConnectionId);
+
           RetryPacket retry =
               new RetryPacket(
                   connection.getVersion(),
-                  Optional.empty(),
                   initialPacket.getSourceConnectionId(),
+                  Optional.of(newLocalConnectionId),
                   initialPacket.getDestinationConnectionId().get(),
                   retryToken);
           connection.sendPacket(retry);

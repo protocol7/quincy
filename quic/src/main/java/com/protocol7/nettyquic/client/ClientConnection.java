@@ -28,9 +28,9 @@ public class ClientConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
-  private ConnectionId destConnectionId;
+  private ConnectionId remoteConnectionId;
   private int lastDestConnectionIdLength;
-  private Optional<ConnectionId> srcConnectionId = Optional.of(ConnectionId.random());
+  private Optional<ConnectionId> localConnectionId = Optional.of(ConnectionId.random());
   private final PacketSender packetSender;
   private final StreamListener streamListener;
 
@@ -46,10 +46,10 @@ public class ClientConnection implements Connection {
   private AEADs aeads;
 
   public ClientConnection(
-      final ConnectionId destConnectionId,
+      final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender) {
-    this.destConnectionId = destConnectionId;
+    this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.streamListener = streamListener;
     this.stateMachine = new ClientStateMachine(this);
@@ -60,7 +60,7 @@ public class ClientConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.aeads = new AEADs(InitialAEAD.create(destConnectionId, true));
+    this.aeads = new AEADs(InitialAEAD.create(remoteConnectionId, true));
   }
 
   public Future<Void> handshake() {
@@ -80,25 +80,21 @@ public class ClientConnection implements Connection {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
-                false, getDestinationConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+                false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
   }
 
   @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
-    return srcConnectionId;
+  public Optional<ConnectionId> getLocalConnectionId() {
+    return localConnectionId;
   }
 
   @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
-    return Optional.ofNullable(destConnectionId);
+  public Optional<ConnectionId> getRemoteConnectionId() {
+    return Optional.ofNullable(remoteConnectionId);
   }
 
-  public void setSourceConnectionId(final Optional<ConnectionId> srcConnId) {
-    this.srcConnectionId = srcConnId;
-  }
-
-  public void setDestinationConnectionId(final ConnectionId destConnId, boolean retry) {
-    this.destConnectionId = destConnId;
+  public void setRemoteConnectionId(final ConnectionId remoteConnectionId, boolean retry) {
+    this.remoteConnectionId = remoteConnectionId;
 
     if (retry) {
       initAEAD();

@@ -134,7 +134,7 @@ public class PacketBuffer {
       Packet packet =
           new ShortPacket(
               false,
-              connection.getDestinationConnectionId(),
+              connection.getRemoteConnectionId(),
               connection.nextSendPacketNumber(),
               new Payload(ackFrame));
 

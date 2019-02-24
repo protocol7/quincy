@@ -16,9 +16,9 @@ public interface Connection {
 
   FullPacket sendPacket(Frame... frames);
 
-  Optional<ConnectionId> getSourceConnectionId();
+  Optional<ConnectionId> getLocalConnectionId();
 
-  Optional<ConnectionId> getDestinationConnectionId();
+  Optional<ConnectionId> getRemoteConnectionId();
 
   Version getVersion();
 

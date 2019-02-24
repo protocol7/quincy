@@ -67,8 +67,8 @@ public class ServerTest {
     connection.onPacket(initialPacket(destConnectionId, empty(), new CryptoFrame(0, ch)));
 
     RetryPacket retry = (RetryPacket) captureSentPacket(1);
-    assertFalse(retry.getDestinationConnectionId().isPresent());
-    assertEquals(srcConnectionId, retry.getSourceConnectionId().get());
+    assertTrue(retry.getDestinationConnectionId().isPresent());
+    assertEquals(srcConnectionId, retry.getDestinationConnectionId().get());
     assertEquals(destConnectionId, retry.getOriginalConnectionId());
     assertTrue(retry.getRetryToken().length > 0);
     byte[] token = retry.getRetryToken();
@@ -76,8 +76,12 @@ public class ServerTest {
     connection.onPacket(initialPacket(destConnectionId2, of(token), new CryptoFrame(0, ch)));
 
     InitialPacket serverHello = (InitialPacket) captureSentPacket(2);
-    assertEquals(destConnectionId2, serverHello.getDestinationConnectionId().get());
-    assertEquals(srcConnectionId, serverHello.getSourceConnectionId().get());
+    assertEquals(srcConnectionId, serverHello.getDestinationConnectionId().get());
+
+    assertTrue(serverHello.getSourceConnectionId().isPresent());
+
+    ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId().get();
+
     assertEquals(1, serverHello.getPacketNumber().asLong());
     assertFalse(serverHello.getToken().isPresent());
     assertEquals(1, serverHello.getPayload().getFrames().size());
@@ -86,8 +90,8 @@ public class ServerTest {
     clientTlsSession.handleServerHello(cf.getCryptoData());
 
     HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
-    assertEquals(destConnectionId2, handshake.getDestinationConnectionId().get());
-    assertEquals(srcConnectionId, handshake.getSourceConnectionId().get());
+    assertEquals(srcConnectionId, handshake.getDestinationConnectionId().get());
+    assertEquals(newSourceConnectionId, handshake.getSourceConnectionId().get());
     assertEquals(2, handshake.getPacketNumber().asLong());
     assertEquals(1, handshake.getPayload().getFrames().size());
     CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
@@ -129,7 +133,7 @@ public class ServerTest {
   private void assertAck(int number, int packetNumber, int smallest, int largest) {
     ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
-    assertEquals(destConnectionId2, ackPacket.getDestinationConnectionId().get());
+    assertTrue(ackPacket.getDestinationConnectionId().isPresent());
     assertEquals(
         new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
   }

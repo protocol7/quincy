@@ -20,21 +20,23 @@ public class Connections {
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
 
-  public Connections(List<byte[]> certificates, PrivateKey privateKey) {
+  public Connections(final List<byte[]> certificates, final PrivateKey privateKey) {
     this.certificates = certificates;
     this.privateKey = privateKey;
   }
 
   public ServerConnection get(
-      Optional<ConnectionId> connIdOpt, StreamListener streamHandler, PacketSender packetSender) {
+      final Optional<ConnectionId> connIdOpt,
+      final StreamListener streamHandler,
+      final PacketSender packetSender) {
 
-    ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
+    final ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
 
     ServerConnection conn = connections.get(connId);
     if (conn == null) {
       log.debug("Creating new server connection for {}", connId);
       conn = new ServerConnection(connId, streamHandler, packetSender, certificates, privateKey);
-      ServerConnection existingConn = connections.putIfAbsent(connId, conn);
+      final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;
       }
@@ -42,7 +44,7 @@ public class Connections {
     return conn;
   }
 
-  public Optional<Connection> get(ConnectionId connId) {
+  public Optional<Connection> get(final ConnectionId connId) {
     return Optional.ofNullable(connections.get(connId));
   }
 }

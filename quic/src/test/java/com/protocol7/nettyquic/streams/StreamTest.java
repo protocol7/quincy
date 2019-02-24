@@ -32,8 +32,8 @@ public class StreamTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.getSourceConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getRemoteConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getLocalConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(1));
 
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(123));

@@ -28,8 +28,8 @@ public class ServerConnection implements Connection {
 
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
-  private Optional<ConnectionId> destConnectionId = Optional.empty();
-  private final Optional<ConnectionId> srcConnectionId;
+  private Optional<ConnectionId> remoteConnectionId = Optional.empty();
+  private Optional<ConnectionId> localConnectionId;
   private final StreamListener handler;
   private final PacketSender packetSender;
   private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
@@ -39,10 +39,10 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  private final AEADs aeads;
+  private AEADs aeads;
 
   public ServerConnection(
-      final ConnectionId srcConnId,
+      final ConnectionId localConnectionId,
       final StreamListener handler,
       final PacketSender packetSender,
       final List<byte[]> certificates,
@@ -53,21 +53,31 @@ public class ServerConnection implements Connection {
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
-    this.srcConnectionId = Optional.of(srcConnId);
+    this.localConnectionId = Optional.of(localConnectionId);
 
-    this.aeads = new AEADs(InitialAEAD.create(srcConnId, false));
+    initAEAD();
   }
 
-  public Optional<ConnectionId> getDestinationConnectionId() {
-    return destConnectionId;
+  private void initAEAD() {
+    this.aeads = new AEADs(InitialAEAD.create(localConnectionId.get(), false));
   }
 
-  public Optional<ConnectionId> getSourceConnectionId() {
-    return srcConnectionId;
+  public Optional<ConnectionId> getRemoteConnectionId() {
+    return remoteConnectionId;
   }
 
-  public void setDestinationConnectionId(ConnectionId destConnectionId) {
-    this.destConnectionId = Optional.of(destConnectionId);
+  public Optional<ConnectionId> getLocalConnectionId() {
+    return localConnectionId;
+  }
+
+  public void setRemoteConnectionId(ConnectionId remoteConnectionId) {
+    this.remoteConnectionId = Optional.of(remoteConnectionId);
+  }
+
+  public void setLocalConnectionId(ConnectionId localConnectionId) {
+    this.localConnectionId = Optional.of(localConnectionId);
+
+    initAEAD();
   }
 
   public Version getVersion() {
@@ -83,7 +93,7 @@ public class ServerConnection implements Connection {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
-                false, getDestinationConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+                false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
   }
 
   private void sendPacketUnbuffered(Packet packet) {

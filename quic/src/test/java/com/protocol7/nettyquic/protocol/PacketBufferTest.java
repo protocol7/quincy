@@ -30,8 +30,8 @@ public class PacketBufferTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(connection.getDestinationConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.getSourceConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getRemoteConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
+    when(connection.getLocalConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
 
     buffer = new PacketBuffer(connection, sender, pn -> {});
