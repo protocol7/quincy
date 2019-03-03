@@ -1,54 +1,19 @@
 package com.protocol7.nettyquick.it;
 
-import com.github.dockerjava.api.model.ExposedPort;
-import com.github.dockerjava.api.model.InternetProtocol;
+import static org.junit.Assert.assertEquals;
+
 import com.protocol7.nettyquic.client.QuicClient;
+import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
-import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.testcontainers.containers.GenericContainer;
-import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
-import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class QuicGoTest {
 
-  private Logger log = LoggerFactory.getLogger("quic-go");
-
-  @Rule
-  public GenericContainer quicGo =
-      new GenericContainer<>(
-              new ImageFromDockerfile("quic-go", false)
-                  .withFileFromClasspath("Dockerfile", "Dockerfile"))
-          .withExposedPorts(6121)
-          .waitingFor(Wait.forLogMessage(".*server Listening for udp connections on.*\\n", 1));
-
-  private int getUdpPort() {
-    return Integer.valueOf(
-        quicGo
-            .getContainerInfo()
-            .getNetworkSettings()
-            .getPorts()
-            .getBindings()
-            .get(new ExposedPort(6121, InternetProtocol.UDP))[0]
-            .getHostPortSpec());
-  }
-
-  private InetSocketAddress serverAddress;
-
-  @Before
-  public void setUp() {
-    Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
-    quicGo.followOutput(logConsumer);
-
-    serverAddress = new InetSocketAddress(quicGo.getContainerIpAddress(), getUdpPort());
-  }
+  @Rule public QuicGoContainer quicGo = new QuicGoContainer();
 
   @Test
   public void test() throws ExecutionException, InterruptedException {
@@ -56,7 +21,7 @@ public class QuicGoTest {
     try {
       client =
           QuicClient.connect(
-                  serverAddress,
+                  quicGo.getAddress(),
                   new StreamListener() {
                     @Override
                     public void onData(Stream stream, byte[] data) {
@@ -77,5 +42,33 @@ public class QuicGoTest {
         client.close();
       }
     }
+
+    List<QuicGoPacket> packets = quicGo.getPackets();
+
+    // client hello without token
+    assertPacket(packets.get(0), true, true, "Initial", new PacketNumber(0));
+
+    // token needed, retry
+    assertPacket(packets.get(1), false, true, "Retry", null);
+
+    // client hello with token
+    assertPacket(packets.get(2), true, true, "Initial", new PacketNumber(1));
+
+    // server hello
+    assertPacket(packets.get(3), false, true, "Initial", new PacketNumber(0));
+
+    // handshake
+    assertPacket(packets.get(4), false, true, "Handshake", new PacketNumber(0));
+
+    // ack handshake
+    assertPacket(packets.get(5), true, true, "Handshake", new PacketNumber(2));
+  }
+
+  private void assertPacket(
+      QuicGoPacket actual, boolean inbount, boolean longHeader, String type, PacketNumber pn) {
+    assertEquals(inbount, actual.inbound);
+    assertEquals(longHeader, actual.longHeader);
+    assertEquals(type, actual.type);
+    assertEquals(pn, actual.packetNumber);
   }
 }
