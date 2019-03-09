@@ -1,4 +1,4 @@
-package com.protocol7.nettyquic.utils;
+package com.protocol7.nettyquic;
 
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
