@@ -16,6 +16,7 @@ import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
 import java.security.PrivateKey;
 import java.util.List;
@@ -39,6 +40,9 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
+  private final TransportParameters transportParameters =
+      TransportParameters.defaults(Version.CURRENT);
+
   private AEADs aeads;
 
   public ServerConnection(
@@ -49,7 +53,7 @@ public class ServerConnection implements Connection {
       final PrivateKey privateKey) {
     this.handler = handler;
     this.packetSender = packetSender;
-    this.stateMachine = new ServerStateMachine(this, certificates, privateKey);
+    this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 

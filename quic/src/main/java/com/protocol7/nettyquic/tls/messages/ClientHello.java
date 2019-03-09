@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.tls.messages;
 import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
@@ -18,17 +19,19 @@ import java.util.Optional;
 
 public class ClientHello {
 
-  public static ClientHello defaults(KeyExchange ke, TransportParameters tps) {
+  public static ClientHello defaults(KeyExchange ke, Extension... exts) {
     byte[] clientRandom = Rnd.rndBytes(32);
     byte[] sessionId = new byte[0];
     List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
     List<Extension> extensions =
-        List.of(
-            KeyShare.of(ke.getGroup(), ke.getPublicKey()),
-            SignatureAlgorithms.defaults(),
-            new SupportedGroups(Group.X25519),
-            SupportedVersions.TLS13,
-            tps);
+        ImmutableList.<Extension>builder()
+            .add(
+                KeyShare.of(ke.getGroup(), ke.getPublicKey()),
+                SignatureAlgorithms.defaults(),
+                new SupportedGroups(Group.X25519),
+                SupportedVersions.TLS13)
+            .add(exts)
+            .build();
 
     return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
   }

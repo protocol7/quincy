@@ -8,6 +8,7 @@ import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.tls.ClientTlsSession;
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -25,10 +26,12 @@ public class ClientStateMachine {
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture =
       new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
-  private final ClientTlsSession tlsEngine = new ClientTlsSession();
+  private final ClientTlsSession tlsSession;
 
-  public ClientStateMachine(final ClientConnection connection) {
+  public ClientStateMachine(
+      final ClientConnection connection, TransportParameters transportParameters) {
     this.connection = connection;
+    tlsSession = new ClientTlsSession(transportParameters);
   }
 
   public Future<Void> handshake() {
@@ -51,7 +54,7 @@ public class ClientStateMachine {
 
     int len = 1200;
 
-    final CryptoFrame clientHello = new CryptoFrame(0, tlsEngine.startHandshake());
+    final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake());
     len -= clientHello.calculateLength();
     frames.add(clientHello);
     frames.add(new PaddingFrame(len));
@@ -80,7 +83,7 @@ public class ClientStateMachine {
             if (frame instanceof CryptoFrame) {
               final CryptoFrame cf = (CryptoFrame) frame;
 
-              final AEAD handshakeAead = tlsEngine.handleServerHello(cf.getCryptoData());
+              final AEAD handshakeAead = tlsSession.handleServerHello(cf.getCryptoData());
               connection.setHandshakeAead(handshakeAead);
               state = ClientState.WaitingForHandshake;
             }
@@ -92,7 +95,7 @@ public class ClientStateMachine {
           connection.resetSendPacketNumber();
           connection.setToken(retryPacket.getRetryToken());
 
-          tlsEngine.reset();
+          tlsSession.reset();
 
           sendInitialPacket();
         } else if (packet instanceof VersionNegotiationPacket) {
@@ -130,7 +133,7 @@ public class ClientStateMachine {
         final CryptoFrame cf = (CryptoFrame) frame;
 
         final Optional<ClientTlsSession.HandshakeResult> result =
-            tlsEngine.handleHandshake(cf.getCryptoData());
+            tlsSession.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
           connection.setOneRttAead(result.get().getOneRttAead());

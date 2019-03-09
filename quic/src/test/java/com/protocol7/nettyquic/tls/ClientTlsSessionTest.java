@@ -22,8 +22,10 @@ import org.junit.Test;
 
 public class ClientTlsSessionTest {
 
-  private final ClientTlsSession engine = new ClientTlsSession();
-  private final ClientTlsSession started = new ClientTlsSession();
+  private final ClientTlsSession engine =
+      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT));
+  private final ClientTlsSession started =
+      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT));
 
   @Before
   public void setUp() {

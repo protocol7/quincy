@@ -27,6 +27,8 @@ import java.util.List;
 
 public class ServerTlsSession {
 
+  private final TransportParameters transportParameters;
+
   private KeyExchange kek;
 
   private final PrivateKey privateKey;
@@ -36,7 +38,11 @@ public class ServerTlsSession {
   private byte[] handshake;
   private byte[] handshakeSecret;
 
-  public ServerTlsSession(List<byte[]> certificates, PrivateKey privateKey) {
+  public ServerTlsSession(
+      final TransportParameters transportParameters,
+      List<byte[]> certificates,
+      PrivateKey privateKey) {
+    this.transportParameters = transportParameters;
     Preconditions.checkArgument(!certificates.isEmpty());
 
     this.privateKey = privateKey;
@@ -71,8 +77,7 @@ public class ServerTlsSession {
             ch.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
 
     // create ServerHello
-    serverHello =
-        Bytes.write(ServerHello.defaults(kek, TransportParameters.defaults(Version.CURRENT)));
+    serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));
 
     ByteBuf handshakeBB = Unpooled.buffer();
 

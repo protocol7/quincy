@@ -1,6 +1,8 @@
 package com.protocol7.nettyquic.tls;
 
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -13,7 +15,8 @@ import org.junit.Test;
 public class TlsSessions {
 
   private PrivateKey privateKey;
-  private final ClientTlsSession client = new ClientTlsSession();
+  private final ClientTlsSession client =
+      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT));
   private ServerTlsSession server;
 
   @Before
@@ -21,7 +24,9 @@ public class TlsSessions {
     privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
 
-    server = new ServerTlsSession(List.of(serverCert), privateKey);
+    server =
+        new ServerTlsSession(
+            TransportParameters.defaults(Version.CURRENT), List.of(serverCert), privateKey);
   }
 
   @Test

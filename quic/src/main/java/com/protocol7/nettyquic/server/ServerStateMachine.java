@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Rnd;
 import java.security.PrivateKey;
 import java.util.List;
@@ -30,9 +31,12 @@ public class ServerStateMachine {
   private final ServerTlsSession tlsEngine;
 
   public ServerStateMachine(
-      final ServerConnection connection, List<byte[]> certificates, PrivateKey privateKey) {
+      final ServerConnection connection,
+      final TransportParameters transportParameters,
+      PrivateKey privateKey,
+      List<byte[]> certificates) {
     this.connection = connection;
-    tlsEngine = new ServerTlsSession(certificates, privateKey);
+    tlsEngine = new ServerTlsSession(transportParameters, certificates, privateKey);
   }
 
   public synchronized void processPacket(Packet packet) {

@@ -17,6 +17,7 @@ import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -34,7 +35,7 @@ public class ClientConnection implements Connection {
   private final PacketSender packetSender;
   private final StreamListener streamListener;
 
-  private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
+  private final Version version = Version.CURRENT;
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(new PacketNumber(0));
   private final PacketBuffer packetBuffer;
@@ -52,7 +53,7 @@ public class ClientConnection implements Connection {
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.streamListener = streamListener;
-    this.stateMachine = new ClientStateMachine(this);
+    this.stateMachine = new ClientStateMachine(this, TransportParameters.defaults(Version.CURRENT));
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
@@ -154,7 +155,7 @@ public class ClientConnection implements Connection {
   }
 
   public Version getVersion() {
-    return version.get();
+    return version;
   }
 
   public PacketNumber lastAckedPacketNumber() {

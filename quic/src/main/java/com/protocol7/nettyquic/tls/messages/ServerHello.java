@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.tls.messages;
 
 import static com.protocol7.nettyquic.utils.Hex.hex;
 
+import com.google.common.collect.ImmutableList;
 import com.protocol7.nettyquic.Writeable;
 import com.protocol7.nettyquic.tls.CipherSuite;
 import com.protocol7.nettyquic.tls.Group;
@@ -18,16 +19,18 @@ public class ServerHello implements Writeable {
 
   private static final byte[] VERSION = new byte[] {0x03, 0x03};
 
-  public static ServerHello defaults(KeyExchange ke, TransportParameters tps) {
+  public static ServerHello defaults(KeyExchange ke, Extension... exts) {
     byte[] clientRandom = Rnd.rndBytes(32);
     byte[] sessionId = new byte[0];
     CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
     List<Extension> extensions =
-        List.of(
-            KeyShare.of(ke.getGroup(), ke.getPublicKey()),
-            new SupportedGroups(Group.X25519),
-            SupportedVersions.TLS13,
-            tps);
+        ImmutableList.<Extension>builder()
+            .add(
+                KeyShare.of(ke.getGroup(), ke.getPublicKey()),
+                new SupportedGroups(Group.X25519),
+                SupportedVersions.TLS13)
+            .add(exts)
+            .build();
 
     return new ServerHello(clientRandom, sessionId, cipherSuites, extensions);
   }

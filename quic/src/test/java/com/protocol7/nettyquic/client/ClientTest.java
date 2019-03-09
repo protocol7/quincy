@@ -14,6 +14,7 @@ import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.KeyUtil;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.util.concurrent.*;
 import java.security.PrivateKey;
@@ -55,7 +56,8 @@ public class ClientTest {
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
-    serverTlsSession = new ServerTlsSession(serverCert, privateKey);
+    serverTlsSession =
+        new ServerTlsSession(TransportParameters.defaults(Version.CURRENT), serverCert, privateKey);
   }
 
   @Test
@@ -82,7 +84,7 @@ public class ClientTest {
 
     byte[] retryToken = Rnd.rndBytes(20);
 
-    // first packet did not contain token, so server send retry
+    // first packet did not contain token, server sends retry
     connection.onPacket(
         new RetryPacket(
             Version.CURRENT,
