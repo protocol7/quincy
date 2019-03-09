@@ -1,10 +1,10 @@
 package com.protocol7.nettyquic.client;
 
+import com.protocol7.nettyquic.Futures;
 import com.protocol7.nettyquic.connection.NettyPacketSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
-import com.protocol7.nettyquic.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;

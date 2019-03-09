@@ -1,8 +1,8 @@
 package com.protocol7.nettyquic.server;
 
+import com.protocol7.nettyquic.Futures;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.StreamListener;
-import com.protocol7.nettyquic.Futures;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelOption;
