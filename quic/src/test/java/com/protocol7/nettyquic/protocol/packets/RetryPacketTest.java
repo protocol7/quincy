@@ -21,7 +21,7 @@ public class RetryPacketTest {
   private byte[] token = Rnd.rndBytes(18);
   private RetryPacket packet = new RetryPacket(Version.DRAFT_15, of(dest), of(src), org, token);
 
-  private final AEAD aead = InitialAEAD.create(ConnectionId.random(), true);
+  private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
   @Test
   public void roundtrip() {

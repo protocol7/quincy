@@ -21,7 +21,7 @@ public class VersionNegotiationPacketTest {
   private VersionNegotiationPacket packet =
       new VersionNegotiationPacket(of(dest), of(src), supported);
 
-  private final AEAD aead = InitialAEAD.create(ConnectionId.random(), true);
+  private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
   @Test
   public void roundtrip() {

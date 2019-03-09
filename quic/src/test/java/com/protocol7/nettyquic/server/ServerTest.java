@@ -39,7 +39,7 @@ public class ServerTest {
   private StreamId streamId = StreamId.random(true, true);
 
   private ClientTlsSession clientTlsSession =
-      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT));
+      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT.asBytes()));
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;

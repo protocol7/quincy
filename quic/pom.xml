@@ -31,6 +31,13 @@
 
     <!-- Tests -->
     <dependency>
+      <groupId>com.protocol7</groupId>
+      <artifactId>netty-quic-tls</artifactId>
+      <classifier>tests</classifier>
+      <type>test-jar</type>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
       <scope>test</scope>

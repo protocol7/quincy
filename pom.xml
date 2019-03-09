@@ -53,6 +53,13 @@
             </dependency>
             <dependency>
                 <groupId>com.protocol7</groupId>
+                <artifactId>netty-quic-tls</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+                <classifier>tests</classifier>
+                <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>com.protocol7</groupId>
                 <artifactId>netty-quic</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>

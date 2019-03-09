@@ -57,7 +57,8 @@ public class ClientTest {
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
     serverTlsSession =
-        new ServerTlsSession(TransportParameters.defaults(Version.CURRENT), serverCert, privateKey);
+        new ServerTlsSession(
+            TransportParameters.defaults(Version.CURRENT.asBytes()), serverCert, privateKey);
   }
 
   @Test

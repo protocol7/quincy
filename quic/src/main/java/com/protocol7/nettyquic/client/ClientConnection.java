@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.client;
 
 import static com.protocol7.nettyquic.client.ClientState.Closed;
 import static com.protocol7.nettyquic.client.ClientState.Closing;
+import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
@@ -53,7 +54,8 @@ public class ClientConnection implements Connection {
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.streamListener = streamListener;
-    this.stateMachine = new ClientStateMachine(this, TransportParameters.defaults(Version.CURRENT));
+    this.stateMachine =
+        new ClientStateMachine(this, TransportParameters.defaults(Version.CURRENT.asBytes()));
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
 
@@ -61,7 +63,7 @@ public class ClientConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.aeads = new AEADs(InitialAEAD.create(remoteConnectionId, true));
+    this.aeads = new AEADs(InitialAEAD.create(remoteConnectionId.asBytes(), true));
   }
 
   public Future<Void> handshake() {
@@ -116,7 +118,7 @@ public class ClientConnection implements Connection {
 
   private void sendPacketUnbuffered(final Packet packet) {
     packetSender
-        .send(packet, getAEAD(EncryptionLevel.forPacket(packet)))
+        .send(packet, getAEAD(getEncryptionLevel(packet)))
         .awaitUninterruptibly(); // TODO fix
 
     log.debug("Client sent {}", packet);
@@ -131,7 +133,7 @@ public class ClientConnection implements Connection {
       lastDestConnectionIdLength = 0;
     }
 
-    EncryptionLevel encLevel = EncryptionLevel.forPacket(packet);
+    EncryptionLevel encLevel = getEncryptionLevel(packet);
     if (aeads.available(encLevel)) {
       packetBuffer.onPacket(packet);
 

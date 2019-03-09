@@ -41,7 +41,7 @@ public class ServerConnection implements Connection {
   private final PacketBuffer packetBuffer;
 
   private final TransportParameters transportParameters =
-      TransportParameters.defaults(Version.CURRENT);
+      TransportParameters.defaults(Version.CURRENT.asBytes());
 
   private AEADs aeads;
 
@@ -63,7 +63,7 @@ public class ServerConnection implements Connection {
   }
 
   private void initAEAD() {
-    this.aeads = new AEADs(InitialAEAD.create(localConnectionId.get(), false));
+    this.aeads = new AEADs(InitialAEAD.create(localConnectionId.get().asBytes(), false));
   }
 
   public Optional<ConnectionId> getRemoteConnectionId() {

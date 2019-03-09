@@ -50,7 +50,7 @@ public interface Packet {
     }
   }
 
-  static EncryptionLevel getEncryptipnLevel(Packet packet) {
+  static EncryptionLevel getEncryptionLevel(Packet packet) {
     if (packet instanceof InitialPacket
         || packet instanceof RetryPacket
         || packet instanceof VersionNegotiationPacket) {
