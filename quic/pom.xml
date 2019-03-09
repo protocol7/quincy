@@ -13,12 +13,12 @@
 
   <dependencies>
     <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
+      <groupId>com.protocol7</groupId>
+      <artifactId>netty-quic-tls</artifactId>
     </dependency>
     <dependency>
-      <groupId>at.favre.lib</groupId>
-      <artifactId>hkdf</artifactId>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

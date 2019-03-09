@@ -1,5 +1,6 @@
 package com.protocol7.nettyquic.protocol.packets;
 
+import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.utils.Bytes;

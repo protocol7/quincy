@@ -3,7 +3,7 @@ package com.protocol7.nettyquic.tls.extensions;
 import static com.protocol7.nettyquic.tls.extensions.TransportParameterType.*;
 
 import com.google.common.collect.ImmutableList;
-import com.protocol7.nettyquic.protocol.Varint;
+import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.protocol.Version;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;

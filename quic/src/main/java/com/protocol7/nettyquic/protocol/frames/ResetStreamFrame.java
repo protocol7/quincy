@@ -3,8 +3,8 @@ package com.protocol7.nettyquic.protocol.frames;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
+import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.protocol.StreamId;
-import com.protocol7.nettyquic.protocol.Varint;
 import io.netty.buffer.ByteBuf;
 
 public class ResetStreamFrame extends Frame {

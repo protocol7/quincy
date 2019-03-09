@@ -1,7 +1,12 @@
 package com.protocol7.nettyquic.protocol.packets;
 
+import static com.protocol7.nettyquic.tls.EncryptionLevel.Handshake;
+import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
+import static com.protocol7.nettyquic.tls.EncryptionLevel.OneRtt;
+
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
+import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
 import java.util.Optional;
@@ -42,6 +47,18 @@ public interface Packet {
       // short header packet
       bb.resetReaderIndex();
       return ShortPacket.parse(bb, connidLength);
+    }
+  }
+
+  static EncryptionLevel getEncryptipnLevel(Packet packet) {
+    if (packet instanceof InitialPacket
+        || packet instanceof RetryPacket
+        || packet instanceof VersionNegotiationPacket) {
+      return Initial;
+    } else if (packet instanceof HandshakePacket) {
+      return Handshake;
+    } else {
+      return OneRtt;
     }
   }
 

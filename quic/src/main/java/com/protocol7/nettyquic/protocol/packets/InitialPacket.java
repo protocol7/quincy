@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.protocol.packets;
 
 import com.google.common.collect.ImmutableList;
+import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.tls.EncryptionLevel;

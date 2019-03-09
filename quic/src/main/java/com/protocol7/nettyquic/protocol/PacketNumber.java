@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.protocol;
 
 import com.google.common.base.Preconditions;
 import com.google.common.primitives.Ints;
+import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.utils.Bytes;
 import java.util.Objects;
 

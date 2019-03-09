@@ -1,4 +1,4 @@
-package com.protocol7.nettyquic.protocol;
+package com.protocol7.nettyquic;
 
 import com.google.common.primitives.Longs;
 import com.protocol7.nettyquic.utils.Bytes;

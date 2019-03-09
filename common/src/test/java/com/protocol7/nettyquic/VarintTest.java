@@ -1,4 +1,4 @@
-package com.protocol7.nettyquic.protocol;
+package com.protocol7.nettyquic;
 
 import static org.junit.Assert.*;
 

@@ -4,6 +4,7 @@ import static com.protocol7.nettyquic.utils.Bits.set;
 import static com.protocol7.nettyquic.utils.Bits.unset;
 
 import com.google.common.base.Preconditions;
+import com.protocol7.nettyquic.Varint;
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 

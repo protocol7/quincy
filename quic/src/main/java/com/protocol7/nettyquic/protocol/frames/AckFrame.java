@@ -2,7 +2,7 @@ package com.protocol7.nettyquic.protocol.frames;
 
 import static java.util.Objects.requireNonNull;
 
-import com.protocol7.nettyquic.protocol.Varint;
+import com.protocol7.nettyquic.Varint;
 import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.Arrays;

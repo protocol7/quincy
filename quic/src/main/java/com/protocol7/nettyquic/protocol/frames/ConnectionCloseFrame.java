@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.protocol.frames;
 
-import com.protocol7.nettyquic.protocol.Varint;
+import com.protocol7.nettyquic.Varint;
 import io.netty.buffer.ByteBuf;
 import java.nio.charset.StandardCharsets;
 

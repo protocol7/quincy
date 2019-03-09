@@ -1,42 +1,50 @@
 package com.protocol7.nettyquic.protocol;
 
+import static com.protocol7.nettyquic.utils.Hex.dehex;
+
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
 
 public enum Version {
-  VERSION_NEGOTIATION(0x00000000),
-  FINAL(0x00000001),
-  QUIC_GO(0x51474fff),
-  DRAFT_15(0xff000000 + 15),
-  DRAFT_17(0xff000000 + 17),
-  UNKNOWN(-1);
+  VERSION_NEGOTIATION(dehex("00000000")),
+  FINAL(dehex("00000001")),
+  QUIC_GO(dehex("51474fff")),
+  DRAFT_15(dehex("ff00000f")),
+  DRAFT_17(dehex("ff000011")),
+  UNKNOWN(new byte[0]);
 
   public static final Version CURRENT = Version.QUIC_GO;
 
   public static Version read(final ByteBuf bb) {
-    long l = bb.readInt();
+    byte[] l = new byte[4];
+    bb.readBytes(l);
 
-    if (l == VERSION_NEGOTIATION.version) {
+    if (Arrays.equals(l, VERSION_NEGOTIATION.version)) {
       return VERSION_NEGOTIATION;
-    } else if (l == FINAL.version) {
+    } else if (Arrays.equals(l, FINAL.version)) {
       return FINAL;
-    } else if (l == QUIC_GO.version) {
+    } else if (Arrays.equals(l, QUIC_GO.version)) {
       return QUIC_GO;
-    } else if (l == DRAFT_15.version) {
+    } else if (Arrays.equals(l, DRAFT_15.version)) {
       return DRAFT_15;
-    } else if (l == DRAFT_17.version) {
+    } else if (Arrays.equals(l, DRAFT_17.version)) {
       return DRAFT_17;
     } else {
       return UNKNOWN;
     }
   }
 
-  private final int version;
+  private final byte[] version;
 
-  Version(final int version) {
+  Version(final byte[] version) {
     this.version = version;
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeInt(version);
+    bb.writeBytes(version);
+  }
+
+  public byte[] asBytes() {
+    return version;
   }
 }
