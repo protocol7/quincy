@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.protocol.frames;
 
 import com.protocol7.nettyquic.Varint;
 import io.netty.buffer.ByteBuf;
+import java.util.Objects;
 
 public class DataBlockedFrame extends Frame {
 
@@ -33,5 +34,18 @@ public class DataBlockedFrame extends Frame {
     bb.writeByte(getType().getType());
 
     Varint.write(dataLimit, bb);
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final DataBlockedFrame that = (DataBlockedFrame) o;
+    return dataLimit == that.dataLimit;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(dataLimit);
   }
 }

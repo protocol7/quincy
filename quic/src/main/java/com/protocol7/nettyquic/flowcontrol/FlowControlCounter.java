@@ -1,13 +1,12 @@
 package com.protocol7.nettyquic.flowcontrol;
 
-import com.protocol7.nettyquic.protocol.StreamId;
+import static com.google.common.base.Preconditions.checkArgument;
+import static java.lang.Math.max;
 
+import com.protocol7.nettyquic.protocol.StreamId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static java.lang.Math.max;
 
 public class FlowControlCounter {
 
@@ -29,36 +28,12 @@ public class FlowControlCounter {
     this.defaultStreamMaxBytes = streamMaxBytes;
   }
 
-  public static class TryConsumeResult {
-    private final boolean success;
-    private final double connection;
-    private final double stream;
-
-    public TryConsumeResult(final boolean success, final double connection, final double stream) {
-      this.success = success;
-      this.connection = connection;
-      this.stream = stream;
-    }
-
-    public boolean isSuccessful() {
-      return success;
-    }
-
-    public double getConnection() {
-      return connection;
-    }
-
-    public double getStream() {
-      return stream;
-    }
-  }
-
   private long calculateConnectionOffset() {
     return streams.values().stream().mapToLong(c -> c.offset.get()).sum();
   }
 
   // remove need to syncronize
-  public synchronized TryConsumeResult tryConsume(StreamId sid, long offset) {
+  public synchronized TryConsumeResult tryConsume(final StreamId sid, final long offset) {
     checkArgument(offset > 0);
 
     // first check if we can successfully consume
@@ -69,43 +44,58 @@ public class FlowControlCounter {
 
     final long streamDelta = offset - streamConsumed.get();
 
-    long resultingConnOffset;
-    boolean success;
+    final long resultingConnOffset;
+    final long resultingStreamOffset;
+    final boolean success;
     if (streamDelta < 0) {
       // out of order, always successful
       success = true;
       resultingConnOffset = connOffset;
+      resultingStreamOffset = streamConsumed.get();
     } else if (streamDelta > 0 && stream.finished) {
       // trying to increase offset for finished stream, bail
       throw new IllegalStateException("Stream finished");
     } else if (offset > streamMax || connOffset + streamDelta > connectionMaxBytes.get()) {
       success = false;
-      resultingConnOffset = connOffset;
+      resultingConnOffset = connOffset + streamDelta;
+      resultingStreamOffset = offset;
     } else {
       success = true;
       streamConsumed.updateAndGet(current -> max(current, offset));
       resultingConnOffset = connOffset + streamDelta;
+      resultingStreamOffset = streamConsumed.get();
     }
 
     return new TryConsumeResult(
-        success,
-        1.0 * resultingConnOffset / connectionMaxBytes.get(),
-        1.0 * streamConsumed.get() / streamMax);
+        success, resultingConnOffset, connectionMaxBytes.get(), resultingStreamOffset, streamMax);
   }
 
-  public void finishStream(StreamId sid, long finalOffset) {
+  public void resetStream(final StreamId sid, final long finalOffset) {
     final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());
     stream.offset.updateAndGet(current -> max(current, finalOffset));
     stream.finished = true;
   }
 
-  public void setConnectionMaxBytes(long connectionMaxBytes) {
+  public void setConnectionMaxBytes(final long connectionMaxBytes) {
     checkArgument(connectionMaxBytes > 0);
 
     this.connectionMaxBytes.updateAndGet(current -> max(connectionMaxBytes, current));
   }
 
-  public void setStreamMaxBytes(StreamId sid, long streamMaxBytes) {
+  public long increaseStreamMax(final StreamId sid) {
+    final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());
+    final AtomicLong streamMax = stream.maxOffset;
+
+    // double
+    return streamMax.addAndGet(streamMax.get());
+  }
+
+  public long increaseConnectionMax() {
+    // double
+    return connectionMaxBytes.addAndGet(connectionMaxBytes.get());
+  }
+
+  public void setStreamMaxBytes(final StreamId sid, final long streamMaxBytes) {
     checkArgument(streamMaxBytes > 0);
 
     final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());
