@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.client;
 
 import com.protocol7.nettyquic.Futures;
 import com.protocol7.nettyquic.connection.NettyPacketSender;
+import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -31,7 +32,8 @@ public class QuicClient {
                   new ClientConnection(
                       ConnectionId.random(),
                       streamListener,
-                      new NettyPacketSender(channel, serverAddress));
+                      new NettyPacketSender(channel, serverAddress),
+                      new DefaultFlowControlHandler(49152, 32768));
               handler.setConnection(connection); // TODO fix cyclic creation
               return connection;
             });

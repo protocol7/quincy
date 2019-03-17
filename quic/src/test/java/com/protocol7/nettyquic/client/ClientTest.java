@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -41,6 +42,7 @@ public class ClientTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
+  @Mock private FlowControlHandler flowControlHandler;
 
   @Before
   public void setUp() {
@@ -51,7 +53,8 @@ public class ClientTest {
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
-    connection = new ClientConnection(destConnectionId, streamListener, packetSender);
+    connection =
+        new ClientConnection(destConnectionId, streamListener, packetSender, flowControlHandler);
 
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");

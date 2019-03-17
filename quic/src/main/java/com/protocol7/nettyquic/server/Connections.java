@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.server;
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.streams.StreamListener;
 import java.security.PrivateKey;
@@ -35,7 +36,14 @@ public class Connections {
     ServerConnection conn = connections.get(connId);
     if (conn == null) {
       log.debug("Creating new server connection for {}", connId);
-      conn = new ServerConnection(connId, streamHandler, packetSender, certificates, privateKey);
+      conn =
+          new ServerConnection(
+              connId,
+              streamHandler,
+              packetSender,
+              certificates,
+              privateKey,
+              new DefaultFlowControlHandler(49152, 32768));
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

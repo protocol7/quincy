@@ -178,14 +178,18 @@ public class ClientStateMachine {
     state = ClientState.Closed;
   }
 
-  public void closeImmediate() {
-    connection.sendPacket(
-        ConnectionCloseFrame.connection(
-            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+  public void closeImmediate(final ConnectionCloseFrame ccf) {
+    connection.sendPacket(ccf);
 
     state = ClientState.Closing;
 
     state = ClientState.Closed;
+  }
+
+  public void closeImmediate() {
+    closeImmediate(
+        ConnectionCloseFrame.connection(
+            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
   }
 
   @VisibleForTesting

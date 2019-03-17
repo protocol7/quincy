@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.client.ClientConnection;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
@@ -43,6 +44,7 @@ public class ClientServerTest {
 
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
+  private @Mock FlowControlHandler flowControlHandler;
 
   public static class ForwardingPacketSender implements PacketSender {
 
@@ -71,14 +73,20 @@ public class ClientServerTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    clientConnection = new ClientConnection(destConnectionId, clientListener, clientSender);
+    clientConnection =
+        new ClientConnection(destConnectionId, clientListener, clientSender, flowControlHandler);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
         new ServerConnection(
-            srcConnectionId, serverListener, serverSender, certificates, privateKey);
+            srcConnectionId,
+            serverListener,
+            serverSender,
+            certificates,
+            privateKey,
+            flowControlHandler);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

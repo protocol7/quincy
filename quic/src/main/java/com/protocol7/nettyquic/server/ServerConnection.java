@@ -3,9 +3,13 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
+import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
+import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
@@ -40,6 +44,8 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
+  private final FlowControlHandler flowControlHandler;
+
   private final TransportParameters transportParameters =
       TransportParameters.defaults(Version.CURRENT.asBytes());
 
@@ -50,9 +56,11 @@ public class ServerConnection implements Connection {
       final StreamListener handler,
       final PacketSender packetSender,
       final List<byte[]> certificates,
-      final PrivateKey privateKey) {
+      final PrivateKey privateKey,
+      final FlowControlHandler flowControlHandler) {
     this.handler = handler;
     this.packetSender = packetSender;
+    this.flowControlHandler = flowControlHandler;
     this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
     this.streams = new Streams(this);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
@@ -89,6 +97,23 @@ public class ServerConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
+    flowControlHandler.beforeSendPacket(
+        p,
+        new FrameSender() {
+          @Override
+          public void send(final Frame... frames) {
+            packetBuffer.send(
+                new ShortPacket(
+                    false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+          }
+
+          @Override
+          public void closeConnection(
+              final TransportError error, final FrameType frameType, final String msg) {
+            close(error, frameType, msg);
+          }
+        });
+
     packetBuffer.send(p);
     return p;
   }
@@ -110,6 +135,28 @@ public class ServerConnection implements Connection {
 
     if (stateMachine.getState() != ServerState.BeforeInitial) {
       packetBuffer.onPacket(packet);
+
+      if (packet instanceof FullPacket) {
+        flowControlHandler.onReceivePacket(
+            (FullPacket) packet,
+            new FrameSender() {
+              @Override
+              public void send(final Frame... frames) {
+                packetBuffer.send(
+                    new ShortPacket(
+                        false,
+                        getRemoteConnectionId(),
+                        nextSendPacketNumber(),
+                        new Payload(frames)));
+              }
+
+              @Override
+              public void closeConnection(
+                  final TransportError error, final FrameType frameType, final String msg) {
+                close(error, frameType, msg);
+              }
+            });
+      }
     }
     // with incorrect conn ID
     stateMachine.processPacket(packet);
@@ -147,6 +194,14 @@ public class ServerConnection implements Connection {
 
   public ServerState getState() {
     return stateMachine.getState();
+  }
+
+  public Future<Void> close(
+      final TransportError error, final FrameType frameType, final String msg) {
+    stateMachine.closeImmediate(
+        ConnectionCloseFrame.connection(error.getValue(), frameType.getType(), msg));
+
+    return packetSender.destroy();
   }
 
   public Future<Void> close() {

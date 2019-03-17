@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -43,6 +44,7 @@ public class ServerTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
+  @Mock private FlowControlHandler flowControlHandler;
 
   @Before
   public void setUp() {
@@ -58,7 +60,12 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            srcConnectionId, streamListener, packetSender, certificates, privateKey);
+            srcConnectionId,
+            streamListener,
+            packetSender,
+            certificates,
+            privateKey,
+            flowControlHandler);
   }
 
   @Test

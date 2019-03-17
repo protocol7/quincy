@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.flowcontrol;
 
+import com.google.common.annotations.VisibleForTesting;
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.DataBlockedFrame;
@@ -10,13 +12,14 @@ import com.protocol7.nettyquic.protocol.frames.MaxStreamDataFrame;
 import com.protocol7.nettyquic.protocol.frames.StreamDataBlockedFrame;
 import com.protocol7.nettyquic.protocol.frames.StreamFrame;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.protocol.packets.Packet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DefaultFlowControlHandler implements FlowControlManager {
+public class DefaultFlowControlHandler implements FlowControlHandler {
 
   private final FlowControlCounter receiveCounter;
   private final FlowControlCounter sendCounter;
@@ -28,7 +31,24 @@ public class DefaultFlowControlHandler implements FlowControlManager {
     sendCounter = new FlowControlCounter(connectionMaxBytes, streamMaxBytes);
   }
 
-  public boolean tryConsume(final StreamId sid, final long offset, final FrameSender sender) {
+  @Override
+  public void beforeSendPacket(final Packet packet, final FrameSender sender) {
+    if (packet instanceof FullPacket) {
+      FullPacket fullPacket = (FullPacket) packet;
+      for (Frame frame : fullPacket.getPayload().getFrames()) {
+        if (frame.getType() == FrameType.STREAM) {
+          StreamFrame sf = (StreamFrame) frame;
+
+          if (!tryConsume(sf.getStreamId(), sf.getOffset() + sf.getData().length, sender)) {
+            throw new IllegalStateException("Stream or connection blocked");
+          }
+        }
+      }
+    }
+  }
+
+  @VisibleForTesting
+  protected boolean tryConsume(final StreamId sid, final long offset, final FrameSender sender) {
     final TryConsumeResult result = sendCounter.tryConsume(sid, offset);
 
     if (result.isSuccess()) {
@@ -82,7 +102,8 @@ public class DefaultFlowControlHandler implements FlowControlManager {
             sender.send(frames.toArray(new Frame[0]));
           }
         } else {
-          sender.closeConnection(TransportError.FLOW_CONTROL_ERROR);
+          sender.closeConnection(
+              TransportError.FLOW_CONTROL_ERROR, FrameType.STREAM, "Flow control error");
         }
       }
     }

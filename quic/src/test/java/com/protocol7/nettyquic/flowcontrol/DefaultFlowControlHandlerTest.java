@@ -3,10 +3,13 @@ package com.protocol7.nettyquic.flowcontrol;
 import static java.util.Optional.of;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
 
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Payload;
@@ -14,6 +17,7 @@ import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.DataBlockedFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
+import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.frames.MaxDataFrame;
 import com.protocol7.nettyquic.protocol.frames.MaxStreamDataFrame;
 import com.protocol7.nettyquic.protocol.frames.StreamDataBlockedFrame;
@@ -24,7 +28,7 @@ import org.junit.Test;
 
 public class DefaultFlowControlHandlerTest {
 
-  private FlowControlManager handler = new DefaultFlowControlHandler(15, 10);
+  private DefaultFlowControlHandler handler = new DefaultFlowControlHandler(15, 10);
   private FrameSender sender = mock(FrameSender.class);
   private StreamId sid = new StreamId(123);
   private StreamId sid2 = new StreamId(456);
@@ -114,7 +118,8 @@ public class DefaultFlowControlHandlerTest {
 
     // user more than flow control allow, must close connection
     handler.onReceivePacket(p(new StreamFrame(sid, 10, false, new byte[11])), sender);
-    verify(sender).closeConnection(TransportError.FLOW_CONTROL_ERROR);
+    verify(sender)
+        .closeConnection(eq(TransportError.FLOW_CONTROL_ERROR), eq(FrameType.STREAM), anyString());
   }
 
   private FullPacket p(Frame frame) {
