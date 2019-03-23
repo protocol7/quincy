@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.streams;
 
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.PacketBuffer;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.StreamId;
@@ -10,11 +10,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class Streams implements PacketBuffer.AckListener {
 
-  private final Connection connection;
+  private final FrameSender connection;
   private final Map<StreamId, Stream> streams = new ConcurrentHashMap<>();
   private StreamId maxId = new StreamId(0);
 
-  public Streams(final Connection connection) {
+  public Streams(final FrameSender connection) {
     this.connection = connection;
   }
 

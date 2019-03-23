@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.streams;
 
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -27,7 +27,7 @@ public class Stream {
   }
 
   private final StreamId id;
-  private final Connection connection;
+  private final FrameSender sender;
   private final StreamListener listener;
   private final AtomicLong offset = new AtomicLong(0);
   private final StreamType streamType;
@@ -37,11 +37,11 @@ public class Stream {
 
   public Stream(
       final StreamId id,
-      final Connection connection,
+      final FrameSender sender,
       final StreamListener listener,
       StreamType streamType) {
     this.id = id;
-    this.connection = connection;
+    this.sender = sender;
     this.listener = listener;
     this.streamType = streamType;
   }
@@ -59,7 +59,7 @@ public class Stream {
 
     final long frameOffset = offset.getAndAdd(b.length);
     final StreamFrame sf = new StreamFrame(id, frameOffset, finish, b);
-    FullPacket p = connection.sendPacket(sf);
+    FullPacket p = sender.send(sf);
 
     sendStateMachine.onStream(p.getPacketNumber(), finish);
   }
@@ -69,7 +69,7 @@ public class Stream {
 
     final Frame frame = new ResetStreamFrame(id, applicationErrorCode, offset.get());
 
-    final FullPacket p = connection.sendPacket(frame);
+    final FullPacket p = sender.send(frame);
 
     sendStateMachine.onReset(p.getPacketNumber());
   }

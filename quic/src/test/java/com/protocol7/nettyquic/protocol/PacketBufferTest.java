@@ -34,7 +34,7 @@ public class PacketBufferTest {
     when(connection.getLocalConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
 
-    buffer = new PacketBuffer(connection, sender, pn -> {});
+    buffer = new PacketBuffer(connection, sender);
   }
 
   private Packet packet(long pn, Frame... frames) {

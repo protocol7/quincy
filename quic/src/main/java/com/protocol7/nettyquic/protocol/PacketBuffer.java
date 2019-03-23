@@ -33,13 +33,10 @@ public class PacketBuffer {
       new AtomicReference<>(PacketNumber.MIN);
   private final Connection connection;
   private final Sender sender;
-  private final AckListener ackListener;
 
-  public PacketBuffer(
-      final Connection connection, final Sender sender, final AckListener ackListener) {
+  public PacketBuffer(final Connection connection, final Sender sender) {
     this.connection = connection;
     this.sender = sender;
-    this.ackListener = ackListener;
   }
 
   @VisibleForTesting
@@ -121,7 +118,6 @@ public class PacketBuffer {
       PacketNumber pn = new PacketNumber(i);
       if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
-        ackListener.onAck(pn);
         largestAcked.getAndAccumulate(pn, PacketNumber::max);
       }
     }

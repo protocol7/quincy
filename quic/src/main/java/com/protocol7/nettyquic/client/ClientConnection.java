@@ -6,8 +6,8 @@ import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.FrameSender;
-import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -15,8 +15,10 @@ import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
+import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.streams.Streams;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
@@ -38,7 +40,6 @@ public class ClientConnection implements Connection {
   private int lastDestConnectionIdLength;
   private Optional<ConnectionId> localConnectionId = Optional.of(ConnectionId.random());
   private final PacketSender packetSender;
-  private final StreamListener streamListener;
 
   private final Version version = Version.CURRENT;
   private final AtomicReference<PacketNumber> sendPacketNumber =
@@ -47,9 +48,9 @@ public class ClientConnection implements Connection {
   private final ClientStateMachine stateMachine;
   private Optional<byte[]> token = Optional.empty();
 
-  private final PacketHandler flowControlHandler;
-
-  private final Streams streams;
+  private final FlowControlHandler flowControlHandler;
+  private final StreamManager streamManager;
+  private final FrameSender frameSender;
 
   private AEADs aeads;
 
@@ -57,14 +58,30 @@ public class ClientConnection implements Connection {
       final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
-      final PacketHandler flowControlHandler) {
+      final FlowControlHandler flowControlHandler) {
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
-    this.streamListener = streamListener;
+
+    this.frameSender =
+        new FrameSender() {
+          @Override
+          public FullPacket send(final Frame... frames) {
+            return sendPacket(frames);
+          }
+
+          @Override
+          public void closeConnection(
+              final TransportError error, final FrameType frameType, final String msg) {
+            close(error, frameType, msg);
+          }
+        };
+
+    final Streams streams = new Streams(frameSender);
+    this.streamManager = new DefaultStreamManager(streams, streamListener);
     this.stateMachine =
-        new ClientStateMachine(this, TransportParameters.defaults(Version.CURRENT.asBytes()));
-    this.streams = new Streams(this);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered, this.streams);
+        new ClientStateMachine(
+            this, TransportParameters.defaults(Version.CURRENT.asBytes()), this.streamManager);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
     this.flowControlHandler = flowControlHandler;
 
     initAEAD();
@@ -84,23 +101,7 @@ public class ClientConnection implements Connection {
       throw new IllegalStateException("Connection not open");
     }
 
-    flowControlHandler.beforeSendPacket(
-        p,
-        new FrameSender() {
-          @Override
-          public Packet send(final Frame... frames) {
-            Packet p = new ShortPacket(
-                    false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames));
-            packetBuffer.send(p);
-            return p;
-          }
-
-          @Override
-          public void closeConnection(
-              final TransportError error, final FrameType frameType, final String msg) {
-            close(error, frameType, msg);
-          }
-        });
+    flowControlHandler.beforeSendPacket(p, frameSender);
 
     // TODO remove repeated check
     if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
@@ -172,26 +173,7 @@ public class ClientConnection implements Connection {
       stateMachine.handlePacket(packet);
 
       if (packet instanceof FullPacket) {
-        flowControlHandler.onReceivePacket(
-            (FullPacket) packet,
-            new FrameSender() {
-              @Override
-              public Packet send(final Frame... frames) {
-                Packet p = new ShortPacket(
-                        false,
-                        getRemoteConnectionId(),
-                        nextSendPacketNumber(),
-                        new Payload(frames));
-                packetBuffer.send(p);
-                return p;
-              }
-
-              @Override
-              public void closeConnection(
-                  final TransportError error, final FrameType frameType, final String msg) {
-                close(error, frameType, msg);
-              }
-            });
+        flowControlHandler.onReceivePacket((FullPacket) packet, frameSender);
       }
     } else {
       // TODO handle unencryptable packet
@@ -228,11 +210,7 @@ public class ClientConnection implements Connection {
   }
 
   public Stream openStream() {
-    return streams.openStream(true, true, streamListener);
-  }
-
-  public Stream getOrCreateStream(final StreamId streamId) {
-    return streams.getOrCreate(streamId, streamListener);
+    return streamManager.openStream(true, true);
   }
 
   public Future<Void> close(

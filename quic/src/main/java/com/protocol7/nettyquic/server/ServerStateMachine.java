@@ -3,11 +3,12 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.server.ServerState.Ready;
 import static com.protocol7.nettyquic.server.ServerState.WaitingForFinished;
 
+import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
-import com.protocol7.nettyquic.streams.Stream;
+import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
@@ -29,13 +30,16 @@ public class ServerStateMachine {
   private ServerState state = ServerState.BeforeInitial;
   private final ServerConnection connection;
   private final ServerTlsSession tlsEngine;
+  private final StreamManager streamManager;
 
   public ServerStateMachine(
       final ServerConnection connection,
       final TransportParameters transportParameters,
       PrivateKey privateKey,
-      List<byte[]> certificates) {
+      List<byte[]> certificates,
+      final StreamManager streamManager) {
     this.connection = connection;
+    this.streamManager = streamManager;
     tlsEngine = new ServerTlsSession(transportParameters, certificates, privateKey);
   }
 
@@ -108,6 +112,21 @@ public class ServerStateMachine {
 
       state = Ready;
 
+      streamManager.onReceivePacket(
+          (FullPacket) packet,
+          new FrameSender() {
+            @Override
+            public FullPacket send(final Frame... frames) {
+              return connection.sendPacket(frames);
+            }
+
+            @Override
+            public void closeConnection(
+                final TransportError error, final FrameType frameType, final String msg) {
+              connection.close(error, frameType, msg);
+            }
+          });
+
       handleFrames(fp);
     } else if (state == Ready) {
       handleFrames((FullPacket) packet);
@@ -116,17 +135,8 @@ public class ServerStateMachine {
 
   private void handleFrames(FullPacket packet) {
     for (Frame frame : packet.getPayload().getFrames()) {
-
-      if (frame instanceof StreamFrame) {
-        StreamFrame sf = (StreamFrame) frame;
-        Stream stream = connection.getOrCreateStream(sf.getStreamId());
-        stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-      } else if (frame instanceof ResetStreamFrame) {
-        ResetStreamFrame rsf = (ResetStreamFrame) frame;
-        Stream stream = connection.getOrCreateStream(rsf.getStreamId());
-        stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
-      } else if (frame instanceof PingFrame) {
-        PingFrame pf = (PingFrame) frame;
+      if (frame instanceof PingFrame) {
+        // ignore
       } else if (frame instanceof ConnectionCloseFrame) {
         handlePeerClose();
       }
