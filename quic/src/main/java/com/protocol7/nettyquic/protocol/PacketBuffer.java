@@ -21,10 +21,6 @@ import org.slf4j.LoggerFactory;
 // TODO resends
 public class PacketBuffer {
 
-  public interface AckListener {
-    void onAck(PacketNumber pn);
-  }
-
   private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
 
   private final Map<PacketNumber, Packet> buffer = new ConcurrentHashMap<>();

@@ -15,8 +15,8 @@ public class DefaultStreamManager implements StreamManager {
   private final Streams streams;
   private final StreamListener listener;
 
-  public DefaultStreamManager(final Streams streams, final StreamListener listener) {
-    this.streams = streams;
+  public DefaultStreamManager(final FrameSender frameSender, final StreamListener listener) {
+    this.streams = new Streams(frameSender);
     this.listener = listener;
   }
 
@@ -37,9 +37,7 @@ public class DefaultStreamManager implements StreamManager {
         stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
       } else if (frame instanceof AckFrame) {
         AckFrame af = (AckFrame) frame;
-        for (AckBlock block : af.getBlocks()) {
-          handleAcks(block);
-        }
+        af.getBlocks().stream().forEach(this::handleAcks);
       }
     }
   }
@@ -49,8 +47,7 @@ public class DefaultStreamManager implements StreamManager {
     long smallest = block.getSmallest().asLong();
     long largest = block.getLargest().asLong();
     for (long i = smallest; i <= largest; i++) {
-      PacketNumber pn = new PacketNumber(i);
-      streams.onAck(pn);
+      streams.onAck(new PacketNumber(i));
     }
   }
 

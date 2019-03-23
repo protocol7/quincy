@@ -16,7 +16,6 @@ import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.streams.StreamManager;
-import com.protocol7.nettyquic.streams.Streams;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.AEADs;
@@ -76,9 +75,7 @@ public class ServerConnection implements Connection {
           }
         };
 
-    final Streams streams = new Streams(frameSender);
-
-    this.streamManager = new DefaultStreamManager(streams, streamListener);
+    this.streamManager = new DefaultStreamManager(frameSender, streamListener);
 
     this.stateMachine =
         new ServerStateMachine(this, transportParameters, privateKey, certificates, streamManager);
