@@ -29,11 +29,11 @@ public class DefaultStreamManager implements StreamManager {
       if (frame instanceof StreamFrame) {
         final StreamFrame sf = (StreamFrame) frame;
 
-        Stream stream = streams.getOrCreate(sf.getStreamId(), listener);
+        DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
         stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
       } else if (frame instanceof ResetStreamFrame) {
         final ResetStreamFrame rsf = (ResetStreamFrame) frame;
-        final Stream stream = streams.getOrCreate(rsf.getStreamId(), listener);
+        final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
         stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
       } else if (frame instanceof AckFrame) {
         AckFrame af = (AckFrame) frame;

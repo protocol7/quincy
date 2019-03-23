@@ -10,7 +10,7 @@ import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
-import com.protocol7.nettyquic.streams.Stream;
+import com.protocol7.nettyquic.streams.DefaultStream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.KeyUtil;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
@@ -220,7 +220,7 @@ public class ClientTest {
 
     connection.onPacket(packet(new ResetStreamFrame(streamId, 123, 0)));
 
-    verify(streamListener).onReset(any(Stream.class), eq(123), eq(0L));
+    verify(streamListener).onReset(any(DefaultStream.class), eq(123), eq(0L));
 
     // verify ack
     assertAck(4, 3, 3, 3);

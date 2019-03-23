@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.streams;
 
-import static com.protocol7.nettyquic.streams.Stream.StreamType.Bidirectional;
+import static com.protocol7.nettyquic.streams.StreamType.Bidirectional;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -36,7 +36,7 @@ public class StreamTest {
 
   @Test
   public void write() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
 
     stream.write(DATA, false);
 
@@ -50,7 +50,7 @@ public class StreamTest {
 
   @Test
   public void writeWithOffset() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
 
     stream.write(DATA, false);
     StreamFrame frame1 = (StreamFrame) captureFrame();
@@ -63,13 +63,13 @@ public class StreamTest {
 
   @Test
   public void reset() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
 
     stream.write(DATA, false);
     captureFrame();
 
     stream.reset(123);
-    assertTrue(stream.isClosed());
+    assertTrue(stream.isFinished());
     ResetStreamFrame frame2 = (ResetStreamFrame) captureFrame();
 
     assertEquals(streamId, frame2.getStreamId());
@@ -79,7 +79,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void resetOnClosed() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
 
     stream.reset(123);
     stream.reset(123);
@@ -87,9 +87,9 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void writeOnClosed() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
     stream.write(DATA, true);
-    assertTrue(stream.isClosed());
+    assertTrue(stream.isFinished());
     stream.write(DATA, true);
   }
 
@@ -101,7 +101,7 @@ public class StreamTest {
 
   @Test
   public void onData() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
     stream.onData(0, true, DATA);
 
     verify(listener).onData(stream, DATA);
@@ -109,11 +109,11 @@ public class StreamTest {
 
   @Test
   public void onReset() {
-    Stream stream = new Stream(streamId, sender, listener, Bidirectional);
+    DefaultStream stream = new DefaultStream(streamId, sender, listener, Bidirectional);
     stream.onReset(123, 456);
 
     verify(listener).onReset(stream, 123, 456);
 
-    assertTrue(stream.isClosed());
+    assertTrue(stream.isFinished());
   }
 }

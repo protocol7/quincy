@@ -32,12 +32,12 @@ public class StreamsTest {
   @Test
   public void createAndThenGet() {
     StreamId streamId = StreamId.random(true, true);
-    Stream stream1 = streams.getOrCreate(streamId, listener);
-    Stream stream2 = streams.getOrCreate(streamId, listener);
+    DefaultStream stream1 = streams.getOrCreate(streamId, listener);
+    DefaultStream stream2 = streams.getOrCreate(streamId, listener);
 
     assertSame(stream1, stream2);
 
-    Stream stream3 = streams.getOrCreate(StreamId.random(true, true), listener);
+    DefaultStream stream3 = streams.getOrCreate(StreamId.random(true, true), listener);
     assertNotSame(stream1, stream3);
   }
 }

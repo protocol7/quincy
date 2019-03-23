@@ -15,6 +15,7 @@ import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
 import com.protocol7.nettyquic.server.ServerState;
+import com.protocol7.nettyquic.streams.DefaultStream;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.KeyUtil;
@@ -109,7 +110,7 @@ public class ClientServerTest {
     // respond pong to any ping
     doAnswer(
             invocation -> {
-              Stream stream = invocation.getArgument(0);
+              DefaultStream stream = invocation.getArgument(0);
               stream.write(PONG, true);
               return null;
             })

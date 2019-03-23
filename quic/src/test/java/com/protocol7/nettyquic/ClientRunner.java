@@ -24,7 +24,7 @@ public class ClientRunner {
                   }
 
                   @Override
-                  public void onDone() {}
+                  public void onFinished() {}
 
                   @Override
                   public void onReset(Stream stream, int applicationErrorCode, long offset) {}
