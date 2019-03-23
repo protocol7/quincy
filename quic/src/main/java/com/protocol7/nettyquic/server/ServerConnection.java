@@ -101,10 +101,11 @@ public class ServerConnection implements Connection {
         p,
         new FrameSender() {
           @Override
-          public void send(final Frame... frames) {
-            packetBuffer.send(
-                new ShortPacket(
-                    false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+          public Packet send(final Frame... frames) {
+            final Packet p = new ShortPacket(
+                    false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames));
+            packetBuffer.send(p);
+            return p;
           }
 
           @Override
@@ -141,13 +142,14 @@ public class ServerConnection implements Connection {
             (FullPacket) packet,
             new FrameSender() {
               @Override
-              public void send(final Frame... frames) {
-                packetBuffer.send(
-                    new ShortPacket(
+              public Packet send(final Frame... frames) {
+                Packet p = new ShortPacket(
                         false,
                         getRemoteConnectionId(),
                         nextSendPacketNumber(),
-                        new Payload(frames)));
+                        new Payload(frames));
+                packetBuffer.send(p);
+                return p;
               }
 
               @Override
