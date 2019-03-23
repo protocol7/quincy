@@ -6,8 +6,8 @@ import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
-import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -47,7 +47,7 @@ public class ClientConnection implements Connection {
   private final ClientStateMachine stateMachine;
   private Optional<byte[]> token = Optional.empty();
 
-  private final FlowControlHandler flowControlHandler;
+  private final PacketHandler flowControlHandler;
 
   private final Streams streams;
 
@@ -57,7 +57,7 @@ public class ClientConnection implements Connection {
       final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
-      final FlowControlHandler flowControlHandler) {
+      final PacketHandler flowControlHandler) {
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.streamListener = streamListener;

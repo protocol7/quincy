@@ -9,8 +9,8 @@ import static org.mockito.Mockito.verify;
 import com.protocol7.nettyquic.client.ClientConnection;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
-import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
@@ -44,7 +44,7 @@ public class ClientServerTest {
 
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
-  private @Mock FlowControlHandler flowControlHandler;
+  private @Mock PacketHandler flowControlHandler;
 
   public static class ForwardingPacketSender implements PacketSender {
 

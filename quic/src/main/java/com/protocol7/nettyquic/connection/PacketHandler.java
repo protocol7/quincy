@@ -1,10 +1,9 @@
-package com.protocol7.nettyquic.flowcontrol;
+package com.protocol7.nettyquic.connection;
 
-import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 
-public interface FlowControlHandler {
+public interface PacketHandler {
 
   void beforeSendPacket(final Packet packet, final FrameSender sender);
 

@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.flowcontrol;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.DataBlockedFrame;
@@ -19,7 +20,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class DefaultFlowControlHandler implements FlowControlHandler {
+public class DefaultFlowControlHandler implements PacketHandler {
 
   private final FlowControlCounter receiveCounter;
   private final FlowControlCounter sendCounter;

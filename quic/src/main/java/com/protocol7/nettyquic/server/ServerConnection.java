@@ -4,8 +4,8 @@ import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
-import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -44,7 +44,7 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  private final FlowControlHandler flowControlHandler;
+  private final PacketHandler flowControlHandler;
 
   private final TransportParameters transportParameters =
       TransportParameters.defaults(Version.CURRENT.asBytes());
@@ -57,7 +57,7 @@ public class ServerConnection implements Connection {
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final FlowControlHandler flowControlHandler) {
+      final PacketHandler flowControlHandler) {
     this.handler = handler;
     this.packetSender = packetSender;
     this.flowControlHandler = flowControlHandler;
