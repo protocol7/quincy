@@ -1,8 +1,7 @@
-package com.protocol7.nettyquick.it;
+package com.protocol7.testcontainers.quicgo;
 
 import com.google.common.base.Strings;
-import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.PacketNumber;
+import com.google.common.primitives.Longs;
 import com.protocol7.nettyquic.utils.Hex;
 import java.util.ArrayList;
 import java.util.List;
@@ -30,22 +29,22 @@ public class QuicGoPacketParser {
         boolean longHeader = log.contains("Long Header{");
 
         Matcher destConnIdMatcher = DEST_CONN_ID_PATTERN.matcher(log);
-        ConnectionId destConnId = null;
+        byte[] destConnId = null;
         if (destConnIdMatcher.find()) {
-          destConnId = new ConnectionId(Hex.dehex(destConnIdMatcher.group(1)));
+          destConnId = Hex.dehex(destConnIdMatcher.group(1));
         }
 
         Matcher srcConnIdMatcher = SRC_CONN_ID_PATTERN.matcher(log);
-        ConnectionId srcConnId = null;
+        byte[] srcConnId = null;
         if (srcConnIdMatcher.find()) {
-          srcConnId = new ConnectionId(Hex.dehex(srcConnIdMatcher.group(1)));
+          srcConnId = Hex.dehex(srcConnIdMatcher.group(1));
         }
 
         Matcher pnMatcher = PN_PATTERN.matcher(log);
-        PacketNumber pn = null;
+        long pn = -1;
         if (pnMatcher.find()) {
-          String s = Strings.padStart(pnMatcher.group(1), 4, '0');
-          pn = PacketNumber.parse(Hex.dehex(s));
+          String s = Strings.padStart(pnMatcher.group(1), 16, '0');
+          pn = Longs.fromByteArray(Hex.dehex(s));
         }
 
         String type = null;

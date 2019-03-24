@@ -16,6 +16,10 @@
       <groupId>com.protocol7</groupId>
       <artifactId>netty-quic</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.protocol7</groupId>
+      <artifactId>quic-go-testcontainer</artifactId>
+    </dependency>
 
     <!-- Tests -->
     <dependency>

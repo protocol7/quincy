@@ -1,4 +1,4 @@
-package com.protocol7.nettyquick.it;
+package com.protocol7.testcontainers.quicgo;
 
 import com.github.dockerjava.api.command.InspectContainerResponse;
 import com.github.dockerjava.api.model.ExposedPort;
@@ -21,7 +21,7 @@ public class QuicGoContainer extends GenericContainer {
 
   private static ImageFromDockerfile image() {
     return new ImageFromDockerfile("quic-go", false)
-        .withFileFromClasspath("Dockerfile", "Dockerfile");
+        .withFileFromClasspath("Dockerfile", "QuicGoDockerfile");
   }
 
   private List<String> logStatements = new ArrayList<>();

@@ -36,6 +36,7 @@
         <module>common</module>
         <module>tls</module>
         <module>quic</module>
+        <module>quic-go-testcontainer</module>
         <module>integration-tests</module>
     </modules>
 
@@ -57,6 +58,11 @@
                 <version>0.0.1-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
+            </dependency>
+            <dependency>
+                <groupId>com.protocol7</groupId>
+                <artifactId>quic-go-testcontainer</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.protocol7</groupId>

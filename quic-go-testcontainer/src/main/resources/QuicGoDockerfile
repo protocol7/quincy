@@ -1,6 +1,6 @@
 FROM golang:latest
 
-ARG hash=42ea3404
+ARG hash=c7ab6f4e
 
 RUN go get -v github.com/lucas-clemente/quic-go/...
 

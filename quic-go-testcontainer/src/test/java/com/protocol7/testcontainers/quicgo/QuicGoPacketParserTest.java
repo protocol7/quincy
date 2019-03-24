@@ -1,14 +1,13 @@
-package com.protocol7.nettyquick.it;
+package com.protocol7.testcontainers.quicgo;
 
-import static com.protocol7.nettyquic.utils.Hex.dehex;
 import static junit.framework.TestCase.assertNull;
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.PacketNumber;
+import com.protocol7.nettyquic.utils.Hex;
 import java.util.List;
+import org.junit.Assert;
 import org.junit.Test;
 
 public class QuicGoPacketParserTest {
@@ -27,17 +26,17 @@ public class QuicGoPacketParserTest {
 
     assertEquals(2, packets.size());
     QuicGoPacket p1 = packets.get(0);
-    assertTrue(p1.inbound);
+    assertEquals(true, p1.inbound);
     assertTrue(p1.longHeader);
-    assertEquals(new ConnectionId(dehex("142de1af")), p1.destinationConnectionId);
-    assertEquals(new ConnectionId(dehex("5fec16f0569563feb5572630227285")), p1.sourceConnectionId);
-    assertEquals(new PacketNumber(2), p1.packetNumber);
+    assertArrayEquals(Hex.dehex("142de1af"), p1.destinationConnectionId);
+    assertArrayEquals(Hex.dehex("5fec16f0569563feb5572630227285"), p1.sourceConnectionId);
+    assertEquals(2, p1.packetNumber);
 
     QuicGoPacket p2 = packets.get(1);
-    assertFalse(p2.inbound);
-    assertFalse(p2.longHeader);
-    assertEquals(new ConnectionId(dehex("5551cb7767435e519f01c1ea")), p2.destinationConnectionId);
+    Assert.assertFalse(p2.inbound);
+    Assert.assertFalse(p2.longHeader);
+    assertArrayEquals(Hex.dehex("5551cb7767435e519f01c1ea"), p2.destinationConnectionId);
     assertNull(p2.sourceConnectionId);
-    assertEquals(new PacketNumber(2), p2.packetNumber);
+    assertEquals(2, p2.packetNumber);
   }
 }
