@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.tls.KeyExchange;
 import com.protocol7.nettyquic.tls.extensions.Extension;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
+import com.protocol7.nettyquic.tls.extensions.PskKeyExchangeModes;
 import com.protocol7.nettyquic.tls.extensions.SignatureAlgorithms;
 import com.protocol7.nettyquic.tls.extensions.SupportedGroups;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
@@ -34,7 +35,8 @@ public class ClientHello {
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
                 SignatureAlgorithms.defaults(),
                 new SupportedGroups(Group.X25519),
-                SupportedVersions.TLS13)
+                SupportedVersions.TLS13,
+                PskKeyExchangeModes.defaults())
             .add(exts)
             .build();
 
