@@ -100,4 +100,14 @@ public class ConnectionCloseFrame extends Frame {
     Varint.write(reasonPhraseBytes.length, bb);
     bb.writeBytes(reasonPhraseBytes);
   }
+
+  @Override
+  public String toString() {
+    return "ConnectionCloseFrame{" +
+            "application=" + application +
+            ", errorCode=" + errorCode +
+            ", frameType=" + frameType +
+            ", reasonPhrase='" + reasonPhrase + '\'' +
+            '}';
+  }
 }
