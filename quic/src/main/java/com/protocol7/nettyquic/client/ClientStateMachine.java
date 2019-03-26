@@ -164,7 +164,7 @@ public class ClientStateMachine {
                   connection.getRemoteConnectionId(),
                   connection.getLocalConnectionId(),
                   connection.nextSendPacketNumber(),
-                  Version.QUIC_GO,
+                  Version.CURRENT,
                   new CryptoFrame(0, result.get().getFin())));
 
           state = ClientState.Ready;
