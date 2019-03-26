@@ -11,6 +11,7 @@ public enum Version {
   QUIC_GO(dehex("51474fff")),
   DRAFT_15(dehex("ff00000f")),
   DRAFT_17(dehex("ff000011")),
+  DRAFT_18(dehex("ff000012")),
   UNKNOWN(new byte[0]);
 
   public static final Version CURRENT = Version.QUIC_GO;
@@ -29,6 +30,8 @@ public enum Version {
       return DRAFT_15;
     } else if (Arrays.equals(l, DRAFT_17.version)) {
       return DRAFT_17;
+    } else if (Arrays.equals(l, DRAFT_18.version)) {
+      return DRAFT_18;
     } else {
       return UNKNOWN;
     }
