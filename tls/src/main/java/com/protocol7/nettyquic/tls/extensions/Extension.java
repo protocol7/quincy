@@ -33,6 +33,8 @@ public interface Extension {
         return SupportedVersions.parse(b, isClient);
       } else if (type == ExtensionType.supported_groups) {
         return SupportedGroups.parse(b);
+      } else if (type == ExtensionType.signature_algorithms) {
+        return SignatureAlgorithms.parse(b);
       } else {
         return RawExtension.parse(type, b);
       }
