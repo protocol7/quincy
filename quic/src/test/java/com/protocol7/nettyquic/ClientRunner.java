@@ -13,10 +13,11 @@ public class ClientRunner {
     InetSocketAddress server = new InetSocketAddress("nghttp2.org", 4433);
     InetSocketAddress server2 = new InetSocketAddress("test.privateoctopus.com", 4433);
     InetSocketAddress server3 = new InetSocketAddress("127.0.0.1", 6121);
+    InetSocketAddress server4 = new InetSocketAddress("127.0.0.1", 4433);
 
     QuicClient client =
         QuicClient.connect(
-                server3,
+                server4,
                 new StreamListener() {
                   @Override
                   public void onData(Stream stream, byte[] data) {
