@@ -100,8 +100,7 @@ public class HandshakePacket extends LongHeaderPacket {
           int payloadLength = length - pnLen; // subtract parsed pn length
 
           byte[] aad = new byte[bb.readerIndex() - bbOffset];
-          bb.readerIndex(bbOffset);
-          bb.readBytes(aad);
+          bb.getBytes(bbOffset, aad);
 
           // restore the AAD with the now removed header protected
           aad[0] = decryptedFirstByte;

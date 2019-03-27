@@ -49,7 +49,7 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   public static HalfParsedPacket<InitialPacket> parse(ByteBuf bb) {
-    bb.markReaderIndex();
+    int bbOffset = bb.readerIndex();
 
     byte firstByte = bb.readByte(); // TODO validate
 
@@ -113,16 +113,15 @@ public class InitialPacket extends LongHeaderPacket {
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
-          int payloadLength = length - (bb.readerIndex() - pnOffset); // subtract fromByte pn length
+          int payloadLength = length - pnLen; // subtract parsed pn length
 
-          byte[] aad = new byte[bb.readerIndex()];
-          bb.resetReaderIndex();
-          bb.readBytes(aad);
+          byte[] aad = new byte[bb.readerIndex() - bbOffset];
+          bb.getBytes(bbOffset, aad);
 
           // restore the AAD with the now removed header protected
           aad[0] = decryptedFirstByte;
           for (int i = 0; i < pnBytes.length; i++) {
-            aad[pnOffset + i] = pnBytes[i];
+            aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
 
           Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);

@@ -89,10 +89,7 @@ public abstract class LongHeaderPacket implements FullPacket {
     bb.writeBytes(pn);
 
     byte[] aad = new byte[bb.writerIndex() - bbOffset];
-
-    bb.readerIndex(bbOffset);
-    bb.readBytes(aad);
-    bb.readerIndex(0);
+    bb.getBytes(bbOffset, aad);
 
     payload.write(bb, aead, packetNumber, aad);
 

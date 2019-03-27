@@ -27,14 +27,7 @@ public class InitialPacketTest {
 
   @Test
   public void roundtrip() {
-    InitialPacket packet =
-        InitialPacket.create(
-            Optional.of(destConnId),
-            Optional.of(srcConnId),
-            new PacketNumber(123),
-            Version.CURRENT,
-            Optional.of(token),
-            List.of(PingFrame.INSTANCE));
+    InitialPacket packet = p(new PacketNumber(123), Optional.of(token));
 
     ByteBuf bb = Unpooled.buffer();
 
@@ -52,15 +45,26 @@ public class InitialPacketTest {
   }
 
   @Test
-  public void roundtripEmpty() {
-    InitialPacket packet =
-        InitialPacket.create(
-            Optional.ofNullable(destConnId),
-            empty(),
-            new PacketNumber(123),
-            Version.CURRENT,
-            empty(),
-            List.of(PingFrame.INSTANCE));
+  public void roundtripMultiple() {
+    ByteBuf bb = Unpooled.buffer();
+
+    p(new PacketNumber(1), Optional.of(token)).write(bb, aead);
+    p(new PacketNumber(2), Optional.of(token)).write(bb, aead);
+
+    InitialPacket parsed1 = InitialPacket.parse(bb).complete(l -> aead);
+    InitialPacket parsed2 = InitialPacket.parse(bb).complete(l -> aead);
+
+    assertEquals(parsed1.getDestinationConnectionId(), parsed2.getDestinationConnectionId());
+    assertEquals(parsed1.getSourceConnectionId(), parsed2.getSourceConnectionId());
+    assertEquals(new PacketNumber(1), parsed1.getPacketNumber());
+    assertEquals(new PacketNumber(2), parsed2.getPacketNumber());
+    assertEquals(parsed1.getVersion(), parsed2.getVersion());
+    assertEquals(parsed1.getPayload(), parsed2.getPayload());
+  }
+
+  @Test
+  public void roundtripNoToken() {
+    InitialPacket packet = p(new PacketNumber(123), empty());
 
     ByteBuf bb = Unpooled.buffer();
 
@@ -69,11 +73,21 @@ public class InitialPacketTest {
     InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
-    assertFalse(parsed.getSourceConnectionId().isPresent());
+    assertEquals(srcConnId, parsed.getSourceConnectionId().get());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertFalse(parsed.getToken().isPresent());
     assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
+  }
+
+  private InitialPacket p(PacketNumber pn, Optional<byte[]> token) {
+    return InitialPacket.create(
+        Optional.ofNullable(destConnId),
+        Optional.ofNullable(srcConnId),
+        pn,
+        Version.CURRENT,
+        token,
+        List.of(PingFrame.INSTANCE));
   }
 }

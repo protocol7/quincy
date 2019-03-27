@@ -33,6 +33,27 @@ public class ShortPacketTest {
     assertEquals(packet.getPayload(), parsed.getPayload());
   }
 
+  @Test
+  public void roundtripPrefix() {
+    // make sure packet doesn't need to start at 0 in buffer
+
+    ShortPacket packet = packet();
+    ByteBuf bb = Unpooled.buffer();
+
+    byte[] b = new byte[123];
+    bb.writeBytes(b);
+
+    packet.write(bb, aead);
+
+    bb.readBytes(b);
+
+    ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
+
+    assertEquals(packet.getDestinationConnectionId(), parsed.getDestinationConnectionId());
+    assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
+    assertEquals(packet.getPayload(), parsed.getPayload());
+  }
+
   @Test(expected = IllegalArgumentException.class)
   public void invalidFirstBit() {
     ByteBuf bb = buffer(packet());
