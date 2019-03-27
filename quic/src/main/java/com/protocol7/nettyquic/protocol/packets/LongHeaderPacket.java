@@ -8,6 +8,7 @@ import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public abstract class LongHeaderPacket implements FullPacket {
 
@@ -62,7 +63,9 @@ public abstract class LongHeaderPacket implements FullPacket {
     return payload;
   }
 
-  protected void writePrefix(ByteBuf bb) {
+  protected void writeInternal(ByteBuf bb, AEAD aead, Consumer<ByteBuf> tokenWriter) {
+    int bbOffset = bb.writerIndex();
+
     int b = (PACKET_TYPE_MASK | packetType.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
 
@@ -73,9 +76,9 @@ public abstract class LongHeaderPacket implements FullPacket {
     version.write(bb);
 
     ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
-  }
 
-  protected void writeSuffix(ByteBuf bb, AEAD aead) {
+    tokenWriter.accept(bb);
+
     byte[] pn = packetNumber.write(packetNumber.getLength());
 
     Varint.write(payload.calculateLength() + pn.length, bb);
@@ -85,21 +88,22 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     bb.writeBytes(pn);
 
-    byte[] aad = new byte[bb.writerIndex()];
-    bb.markReaderIndex();
+    byte[] aad = new byte[bb.writerIndex() - bbOffset];
+
+    bb.readerIndex(bbOffset);
     bb.readBytes(aad);
-    bb.resetReaderIndex();
+    bb.readerIndex(0);
 
     payload.write(bb, aead, packetNumber, aad);
 
     byte[] sample = new byte[aead.getSampleLength()];
     bb.getBytes(sampleOffset, sample);
 
-    byte firstBýte = bb.getByte(0);
+    byte firstBýte = bb.getByte(bbOffset);
     byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
     try {
       byte[] encryptedHeader = aead.encryptHeader(sample, header, false);
-      bb.setByte(0, encryptedHeader[0]);
+      bb.setByte(bbOffset, encryptedHeader[0]);
       bb.setBytes(pnOffset, encryptedHeader, 1, encryptedHeader.length - 1);
     } catch (GeneralSecurityException e) {
       throw new RuntimeException(e);

@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class InitialPacket extends LongHeaderPacket {
 
@@ -168,17 +169,21 @@ public class InitialPacket extends LongHeaderPacket {
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    writePrefix(bb);
-
-    if (token.isPresent()) {
-      byte[] t = token.get();
-      Varint.write(t.length, bb);
-      bb.writeBytes(t);
-    } else {
-      Varint.write(0, bb);
-    }
-
-    writeSuffix(bb, aead);
+    writeInternal(
+        bb,
+        aead,
+        new Consumer<ByteBuf>() {
+          @Override
+          public void accept(final ByteBuf byteBuf) {
+            if (token.isPresent()) {
+              byte[] t = token.get();
+              Varint.write(t.length, bb);
+              bb.writeBytes(t);
+            } else {
+              Varint.write(0, bb);
+            }
+          }
+        });
   }
 
   public Optional<byte[]> getToken() {

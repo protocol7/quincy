@@ -39,7 +39,7 @@ public class HandshakePacket extends LongHeaderPacket {
     // TODO merge with InitialPacket parsing
     // TODO validate marker
 
-    bb.markReaderIndex();
+    int bbOffset = bb.readerIndex();
 
     byte firstByte = bb.readByte();
     byte ptByte = (byte) ((firstByte & 0x30) >> 4);
@@ -97,16 +97,16 @@ public class HandshakePacket extends LongHeaderPacket {
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
-          int payloadLength = length - (bb.readerIndex() - pnOffset); // subtract fromByte pn length
+          int payloadLength = length - pnLen; // subtract parsed pn length
 
-          byte[] aad = new byte[bb.readerIndex()];
-          bb.resetReaderIndex();
+          byte[] aad = new byte[bb.readerIndex() - bbOffset];
+          bb.readerIndex(bbOffset);
           bb.readBytes(aad);
 
           // restore the AAD with the now removed header protected
           aad[0] = decryptedFirstByte;
           for (int i = 0; i < pnBytes.length; i++) {
-            aad[pnOffset + i] = pnBytes[i];
+            aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
 
           Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
@@ -146,8 +146,7 @@ public class HandshakePacket extends LongHeaderPacket {
 
   @Override
   public void write(ByteBuf bb, AEAD aead) {
-    writePrefix(bb);
-    writeSuffix(bb, aead);
+    writeInternal(bb, aead, byteBuf -> {});
   }
 
   @Override
