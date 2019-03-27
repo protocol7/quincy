@@ -3,6 +3,7 @@ package com.protocol7.nettyquick.it;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquic.client.QuicClient;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.testcontainers.quicgo.QuicGoContainer;
@@ -22,6 +23,7 @@ public class QuicGoTest {
     try {
       client =
           QuicClient.connect(
+                  Version.QUIC_GO,
                   quicGo.getAddress(),
                   new StreamListener() {
                     @Override
@@ -61,8 +63,13 @@ public class QuicGoTest {
     // handshake
     assertPacket(packets.get(4), false, true, "Handshake", 0);
 
+    assertPacket(packets.get(5), false, false, "1-RTT", 0);
+
     // ack handshake
-    assertPacket(packets.get(5), true, true, "Handshake", 2);
+    assertPacket(packets.get(6), true, true, "Handshake", 2);
+
+    // ack handshake
+    assertPacket(packets.get(7), false, true, "Handshake", 1);
   }
 
   private void assertPacket(

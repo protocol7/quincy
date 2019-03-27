@@ -1,12 +1,11 @@
 package com.protocol7.nettyquic.tls.extensions;
 
-import io.netty.buffer.ByteBuf;
+import static java.util.Arrays.asList;
 
+import io.netty.buffer.ByteBuf;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-
-import static java.util.Arrays.asList;
 
 public class PskKeyExchangeModes implements Extension {
 
@@ -68,8 +67,6 @@ public class PskKeyExchangeModes implements Extension {
 
   @Override
   public String toString() {
-    return "PskKeyExchangeModes{" +
-            "exchangeModes=" + exchangeModes +
-            '}';
+    return "PskKeyExchangeModes{" + "exchangeModes=" + exchangeModes + '}';
   }
 }
