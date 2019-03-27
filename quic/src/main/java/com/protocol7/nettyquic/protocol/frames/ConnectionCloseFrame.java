@@ -103,11 +103,16 @@ public class ConnectionCloseFrame extends Frame {
 
   @Override
   public String toString() {
-    return "ConnectionCloseFrame{" +
-            "application=" + application +
-            ", errorCode=" + errorCode +
-            ", frameType=" + frameType +
-            ", reasonPhrase='" + reasonPhrase + '\'' +
-            '}';
+    return "ConnectionCloseFrame{"
+        + "application="
+        + application
+        + ", errorCode="
+        + errorCode
+        + ", frameType="
+        + frameType
+        + ", reasonPhrase='"
+        + reasonPhrase
+        + '\''
+        + '}';
   }
 }
