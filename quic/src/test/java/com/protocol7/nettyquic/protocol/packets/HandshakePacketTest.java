@@ -61,6 +61,6 @@ public class HandshakePacketTest {
 
   private HandshakePacket p(PacketNumber pn) {
     return HandshakePacket.create(
-        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.CURRENT, PingFrame.INSTANCE);
+        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, PingFrame.INSTANCE);
   }
 }

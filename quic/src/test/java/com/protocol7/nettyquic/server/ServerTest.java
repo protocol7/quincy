@@ -40,7 +40,7 @@ public class ServerTest {
   private StreamId streamId = StreamId.random(true, true);
 
   private ClientTlsSession clientTlsSession =
-      new ClientTlsSession(TransportParameters.defaults(Version.CURRENT.asBytes()));
+      new ClientTlsSession(TransportParameters.defaults(Version.DRAFT_18.asBytes()));
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
@@ -60,6 +60,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
+            Version.DRAFT_18,
             srcConnectionId,
             streamListener,
             packetSender,
@@ -165,7 +166,7 @@ public class ServerTest {
         Optional.of(destConnId),
         Optional.of(srcConnectionId),
         nextPacketNumber(),
-        Version.CURRENT,
+        Version.DRAFT_18,
         token,
         List.of(frames));
   }

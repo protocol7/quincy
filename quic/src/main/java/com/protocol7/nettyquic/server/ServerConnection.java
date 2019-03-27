@@ -36,7 +36,7 @@ public class ServerConnection implements Connection {
   private Optional<ConnectionId> remoteConnectionId = Optional.empty();
   private Optional<ConnectionId> localConnectionId;
   private final PacketSender packetSender;
-  private final AtomicReference<Version> version = new AtomicReference<>(Version.CURRENT);
+  private final Version version;
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(PacketNumber.MIN);
   private final ServerStateMachine stateMachine;
@@ -46,20 +46,22 @@ public class ServerConnection implements Connection {
   private final StreamManager streamManager;
   private final FrameSender frameSender;
 
-  private final TransportParameters transportParameters =
-      TransportParameters.defaults(Version.CURRENT.asBytes());
+  private final TransportParameters transportParameters;
 
   private AEADs aeads;
 
   public ServerConnection(
+      final Version version,
       final ConnectionId localConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
       final PacketHandler flowControlHandler) {
+    this.version = version;
     this.packetSender = packetSender;
     this.flowControlHandler = flowControlHandler;
+    this.transportParameters = TransportParameters.defaults(version.asBytes());
 
     this.frameSender =
         new FrameSender() {
@@ -109,7 +111,7 @@ public class ServerConnection implements Connection {
   }
 
   public Version getVersion() {
-    return version.get();
+    return version;
   }
 
   public Packet sendPacket(Packet p) {

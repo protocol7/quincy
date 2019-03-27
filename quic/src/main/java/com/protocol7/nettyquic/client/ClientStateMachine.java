@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.client;
 import com.google.common.annotations.VisibleForTesting;
 import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.TransportError;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.streams.StreamManager;
@@ -164,7 +163,7 @@ public class ClientStateMachine {
                   connection.getRemoteConnectionId(),
                   connection.getLocalConnectionId(),
                   connection.nextSendPacketNumber(),
-                  Version.CURRENT,
+                  connection.getVersion(),
                   new CryptoFrame(0, result.get().getFin())));
 
           state = ClientState.Ready;

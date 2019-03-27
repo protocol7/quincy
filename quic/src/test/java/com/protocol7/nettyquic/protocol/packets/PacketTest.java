@@ -27,7 +27,7 @@ public class PacketTest {
             Optional.ofNullable(connId),
             empty(),
             pn,
-            Version.CURRENT,
+            Version.DRAFT_18,
             empty(),
             List.of(PingFrame.INSTANCE));
     ByteBuf bb = Unpooled.buffer();
@@ -68,7 +68,7 @@ public class PacketTest {
   public void parseHandshakePacket() {
     HandshakePacket packet =
         HandshakePacket.create(
-            Optional.ofNullable(connId), empty(), pn, Version.CURRENT, PingFrame.INSTANCE);
+            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_18, PingFrame.INSTANCE);
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -80,7 +80,7 @@ public class PacketTest {
   public void parseRetryPacket() {
     RetryPacket packet =
         new RetryPacket(
-            Version.CURRENT, Optional.ofNullable(connId), empty(), connId, Rnd.rndBytes(11));
+            Version.DRAFT_18, Optional.ofNullable(connId), empty(), connId, Rnd.rndBytes(11));
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

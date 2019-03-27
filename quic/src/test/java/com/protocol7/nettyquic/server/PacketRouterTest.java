@@ -43,7 +43,7 @@ public class PacketRouterTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    router = new PacketRouter(Version.CURRENT, connections, listener);
+    router = new PacketRouter(Version.DRAFT_18, connections, listener);
 
     when(connections.get(any())).thenReturn(of(connection));
     when(connections.get(any(), any(), any())).thenReturn(connection);
@@ -59,7 +59,7 @@ public class PacketRouterTest {
             of(destConnId),
             empty(),
             new PacketNumber(2),
-            Version.CURRENT,
+            Version.DRAFT_18,
             empty(),
             PingFrame.INSTANCE);
 
@@ -102,6 +102,6 @@ public class PacketRouterTest {
 
     assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
     assertEquals(srcConnId, verNeg.getSourceConnectionId().get());
-    assertEquals(List.of(Version.CURRENT), verNeg.getSupportedVersions());
+    assertEquals(List.of(Version.DRAFT_18), verNeg.getSupportedVersions());
   }
 }

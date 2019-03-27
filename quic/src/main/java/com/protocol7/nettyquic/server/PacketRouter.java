@@ -30,7 +30,7 @@ public class PacketRouter {
     if (halfParsed.getVersion().isPresent()) {
       if (halfParsed.getVersion().get() != version) {
         VersionNegotiationPacket verNeg =
-            new VersionNegotiationPacket(halfParsed.getConnectionId(), srcConnId, Version.CURRENT);
+            new VersionNegotiationPacket(halfParsed.getConnectionId(), srcConnId, version);
         sender.send(verNeg, null); // TODO remove null
         return false;
       }

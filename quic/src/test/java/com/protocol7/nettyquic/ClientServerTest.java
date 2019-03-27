@@ -12,6 +12,7 @@ import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
 import com.protocol7.nettyquic.server.ServerState;
@@ -75,13 +76,15 @@ public class ClientServerTest {
     MockitoAnnotations.initMocks(this);
 
     clientConnection =
-        new ClientConnection(destConnectionId, clientListener, clientSender, flowControlHandler);
+        new ClientConnection(
+            Version.DRAFT_18, destConnectionId, clientListener, clientSender, flowControlHandler);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
         new ServerConnection(
+            Version.DRAFT_18,
             srcConnectionId,
             serverListener,
             serverSender,

@@ -1,26 +1,21 @@
 package com.protocol7.nettyquic;
 
-import com.protocol7.nettyquic.client.QuicClient;
 import com.protocol7.nettyquic.protocol.Version;
+import com.protocol7.nettyquic.server.QuicServer;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
+import com.protocol7.nettyquic.tls.KeyUtil;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 
-public class ClientRunner {
+public class ServerRunner {
 
   public static void main(String[] args) throws ExecutionException, InterruptedException {
 
-    InetSocketAddress server1 = new InetSocketAddress("127.0.0.1", 6121);
-    InetSocketAddress server2 = new InetSocketAddress("127.0.0.1", 4433);
-
-    InetSocketAddress server = server2;
-    Version version = Version.DRAFT_18;
-
-    QuicClient client =
-        QuicClient.connect(
-                version,
-                server,
+    QuicServer server =
+        QuicServer.bind(
+                Version.DRAFT_18,
+                new InetSocketAddress("0.0.0.0", 4444),
                 new StreamListener() {
                   @Override
                   public void onData(Stream stream, byte[] data) {
@@ -32,11 +27,13 @@ public class ClientRunner {
 
                   @Override
                   public void onReset(Stream stream, int applicationErrorCode, long offset) {}
-                })
+                },
+                KeyUtil.getCertsFromCrt("quic/src/test/resources/server.crt"),
+                KeyUtil.getPrivateKey("quic/src/test/resources/server.der"))
             .get();
 
-    client.openStream().write("Hello world".getBytes(), true);
+    Thread.sleep(20000);
 
-    client.close();
+    server.close();
   }
 }

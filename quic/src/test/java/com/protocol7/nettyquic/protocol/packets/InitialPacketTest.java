@@ -86,7 +86,7 @@ public class InitialPacketTest {
         Optional.ofNullable(destConnId),
         Optional.ofNullable(srcConnId),
         pn,
-        Version.CURRENT,
+        Version.DRAFT_18,
         token,
         List.of(PingFrame.INSTANCE));
   }

@@ -18,23 +18,26 @@ import java.util.List;
 public class QuicServer {
 
   public static Future<QuicServer> bind(
+      final Version version,
       final InetSocketAddress address,
-      StreamListener streamHandler,
-      List<byte[]> certificates,
-      PrivateKey privateKey) {
+      final StreamListener streamHandler,
+      final List<byte[]> certificates,
+      final PrivateKey privateKey) {
     return Futures.thenSync(
-        bindImpl(address, streamHandler, certificates, privateKey), g -> new QuicServer(g));
+        bindImpl(version, address, streamHandler, certificates, privateKey),
+        g -> new QuicServer(g));
   }
 
   private static Future<EventExecutorGroup> bindImpl(
+      final Version version,
       final InetSocketAddress address,
       final StreamListener streamHandler,
       List<byte[]> certificates,
       PrivateKey privateKey) {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
-    Connections connections = new Connections(certificates, privateKey);
-    PacketRouter router = new PacketRouter(Version.CURRENT, connections, streamHandler);
+    Connections connections = new Connections(version, certificates, privateKey);
+    PacketRouter router = new PacketRouter(version, connections, streamHandler);
 
     final Bootstrap b = new Bootstrap();
     b.group(group)

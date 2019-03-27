@@ -14,8 +14,6 @@ public enum Version {
   DRAFT_18(dehex("ff000012")),
   UNKNOWN(new byte[0]);
 
-  public static final Version CURRENT = Version.QUIC_GO;
-
   public static Version read(final ByteBuf bb) {
     byte[] l = new byte[4];
     bb.readBytes(l);

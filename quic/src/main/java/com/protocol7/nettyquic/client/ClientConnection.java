@@ -40,7 +40,7 @@ public class ClientConnection implements Connection {
   private Optional<ConnectionId> localConnectionId = Optional.of(ConnectionId.random());
   private final PacketSender packetSender;
 
-  private final Version version = Version.CURRENT;
+  private final Version version;
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(new PacketNumber(0));
   private final PacketBuffer packetBuffer;
@@ -54,10 +54,12 @@ public class ClientConnection implements Connection {
   private AEADs aeads;
 
   public ClientConnection(
+      final Version version,
       final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler) {
+    this.version = version;
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
 
@@ -78,7 +80,7 @@ public class ClientConnection implements Connection {
     this.streamManager = new DefaultStreamManager(frameSender, streamListener);
     this.stateMachine =
         new ClientStateMachine(
-            this, TransportParameters.defaults(Version.CURRENT.asBytes()), this.streamManager);
+            this, TransportParameters.defaults(version.asBytes()), this.streamManager);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
     this.flowControlHandler = flowControlHandler;
 

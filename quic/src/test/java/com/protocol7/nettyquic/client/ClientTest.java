@@ -54,14 +54,15 @@ public class ClientTest {
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
     connection =
-        new ClientConnection(destConnectionId, streamListener, packetSender, flowControlHandler);
+        new ClientConnection(
+            Version.DRAFT_18, destConnectionId, streamListener, packetSender, flowControlHandler);
 
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
     serverTlsSession =
         new ServerTlsSession(
-            TransportParameters.defaults(Version.CURRENT.asBytes()), serverCert, privateKey);
+            TransportParameters.defaults(Version.DRAFT_18.asBytes()), serverCert, privateKey);
   }
 
   @Test
@@ -78,7 +79,7 @@ public class ClientTest {
     ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
 
     assertFalse(initialPacket.getToken().isPresent());
-    assertEquals(Version.CURRENT, initialPacket.getVersion());
+    assertEquals(Version.DRAFT_18, initialPacket.getVersion());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
     assertTrue(initialPacket.getPayload().calculateLength() >= 1200);
 
@@ -91,7 +92,7 @@ public class ClientTest {
     // first packet did not contain token, server sends retry
     connection.onPacket(
         new RetryPacket(
-            Version.CURRENT,
+            Version.DRAFT_18,
             Optional.empty(),
             Optional.of(srcConnectionId),
             destConnectionId,
@@ -104,7 +105,7 @@ public class ClientTest {
     assertEquals(srcConnectionId, newDestConnId);
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertArrayEquals(retryToken, initialPacket2.getToken().get());
-    assertEquals(Version.CURRENT, initialPacket2.getVersion());
+    assertEquals(Version.DRAFT_18, initialPacket2.getVersion());
 
     CryptoFrame cf = (CryptoFrame) initialPacket2.getPayload().getFrames().get(0);
 
@@ -124,7 +125,7 @@ public class ClientTest {
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
-            Version.CURRENT,
+            Version.DRAFT_18,
             Optional.empty(),
             new CryptoFrame(0, shah.getServerHello())));
 
@@ -141,7 +142,7 @@ public class ClientTest {
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
-            Version.CURRENT,
+            Version.DRAFT_18,
             new CryptoFrame(0, shah.getServerHandshake())));
 
     // validate client fin handshake packet

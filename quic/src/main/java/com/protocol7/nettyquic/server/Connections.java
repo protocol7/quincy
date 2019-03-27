@@ -4,6 +4,7 @@ import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.StreamListener;
 import java.security.PrivateKey;
 import java.util.List;
@@ -17,11 +18,14 @@ public class Connections {
 
   private final Logger log = LoggerFactory.getLogger(Connections.class);
 
+  private final Version version;
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
 
-  public Connections(final List<byte[]> certificates, final PrivateKey privateKey) {
+  public Connections(
+      final Version version, final List<byte[]> certificates, final PrivateKey privateKey) {
+    this.version = version;
     this.certificates = certificates;
     this.privateKey = privateKey;
   }
@@ -38,6 +42,7 @@ public class Connections {
       log.debug("Creating new server connection for {}", connId);
       conn =
           new ServerConnection(
+              version,
               connId,
               streamHandler,
               packetSender,
