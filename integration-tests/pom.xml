@@ -20,6 +20,10 @@
       <groupId>com.protocol7</groupId>
       <artifactId>quic-go-testcontainer</artifactId>
     </dependency>
+    <dependency>
+      <groupId>com.protocol7</groupId>
+      <artifactId>quicly-testcontainer</artifactId>
+    </dependency>
 
     <!-- Tests -->
     <dependency>

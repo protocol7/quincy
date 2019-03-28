@@ -37,6 +37,7 @@
         <module>tls</module>
         <module>quic</module>
         <module>quic-go-testcontainer</module>
+        <module>quicly-testcontainer</module>
         <module>integration-tests</module>
     </modules>
 
@@ -62,6 +63,11 @@
             <dependency>
                 <groupId>com.protocol7</groupId>
                 <artifactId>quic-go-testcontainer</artifactId>
+                <version>0.0.1-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.protocol7</groupId>
+                <artifactId>quicly-testcontainer</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
