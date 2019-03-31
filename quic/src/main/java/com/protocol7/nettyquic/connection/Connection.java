@@ -12,6 +12,7 @@ import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import io.netty.util.concurrent.Future;
+import java.net.InetSocketAddress;
 import java.util.Optional;
 
 public interface Connection extends FrameSender {
@@ -33,4 +34,6 @@ public interface Connection extends FrameSender {
   AEAD getAEAD(EncryptionLevel level);
 
   Future<Void> close(TransportError error, FrameType frameType, String msg);
+
+  InetSocketAddress getPeerAddress();
 }

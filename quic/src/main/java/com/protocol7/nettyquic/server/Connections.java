@@ -6,6 +6,7 @@ import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.StreamListener;
+import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Map;
@@ -33,7 +34,8 @@ public class Connections {
   public ServerConnection get(
       final Optional<ConnectionId> connIdOpt,
       final StreamListener streamHandler,
-      final PacketSender packetSender) {
+      final PacketSender packetSender,
+      final InetSocketAddress peerAddress) {
 
     final ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
 
@@ -48,7 +50,8 @@ public class Connections {
               packetSender,
               certificates,
               privateKey,
-              new DefaultFlowControlHandler(49152, 32768));
+              new DefaultFlowControlHandler(49152, 32768),
+              peerAddress);
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

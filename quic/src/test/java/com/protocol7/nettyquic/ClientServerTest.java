@@ -77,7 +77,12 @@ public class ClientServerTest {
 
     clientConnection =
         new ClientConnection(
-            Version.DRAFT_18, destConnectionId, clientListener, clientSender, flowControlHandler);
+            Version.DRAFT_18,
+            destConnectionId,
+            clientListener,
+            clientSender,
+            flowControlHandler,
+            TestUtil.getTestAddress());
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
@@ -90,7 +95,8 @@ public class ClientServerTest {
             serverSender,
             certificates,
             privateKey,
-            flowControlHandler);
+            flowControlHandler,
+            TestUtil.getTestAddress());
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

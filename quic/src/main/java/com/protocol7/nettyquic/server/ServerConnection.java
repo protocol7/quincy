@@ -3,6 +3,8 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 
 import com.protocol7.nettyquic.Pipeline;
+import com.protocol7.nettyquic.addressvalidation.RetryHandler;
+import com.protocol7.nettyquic.addressvalidation.RetryToken;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
@@ -22,9 +24,11 @@ import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
+import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,6 +48,7 @@ public class ServerConnection implements Connection {
 
   private final StreamManager streamManager;
   private final Pipeline pipeline;
+  private final InetSocketAddress peerAddress;
 
   private final TransportParameters transportParameters;
 
@@ -56,16 +61,21 @@ public class ServerConnection implements Connection {
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final FlowControlHandler flowControlHandler) {
+      final FlowControlHandler flowControlHandler,
+      final InetSocketAddress peerAddress) {
     this.version = version;
     this.packetSender = packetSender;
+    this.peerAddress = peerAddress;
     this.transportParameters = TransportParameters.defaults(version.asBytes());
 
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     this.pipeline =
         new Pipeline(
-            List.of(new RetryHandler(), streamManager, flowControlHandler),
+            List.of(
+                new RetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
+                streamManager,
+                flowControlHandler),
             List.of(flowControlHandler));
 
     this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
@@ -161,6 +171,11 @@ public class ServerConnection implements Connection {
         ConnectionCloseFrame.connection(error.getValue(), frameType.getType(), msg));
 
     return packetSender.destroy();
+  }
+
+  @Override
+  public InetSocketAddress getPeerAddress() {
+    return peerAddress;
   }
 
   public Future<Void> close() {

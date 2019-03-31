@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
@@ -66,7 +67,8 @@ public class ServerTest {
             packetSender,
             certificates,
             privateKey,
-            flowControlHandler);
+            flowControlHandler,
+            TestUtil.getTestAddress());
   }
 
   @Test

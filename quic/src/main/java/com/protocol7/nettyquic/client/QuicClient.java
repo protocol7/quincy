@@ -37,7 +37,8 @@ public class QuicClient {
                       ConnectionId.random(),
                       streamListener,
                       new NettyPacketSender(channel, serverAddress),
-                      new DefaultFlowControlHandler(49152, 32768));
+                      new DefaultFlowControlHandler(49152, 32768),
+                      serverAddress);
               handler.setConnection(connection); // TODO fix cyclic creation
               return connection;
             });

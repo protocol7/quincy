@@ -5,6 +5,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
@@ -55,7 +56,12 @@ public class ClientTest {
 
     connection =
         new ClientConnection(
-            Version.DRAFT_18, destConnectionId, streamListener, packetSender, flowControlHandler);
+            Version.DRAFT_18,
+            destConnectionId,
+            streamListener,
+            packetSender,
+            flowControlHandler,
+            TestUtil.getTestAddress());
 
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");

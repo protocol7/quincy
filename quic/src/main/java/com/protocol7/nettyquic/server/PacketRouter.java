@@ -9,6 +9,7 @@ import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.nettyquic.streams.StreamListener;
 import io.netty.buffer.ByteBuf;
+import java.net.InetSocketAddress;
 import java.util.Optional;
 import org.slf4j.MDC;
 
@@ -38,7 +39,7 @@ public class PacketRouter {
     return true;
   }
 
-  public void route(ByteBuf bb, PacketSender sender) {
+  public void route(ByteBuf bb, PacketSender sender, InetSocketAddress peerAddress) {
 
     while (bb.isReadable()) {
       HalfParsedPacket<?> halfParsed = Packet.parse(bb, -1);
@@ -47,7 +48,8 @@ public class PacketRouter {
           connections.get(
               halfParsed.getConnectionId(),
               listener,
-              sender); // TODO fix for when connId is omitted
+              sender,
+              peerAddress); // TODO fix for when connId is omitted
 
       if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
 

@@ -25,6 +25,7 @@ import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
@@ -50,6 +51,7 @@ public class ClientConnection implements Connection {
 
   private final StreamManager streamManager;
   private final Pipeline pipeline;
+  private final InetSocketAddress peerAddress;
 
   private AEADs aeads;
 
@@ -58,10 +60,12 @@ public class ClientConnection implements Connection {
       final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
-      final FlowControlHandler flowControlHandler) {
+      final FlowControlHandler flowControlHandler,
+      final InetSocketAddress peerAddress) {
     this.version = version;
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
+    this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     this.pipeline = new Pipeline(List.of(streamManager, flowControlHandler), List.of());
@@ -199,6 +203,11 @@ public class ClientConnection implements Connection {
         ConnectionCloseFrame.connection(error.getValue(), frameType.getType(), msg));
 
     return packetSender.destroy();
+  }
+
+  @Override
+  public InetSocketAddress getPeerAddress() {
+    return peerAddress;
   }
 
   public Future<Void> close() {

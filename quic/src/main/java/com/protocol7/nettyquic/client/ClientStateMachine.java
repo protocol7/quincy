@@ -116,8 +116,10 @@ public class ClientStateMachine {
       } else if (state == ClientState.Ready
           || state == ClientState.Closing
           || state == ClientState.Closed) { // TODO don't allow when closed
-        for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
-          handleFrame(frame);
+        if (packet instanceof FullPacket) {
+          for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
+            handleFrame(frame);
+          }
         }
       } else {
         log.warn("Got packet in an unexpected state {} {}", state, packet);

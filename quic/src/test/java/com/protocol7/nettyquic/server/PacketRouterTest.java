@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
@@ -19,6 +20,7 @@ import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.net.InetSocketAddress;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -38,6 +40,7 @@ public class PacketRouterTest {
   @Mock private ServerConnection connection;
   @Mock private StreamListener listener;
   @Mock private PacketSender sender;
+  private InetSocketAddress peerAddress = TestUtil.getTestAddress();
 
   @Before
   public void setUp() {
@@ -46,7 +49,7 @@ public class PacketRouterTest {
     router = new PacketRouter(Version.DRAFT_18, connections, listener);
 
     when(connections.get(any())).thenReturn(of(connection));
-    when(connections.get(any(), any(), any())).thenReturn(connection);
+    when(connections.get(any(), any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
     when(connection.getLocalConnectionId()).thenReturn(of(srcConnId));
@@ -66,7 +69,7 @@ public class PacketRouterTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    router.route(bb, sender);
+    router.route(bb, sender, peerAddress);
 
     verify(connection).onPacket(packet);
   }
@@ -75,7 +78,7 @@ public class PacketRouterTest {
   public void invalidPacket() {
     ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
 
-    router.route(bb, sender);
+    router.route(bb, sender, peerAddress);
   }
 
   @Test
@@ -92,7 +95,7 @@ public class PacketRouterTest {
     ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    router.route(bb, sender);
+    router.route(bb, sender, peerAddress);
 
     ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);

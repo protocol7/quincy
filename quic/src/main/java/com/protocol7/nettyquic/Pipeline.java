@@ -7,6 +7,7 @@ import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
+import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.List;
 
@@ -37,6 +38,11 @@ public class Pipeline {
           @Override
           public Version getVersion() {
             return connection.getVersion();
+          }
+
+          @Override
+          public InetSocketAddress getPeerAddress() {
+            return connection.getPeerAddress();
           }
 
           @Override
@@ -78,6 +84,11 @@ public class Pipeline {
           @Override
           public Version getVersion() {
             return connection.getVersion();
+          }
+
+          @Override
+          public InetSocketAddress getPeerAddress() {
+            return connection.getPeerAddress();
           }
 
           @Override
