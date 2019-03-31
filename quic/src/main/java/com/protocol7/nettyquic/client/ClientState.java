@@ -1,6 +1,8 @@
 package com.protocol7.nettyquic.client;
 
-public enum ClientState {
+import com.protocol7.nettyquic.connection.State;
+
+public enum ClientState implements State {
   BeforeInitial,
   WaitingForServerHello,
   WaitingForHandshake,

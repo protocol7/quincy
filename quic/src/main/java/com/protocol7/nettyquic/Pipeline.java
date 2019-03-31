@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic;
 
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -43,6 +44,11 @@ public class Pipeline {
           @Override
           public InetSocketAddress getPeerAddress() {
             return connection.getPeerAddress();
+          }
+
+          @Override
+          public State getState() {
+            return connection.getState();
           }
 
           @Override
@@ -89,6 +95,11 @@ public class Pipeline {
           @Override
           public InetSocketAddress getPeerAddress() {
             return connection.getPeerAddress();
+          }
+
+          @Override
+          public State getState() {
+            return connection.getState();
           }
 
           @Override

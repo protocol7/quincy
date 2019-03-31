@@ -2,11 +2,16 @@ package com.protocol7.nettyquic.protocol;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
+import com.protocol7.nettyquic.InboundHandler;
+import com.protocol7.nettyquic.PipelineContext;
+import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.Sender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
+import com.protocol7.nettyquic.server.ServerState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -19,7 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO resends
-public class PacketBuffer {
+public class PacketBuffer implements InboundHandler {
 
   private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
 
@@ -67,18 +72,26 @@ public class PacketBuffer {
     sender.send(packet);
   }
 
-  public void onPacket(Packet packet) {
+  @Override
+  public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
-      ackQueue.add(((FullPacket) packet).getPacketNumber());
-      log.debug("Acked packet {}", ((FullPacket) packet).getPacketNumber());
+      State state = ctx.getState();
+      if ((state instanceof ServerState && state != ServerState.BeforeInitial)
+          || (state instanceof ClientState && state != ClientState.BeforeInitial)) {
 
-      handleAcks(packet);
+        ackQueue.add(((FullPacket) packet).getPacketNumber());
+        log.debug("Acked packet {}", ((FullPacket) packet).getPacketNumber());
 
-      if (shouldFlush(packet)) {
-        log.debug("Directly acking packet");
-        flushAcks();
+        handleAcks(packet);
+
+        if (shouldFlush(packet)) {
+          log.debug("Directly acking packet");
+          flushAcks();
+        }
       }
     }
+
+    ctx.next(packet);
   }
 
   private boolean shouldFlush(Packet packet) {

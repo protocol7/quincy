@@ -69,17 +69,18 @@ public class ServerConnection implements Connection {
     this.transportParameters = TransportParameters.defaults(version.asBytes());
 
     this.streamManager = new DefaultStreamManager(this, streamListener);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
     this.pipeline =
         new Pipeline(
             List.of(
                 new RetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
+                packetBuffer,
                 streamManager,
                 flowControlHandler),
             List.of(flowControlHandler));
 
     this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
     this.localConnectionId = Optional.of(localConnectionId);
 
@@ -135,9 +136,6 @@ public class ServerConnection implements Connection {
   public void onPacket(Packet packet) {
     log.debug("Server got {}", packet);
 
-    if (stateMachine.getState() != ServerState.BeforeInitial) {
-      packetBuffer.onPacket(packet);
-    }
     // with incorrect conn ID
     stateMachine.processPacket(packet);
 

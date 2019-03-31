@@ -175,7 +175,7 @@ public class ClientTest {
     assertArrayEquals(DATA, dataCaptor.getValue());
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
   }
 
   @Test
@@ -195,7 +195,7 @@ public class ClientTest {
     assertArrayEquals(DATA2, datas.get(1));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
     // verify ack
     assertAck(5, 4, 4, 4);
   }
@@ -217,7 +217,7 @@ public class ClientTest {
     assertArrayEquals(DATA2, datas.get(1));
 
     // verify acks
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
     assertAck(5, 4, 4, 4);
   }
 
@@ -230,7 +230,7 @@ public class ClientTest {
     verify(streamListener).onReset(any(DefaultStream.class), eq(123), eq(0L));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
   }
 
   @Test
@@ -240,7 +240,7 @@ public class ClientTest {
     connection.onPacket(packet(PingFrame.INSTANCE));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
   }
 
   @Test
@@ -250,7 +250,7 @@ public class ClientTest {
     connection.onPacket(packet(ConnectionCloseFrame.connection(123, 124, "Closed")));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 2, 3);
 
     assertEquals(ClientState.Closed, connection.getState());
 
@@ -305,6 +305,9 @@ public class ClientTest {
     ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
+    System.out.println(ackPacket.getPayload());
+    System.out.println(ackPacket.getPayload().getFrames().size());
+
     assertEquals(
         new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
   }

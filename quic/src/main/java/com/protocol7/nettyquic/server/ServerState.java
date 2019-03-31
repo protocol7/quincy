@@ -1,6 +1,8 @@
 package com.protocol7.nettyquic.server;
 
-public enum ServerState {
+import com.protocol7.nettyquic.connection.State;
+
+public enum ServerState implements State {
   BeforeInitial,
   WaitingForFinished,
   Ready,

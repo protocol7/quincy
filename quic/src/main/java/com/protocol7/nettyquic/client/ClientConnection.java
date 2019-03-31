@@ -67,12 +67,13 @@ public class ClientConnection implements Connection {
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
-    this.pipeline = new Pipeline(List.of(streamManager, flowControlHandler), List.of());
+    this.pipeline =
+        new Pipeline(List.of(packetBuffer, streamManager, flowControlHandler), List.of());
 
     this.stateMachine =
         new ClientStateMachine(this, TransportParameters.defaults(version.asBytes()));
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
     initAEAD();
   }
@@ -158,7 +159,7 @@ public class ClientConnection implements Connection {
 
     EncryptionLevel encLevel = getEncryptionLevel(packet);
     if (aeads.available(encLevel)) {
-      packetBuffer.onPacket(packet);
+      // packetBuffer.onReceivePacket(packet, null);
 
       stateMachine.handlePacket(packet);
 

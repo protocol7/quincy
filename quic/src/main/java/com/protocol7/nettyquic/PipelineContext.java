@@ -1,5 +1,6 @@
 package com.protocol7.nettyquic;
 
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
@@ -15,4 +16,6 @@ public interface PipelineContext extends FrameSender {
   void closeConnection(TransportError error, final FrameType frameType, final String msg);
 
   InetSocketAddress getPeerAddress();
+
+  State getState();
 }

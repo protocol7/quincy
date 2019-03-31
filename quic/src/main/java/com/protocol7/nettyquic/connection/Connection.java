@@ -36,4 +36,6 @@ public interface Connection extends FrameSender {
   Future<Void> close(TransportError error, FrameType frameType, String msg);
 
   InetSocketAddress getPeerAddress();
+
+  State getState();
 }
