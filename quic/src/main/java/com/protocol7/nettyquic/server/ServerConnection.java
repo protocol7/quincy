@@ -64,7 +64,9 @@ public class ServerConnection implements Connection {
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     this.pipeline =
-        new Pipeline(List.of(streamManager, flowControlHandler), List.of(flowControlHandler));
+        new Pipeline(
+            List.of(new RetryHandler(), streamManager, flowControlHandler),
+            List.of(flowControlHandler));
 
     this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
@@ -137,21 +139,12 @@ public class ServerConnection implements Connection {
     return aeads.get(level);
   }
 
-  @Override
-  public Optional<byte[]> getToken() {
-    return Optional.empty();
-  }
-
   public void setHandshakeAead(AEAD handshakeAead) {
     aeads.setHandshakeAead(handshakeAead);
   }
 
   public void setOneRttAead(AEAD oneRttAead) {
     aeads.setOneRttAead(oneRttAead);
-  }
-
-  public PacketNumber lastAckedPacketNumber() {
-    return packetBuffer.getLargestAcked();
   }
 
   public PacketNumber nextSendPacketNumber() {

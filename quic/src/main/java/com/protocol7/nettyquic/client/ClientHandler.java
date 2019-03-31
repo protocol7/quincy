@@ -20,6 +20,7 @@ public class ClientHandler extends SimpleChannelInboundHandler<DatagramPacket> {
   @Override
   protected void channelRead0(final ChannelHandlerContext ctx, final DatagramPacket msg) {
     final ByteBuf bb = msg.content();
+
     while (bb.isReadable()) {
       final HalfParsedPacket<?> halfParsed =
           Packet.parse(msg.content(), connection.getLastDestConnectionIdLength());

@@ -3,14 +3,12 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.server.ServerState.Ready;
 import static com.protocol7.nettyquic.server.ServerState.WaitingForFinished;
 
-import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
-import com.protocol7.nettyquic.utils.Rnd;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -82,20 +80,6 @@ public class ServerStateMachine {
           connection.sendPacket(handshake);
 
           state = WaitingForFinished;
-        } else {
-          byte[] retryToken = Rnd.rndBytes(34); // TODO generate a useful token
-
-          ConnectionId newLocalConnectionId = ConnectionId.random();
-          connection.setLocalConnectionId(newLocalConnectionId);
-
-          RetryPacket retry =
-              new RetryPacket(
-                  connection.getVersion(),
-                  initialPacket.getSourceConnectionId(),
-                  Optional.of(newLocalConnectionId),
-                  initialPacket.getDestinationConnectionId().get(),
-                  retryToken);
-          connection.sendPacket(retry);
         }
       } else {
         log.warn("Unexpected packet in BeforeInitial: " + packet);

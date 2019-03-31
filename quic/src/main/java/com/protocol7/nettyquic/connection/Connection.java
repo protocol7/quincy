@@ -28,13 +28,9 @@ public interface Connection extends FrameSender {
 
   PacketNumber nextSendPacketNumber();
 
-  PacketNumber lastAckedPacketNumber();
-
   void onPacket(Packet packet);
 
   AEAD getAEAD(EncryptionLevel level);
-
-  Optional<byte[]> getToken();
 
   Future<Void> close(TransportError error, FrameType frameType, String msg);
 }

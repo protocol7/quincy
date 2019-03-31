@@ -48,7 +48,6 @@ public class ClientConnection implements Connection {
   private final ClientStateMachine stateMachine;
   private Optional<byte[]> token = Optional.empty();
 
-  private final FlowControlHandler flowControlHandler;
   private final StreamManager streamManager;
   private final Pipeline pipeline;
 
@@ -63,7 +62,6 @@ public class ClientConnection implements Connection {
     this.version = version;
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
-    this.flowControlHandler = flowControlHandler;
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     this.pipeline = new Pipeline(List.of(streamManager, flowControlHandler), List.of());
@@ -181,10 +179,6 @@ public class ClientConnection implements Connection {
 
   public Version getVersion() {
     return version;
-  }
-
-  public PacketNumber lastAckedPacketNumber() {
-    return packetBuffer.getLargestAcked();
   }
 
   public PacketNumber nextSendPacketNumber() {

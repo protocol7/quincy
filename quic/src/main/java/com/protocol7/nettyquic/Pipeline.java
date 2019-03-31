@@ -2,6 +2,7 @@ package com.protocol7.nettyquic;
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.protocol.TransportError;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
@@ -34,6 +35,16 @@ public class Pipeline {
           }
 
           @Override
+          public Version getVersion() {
+            return connection.getVersion();
+          }
+
+          @Override
+          public Packet sendPacket(final Packet p) {
+            return connection.sendPacket(p);
+          }
+
+          @Override
           public FullPacket send(final Frame... frames) {
             return connection.send(frames);
           }
@@ -62,6 +73,16 @@ public class Pipeline {
               final OutboundHandler handler = iter.next();
               handler.beforeSendPacket(newPacket, this);
             }
+          }
+
+          @Override
+          public Version getVersion() {
+            return connection.getVersion();
+          }
+
+          @Override
+          public Packet sendPacket(final Packet p) {
+            return connection.sendPacket(p);
           }
 
           @Override
