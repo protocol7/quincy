@@ -6,8 +6,8 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -44,7 +44,7 @@ public class ServerTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
-  @Mock private PacketHandler flowControlHandler;
+  @Mock private FlowControlHandler flowControlHandler;
 
   @Before
   public void setUp() {

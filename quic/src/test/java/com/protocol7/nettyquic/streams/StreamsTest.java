@@ -2,7 +2,7 @@ package com.protocol7.nettyquic.streams;
 
 import static org.junit.Assert.*;
 
-import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.protocol.StreamId;
 import org.junit.Before;
 import org.junit.Test;
@@ -11,7 +11,7 @@ import org.mockito.MockitoAnnotations;
 
 public class StreamsTest {
 
-  @Mock FrameSender sender;
+  @Mock PipelineContext ctx;
   @Mock StreamListener listener;
 
   private Streams streams;
@@ -20,7 +20,7 @@ public class StreamsTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    this.streams = new Streams(sender);
+    this.streams = new Streams(ctx);
   }
 
   @Test

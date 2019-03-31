@@ -2,10 +2,10 @@ package com.protocol7.nettyquic.server;
 
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 
+import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.connection.Connection;
-import com.protocol7.nettyquic.connection.FrameSender;
-import com.protocol7.nettyquic.connection.PacketHandler;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -42,9 +42,8 @@ public class ServerConnection implements Connection {
   private final ServerStateMachine stateMachine;
   private final PacketBuffer packetBuffer;
 
-  private final PacketHandler flowControlHandler;
   private final StreamManager streamManager;
-  private final FrameSender frameSender;
+  private final Pipeline pipeline;
 
   private final TransportParameters transportParameters;
 
@@ -57,30 +56,17 @@ public class ServerConnection implements Connection {
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final PacketHandler flowControlHandler) {
+      final FlowControlHandler flowControlHandler) {
     this.version = version;
     this.packetSender = packetSender;
-    this.flowControlHandler = flowControlHandler;
     this.transportParameters = TransportParameters.defaults(version.asBytes());
 
-    this.frameSender =
-        new FrameSender() {
-          @Override
-          public FullPacket send(final Frame... frames) {
-            return sendPacket(frames);
-          }
+    this.streamManager = new DefaultStreamManager(this, streamListener);
 
-          @Override
-          public void closeConnection(
-              final TransportError error, final FrameType frameType, final String msg) {
-            close(error, frameType, msg);
-          }
-        };
+    this.pipeline =
+        new Pipeline(List.of(streamManager, flowControlHandler), List.of(flowControlHandler));
 
-    this.streamManager = new DefaultStreamManager(frameSender, streamListener);
-
-    this.stateMachine =
-        new ServerStateMachine(this, transportParameters, privateKey, certificates, streamManager);
+    this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
     this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
     this.localConnectionId = Optional.of(localConnectionId);
@@ -115,13 +101,14 @@ public class ServerConnection implements Connection {
   }
 
   public Packet sendPacket(Packet p) {
-    flowControlHandler.beforeSendPacket(p, frameSender);
+
+    pipeline.send(this, p);
 
     packetBuffer.send(p);
     return p;
   }
 
-  public FullPacket sendPacket(Frame... frames) {
+  public FullPacket send(Frame... frames) {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
@@ -138,15 +125,11 @@ public class ServerConnection implements Connection {
 
     if (stateMachine.getState() != ServerState.BeforeInitial) {
       packetBuffer.onPacket(packet);
-
-      if (packet instanceof FullPacket) {
-        FullPacket fp = (FullPacket) packet;
-        streamManager.onReceivePacket(fp, frameSender);
-        flowControlHandler.onReceivePacket(fp, frameSender);
-      }
     }
     // with incorrect conn ID
     stateMachine.processPacket(packet);
+
+    pipeline.onPacket(this, packet);
   }
 
   @Override

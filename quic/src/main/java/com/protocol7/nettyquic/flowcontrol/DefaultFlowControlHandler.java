@@ -1,7 +1,7 @@
 package com.protocol7.nettyquic.flowcontrol;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.DataBlockedFrame;
@@ -32,14 +32,14 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
   }
 
   @Override
-  public void beforeSendPacket(final Packet packet, final FrameSender sender) {
+  public void beforeSendPacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket) {
       FullPacket fullPacket = (FullPacket) packet;
       for (Frame frame : fullPacket.getPayload().getFrames()) {
         if (frame.getType() == FrameType.STREAM) {
           StreamFrame sf = (StreamFrame) frame;
 
-          if (!tryConsume(sf.getStreamId(), sf.getOffset() + sf.getData().length, sender)) {
+          if (!tryConsume(sf.getStreamId(), sf.getOffset() + sf.getData().length, ctx)) {
             throw new IllegalStateException("Stream or connection blocked");
           }
         }
@@ -48,7 +48,7 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
   }
 
   @VisibleForTesting
-  protected boolean tryConsume(final StreamId sid, final long offset, final FrameSender sender) {
+  protected boolean tryConsume(final StreamId sid, final long offset, final PipelineContext ctx) {
     final TryConsumeResult result = sendCounter.tryConsume(sid, offset);
 
     if (result.isSuccess()) {
@@ -64,48 +64,53 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
         blockedStreams.add(sid);
       }
       if (!frames.isEmpty()) {
-        sender.send(frames.toArray(new Frame[0]));
+        ctx.send(frames.toArray(new Frame[0]));
       }
       return false;
     }
   }
 
-  public void onReceivePacket(final FullPacket packet, final FrameSender sender) {
-    // listen for flow control frames
-    for (final Frame frame : packet.getPayload().getFrames()) {
-      if (frame.getType() == FrameType.MAX_STREAM_DATA) {
-        final MaxStreamDataFrame msd = (MaxStreamDataFrame) frame;
-        sendCounter.setStreamMaxBytes(msd.getStreamId(), msd.getMaxStreamData());
-        blockedStreams.remove(msd.getStreamId());
-      } else if (frame.getType() == FrameType.MAX_DATA) {
-        final MaxDataFrame mdf = (MaxDataFrame) frame;
-        sendCounter.setConnectionMaxBytes(mdf.getMaxData());
-        connectionBlocked.set(false);
-      } else if (frame.getType() == FrameType.STREAM) {
-        final StreamFrame sf = (StreamFrame) frame;
-        final StreamId sid = sf.getStreamId();
-        final TryConsumeResult result =
-            receiveCounter.tryConsume(sid, sf.getOffset() + sf.getData().length);
+  public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
+    if (packet instanceof FullPacket) {
+      FullPacket fp = (FullPacket) packet;
+      // listen for flow control frames
+      for (final Frame frame : fp.getPayload().getFrames()) {
+        if (frame.getType() == FrameType.MAX_STREAM_DATA) {
+          final MaxStreamDataFrame msd = (MaxStreamDataFrame) frame;
+          sendCounter.setStreamMaxBytes(msd.getStreamId(), msd.getMaxStreamData());
+          blockedStreams.remove(msd.getStreamId());
+        } else if (frame.getType() == FrameType.MAX_DATA) {
+          final MaxDataFrame mdf = (MaxDataFrame) frame;
+          sendCounter.setConnectionMaxBytes(mdf.getMaxData());
+          connectionBlocked.set(false);
+        } else if (frame.getType() == FrameType.STREAM) {
+          final StreamFrame sf = (StreamFrame) frame;
+          final StreamId sid = sf.getStreamId();
+          final TryConsumeResult result =
+              receiveCounter.tryConsume(sid, sf.getOffset() + sf.getData().length);
 
-        if (result.isSuccess()) {
-          final List<Frame> frames = new ArrayList<>();
-          if (1.0 * result.getConnectionOffset() / result.getConnectionMax() > 0.5) {
-            final long newMax = receiveCounter.increaseConnectionMax();
-            frames.add(new MaxDataFrame(newMax));
-          }
-          if (1.0 * result.getStreamOffset() / result.getStreamMax() > 0.5) {
-            final long newMax = receiveCounter.increaseStreamMax(sid);
-            frames.add(new MaxStreamDataFrame(sid, newMax));
-          }
+          if (result.isSuccess()) {
+            final List<Frame> frames = new ArrayList<>();
+            if (1.0 * result.getConnectionOffset() / result.getConnectionMax() > 0.5) {
+              final long newMax = receiveCounter.increaseConnectionMax();
+              frames.add(new MaxDataFrame(newMax));
+            }
+            if (1.0 * result.getStreamOffset() / result.getStreamMax() > 0.5) {
+              final long newMax = receiveCounter.increaseStreamMax(sid);
+              frames.add(new MaxStreamDataFrame(sid, newMax));
+            }
 
-          if (!frames.isEmpty()) {
-            sender.send(frames.toArray(new Frame[0]));
+            if (!frames.isEmpty()) {
+              ctx.send(frames.toArray(new Frame[0]));
+            }
+          } else {
+            ctx.closeConnection(
+                TransportError.FLOW_CONTROL_ERROR, FrameType.STREAM, "Flow control error");
           }
-        } else {
-          sender.closeConnection(
-              TransportError.FLOW_CONTROL_ERROR, FrameType.STREAM, "Flow control error");
         }
       }
     }
+
+    ctx.next(packet);
   }
 }

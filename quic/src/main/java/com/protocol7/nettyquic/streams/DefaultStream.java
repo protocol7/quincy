@@ -1,6 +1,6 @@
 package com.protocol7.nettyquic.streams;
 
-import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.frames.Frame;

@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
-import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Payload;
@@ -27,7 +27,7 @@ public class DefaultStreamManagerTest {
   private static final byte[] DATA1 = "hello".getBytes();
   private static final byte[] DATA2 = "world".getBytes();
 
-  @Mock private FrameSender sender;
+  @Mock private PipelineContext ctx;
   @Mock private StreamListener listener;
   @Mock private FullPacket packet;
 
@@ -37,10 +37,10 @@ public class DefaultStreamManagerTest {
   public void setUp() {
     initMocks(this);
 
-    when(sender.send(any(Frame.class))).thenReturn(packet);
+    when(ctx.send(any(Frame.class))).thenReturn(packet);
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(456));
 
-    manager = new DefaultStreamManager(sender, listener);
+    manager = new DefaultStreamManager(ctx, listener);
   }
 
   @Test
@@ -48,7 +48,7 @@ public class DefaultStreamManagerTest {
     Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, true);
-    verify(sender).send(new StreamFrame(stream.getId(), 0, true, DATA1));
+    verify(ctx).send(new StreamFrame(stream.getId(), 0, true, DATA1));
 
     assertTrue(stream.isFinished());
   }
@@ -58,12 +58,12 @@ public class DefaultStreamManagerTest {
     Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(sender).send(new StreamFrame(stream.getId(), 0, false, DATA1));
+    verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
 
     assertFalse(stream.isFinished());
 
     stream.write(DATA2, true);
-    verify(sender).send(new StreamFrame(stream.getId(), DATA1.length, true, DATA2));
+    verify(ctx).send(new StreamFrame(stream.getId(), DATA1.length, true, DATA2));
 
     assertTrue(stream.isFinished());
   }
@@ -73,11 +73,11 @@ public class DefaultStreamManagerTest {
     Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(sender).send(new StreamFrame(stream.getId(), 0, false, DATA1));
+    verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
 
     stream.reset(123);
 
-    verify(sender).send(new ResetStreamFrame(stream.getId(), 123, DATA1.length));
+    verify(ctx).send(new ResetStreamFrame(stream.getId(), 123, DATA1.length));
 
     assertTrue(stream.isFinished());
   }
@@ -86,7 +86,7 @@ public class DefaultStreamManagerTest {
   public void receiveSingle() {
     Stream stream = manager.openStream(true, true);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, true, DATA1)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, true, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
     verify(listener).onFinished();
 
@@ -97,11 +97,11 @@ public class DefaultStreamManagerTest {
   public void receiveMulti() {
     Stream stream = manager.openStream(true, true);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
     verifyNoMoreInteractions(listener);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), ctx);
     verify(listener).onData(stream, DATA2);
     verify(listener).onFinished();
 
@@ -112,10 +112,10 @@ public class DefaultStreamManagerTest {
   public void receiveMultiOutOfOrder() {
     Stream stream = manager.openStream(true, true);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), ctx);
     verifyNoMoreInteractions(listener);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
     verify(listener).onData(stream, DATA2);
     verify(listener).onFinished();
@@ -127,11 +127,11 @@ public class DefaultStreamManagerTest {
   public void receiveReset() {
     Stream stream = manager.openStream(true, true);
 
-    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), sender);
+    manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
     verifyNoMoreInteractions(listener);
 
-    manager.onReceivePacket(p(new ResetStreamFrame(stream.getId(), 123, DATA1.length)), sender);
+    manager.onReceivePacket(p(new ResetStreamFrame(stream.getId(), 123, DATA1.length)), ctx);
     verify(listener).onReset(stream, 123, DATA1.length);
     verifyNoMoreInteractions(listener);
 

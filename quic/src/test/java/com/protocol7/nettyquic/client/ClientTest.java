@@ -249,7 +249,7 @@ public class ClientTest {
     assertEquals(ClientState.Closed, connection.getState());
 
     try {
-      connection.sendPacket(PingFrame.INSTANCE);
+      connection.send(PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
     } catch (IllegalStateException e) {
       // expected
@@ -265,7 +265,7 @@ public class ClientTest {
     assertEquals(ClientState.Closed, connection.getState());
 
     try {
-      connection.sendPacket(PingFrame.INSTANCE);
+      connection.send(PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
     } catch (IllegalStateException e) {
       // expected

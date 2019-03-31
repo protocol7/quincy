@@ -1,11 +1,9 @@
 package com.protocol7.nettyquic.client;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
-import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.tls.ClientTlsSession;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
@@ -27,30 +25,11 @@ public class ClientStateMachine {
   private final DefaultPromise<Void> handshakeFuture =
       new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
   private final ClientTlsSession tlsSession;
-  private final StreamManager streamManager;
-  private final FrameSender frameSender;
 
   public ClientStateMachine(
-      final ClientConnection connection,
-      TransportParameters transportParameters,
-      final StreamManager streamManager) {
+      final ClientConnection connection, TransportParameters transportParameters) {
     this.connection = connection;
     this.tlsSession = new ClientTlsSession(transportParameters);
-    this.streamManager = streamManager;
-
-    this.frameSender =
-        new FrameSender() {
-          @Override
-          public FullPacket send(final Frame... frames) {
-            return connection.sendPacket(frames);
-          }
-
-          @Override
-          public void closeConnection(
-              final TransportError error, final FrameType frameType, final String msg) {
-            connection.close(error, frameType, msg);
-          }
-        };
   }
 
   public Future<Void> handshake() {
@@ -137,7 +116,6 @@ public class ClientStateMachine {
       } else if (state == ClientState.Ready
           || state == ClientState.Closing
           || state == ClientState.Closed) { // TODO don't allow when closed
-        streamManager.onReceivePacket((FullPacket) packet, frameSender);
         for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
           handleFrame(frame);
         }
@@ -190,7 +168,7 @@ public class ClientStateMachine {
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {
-    connection.sendPacket(ccf);
+    connection.send(ccf);
 
     state = ClientState.Closing;
 

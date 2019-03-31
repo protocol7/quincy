@@ -4,8 +4,8 @@ import static com.protocol7.nettyquic.client.ClientState.Closed;
 import static com.protocol7.nettyquic.client.ClientState.Closing;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 
+import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.connection.Connection;
-import com.protocol7.nettyquic.connection.FrameSender;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
@@ -25,6 +25,7 @@ import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
@@ -49,7 +50,7 @@ public class ClientConnection implements Connection {
 
   private final FlowControlHandler flowControlHandler;
   private final StreamManager streamManager;
-  private final FrameSender frameSender;
+  private final Pipeline pipeline;
 
   private AEADs aeads;
 
@@ -62,27 +63,14 @@ public class ClientConnection implements Connection {
     this.version = version;
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
-
-    this.frameSender =
-        new FrameSender() {
-          @Override
-          public FullPacket send(final Frame... frames) {
-            return sendPacket(frames);
-          }
-
-          @Override
-          public void closeConnection(
-              final TransportError error, final FrameType frameType, final String msg) {
-            close(error, frameType, msg);
-          }
-        };
-
-    this.streamManager = new DefaultStreamManager(frameSender, streamListener);
-    this.stateMachine =
-        new ClientStateMachine(
-            this, TransportParameters.defaults(version.asBytes()), this.streamManager);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
     this.flowControlHandler = flowControlHandler;
+    this.streamManager = new DefaultStreamManager(this, streamListener);
+
+    this.pipeline = new Pipeline(List.of(streamManager, flowControlHandler), List.of());
+
+    this.stateMachine =
+        new ClientStateMachine(this, TransportParameters.defaults(version.asBytes()));
+    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
 
     initAEAD();
   }
@@ -101,7 +89,7 @@ public class ClientConnection implements Connection {
       throw new IllegalStateException("Connection not open");
     }
 
-    flowControlHandler.beforeSendPacket(p, frameSender);
+    pipeline.send(this, p);
 
     // TODO remove repeated check
     if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
@@ -112,7 +100,7 @@ public class ClientConnection implements Connection {
     return p;
   }
 
-  public FullPacket sendPacket(final Frame... frames) {
+  public FullPacket send(final Frame... frames) {
     return (FullPacket)
         sendPacket(
             new ShortPacket(
@@ -172,9 +160,7 @@ public class ClientConnection implements Connection {
 
       stateMachine.handlePacket(packet);
 
-      if (packet instanceof FullPacket) {
-        flowControlHandler.onReceivePacket((FullPacket) packet, frameSender);
-      }
+      pipeline.onPacket(this, packet);
     } else {
       // TODO handle unencryptable packet
     }

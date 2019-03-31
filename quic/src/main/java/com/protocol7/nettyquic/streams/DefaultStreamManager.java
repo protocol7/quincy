@@ -1,14 +1,15 @@
 package com.protocol7.nettyquic.streams;
 
-import com.protocol7.nettyquic.connection.FrameSender;
+import com.protocol7.nettyquic.FrameSender;
+import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.ResetStreamFrame;
 import com.protocol7.nettyquic.protocol.frames.StreamFrame;
-import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
+import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 
 public class DefaultStreamManager implements StreamManager {
 
@@ -21,25 +22,27 @@ public class DefaultStreamManager implements StreamManager {
   }
 
   @Override
-  public void beforeSendPacket(final Packet packet, final FrameSender sender) {}
+  public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
+    if (packet instanceof ShortPacket) {
+      ShortPacket sp = (ShortPacket) packet;
+      for (Frame frame : sp.getPayload().getFrames()) {
+        if (frame instanceof StreamFrame) {
+          final StreamFrame sf = (StreamFrame) frame;
 
-  @Override
-  public void onReceivePacket(final FullPacket packet, final FrameSender sender) {
-    for (Frame frame : packet.getPayload().getFrames()) {
-      if (frame instanceof StreamFrame) {
-        final StreamFrame sf = (StreamFrame) frame;
-
-        DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
-        stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
-      } else if (frame instanceof ResetStreamFrame) {
-        final ResetStreamFrame rsf = (ResetStreamFrame) frame;
-        final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
-        stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
-      } else if (frame instanceof AckFrame) {
-        AckFrame af = (AckFrame) frame;
-        af.getBlocks().stream().forEach(this::handleAcks);
+          DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
+          stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
+        } else if (frame instanceof ResetStreamFrame) {
+          final ResetStreamFrame rsf = (ResetStreamFrame) frame;
+          final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
+          stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+        } else if (frame instanceof AckFrame) {
+          AckFrame af = (AckFrame) frame;
+          af.getBlocks().stream().forEach(this::handleAcks);
+        }
       }
     }
+
+    ctx.next(packet);
   }
 
   private void handleAcks(AckBlock block) {
