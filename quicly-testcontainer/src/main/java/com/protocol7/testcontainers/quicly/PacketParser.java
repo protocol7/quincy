@@ -14,7 +14,7 @@ public class PacketParser {
 
     boolean inbound = false;
     ByteBuf bb = Unpooled.buffer();
-    for (String log : logs) {
+    for (String log : List.copyOf(logs)) {
       if (log.startsWith("recvmsg") || log.startsWith("sendmsg")) {
         if (bb.writerIndex() > 0) {
           packets.add(new QuiclyPacket(inbound, Bytes.peekToArray(bb)));
