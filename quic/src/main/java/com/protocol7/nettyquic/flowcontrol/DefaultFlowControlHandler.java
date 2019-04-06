@@ -45,6 +45,8 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
         }
       }
     }
+
+    ctx.next(packet);
   }
 
   @VisibleForTesting
