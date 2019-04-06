@@ -8,8 +8,8 @@ import com.protocol7.nettyquic.client.QuicClient;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
-import com.protocol7.testcontainers.quicly.QuiclyContainer;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
+import com.protocol7.testcontainers.quicly.QuiclyServerContainer;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
@@ -20,10 +20,10 @@ import org.junit.Test;
 
 public class QuiclyTest {
 
-  @Rule public QuiclyContainer quicly = new QuiclyContainer();
+  @Rule public QuiclyServerContainer quicly = new QuiclyServerContainer();
 
   @Test
-  public void test() throws ExecutionException, InterruptedException {
+  public void quiclyServer() throws ExecutionException, InterruptedException {
 
     final BlockingQueue<byte[]> capturedData = new ArrayBlockingQueue<>(10);
 

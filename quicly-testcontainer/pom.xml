@@ -35,6 +35,7 @@
         <directory>src/main/resources</directory>
         <includes>
           <include>QuiclyDockerfile</include>
+          <include>QuiclyClientDockerfile</include>
         </includes>
       </resource>
     </resources>

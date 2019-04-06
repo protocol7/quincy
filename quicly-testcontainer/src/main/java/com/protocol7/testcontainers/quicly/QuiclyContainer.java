@@ -12,25 +12,16 @@ import org.slf4j.LoggerFactory;
 import org.testcontainers.containers.GenericContainer;
 import org.testcontainers.containers.output.OutputFrame;
 import org.testcontainers.containers.output.Slf4jLogConsumer;
-import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class QuiclyContainer extends GenericContainer {
 
   private final Logger log = LoggerFactory.getLogger("quicly");
 
-  private static ImageFromDockerfile image() {
-    return new ImageFromDockerfile("quicly", false)
-        .withFileFromClasspath("Dockerfile", "QuiclyDockerfile");
-  }
-
   private final List<String> logStatements = new ArrayList<>();
 
-  public QuiclyContainer() {
-    super(image());
-
-    withExposedPorts(4433);
-    waitingFor(Wait.forHealthcheck());
+  public QuiclyContainer(ImageFromDockerfile image) {
+    super(image);
   }
 
   @Override
