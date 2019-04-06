@@ -34,7 +34,7 @@ public class ClientHello {
             .add(
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
                 SignatureAlgorithms.defaults(),
-                new SupportedGroups(Group.X25519),
+                new SupportedGroups(Group.SECP256r1),
                 SupportedVersions.TLS13,
                 PskKeyExchangeModes.defaults())
             .add(exts)

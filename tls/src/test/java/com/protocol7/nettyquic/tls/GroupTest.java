@@ -1,5 +1,6 @@
 package com.protocol7.nettyquic.tls;
 
+import static com.protocol7.nettyquic.tls.Group.SECP256r1;
 import static com.protocol7.nettyquic.tls.Group.X25519;
 import static com.protocol7.nettyquic.tls.Group.X448;
 import static org.junit.Assert.assertEquals;
@@ -13,6 +14,7 @@ public class GroupTest {
   public void fromValue() {
     assertEquals(X25519, Group.fromValue(X25519.getValue()).get());
     assertEquals(X448, Group.fromValue(X448.getValue()).get());
+    assertEquals(SECP256r1, Group.fromValue(SECP256r1.getValue()).get());
   }
 
   @Test

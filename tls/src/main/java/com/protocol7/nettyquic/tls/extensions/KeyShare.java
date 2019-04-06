@@ -12,15 +12,24 @@ import java.util.SortedMap;
 public class KeyShare implements Extension {
 
   public static KeyShare parse(ByteBuf bb, boolean isClient) {
+    System.out.println("############ Keyshare");
+    int len;
     if (!isClient) {
-      bb.readShort();
+      len = bb.readShort();
+    } else {
+      len = 1;
     }
+    System.out.println(isClient);
+    System.out.println(len);
 
     Builder<Group, byte[]> builder = ImmutableSortedMap.naturalOrder();
 
     while (bb.isReadable()) {
+      System.out.println(bb.readableBytes());
       Optional<Group> group = Group.fromValue(bb.readShort());
+      System.out.println(group);
       int keyLen = bb.readShort();
+      System.out.println(group + " - " + keyLen);
       byte[] key = new byte[keyLen];
       bb.readBytes(key);
 
