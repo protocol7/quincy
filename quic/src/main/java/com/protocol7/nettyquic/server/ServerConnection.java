@@ -69,7 +69,7 @@ public class ServerConnection implements Connection {
     this.transportParameters = TransportParameters.defaults(version.asBytes());
 
     this.streamManager = new DefaultStreamManager(this, streamListener);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
+    this.packetBuffer = new PacketBuffer(this);
 
     this.pipeline =
         new Pipeline(
@@ -78,7 +78,7 @@ public class ServerConnection implements Connection {
                 packetBuffer,
                 streamManager,
                 flowControlHandler),
-            List.of(flowControlHandler));
+            List.of(flowControlHandler, packetBuffer));
 
     this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
 
@@ -115,10 +115,11 @@ public class ServerConnection implements Connection {
 
   public Packet sendPacket(Packet p) {
 
-    pipeline.send(this, p);
+    Packet newPacket = pipeline.send(this, p);
 
-    packetBuffer.send(p);
-    return p;
+    sendPacketUnbuffered(newPacket);
+
+    return newPacket;
   }
 
   public FullPacket send(Frame... frames) {

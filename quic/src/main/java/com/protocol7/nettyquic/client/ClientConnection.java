@@ -67,10 +67,10 @@ public class ClientConnection implements Connection {
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
-    this.packetBuffer = new PacketBuffer(this, this::sendPacketUnbuffered);
+    this.packetBuffer = new PacketBuffer(this);
 
     this.pipeline =
-        new Pipeline(List.of(packetBuffer, streamManager, flowControlHandler), List.of());
+        new Pipeline(List.of(packetBuffer, streamManager, flowControlHandler), List.of(packetBuffer));
 
     this.stateMachine =
         new ClientStateMachine(this, TransportParameters.defaults(version.asBytes()));
@@ -92,15 +92,15 @@ public class ClientConnection implements Connection {
       throw new IllegalStateException("Connection not open");
     }
 
-    pipeline.send(this, p);
+    Packet newPacket = pipeline.send(this, p);
 
     // TODO remove repeated check
     if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
       throw new IllegalStateException("Connection not open");
     }
 
-    packetBuffer.send(p);
-    return p;
+    sendPacketUnbuffered(newPacket);
+    return newPacket;
   }
 
   public FullPacket send(final Frame... frames) {

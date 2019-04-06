@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
@@ -45,7 +46,7 @@ public class ServerTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
-  @Mock private FlowControlHandler flowControlHandler;
+  private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   @Before
   public void setUp() {

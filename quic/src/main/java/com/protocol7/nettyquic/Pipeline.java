@@ -11,6 +11,7 @@ import com.protocol7.nettyquic.protocol.packets.Packet;
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class Pipeline {
 
@@ -74,8 +75,9 @@ public class Pipeline {
     }
   }
 
-  public void send(Connection connection, Packet packet) {
+  public Packet send(Connection connection, Packet packet) {
     final Iterator<OutboundHandler> iter = outboundHandlers.iterator();
+    final AtomicReference<Packet> processedPacket = new AtomicReference<>();
 
     PipelineContext ctx =
         new PipelineContext() {
@@ -84,6 +86,8 @@ public class Pipeline {
             if (iter.hasNext()) {
               final OutboundHandler handler = iter.next();
               handler.beforeSendPacket(newPacket, this);
+            } else {
+              processedPacket.set(newPacket);
             }
           }
 
@@ -123,5 +127,7 @@ public class Pipeline {
       final OutboundHandler handler = iter.next();
       handler.beforeSendPacket(packet, ctx);
     }
+
+    return processedPacket.get();
   }
 }

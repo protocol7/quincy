@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.client.ClientConnection;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
@@ -46,7 +47,7 @@ public class ClientServerTest {
 
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
-  private @Mock FlowControlHandler flowControlHandler;
+  private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   public static class ForwardingPacketSender implements PacketSender {
 

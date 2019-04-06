@@ -2,7 +2,9 @@ package com.protocol7.nettyquic.protocol;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
+import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
+import com.protocol7.nettyquic.OutboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
@@ -24,7 +26,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO resends
-public class PacketBuffer implements InboundHandler {
+public class PacketBuffer implements InboundHandler, OutboundHandler {
 
   private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
 
@@ -33,11 +35,9 @@ public class PacketBuffer implements InboundHandler {
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
   private final Connection connection;
-  private final Sender sender;
 
-  public PacketBuffer(final Connection connection, final Sender sender) {
+  public PacketBuffer(final Connection connection) {
     this.connection = connection;
-    this.sender = sender;
   }
 
   @VisibleForTesting
@@ -49,27 +49,20 @@ public class PacketBuffer implements InboundHandler {
     return largestAcked.get();
   }
 
-  public void send(Packet packet) {
+  @Override
+  public void beforeSendPacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket) {
       List<AckBlock> ackBlocks = drainAcks(ackQueue);
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
-        sendImpl(((FullPacket) packet).addFrame(ackFrame));
+        ctx.next(((FullPacket) packet).addFrame(ackFrame));
       } else {
-        sendImpl(packet);
+        ctx.next(packet);
       }
     } else {
-      sendImpl(packet);
+      ctx.next(packet);
     }
-  }
-
-  private void sendImpl(Packet packet) {
-    if (packet instanceof FullPacket) {
-      buffer.put(((FullPacket) packet).getPacketNumber(), packet);
-      log.debug("Buffered packet {}", ((FullPacket) packet).getPacketNumber());
-    }
-    sender.send(packet);
   }
 
   @Override
@@ -86,7 +79,7 @@ public class PacketBuffer implements InboundHandler {
 
         if (shouldFlush(packet)) {
           log.debug("Directly acking packet");
-          flushAcks();
+          flushAcks(ctx);
         }
       }
     }
@@ -132,20 +125,13 @@ public class PacketBuffer implements InboundHandler {
     }
   }
 
-  private void flushAcks() {
+  private void flushAcks(FrameSender sender) {
     List<AckBlock> blocks = drainAcks(ackQueue);
     if (!blocks.isEmpty()) {
       AckFrame ackFrame = new AckFrame(123, blocks);
-      Packet packet =
-          new ShortPacket(
-              false,
-              connection.getRemoteConnectionId(),
-              connection.nextSendPacketNumber(),
-              new Payload(ackFrame));
+      sender.send(ackFrame);
 
       log.debug("Flushed acks {}", blocks);
-
-      sendImpl(packet);
     }
   }
 

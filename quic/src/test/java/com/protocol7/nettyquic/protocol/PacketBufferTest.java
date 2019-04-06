@@ -24,7 +24,6 @@ import org.mockito.MockitoAnnotations;
 public class PacketBufferTest {
 
   @Mock private Connection connection;
-  @Mock private Sender sender;
   @Mock private PipelineContext ctx;
 
   private PacketBuffer buffer;
@@ -39,7 +38,7 @@ public class PacketBufferTest {
 
     when(ctx.getState()).thenReturn(ClientState.Ready);
 
-    buffer = new PacketBuffer(connection, sender);
+    buffer = new PacketBuffer(connection);
   }
 
   private Packet packet(long pn, Frame... frames) {
@@ -69,9 +68,9 @@ public class PacketBufferTest {
     // assertBuffered(3);
   }
 
-  private Packet verifySent() {
-    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
-    verify(sender).send(captor.capture());
+  private Frame verifySent() {
+    ArgumentCaptor<Frame> captor = ArgumentCaptor.forClass(Frame.class);
+    verify(ctx).send((captor.capture()));
 
     return captor.getValue();
   }
@@ -94,11 +93,11 @@ public class PacketBufferTest {
   public void send() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
-    buffer.send(pingPacket);
+    buffer.beforeSendPacket(pingPacket, ctx);
 
-    Packet actual = verifySent();
+    Frame actual = verifySent();
 
-    assertEquals(pingPacket, actual);
+    assertEquals(PingFrame.INSTANCE, actual);
 
     assertBuffered(2);
   }
@@ -108,7 +107,7 @@ public class PacketBufferTest {
     // send packet to buffer it
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
-    buffer.send(pingPacket);
+    buffer.beforeSendPacket(pingPacket, ctx);
     assertBuffered(2);
 
     // now ack the packet

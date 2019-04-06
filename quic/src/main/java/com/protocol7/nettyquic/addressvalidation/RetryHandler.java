@@ -33,6 +33,8 @@ public class RetryHandler implements InboundHandler {
         } else {
           // send retry
           sendRetry(ctx, initialPacket);
+
+          return;
         }
       } else {
         // send retry
