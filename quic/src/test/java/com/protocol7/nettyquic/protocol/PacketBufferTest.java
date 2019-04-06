@@ -7,7 +7,6 @@ import static org.mockito.Mockito.*;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
-import com.protocol7.nettyquic.connection.Sender;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -53,24 +52,28 @@ public class PacketBufferTest {
     buffer.onReceivePacket(ackPacket, ctx);
 
     // should not send an ack
-    verifyNoMoreInteractions(connection);
+    verify(ctx, never()).send(any(Frame.class));
     assertBufferEmpty();
 
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.onReceivePacket(pingPacket, ctx);
 
-    // Packet actual = verifySent();
+    AckFrame actual = (AckFrame) verifySent();
 
-    // AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
-    // assertEquals(AckBlock.fromLongs(1, 2), actualFrame.getBlocks().get(0));
+    assertEquals(AckBlock.fromLongs(1, 2), actual.getBlocks().get(0));
+  }
 
-    // assertBuffered(3);
+  private Packet verifyNext() {
+    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
+    verify(ctx).next(captor.capture());
+
+    return captor.getValue();
   }
 
   private Frame verifySent() {
     ArgumentCaptor<Frame> captor = ArgumentCaptor.forClass(Frame.class);
-    verify(ctx).send((captor.capture()));
+    verify(ctx).send(captor.capture());
 
     return captor.getValue();
   }
@@ -81,12 +84,9 @@ public class PacketBufferTest {
 
     buffer.onReceivePacket(pingPacket, ctx);
 
-    // Packet actual = verifySent();
+    AckFrame actual = (AckFrame) verifySent();
 
-    // AckFrame actualFrame = (AckFrame) ((FullPacket)actual).getPayload().getFrames().get(0);
-    // assertEquals(AckBlock.fromLongs(2, 2), actualFrame.getBlocks().get(0));
-
-    // assertBuffered(3);
+    assertEquals(AckBlock.fromLongs(2, 2), actual.getBlocks().get(0));
   }
 
   @Test
@@ -95,9 +95,9 @@ public class PacketBufferTest {
 
     buffer.beforeSendPacket(pingPacket, ctx);
 
-    Frame actual = verifySent();
+    Packet actual = verifyNext();
 
-    assertEquals(PingFrame.INSTANCE, actual);
+    assertEquals(pingPacket, actual);
 
     assertBuffered(2);
   }

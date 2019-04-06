@@ -8,7 +8,6 @@ import com.protocol7.nettyquic.OutboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
-import com.protocol7.nettyquic.connection.Sender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
@@ -52,11 +51,15 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
   @Override
   public void beforeSendPacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket) {
+      FullPacket fp = (FullPacket) packet;
+      buffer.put(fp.getPacketNumber(), packet);
+      log.debug("Buffered packet {}", ((FullPacket) packet).getPacketNumber());
+
       List<AckBlock> ackBlocks = drainAcks(ackQueue);
       if (!ackBlocks.isEmpty()) {
         // add to packet
         AckFrame ackFrame = new AckFrame(123, ackBlocks);
-        ctx.next(((FullPacket) packet).addFrame(ackFrame));
+        ctx.next(fp.addFrame(ackFrame));
       } else {
         ctx.next(packet);
       }

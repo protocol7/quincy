@@ -70,7 +70,8 @@ public class ClientConnection implements Connection {
     this.packetBuffer = new PacketBuffer(this);
 
     this.pipeline =
-        new Pipeline(List.of(packetBuffer, streamManager, flowControlHandler), List.of(packetBuffer));
+        new Pipeline(
+            List.of(packetBuffer, streamManager, flowControlHandler), List.of(packetBuffer));
 
     this.stateMachine =
         new ClientStateMachine(this, TransportParameters.defaults(version.asBytes()));
@@ -163,7 +164,9 @@ public class ClientConnection implements Connection {
 
       stateMachine.handlePacket(packet);
 
-      pipeline.onPacket(this, packet);
+      if (getState() != ClientState.Closed) {
+        pipeline.onPacket(this, packet);
+      }
     } else {
       // TODO handle unencryptable packet
     }
