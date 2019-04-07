@@ -5,7 +5,7 @@ import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.addressvalidation.RetryHandler;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
@@ -34,7 +34,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class ServerConnection implements Connection {
+public class ServerConnection implements InternalConnection {
 
   private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
@@ -163,6 +163,10 @@ public class ServerConnection implements Connection {
 
   public State getState() {
     return stateMachine.getState();
+  }
+
+  public void setState(final State state) {
+    stateMachine.setState(state);
   }
 
   public Future<Void> close(

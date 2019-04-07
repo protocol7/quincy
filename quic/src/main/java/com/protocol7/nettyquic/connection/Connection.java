@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.connection;
 
 import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -26,10 +25,6 @@ public interface Connection extends FrameSender {
   Optional<ConnectionId> getRemoteConnectionId();
 
   Version getVersion();
-
-  PacketNumber nextSendPacketNumber();
-
-  void onPacket(Packet packet);
 
   AEAD getAEAD(EncryptionLevel level);
 

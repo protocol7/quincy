@@ -18,4 +18,6 @@ public interface PipelineContext extends FrameSender {
   InetSocketAddress getPeerAddress();
 
   State getState();
+
+  void setState(final State state);
 }

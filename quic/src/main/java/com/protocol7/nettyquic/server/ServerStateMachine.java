@@ -126,4 +126,8 @@ public class ServerStateMachine {
         ConnectionCloseFrame.connection(
             TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
   }
+
+  public void setState(final State state) {
+    this.state = state;
+  }
 }

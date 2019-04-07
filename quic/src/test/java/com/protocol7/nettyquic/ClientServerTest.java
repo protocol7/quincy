@@ -7,7 +7,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import com.protocol7.nettyquic.client.ClientConnection;
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
@@ -52,9 +52,9 @@ public class ClientServerTest {
 
     private final DefaultEventExecutor executor = new DefaultEventExecutor();
 
-    private Connection peer;
+    private InternalConnection peer;
 
-    public void setPeer(Connection peer) {
+    public void setPeer(InternalConnection peer) {
       this.peer = peer;
     }
 

@@ -5,7 +5,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
@@ -22,7 +22,7 @@ import org.mockito.MockitoAnnotations;
 
 public class PacketBufferTest {
 
-  @Mock private Connection connection;
+  @Mock private InternalConnection connection;
   @Mock private PipelineContext ctx;
 
   private PacketBuffer buffer;

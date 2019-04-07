@@ -188,4 +188,8 @@ public class ClientStateMachine {
   protected State getState() {
     return state;
   }
+
+  public void setState(final State state) {
+    this.state = state;
+  }
 }

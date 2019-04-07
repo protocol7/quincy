@@ -5,7 +5,7 @@ import static com.protocol7.nettyquic.connection.State.Closing;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 
 import com.protocol7.nettyquic.Pipeline;
-import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
@@ -34,7 +34,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
-public class ClientConnection implements Connection {
+public class ClientConnection implements InternalConnection {
 
   private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
@@ -227,5 +227,9 @@ public class ClientConnection implements Connection {
 
   public State getState() {
     return stateMachine.getState();
+  }
+
+  public void setState(final State state) {
+    stateMachine.setState(state);
   }
 }

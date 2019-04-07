@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic;
 
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
@@ -50,6 +51,11 @@ public class Pipeline {
           @Override
           public State getState() {
             return connection.getState();
+          }
+
+          @Override
+          public void setState(final State state) {
+            ((InternalConnection) connection).setState(state);
           }
 
           @Override
@@ -104,6 +110,11 @@ public class Pipeline {
           @Override
           public State getState() {
             return connection.getState();
+          }
+
+          @Override
+          public void setState(final State state) {
+            ((InternalConnection) connection).setState(state);
           }
 
           @Override
