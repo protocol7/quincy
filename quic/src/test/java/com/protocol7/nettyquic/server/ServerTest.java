@@ -111,7 +111,7 @@ public class ServerTest {
 
     HandshakeResult hr = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
 
-    connection.onPacket(packet(destConnectionId2, new CryptoFrame(0, hr.getFin())));
+    connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, hr.getFin())));
 
     assertEquals(State.Ready, connection.getState());
   }
@@ -140,7 +140,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));
 
-    assertAck(4, 3, 3, 3);
+    assertAck(4, 3, 3, 4);
   }
 
   private void assertAck(int number, int packetNumber, int smallest, int largest) {
@@ -162,8 +162,8 @@ public class ServerTest {
   private InitialPacket initialPacket(
       ConnectionId destConnId, Optional<byte[]> token, Frame... frames) {
     return InitialPacket.create(
-        Optional.of(destConnId),
-        Optional.of(srcConnectionId),
+        of(destConnId),
+        of(srcConnectionId),
         nextPacketNumber(),
         Version.DRAFT_18,
         token,
@@ -171,7 +171,12 @@ public class ServerTest {
   }
 
   private Packet packet(ConnectionId destConnId, Frame... frames) {
-    return new ShortPacket(false, Optional.of(destConnId), nextPacketNumber(), new Payload(frames));
+    return new ShortPacket(false, of(destConnId), nextPacketNumber(), new Payload(frames));
+  }
+
+  private Packet hp(ConnectionId destConnId, Frame... frames) {
+    return HandshakePacket.create(
+        of(destConnId), of(srcConnectionId), nextPacketNumber(), Version.DRAFT_18, frames);
   }
 
   private PacketNumber nextPacketNumber() {

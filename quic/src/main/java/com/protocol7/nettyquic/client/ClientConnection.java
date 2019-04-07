@@ -90,7 +90,7 @@ public class ClientConnection implements InternalConnection {
 
   public Future<Void> handshake() {
     MDC.put("actor", "client");
-    return tlsManager.handshake(this);
+    return tlsManager.handshake(getState(), this, stateMachine::setState);
   }
 
   public Packet sendPacket(final Packet p) {

@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.tls;
 import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.frames.CryptoFrame;
@@ -20,6 +19,7 @@ import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 public class ClientTlsManager implements InboundHandler {
 
@@ -40,13 +40,13 @@ public class ClientTlsManager implements InboundHandler {
         new ClientTlsSession(InitialAEAD.create(connectionId.asBytes(), true), transportParameters);
   }
 
-  public Future<Void> handshake(InternalConnection connection) {
+  public Future<Void> handshake(State state, FrameSender sender, Consumer<State> stateSetter) {
     // send initial packet
-    if (connection.getState() == State.Started) {
-      sendInitialPacket(connection);
-      connection.setState(State.BeforeHello);
+    if (state == State.Started) {
+      sendInitialPacket(sender);
+      stateSetter.accept(State.BeforeHello);
     } else {
-      throw new IllegalStateException("Can't handshake in state " + connection.getState());
+      throw new IllegalStateException("Can't handshake in state " + state);
     }
     return handshakeFuture;
   }

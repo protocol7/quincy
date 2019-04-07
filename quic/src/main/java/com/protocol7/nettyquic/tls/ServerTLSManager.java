@@ -5,7 +5,7 @@ import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.frames.CryptoFrame;
-import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.tls.aead.AEAD;
@@ -72,7 +72,7 @@ public class ServerTLSManager implements InboundHandler {
         throw new IllegalStateException("Unexpected packet in BeforeInitial: " + packet);
       }
     } else if (state == State.BeforeReady) {
-      FullPacket fp = (FullPacket) packet;
+      HandshakePacket fp = (HandshakePacket) packet;
       CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
       tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
 
