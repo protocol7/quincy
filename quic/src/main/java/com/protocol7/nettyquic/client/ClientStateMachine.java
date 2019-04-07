@@ -14,8 +14,6 @@ import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GlobalEventExecutor;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -65,23 +63,12 @@ public class ClientStateMachine {
   }
 
   private void sendInitialPacket() {
-    final List<Frame> frames = new ArrayList<>();
-
     int len = 1200;
 
     final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake());
     len -= clientHello.calculateLength();
-    frames.add(clientHello);
-    frames.add(new PaddingFrame(len));
 
-    connection.sendPacket(
-        InitialPacket.create(
-            connection.getRemoteConnectionId(),
-            connection.getLocalConnectionId(),
-            connection.nextSendPacketNumber(),
-            connection.getVersion(),
-            connection.getToken(),
-            frames));
+    connection.send(clientHello, new PaddingFrame(len));
   }
 
   public void handlePacket(Packet packet) {
