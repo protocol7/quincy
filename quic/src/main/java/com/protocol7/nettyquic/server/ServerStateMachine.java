@@ -66,8 +66,6 @@ public class ServerStateMachine {
         InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
-          //  TODO validate token
-
           connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
 
           CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);

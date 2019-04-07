@@ -45,20 +45,12 @@ public class ClientStateMachine {
           || state == State.Closed) { // TODO don't allow when closed
         if (packet instanceof FullPacket) {
           for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
-            handleFrame(frame);
+            if (frame instanceof ConnectionCloseFrame) {
+              handlePeerClose();
+            }
           }
         }
-      } else {
-        log.warn("Got packet in an unexpected state {} {}", state, packet);
       }
-    }
-  }
-
-  private void handleFrame(final Frame frame) {
-    if (frame instanceof PingFrame) {
-      // do nothing, will be acked
-    } else if (frame instanceof ConnectionCloseFrame) {
-      handlePeerClose();
     }
   }
 
