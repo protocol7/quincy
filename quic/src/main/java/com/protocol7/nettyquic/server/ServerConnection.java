@@ -34,12 +34,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class ServerConnection implements InternalConnection {
-
-  private final Logger log = LoggerFactory.getLogger(ServerConnection.class);
 
   private Optional<ConnectionId> remoteConnectionId = Optional.empty();
   private Optional<ConnectionId> localConnectionId;

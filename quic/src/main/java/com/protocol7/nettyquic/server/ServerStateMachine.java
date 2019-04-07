@@ -26,12 +26,6 @@ public class ServerStateMachine {
   }
 
   public synchronized void processPacket(Packet packet) {
-    log.info(
-        "Server got {} in state {} with connection ID {}",
-        packet.getClass().getName(),
-        state,
-        packet.getDestinationConnectionId());
-
     // TODO check version
     if (state == State.Started) {
       if (packet instanceof InitialPacket) {
