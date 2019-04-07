@@ -21,8 +21,6 @@ import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
-import com.protocol7.nettyquic.tls.aead.AEADs;
-import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
@@ -53,8 +51,6 @@ public class ServerConnection implements InternalConnection {
 
   private final TransportParameters transportParameters;
 
-  private AEADs aeads;
-
   public ServerConnection(
       final Version version,
       final ConnectionId localConnectionId,
@@ -81,15 +77,13 @@ public class ServerConnection implements InternalConnection {
                 flowControlHandler),
             List.of(flowControlHandler, packetBuffer));
 
-    this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
-
     this.localConnectionId = Optional.of(localConnectionId);
 
-    initAEAD();
+    this.stateMachine = new ServerStateMachine(this, transportParameters, privateKey, certificates);
   }
 
-  private void initAEAD() {
-    this.aeads = new AEADs(InitialAEAD.create(localConnectionId.get().asBytes(), false));
+  private void resetTlsSession() {
+    stateMachine.resetTlsSession(localConnectionId.get());
   }
 
   public Optional<ConnectionId> getRemoteConnectionId() {
@@ -107,7 +101,7 @@ public class ServerConnection implements InternalConnection {
   public void setLocalConnectionId(ConnectionId localConnectionId) {
     this.localConnectionId = Optional.of(localConnectionId);
 
-    initAEAD();
+    resetTlsSession();
   }
 
   public Version getVersion() {
@@ -146,15 +140,7 @@ public class ServerConnection implements InternalConnection {
 
   @Override
   public AEAD getAEAD(EncryptionLevel level) {
-    return aeads.get(level);
-  }
-
-  public void setHandshakeAead(AEAD handshakeAead) {
-    aeads.setHandshakeAead(handshakeAead);
-  }
-
-  public void setOneRttAead(AEAD oneRttAead) {
-    aeads.setOneRttAead(oneRttAead);
+    return stateMachine.getAEAD(level);
   }
 
   public PacketNumber nextSendPacketNumber() {

@@ -1,11 +1,15 @@
 package com.protocol7.nettyquic.server;
 
 import com.protocol7.nettyquic.connection.State;
+import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
+import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import java.security.PrivateKey;
 import java.util.List;
@@ -23,7 +27,10 @@ public class ServerStateMachine {
 
   private State state = State.Started;
   private final ServerConnection connection;
-  private final ServerTlsSession tlsEngine;
+  private ServerTlsSession tlsSession;
+  private final TransportParameters transportParameters;
+  private final PrivateKey privateKey;
+  private final List<byte[]> certificates;
 
   public ServerStateMachine(
       final ServerConnection connection,
@@ -31,7 +38,20 @@ public class ServerStateMachine {
       PrivateKey privateKey,
       List<byte[]> certificates) {
     this.connection = connection;
-    tlsEngine = new ServerTlsSession(transportParameters, certificates, privateKey);
+    this.privateKey = privateKey;
+    this.certificates = certificates;
+    this.transportParameters = transportParameters;
+
+    resetTlsSession(connection.getLocalConnectionId().get());
+  }
+
+  public void resetTlsSession(ConnectionId localConnectionId) {
+    this.tlsSession =
+        new ServerTlsSession(
+            InitialAEAD.create(localConnectionId.asBytes(), true),
+            transportParameters,
+            certificates,
+            privateKey);
   }
 
   public synchronized void processPacket(Packet packet) {
@@ -53,10 +73,10 @@ public class ServerStateMachine {
 
           CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
-          ServerHelloAndHandshake shah = tlsEngine.handleClientHello(cf.getCryptoData());
+          ServerHelloAndHandshake shah = tlsSession.handleClientHello(cf.getCryptoData());
 
-          connection.setHandshakeAead(shah.getHandshakeAEAD());
-          connection.setOneRttAead(shah.getOneRttAEAD());
+          tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
+          tlsSession.setOneRttAead(shah.getOneRttAEAD());
 
           InitialPacket serverHello =
               InitialPacket.create(
@@ -85,7 +105,7 @@ public class ServerStateMachine {
     } else if (state == State.BeforeReady) {
       FullPacket fp = (FullPacket) packet;
       CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
-      tlsEngine.handleClientFinished(cryptoFrame.getCryptoData());
+      tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
 
       state = State.Ready;
 
@@ -129,5 +149,9 @@ public class ServerStateMachine {
 
   public void setState(final State state) {
     this.state = state;
+  }
+
+  public AEAD getAEAD(final EncryptionLevel level) {
+    return tlsSession.getAEAD(level);
   }
 }

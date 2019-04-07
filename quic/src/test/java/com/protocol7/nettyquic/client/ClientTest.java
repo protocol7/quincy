@@ -16,6 +16,7 @@ import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.KeyUtil;
 import com.protocol7.nettyquic.tls.ServerTlsSession;
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.util.concurrent.*;
@@ -68,7 +69,10 @@ public class ClientTest {
 
     serverTlsSession =
         new ServerTlsSession(
-            TransportParameters.defaults(Version.DRAFT_18.asBytes()), serverCert, privateKey);
+            InitialAEAD.create(Rnd.rndBytes(4), false),
+            TransportParameters.defaults(Version.DRAFT_18.asBytes()),
+            serverCert,
+            privateKey);
   }
 
   @Test

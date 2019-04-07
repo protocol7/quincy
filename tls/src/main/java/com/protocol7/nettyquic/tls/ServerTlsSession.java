@@ -5,6 +5,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.google.common.base.Preconditions;
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
@@ -28,7 +29,8 @@ public class ServerTlsSession {
 
   private final TransportParameters transportParameters;
 
-  private KeyExchange kek;
+  private final AEADs aeads;
+  private final KeyExchange kek;
 
   private final PrivateKey privateKey;
   private final List<byte[]> certificates;
@@ -38,23 +40,17 @@ public class ServerTlsSession {
   private byte[] handshakeSecret;
 
   public ServerTlsSession(
+      final AEAD initialAEAD,
       final TransportParameters transportParameters,
       List<byte[]> certificates,
       PrivateKey privateKey) {
     this.transportParameters = transportParameters;
     Preconditions.checkArgument(!certificates.isEmpty());
 
+    aeads = new AEADs(initialAEAD);
     this.privateKey = privateKey;
     this.certificates = requireNonNull(certificates);
-    reset();
-  }
-
-  public void reset() {
-    kek = KeyExchange.generate(Group.X25519);
-    clientHello = null;
-    serverHello = null;
-    handshake = null;
-    handshakeSecret = null;
+    this.kek = KeyExchange.generate(Group.X25519);
   }
 
   public ServerHelloAndHandshake handleClientHello(byte[] msg) {
@@ -147,6 +143,18 @@ public class ServerTlsSession {
     if (!valid) {
       throw new RuntimeException("Invalid client verification");
     }
+  }
+
+  public AEAD getAEAD(final EncryptionLevel level) {
+    return aeads.get(level);
+  }
+
+  public void setHandshakeAead(final AEAD handshakeAEAD) {
+    aeads.setOneRttAead(handshakeAEAD);
+  }
+
+  public void setOneRttAead(final AEAD oneRttAEAD) {
+    aeads.setOneRttAead(oneRttAEAD);
   }
 
   public static class ServerHelloAndHandshake {

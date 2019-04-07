@@ -32,7 +32,10 @@ public class TlsSessionTest {
 
     server =
         new ServerTlsSession(
-            TransportParameters.defaults(version), List.of(serverCert), privateKey);
+            InitialAEAD.create(Rnd.rndBytes(4), false),
+            TransportParameters.defaults(version),
+            List.of(serverCert),
+            privateKey);
   }
 
   @Test
