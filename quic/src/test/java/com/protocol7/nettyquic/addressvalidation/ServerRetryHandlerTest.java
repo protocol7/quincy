@@ -1,4 +1,4 @@
-package com.protocol7.nettyquic.server;
+package com.protocol7.nettyquic.addressvalidation;
 
 import static java.lang.System.currentTimeMillis;
 import static java.util.Optional.of;
@@ -10,8 +10,6 @@ import static org.mockito.Mockito.when;
 
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.TestUtil;
-import com.protocol7.nettyquic.addressvalidation.RetryToken;
-import com.protocol7.nettyquic.addressvalidation.ServerRetryHandler;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;

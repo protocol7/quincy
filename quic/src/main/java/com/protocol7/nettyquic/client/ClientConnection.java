@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.client;
 
 import static com.protocol7.nettyquic.connection.State.Closed;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
+import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 
 import com.protocol7.nettyquic.Pipeline;
@@ -42,7 +43,7 @@ public class ClientConnection implements InternalConnection {
 
   private ConnectionId remoteConnectionId;
   private int lastDestConnectionIdLength;
-  private Optional<ConnectionId> localConnectionId = of(ConnectionId.random());
+  private final Optional<ConnectionId> localConnectionId = of(ConnectionId.random());
   private final PacketSender packetSender;
 
   private final Version version;
@@ -141,7 +142,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId, boolean retry) {
-    this.remoteConnectionId = remoteConnectionId;
+    this.remoteConnectionId = requireNonNull(remoteConnectionId);
 
     if (retry) {
       resetTlsSession();
@@ -193,7 +194,7 @@ public class ClientConnection implements InternalConnection {
     return version;
   }
 
-  public PacketNumber nextSendPacketNumber() {
+  private PacketNumber nextSendPacketNumber() {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 

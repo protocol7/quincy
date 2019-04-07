@@ -153,7 +153,7 @@ public class ServerConnection implements InternalConnection {
     return tlsManager.getAEAD(level);
   }
 
-  public PacketNumber nextSendPacketNumber() {
+  private PacketNumber nextSendPacketNumber() {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 

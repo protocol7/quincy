@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.addressvalidation;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.nettyquic.Varint;
 import com.protocol7.nettyquic.tls.CryptoEquals;
 import com.protocol7.nettyquic.utils.Bytes;
@@ -19,10 +21,12 @@ public class RetryToken {
   private final PrivateKey key;
 
   public RetryToken(final PrivateKey key) {
-    this.key = key;
+    this.key = requireNonNull(key);
   }
 
-  public byte[] create(InetAddress address, long ttl) {
+  public byte[] create(final InetAddress address, final long ttl) {
+    requireNonNull(address);
+
     final byte[] addressBytes = address.getAddress();
     final ByteBuf bb = Unpooled.buffer();
     bb.writeByte(addressBytes.length);
@@ -36,7 +40,7 @@ public class RetryToken {
     return Bytes.drainToArray(bb);
   }
 
-  private byte[] hmac(byte[] data) {
+  private byte[] hmac(final byte[] data) {
     try {
       final Mac hmac = Mac.getInstance(HMAC_SHA512);
       final SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), HMAC_SHA512);
@@ -47,7 +51,10 @@ public class RetryToken {
     }
   }
 
-  public boolean validate(byte[] token, InetAddress address, long maxTtl) {
+  public boolean validate(final byte[] token, final InetAddress address, final long maxTtl) {
+    requireNonNull(token);
+    requireNonNull(address);
+
     boolean success = true;
 
     final ByteBuf bb = Unpooled.wrappedBuffer(token);

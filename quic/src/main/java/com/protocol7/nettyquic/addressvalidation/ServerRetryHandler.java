@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.addressvalidation;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
@@ -17,12 +19,15 @@ public class ServerRetryHandler implements InboundHandler {
 
   public ServerRetryHandler(
       final RetryToken retryTokenManager, final long ttl, final TimeUnit timeUnit) {
-    this.retryTokenManager = retryTokenManager;
+    this.retryTokenManager = requireNonNull(retryTokenManager);
     this.ttlMs = timeUnit.toMillis(ttl);
   }
 
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
+    requireNonNull(packet);
+    requireNonNull(ctx);
+
     if (ctx.getState() == State.Started) {
       if (packet instanceof InitialPacket) {
         final InitialPacket initialPacket = (InitialPacket) packet;
@@ -53,7 +58,8 @@ public class ServerRetryHandler implements InboundHandler {
   }
 
   private void sendRetry(final PipelineContext ctx, final InitialPacket initialPacket) {
-    byte[] retryToken = retryTokenManager.create(ctx.getPeerAddress().getAddress(), now() + ttlMs);
+    final byte[] retryToken =
+        retryTokenManager.create(ctx.getPeerAddress().getAddress(), now() + ttlMs);
 
     final ConnectionId newLocalConnectionId = ConnectionId.random();
 
