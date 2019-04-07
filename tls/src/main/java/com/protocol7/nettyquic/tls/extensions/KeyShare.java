@@ -48,7 +48,7 @@ public class KeyShare implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.key_share;
+    return ExtensionType.KEY_SHARE;
   }
 
   public SortedMap<Group, byte[]> getKeys() {

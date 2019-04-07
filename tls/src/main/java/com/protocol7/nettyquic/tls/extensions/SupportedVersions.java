@@ -42,7 +42,7 @@ public class SupportedVersions implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.supported_versions;
+    return ExtensionType.SUPPORTED_VERSIONS;
   }
 
   public List<SupportedVersion> getVersions() {

@@ -38,7 +38,7 @@ public class SupportedGroups implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.supported_groups;
+    return ExtensionType.SUPPORTED_GROUPS;
   }
 
   @Override

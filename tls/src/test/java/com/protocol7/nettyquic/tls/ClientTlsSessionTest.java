@@ -53,16 +53,16 @@ public class ClientTlsSessionTest {
 
     assertEquals(
         32,
-        ((KeyShare) hello.getExtension(ExtensionType.key_share).get())
+        ((KeyShare) hello.getExtension(ExtensionType.KEY_SHARE).get())
             .getKey(Group.X25519)
             .get()
             .length);
     assertEquals(
         List.of(Group.X25519),
-        ((SupportedGroups) hello.getExtension(ExtensionType.supported_groups).get()).getGroups());
+        ((SupportedGroups) hello.getExtension(ExtensionType.SUPPORTED_GROUPS).get()).getGroups());
     assertEquals(
         List.of(SupportedVersion.TLS13),
-        ((SupportedVersions) hello.getExtension(ExtensionType.supported_versions).get())
+        ((SupportedVersions) hello.getExtension(ExtensionType.SUPPORTED_VERSIONS).get())
             .getVersions());
 
     TransportParameters tps = (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();

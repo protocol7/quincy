@@ -70,7 +70,7 @@ public class ClientTlsSession {
     SupportedVersions version =
         (SupportedVersions)
             hello
-                .geExtension(ExtensionType.supported_versions)
+                .geExtension(ExtensionType.SUPPORTED_VERSIONS)
                 .orElseThrow(IllegalArgumentException::new);
     if (!version.equals(SupportedVersions.TLS13)) {
       throw new IllegalArgumentException("Illegal version");
@@ -78,7 +78,7 @@ public class ClientTlsSession {
 
     KeyShare keyShareExtension =
         (KeyShare)
-            hello.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
+            hello.geExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
     byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
     byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
 

@@ -6,119 +6,119 @@ import java.util.Set;
 
 public class ExtensionType {
 
-  public static final ExtensionType server_name = new ExtensionType("server_name", 0);
-  public static final ExtensionType max_fragment_length =
+  public static final ExtensionType SERVER_NAME = new ExtensionType("server_name", 0);
+  public static final ExtensionType MAX_FRAGMENT_LENGTH =
       new ExtensionType("max_fragment_length", 1);
-  public static final ExtensionType client_certificate_url =
+  public static final ExtensionType CLIENT_CERTIFICATE_URL =
       new ExtensionType("client_certificate_url", 2);
-  public static final ExtensionType trusted_ca_keys = new ExtensionType("trusted_ca_keys", 3);
-  public static final ExtensionType truncated_hmac = new ExtensionType("truncated_hmac", 4);
-  public static final ExtensionType status_request = new ExtensionType("status_request", 5);
-  public static final ExtensionType user_mapping = new ExtensionType("user_mapping", 6);
-  public static final ExtensionType client_authz = new ExtensionType("client_authz", 7);
-  public static final ExtensionType server_authz = new ExtensionType("server_authz", 8);
-  public static final ExtensionType cert_type = new ExtensionType("cert_type", 9);
-  public static final ExtensionType supported_groups = new ExtensionType("supported_groups", 10);
-  public static final ExtensionType ec_point_formats = new ExtensionType("ec_point_formats", 11);
-  public static final ExtensionType srp = new ExtensionType("srp", 12);
-  public static final ExtensionType signature_algorithms =
+  public static final ExtensionType TRUSTED_CA_KEYS = new ExtensionType("trusted_ca_keys", 3);
+  public static final ExtensionType TRUNCATED_HMAC = new ExtensionType("truncated_hmac", 4);
+  public static final ExtensionType STATUS_REQUEST = new ExtensionType("status_request", 5);
+  public static final ExtensionType USER_MAPPING = new ExtensionType("user_mapping", 6);
+  public static final ExtensionType CLIENT_AUTHZ = new ExtensionType("client_authz", 7);
+  public static final ExtensionType SERVER_AUTHZ = new ExtensionType("server_authz", 8);
+  public static final ExtensionType CERT_TYPE = new ExtensionType("cert_type", 9);
+  public static final ExtensionType SUPPORTED_GROUPS = new ExtensionType("supported_groups", 10);
+  public static final ExtensionType EC_POINT_FORMATS = new ExtensionType("ec_point_formats", 11);
+  public static final ExtensionType SRP = new ExtensionType("srp", 12);
+  public static final ExtensionType SIGNATURE_ALGORITHMS =
       new ExtensionType("signature_algorithms", 13);
-  public static final ExtensionType use_srtp = new ExtensionType("use_srtp", 14);
-  public static final ExtensionType heartbeat = new ExtensionType("heartbeat", 15);
-  public static final ExtensionType application_layer_protocol_negotiation =
+  public static final ExtensionType USE_SRTP = new ExtensionType("use_srtp", 14);
+  public static final ExtensionType HEARTBEAT = new ExtensionType("heartbeat", 15);
+  public static final ExtensionType APPLICATION_LAYER_PROTOCOL_NEGOTIATION =
       new ExtensionType("application_layer_protocol_negotiation", 16);
-  public static final ExtensionType status_request_v2 = new ExtensionType("status_request_v2", 17);
-  public static final ExtensionType signed_certificate_timestamp =
+  public static final ExtensionType STATUS_REQUEST_V_2 = new ExtensionType("status_request_v2", 17);
+  public static final ExtensionType SIGNED_CERTIFICATE_TIMESTAMP =
       new ExtensionType("signed_certificate_timestamp", 18);
-  public static final ExtensionType client_certificate_type =
+  public static final ExtensionType CLIENT_CERTIFICATE_TYPE =
       new ExtensionType("client_certificate_type", 19);
-  public static final ExtensionType server_certificate_type =
+  public static final ExtensionType SERVER_CERTIFICATE_TYPE =
       new ExtensionType("server_certificate_type", 20);
-  public static final ExtensionType padding = new ExtensionType("padding", 21);
-  public static final ExtensionType encrypt_then_mac = new ExtensionType("encrypt_then_mac", 22);
-  public static final ExtensionType extended_master_secret =
+  public static final ExtensionType PADDING = new ExtensionType("padding", 21);
+  public static final ExtensionType ENCRYPT_THEN_MAC = new ExtensionType("encrypt_then_mac", 22);
+  public static final ExtensionType EXTENDED_MASTER_SECRET =
       new ExtensionType("extended_master_secret", 23);
-  public static final ExtensionType token_binding = new ExtensionType("token_binding", 24);
-  public static final ExtensionType cached_info = new ExtensionType("cached_info", 25);
-  public static final ExtensionType tls_lts = new ExtensionType("tls_lts", 26);
-  public static final ExtensionType compress_certificate =
+  public static final ExtensionType TOKEN_BINDING = new ExtensionType("token_binding", 24);
+  public static final ExtensionType CACHED_INFO = new ExtensionType("cached_info", 25);
+  public static final ExtensionType TLS_LTS = new ExtensionType("tls_lts", 26);
+  public static final ExtensionType COMPRESS_CERTIFICATE =
       new ExtensionType("compress_certificate", 27);
-  public static final ExtensionType record_size_limit = new ExtensionType("record_size_limit", 28);
-  public static final ExtensionType pwd_protect = new ExtensionType("pwd_protect", 29);
-  public static final ExtensionType pwd_clear = new ExtensionType("pwd_clear", 30);
-  public static final ExtensionType password_salt = new ExtensionType("password_salt", 31);
-  public static final ExtensionType session_ticket = new ExtensionType("session_ticket", 35);
-  public static final ExtensionType pre_shared_key = new ExtensionType("pre_shared_key", 41);
-  public static final ExtensionType early_data = new ExtensionType("early_data", 42);
-  public static final ExtensionType supported_versions =
+  public static final ExtensionType RECORD_SIZE_LIMIT = new ExtensionType("record_size_limit", 28);
+  public static final ExtensionType PWD_PROTECT = new ExtensionType("pwd_protect", 29);
+  public static final ExtensionType PWD_CLEAR = new ExtensionType("pwd_clear", 30);
+  public static final ExtensionType PASSWORD_SALT = new ExtensionType("password_salt", 31);
+  public static final ExtensionType SESSION_TICKET = new ExtensionType("session_ticket", 35);
+  public static final ExtensionType PRE_SHARED_KEY = new ExtensionType("pre_shared_key", 41);
+  public static final ExtensionType EARLY_DATA = new ExtensionType("early_data", 42);
+  public static final ExtensionType SUPPORTED_VERSIONS =
       new ExtensionType("supported_versions", 43);
-  public static final ExtensionType cookie = new ExtensionType("cookie", 44);
-  public static final ExtensionType psk_key_exchange_modes =
+  public static final ExtensionType COOKIE = new ExtensionType("cookie", 44);
+  public static final ExtensionType PSK_KEY_EXCHANGE_MODES =
       new ExtensionType("psk_key_exchange_modes", 45);
-  public static final ExtensionType certificate_authorities =
+  public static final ExtensionType CERTIFICATE_AUTHORITIES =
       new ExtensionType("certificate_authorities", 47);
-  public static final ExtensionType oid_filters = new ExtensionType("oid_filters", 48);
-  public static final ExtensionType post_handshake_auth =
+  public static final ExtensionType OID_FILTERS = new ExtensionType("oid_filters", 48);
+  public static final ExtensionType POST_HANDSHAKE_AUTH =
       new ExtensionType("post_handshake_auth", 49);
-  public static final ExtensionType signature_algorithms_cert =
+  public static final ExtensionType SIGNATURE_ALGORITHMS_CERT =
       new ExtensionType("signature_algorithms_cert", 50);
-  public static final ExtensionType key_share = new ExtensionType("key_share", 51);
-  public static final ExtensionType renegotiation_info =
+  public static final ExtensionType KEY_SHARE = new ExtensionType("key_share", 51);
+  public static final ExtensionType RENEGOTIATION_INFO =
       new ExtensionType("renegotiation_info", 65281);
 
   public static final ExtensionType QUIC = new ExtensionType("QUIC", 0xffa5);
 
-  private static final Set<ExtensionType> all =
+  private static final Set<ExtensionType> ALL =
       Sets.newHashSet(
-          server_name,
-          max_fragment_length,
-          client_certificate_url,
-          trusted_ca_keys,
-          truncated_hmac,
-          status_request,
-          user_mapping,
-          client_authz,
-          server_authz,
-          cert_type,
-          supported_groups,
-          ec_point_formats,
-          srp,
-          signature_algorithms,
-          use_srtp,
-          heartbeat,
-          application_layer_protocol_negotiation,
-          status_request_v2,
-          signed_certificate_timestamp,
-          client_certificate_type,
-          server_certificate_type,
-          padding,
-          encrypt_then_mac,
-          extended_master_secret,
-          token_binding,
-          cached_info,
-          tls_lts,
-          compress_certificate,
-          record_size_limit,
-          pwd_protect,
-          pwd_clear,
-          password_salt,
-          session_ticket,
-          pre_shared_key,
-          early_data,
-          supported_versions,
-          cookie,
-          psk_key_exchange_modes,
-          certificate_authorities,
-          oid_filters,
-          post_handshake_auth,
-          signature_algorithms_cert,
-          key_share,
-          renegotiation_info,
+          SERVER_NAME,
+          MAX_FRAGMENT_LENGTH,
+          CLIENT_CERTIFICATE_URL,
+          TRUSTED_CA_KEYS,
+          TRUNCATED_HMAC,
+          STATUS_REQUEST,
+          USER_MAPPING,
+          CLIENT_AUTHZ,
+          SERVER_AUTHZ,
+          CERT_TYPE,
+          SUPPORTED_GROUPS,
+          EC_POINT_FORMATS,
+          SRP,
+          SIGNATURE_ALGORITHMS,
+          USE_SRTP,
+          HEARTBEAT,
+          APPLICATION_LAYER_PROTOCOL_NEGOTIATION,
+          STATUS_REQUEST_V_2,
+          SIGNED_CERTIFICATE_TIMESTAMP,
+          CLIENT_CERTIFICATE_TYPE,
+          SERVER_CERTIFICATE_TYPE,
+          PADDING,
+          ENCRYPT_THEN_MAC,
+          EXTENDED_MASTER_SECRET,
+          TOKEN_BINDING,
+          CACHED_INFO,
+          TLS_LTS,
+          COMPRESS_CERTIFICATE,
+          RECORD_SIZE_LIMIT,
+          PWD_PROTECT,
+          PWD_CLEAR,
+          PASSWORD_SALT,
+          SESSION_TICKET,
+          PRE_SHARED_KEY,
+          EARLY_DATA,
+          SUPPORTED_VERSIONS,
+          COOKIE,
+          PSK_KEY_EXCHANGE_MODES,
+          CERTIFICATE_AUTHORITIES,
+          OID_FILTERS,
+          POST_HANDSHAKE_AUTH,
+          SIGNATURE_ALGORITHMS_CERT,
+          KEY_SHARE,
+          RENEGOTIATION_INFO,
           QUIC);
 
   // TODO optimize
   public static ExtensionType fromValue(int value) {
-    for (ExtensionType type : all) {
+    for (ExtensionType type : ALL) {
       if (type.value == value) {
         return type;
       }
@@ -132,10 +132,6 @@ public class ExtensionType {
   ExtensionType(final String name, int value) {
     this.name = name;
     this.value = value;
-  }
-
-  public String getName() {
-    return name;
   }
 
   public int getValue() {

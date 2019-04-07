@@ -66,16 +66,16 @@ public class ClientHelloTest {
     assertEquals(0, ch.getSessionId().length);
     assertEquals(List.of(TLS_AES_128_GCM_SHA256), ch.getCipherSuites());
 
-    KeyShare keyShare = (KeyShare) ch.getExtension(ExtensionType.key_share).get();
+    KeyShare keyShare = (KeyShare) ch.getExtension(ExtensionType.KEY_SHARE).get();
     assertEquals(1, keyShare.getKeys().size());
     assertEquals(Hex.hex(kek.getPublicKey()), Hex.hex(keyShare.getKey(Group.X25519).get()));
 
     SupportedGroups supportedGroups =
-        (SupportedGroups) ch.getExtension(ExtensionType.supported_groups).get();
+        (SupportedGroups) ch.getExtension(ExtensionType.SUPPORTED_GROUPS).get();
     assertEquals(List.of(Group.X25519), supportedGroups.getGroups());
 
     SupportedVersions supportedVersions =
-        (SupportedVersions) ch.getExtension(ExtensionType.supported_versions).get();
+        (SupportedVersions) ch.getExtension(ExtensionType.SUPPORTED_VERSIONS).get();
     assertEquals(List.of(SupportedVersion.TLS13), supportedVersions.getVersions());
 
     TransportParameters transportParameters =

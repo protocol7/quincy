@@ -27,15 +27,15 @@ public interface Extension {
     try {
       if (type == ExtensionType.QUIC) {
         return TransportParameters.parse(b, isClient);
-      } else if (type == ExtensionType.key_share) {
+      } else if (type == ExtensionType.KEY_SHARE) {
         return KeyShare.parse(b, isClient);
-      } else if (type == ExtensionType.supported_versions) {
+      } else if (type == ExtensionType.SUPPORTED_VERSIONS) {
         return SupportedVersions.parse(b, isClient);
-      } else if (type == ExtensionType.supported_groups) {
+      } else if (type == ExtensionType.SUPPORTED_GROUPS) {
         return SupportedGroups.parse(b);
-      } else if (type == ExtensionType.signature_algorithms) {
+      } else if (type == ExtensionType.SIGNATURE_ALGORITHMS) {
         return SignatureAlgorithms.parse(b);
-      } else if (type == ExtensionType.psk_key_exchange_modes) {
+      } else if (type == ExtensionType.PSK_KEY_EXCHANGE_MODES) {
         return PskKeyExchangeModes.parse(b);
       } else {
         return RawExtension.parse(type, b);

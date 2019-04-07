@@ -36,7 +36,7 @@ public class SignatureAlgorithms implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.signature_algorithms;
+    return ExtensionType.SIGNATURE_ALGORITHMS;
   }
 
   public List<Integer> getAlgorithms() {

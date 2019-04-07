@@ -18,7 +18,7 @@ public class KeyShareTest {
 
   @Test
   public void getType() {
-    assertEquals(ExtensionType.key_share, ext.getType());
+    assertEquals(ExtensionType.KEY_SHARE, ext.getType());
   }
 
   @Test

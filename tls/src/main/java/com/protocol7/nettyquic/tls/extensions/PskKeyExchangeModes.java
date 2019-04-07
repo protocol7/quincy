@@ -36,7 +36,7 @@ public class PskKeyExchangeModes implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.psk_key_exchange_modes;
+    return ExtensionType.PSK_KEY_EXCHANGE_MODES;
   }
 
   public List<Integer> getExchangeModes() {
