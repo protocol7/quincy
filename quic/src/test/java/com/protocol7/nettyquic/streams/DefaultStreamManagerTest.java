@@ -10,9 +10,11 @@ import static org.mockito.Mockito.when;
 import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.protocol7.nettyquic.PipelineContext;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Payload;
+import com.protocol7.nettyquic.protocol.StreamId;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.ResetStreamFrame;
 import com.protocol7.nettyquic.protocol.frames.StreamFrame;
@@ -38,6 +40,7 @@ public class DefaultStreamManagerTest {
     initMocks(this);
 
     when(ctx.send(any(Frame.class))).thenReturn(packet);
+    when(ctx.getState()).thenReturn(State.Ready);
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(456));
 
     manager = new DefaultStreamManager(ctx, listener);
@@ -136,6 +139,12 @@ public class DefaultStreamManagerTest {
     verifyNoMoreInteractions(listener);
 
     assertTrue(stream.isFinished());
+  }
+
+  @Test(expected = IllegalStateException.class)
+  public void receiveInInvalidState() {
+    when(ctx.getState()).thenReturn(State.BeforeReady);
+    manager.onReceivePacket(p(new StreamFrame(new StreamId(0), 0, false, DATA1)), ctx);
   }
 
   private FullPacket p(Frame... frames) {
