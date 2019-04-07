@@ -44,14 +44,10 @@ public class ServerConnection implements InternalConnection {
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(PacketNumber.MIN);
   private final ServerStateMachine stateMachine;
-  private final PacketBuffer packetBuffer;
 
-  private final StreamManager streamManager;
   private final ServerTLSManager tlsManager;
   private final Pipeline pipeline;
   private final InetSocketAddress peerAddress;
-
-  private final TransportParameters transportParameters;
 
   public ServerConnection(
       final Version version,
@@ -65,10 +61,10 @@ public class ServerConnection implements InternalConnection {
     this.version = version;
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
-    this.transportParameters = TransportParameters.defaults(version.asBytes());
+    final TransportParameters transportParameters = TransportParameters.defaults(version.asBytes());
 
-    this.streamManager = new DefaultStreamManager(this, streamListener);
-    this.packetBuffer = new PacketBuffer(this);
+    final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
+    final PacketBuffer packetBuffer = new PacketBuffer(this);
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 
@@ -80,8 +76,8 @@ public class ServerConnection implements InternalConnection {
                 logger,
                 new ServerRetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
                 tlsManager,
-                packetBuffer,
-                streamManager,
+                    packetBuffer,
+                    streamManager,
                 flowControlHandler),
             List.of(flowControlHandler, packetBuffer, logger));
 
