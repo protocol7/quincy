@@ -1,8 +1,11 @@
 package com.protocol7.nettyquic;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
@@ -29,6 +32,7 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
@@ -134,6 +138,50 @@ public class ClientServerTest {
 
     // verify we got pong
     verify(clientListener).onData(any(), eq(PONG));
+  }
+
+  @Test
+  public void sirStreamAlot() {
+    handshake();
+
+    // This is a somewhat contrived test, but it send a bunch of messages from a client to a server
+    // and verifies that they all arrive in order. The amount of data sent is meant to require flow
+    // control.
+
+    Stream stream = clientConnection.openStream();
+
+    for (int i = 0; i < 100; i++) {
+      stream.write(b(i), i == 99);
+    }
+
+    // wait until all messages have arrived
+    ArgumentCaptor<byte[]> captor = null;
+    for (int i = 0; i < 10; i++) {
+      captor = ArgumentCaptor.forClass(byte[].class);
+      verify(serverListener, atLeast(0)).onData(any(Stream.class), captor.capture());
+
+      if (captor.getAllValues().size() >= 100) {
+        break;
+      }
+      sleep();
+    }
+
+    if (captor != null) {
+      assertEquals(100, captor.getAllValues().size());
+
+      for (int i = 0; i < 100; i++) {
+        byte[] value = captor.getAllValues().get(i);
+        assertArrayEquals(b(i), value);
+      }
+    } else {
+      fail("Timed out");
+    }
+  }
+
+  private byte[] b(int i) {
+    byte[] b = new byte[1000];
+    b[0] = (byte) i;
+    return b;
   }
 
   @Test

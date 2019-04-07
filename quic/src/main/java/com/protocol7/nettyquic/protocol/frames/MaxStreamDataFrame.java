@@ -61,4 +61,14 @@ public class MaxStreamDataFrame extends Frame {
   public int hashCode() {
     return Objects.hash(streamId, maxStreamData);
   }
+
+  @Override
+  public String toString() {
+    return "MaxStreamDataFrame{"
+        + "streamId="
+        + streamId
+        + ", maxStreamData="
+        + maxStreamData
+        + '}';
+  }
 }

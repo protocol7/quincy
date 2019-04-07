@@ -76,8 +76,8 @@ public class ServerConnection implements InternalConnection {
                 logger,
                 new ServerRetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
                 tlsManager,
-                    packetBuffer,
-                    streamManager,
+                packetBuffer,
+                streamManager,
                 flowControlHandler),
             List.of(flowControlHandler, packetBuffer, logger));
 

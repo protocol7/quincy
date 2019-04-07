@@ -48,4 +48,9 @@ public class MaxDataFrame extends Frame {
   public int hashCode() {
     return Objects.hash(maxData);
   }
+
+  @Override
+  public String toString() {
+    return "MaxDataFrame{" + "maxData=" + maxData + '}';
+  }
 }
