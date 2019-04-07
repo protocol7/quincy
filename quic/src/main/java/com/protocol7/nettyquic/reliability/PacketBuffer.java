@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.reliability;
 
+import static java.util.Objects.requireNonNull;
+
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
 import com.protocol7.nettyquic.FrameSender;
@@ -39,15 +41,18 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
 
   @Override
   public void beforeSendPacket(final Packet packet, final PipelineContext ctx) {
+    requireNonNull(packet);
+    requireNonNull(ctx);
+
     if (packet instanceof FullPacket) {
-      FullPacket fp = (FullPacket) packet;
+      final FullPacket fp = (FullPacket) packet;
       buffer.put(fp.getPacketNumber(), packet);
       log.debug("Buffered packet {}", ((FullPacket) packet).getPacketNumber());
 
-      List<AckBlock> ackBlocks = drainAcks(ackQueue);
+      final List<AckBlock> ackBlocks = drainAcks();
       if (!ackBlocks.isEmpty()) {
         // add to packet
-        AckFrame ackFrame = new AckFrame(123, ackBlocks);
+        final AckFrame ackFrame = new AckFrame(123, ackBlocks);
         ctx.next(fp.addFrame(ackFrame));
       } else {
         ctx.next(packet);
@@ -59,6 +64,9 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
 
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
+    requireNonNull(packet);
+    requireNonNull(ctx);
+
     if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
       if (ctx.getState() != State.Started) {
         ackQueue.add(((FullPacket) packet).getPacketNumber());
@@ -76,7 +84,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     ctx.next(packet);
   }
 
-  private boolean shouldFlush(Packet packet) {
+  private boolean shouldFlush(final Packet packet) {
     if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
       return false;
     } else if (packet instanceof FullPacket && acksOnly((FullPacket) packet)) {
@@ -86,7 +94,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     }
   }
 
-  private void handleAcks(Packet packet) {
+  private void handleAcks(final Packet packet) {
     if (packet instanceof FullPacket) {
       ((FullPacket) packet)
           .getPayload()
@@ -97,16 +105,16 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     }
   }
 
-  private void handleAcks(AckFrame frame) {
+  private void handleAcks(final AckFrame frame) {
     frame.getBlocks().forEach(this::handleAcks);
   }
 
-  private void handleAcks(AckBlock block) {
+  private void handleAcks(final AckBlock block) {
     // TODO optimize
-    long smallest = block.getSmallest().asLong();
-    long largest = block.getLargest().asLong();
+    final long smallest = block.getSmallest().asLong();
+    final long largest = block.getLargest().asLong();
     for (long i = smallest; i <= largest; i++) {
-      PacketNumber pn = new PacketNumber(i);
+      final PacketNumber pn = new PacketNumber(i);
       if (buffer.remove(pn) != null) {
         log.debug("Acked packet {}", pn);
         largestAcked.getAndAccumulate(pn, PacketNumber::max);
@@ -114,10 +122,10 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     }
   }
 
-  private void flushAcks(FrameSender sender) {
-    List<AckBlock> blocks = drainAcks(ackQueue);
+  private void flushAcks(final FrameSender sender) {
+    final List<AckBlock> blocks = drainAcks();
     if (!blocks.isEmpty()) {
-      AckFrame ackFrame = new AckFrame(123, blocks);
+      final AckFrame ackFrame = new AckFrame(123, blocks);
       sender.send(ackFrame);
 
       log.debug("Flushed acks {}", blocks);
@@ -125,18 +133,18 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
   }
 
   // TODO break out and test directly
-  private List<AckBlock> drainAcks(BlockingQueue<PacketNumber> queue) {
-    List<PacketNumber> pns = new ArrayList<>();
+  private List<AckBlock> drainAcks() {
+    final List<PacketNumber> pns = new ArrayList<>();
     ackQueue.drainTo(pns);
     if (pns.isEmpty()) {
       return Collections.emptyList();
     }
 
-    List<Long> pnsLong =
+    final List<Long> pnsLong =
         pns.stream().map(packetNumber -> packetNumber.asLong()).collect(Collectors.toList());
     Collections.sort(pnsLong);
 
-    List<AckBlock> blocks = new ArrayList<>();
+    final List<AckBlock> blocks = new ArrayList<>();
     long lower = -1;
     long upper = -1;
     for (long pn : pnsLong) {
@@ -158,7 +166,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     return blocks;
   }
 
-  private boolean acksOnly(FullPacket packet) {
+  private boolean acksOnly(final FullPacket packet) {
     return packet.getPayload().getFrames().stream().allMatch(frame -> frame instanceof AckFrame);
   }
 }
