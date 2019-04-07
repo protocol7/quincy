@@ -5,6 +5,7 @@ import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel
 import static java.util.Objects.requireNonNull;
 import static java.util.Optional.of;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
@@ -31,7 +32,6 @@ import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.tls.ClientTlsManager;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -59,20 +59,20 @@ public class ClientConnection implements InternalConnection {
   private final InetSocketAddress peerAddress;
 
   public ClientConnection(
-      final Version version,
+      final Configuration configuration,
       final ConnectionId initialRemoteConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress) {
-    this.version = version;
+    this.version = configuration.getVersion();
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
     this.packetBuffer = new PacketBuffer();
     this.tlsManager =
-        new ClientTlsManager(remoteConnectionId, TransportParameters.defaults(version.asBytes()));
+        new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
 
     final LoggingHandler logger = new LoggingHandler(true);
 

@@ -1,6 +1,6 @@
 package com.protocol7.nettyquick.it;
 
-import com.protocol7.nettyquic.protocol.Version;
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.server.QuicServer;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -19,7 +19,7 @@ public class QuiclyClientTest {
     try {
       server =
           QuicServer.bind(
-                  Version.DRAFT_18,
+                  Configuration.defaults(),
                   new InetSocketAddress("0.0.0.0", 4444),
                   new StreamListener() {
                     @Override

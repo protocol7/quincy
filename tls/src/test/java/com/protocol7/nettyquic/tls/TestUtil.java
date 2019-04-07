@@ -2,27 +2,12 @@ package com.protocol7.nettyquic.tls;
 
 import static com.protocol7.nettyquic.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
 
+import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
 public class TestUtil {
-
-  public static void assertBuffer(byte[] expected, ByteBuf actual) {
-    assertBuffer(hex(expected), actual);
-  }
-
-  public static void assertBuffer(String expected, ByteBuf actual) {
-    byte[] actualBytes = new byte[actual.readableBytes()];
-    actual.readBytes(actualBytes);
-    assertEquals(expected, hex(actualBytes));
-    assertBufferExhusted(actual);
-  }
-
-  public static void assertBufferExhusted(ByteBuf bb) {
-    assertFalse(bb.isReadable());
-  }
 
   public static void assertHex(String expectedHex, byte[] actual) {
     assertEquals(expectedHex, hex(actual));
@@ -35,5 +20,19 @@ public class TestUtil {
 
   public static void assertHex(byte[] expected, byte[] actual) {
     assertEquals(hex(expected), hex(actual));
+  }
+
+  public static TransportParameters tps(byte[] version) {
+    return TransportParameters.newBuilder(version)
+        .withInitialMaxStreamDataBidiLocal(32768)
+        .withInitialMaxData(49152)
+        .withInitialMaxBidiStreams(100)
+        .withIdleTimeout(30)
+        .withMaxPacketSize(1452)
+        .withInitialMaxUniStreams(100)
+        .withDisableMigration(true)
+        .withInitialMaxStreamDataBidiRemote(32768)
+        .withInitialMaxStreamDataUni(32768)
+        .build();
   }
 }

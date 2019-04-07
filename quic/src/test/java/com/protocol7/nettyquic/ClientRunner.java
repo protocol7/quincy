@@ -1,7 +1,6 @@
 package com.protocol7.nettyquic;
 
 import com.protocol7.nettyquic.client.QuicClient;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import java.net.InetSocketAddress;
@@ -15,11 +14,10 @@ public class ClientRunner {
     InetSocketAddress server2 = new InetSocketAddress("127.0.0.1", 4433);
 
     InetSocketAddress server = server2;
-    Version version = Version.DRAFT_18;
 
     QuicClient client =
         QuicClient.connect(
-                version,
+                Configuration.defaults(),
                 server,
                 new StreamListener() {
                   @Override

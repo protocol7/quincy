@@ -16,7 +16,6 @@ import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
 import com.protocol7.nettyquic.streams.DefaultStream;
@@ -81,7 +80,7 @@ public class ClientServerTest {
   public void setUp() {
     clientConnection =
         new ClientConnection(
-            Version.DRAFT_18,
+            Configuration.defaults(),
             destConnectionId,
             clientListener,
             clientSender,
@@ -93,7 +92,7 @@ public class ClientServerTest {
 
     serverConnection =
         new ServerConnection(
-            Version.DRAFT_18,
+            Configuration.defaults(),
             srcConnectionId,
             serverListener,
             serverSender,

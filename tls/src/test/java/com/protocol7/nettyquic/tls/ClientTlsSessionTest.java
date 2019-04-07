@@ -30,11 +30,9 @@ public class ClientTlsSessionTest {
   private final byte[] version = dehex("51474fff");
 
   private final ClientTlsSession engine =
-      new ClientTlsSession(
-          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
+      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
   private final ClientTlsSession started =
-      new ClientTlsSession(
-          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
+      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
 
   @Before
   public void setUp() {
@@ -66,7 +64,7 @@ public class ClientTlsSessionTest {
             .getVersions());
 
     TransportParameters tps = (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(version), tps);
+    assertEquals(TestUtil.tps(version), tps);
   }
 
   private KeyShare keyshare() {
@@ -75,8 +73,7 @@ public class ClientTlsSessionTest {
 
   @Test
   public void serverHello() {
-    List<Extension> ext =
-        List.of(keyshare(), SupportedVersions.TLS13, TransportParameters.defaults(version));
+    List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps(version));
 
     byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
@@ -114,18 +111,14 @@ public class ClientTlsSessionTest {
         sh(
             new byte[32],
             TLS_AES_128_GCM_SHA256,
-            ext(SupportedVersions.TLS13, TransportParameters.defaults(version)));
+            ext(SupportedVersions.TLS13, TestUtil.tps(version)));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
-    byte[] b =
-        sh(
-            new byte[32],
-            TLS_AES_128_GCM_SHA256,
-            ext(keyshare(), TransportParameters.defaults(version)));
+    byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps(version)));
 
     started.handleServerHello(b);
   }

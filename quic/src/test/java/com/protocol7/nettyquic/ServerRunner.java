@@ -1,6 +1,5 @@
 package com.protocol7.nettyquic;
 
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.server.QuicServer;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -14,7 +13,7 @@ public class ServerRunner {
 
     QuicServer server =
         QuicServer.bind(
-                Version.DRAFT_18,
+                Configuration.defaults(),
                 new InetSocketAddress("0.0.0.0", 4444),
                 new StreamListener() {
                   @Override

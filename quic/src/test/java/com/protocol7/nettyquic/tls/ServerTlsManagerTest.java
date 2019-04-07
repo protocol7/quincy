@@ -8,6 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
@@ -28,7 +29,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ServerTlsManagerTest {
 
   private ConnectionId connectionId = ConnectionId.random();
-  private TransportParameters tps = TransportParameters.defaults(Version.DRAFT_18.asBytes());
+  private TransportParameters tps = Configuration.defaults().toTransportParameters();
   private ServerTLSManager manager =
       new ServerTLSManager(
           connectionId,

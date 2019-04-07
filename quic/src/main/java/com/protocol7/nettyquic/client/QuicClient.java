@@ -1,10 +1,10 @@
 package com.protocol7.nettyquic.client;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.Futures;
 import com.protocol7.nettyquic.connection.NettyPacketSender;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import io.netty.bootstrap.Bootstrap;
@@ -17,7 +17,7 @@ import java.net.InetSocketAddress;
 public class QuicClient {
 
   public static Future<QuicClient> connect(
-      final Version version,
+      final Configuration configuration,
       final InetSocketAddress serverAddress,
       final StreamListener streamListener) {
     final NioEventLoopGroup group = new NioEventLoopGroup();
@@ -33,7 +33,7 @@ public class QuicClient {
             channel -> {
               ClientConnection connection =
                   new ClientConnection(
-                      version,
+                      configuration,
                       ConnectionId.random(),
                       streamListener,
                       new NettyPacketSender(channel, serverAddress),

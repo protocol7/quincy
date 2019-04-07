@@ -35,16 +35,9 @@ public class Payload {
 
     while (frameBuf.isReadable()) {
       final Frame frame = Frame.parse(frameBuf);
-      // TODO ignore padding frames?
       frames.add(frame);
     }
     return new Payload(frames);
-  }
-
-  public Payload addFrame(final Frame frame) {
-    List<Frame> newFrames = new ArrayList<>(frames);
-    newFrames.add(frame);
-    return new Payload(newFrames);
   }
 
   private final List<Frame> frames;
@@ -62,6 +55,12 @@ public class Payload {
 
   public List<Frame> getFrames() {
     return frames;
+  }
+
+  public Payload addFrame(final Frame frame) {
+    List<Frame> newFrames = new ArrayList<>(frames);
+    newFrames.add(frame);
+    return new Payload(newFrames);
   }
 
   public int calculateLength() {

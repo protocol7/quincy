@@ -1,10 +1,10 @@
 package com.protocol7.nettyquic.server;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.StreamListener;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
@@ -19,14 +19,16 @@ public class Connections {
 
   private final Logger log = LoggerFactory.getLogger(Connections.class);
 
-  private final Version version;
+  private final Configuration configuration;
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
 
   public Connections(
-      final Version version, final List<byte[]> certificates, final PrivateKey privateKey) {
-    this.version = version;
+      final Configuration configuration,
+      final List<byte[]> certificates,
+      final PrivateKey privateKey) {
+    this.configuration = configuration;
     this.certificates = certificates;
     this.privateKey = privateKey;
   }
@@ -44,7 +46,7 @@ public class Connections {
       log.debug("Creating new server connection for {}", connId);
       conn =
           new ServerConnection(
-              version,
+              configuration,
               connId,
               streamHandler,
               packetSender,

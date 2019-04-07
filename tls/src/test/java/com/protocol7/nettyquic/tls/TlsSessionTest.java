@@ -4,7 +4,6 @@ import static com.protocol7.nettyquic.utils.Hex.dehex;
 
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake;
 import com.protocol7.nettyquic.utils.Bytes;
 import com.protocol7.nettyquic.utils.Rnd;
@@ -21,8 +20,7 @@ public class TlsSessionTest {
 
   private PrivateKey privateKey;
   private final ClientTlsSession client =
-      new ClientTlsSession(
-          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
+      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
   private ServerTlsSession server;
 
   @Before
@@ -33,7 +31,7 @@ public class TlsSessionTest {
     server =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
-            TransportParameters.defaults(version),
+            TestUtil.tps(version),
             List.of(serverCert),
             privateKey);
   }

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquic.tls.Group;
 import com.protocol7.nettyquic.tls.KeyExchange;
+import com.protocol7.nettyquic.tls.TestUtil;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
 import com.protocol7.nettyquic.tls.extensions.SupportedGroups;
@@ -60,7 +61,7 @@ public class ClientHelloTest {
   @Test
   public void defaults() {
     KeyExchange kek = KeyExchange.generate(Group.X25519);
-    ClientHello ch = ClientHello.defaults(kek, TransportParameters.defaults(version));
+    ClientHello ch = ClientHello.defaults(kek, TestUtil.tps(version));
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);
@@ -80,6 +81,6 @@ public class ClientHelloTest {
 
     TransportParameters transportParameters =
         (TransportParameters) ch.getExtension(ExtensionType.QUIC).get();
-    assertEquals(TransportParameters.defaults(version), transportParameters);
+    assertEquals(TestUtil.tps(version), transportParameters);
   }
 }

@@ -1,7 +1,7 @@
 package com.protocol7.nettyquic.server;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.Futures;
-import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.StreamListener;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
@@ -18,26 +18,26 @@ import java.util.List;
 public class QuicServer {
 
   public static Future<QuicServer> bind(
-      final Version version,
+      final Configuration configuration,
       final InetSocketAddress address,
       final StreamListener streamHandler,
       final List<byte[]> certificates,
       final PrivateKey privateKey) {
     return Futures.thenSync(
-        bindImpl(version, address, streamHandler, certificates, privateKey),
+        bindImpl(configuration, address, streamHandler, certificates, privateKey),
         g -> new QuicServer(g));
   }
 
   private static Future<EventExecutorGroup> bindImpl(
-      final Version version,
+      final Configuration configuration,
       final InetSocketAddress address,
       final StreamListener streamHandler,
       List<byte[]> certificates,
       PrivateKey privateKey) {
     NioEventLoopGroup group = new NioEventLoopGroup();
 
-    Connections connections = new Connections(version, certificates, privateKey);
-    PacketRouter router = new PacketRouter(version, connections, streamHandler);
+    Connections connections = new Connections(configuration, certificates, privateKey);
+    PacketRouter router = new PacketRouter(configuration.getVersion(), connections, streamHandler);
 
     final Bootstrap b = new Bootstrap();
     b.group(group)

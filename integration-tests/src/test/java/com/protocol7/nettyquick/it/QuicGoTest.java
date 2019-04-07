@@ -2,6 +2,7 @@ package com.protocol7.nettyquick.it;
 
 import static org.junit.Assert.assertEquals;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.client.QuicClient;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.streams.Stream;
@@ -19,11 +20,13 @@ public class QuicGoTest {
 
   @Test
   public void test() throws ExecutionException, InterruptedException {
+    Configuration config = Configuration.newBuilder().withVersion(Version.QUIC_GO).build();
+
     QuicClient client = null;
     try {
       client =
           QuicClient.connect(
-                  Version.QUIC_GO,
+                  config,
                   quicGo.getAddress(),
                   new StreamListener() {
                     @Override

@@ -140,20 +140,6 @@ public class TransportParameters implements Extension {
     return new Builder(version);
   }
 
-  public static TransportParameters defaults(final byte[] version) {
-    return new Builder(version)
-        .withInitialMaxStreamDataBidiLocal(32768)
-        .withInitialMaxData(49152)
-        .withInitialMaxBidiStreams(100)
-        .withIdleTimeout(30)
-        .withMaxPacketSize(1452)
-        .withInitialMaxUniStreams(100)
-        .withDisableMigration(true)
-        .withInitialMaxStreamDataBidiRemote(32768)
-        .withInitialMaxStreamDataUni(32768)
-        .build();
-  }
-
   public static TransportParameters parse(final ByteBuf bb, final boolean isClient) {
     final byte[] version = new byte[4];
     bb.readBytes(version);

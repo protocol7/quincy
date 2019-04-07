@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 import static java.util.Optional.empty;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
 import com.protocol7.nettyquic.addressvalidation.ServerRetryHandler;
@@ -51,7 +52,7 @@ public class ServerConnection implements InternalConnection {
   private final InetSocketAddress peerAddress;
 
   public ServerConnection(
-      final Version version,
+      final Configuration configuration,
       final ConnectionId localConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
@@ -59,10 +60,10 @@ public class ServerConnection implements InternalConnection {
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress) {
-    this.version = version;
+    this.version = configuration.getVersion();
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
-    final TransportParameters transportParameters = TransportParameters.defaults(version.asBytes());
+    final TransportParameters transportParameters = configuration.toTransportParameters();
 
     final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
     final PacketBuffer packetBuffer = new PacketBuffer();

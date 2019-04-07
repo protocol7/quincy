@@ -7,6 +7,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
@@ -30,7 +31,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ClientTlsManagerTest {
 
   private ConnectionId connectionId = ConnectionId.random();
-  private TransportParameters tps = TransportParameters.defaults(Version.DRAFT_18.asBytes());
+  private TransportParameters tps = Configuration.defaults().toTransportParameters();
   private ClientTlsManager manager = new ClientTlsManager(connectionId, tps);
 
   private ServerTlsSession serverTlsSession =

@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+import com.protocol7.nettyquic.Configuration;
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
@@ -19,7 +20,6 @@ import com.protocol7.nettyquic.tls.ClientTlsSession;
 import com.protocol7.nettyquic.tls.ClientTlsSession.HandshakeResult;
 import com.protocol7.nettyquic.tls.KeyUtil;
 import com.protocol7.nettyquic.tls.aead.InitialAEAD;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.SucceededFuture;
 import java.security.PrivateKey;
@@ -46,7 +46,7 @@ public class ServerTest {
   private ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
-          TransportParameters.defaults(Version.DRAFT_18.asBytes()));
+          Configuration.defaults().toTransportParameters());
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
@@ -62,7 +62,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            Version.DRAFT_18,
+            Configuration.defaults(),
             srcConnectionId,
             streamListener,
             packetSender,
