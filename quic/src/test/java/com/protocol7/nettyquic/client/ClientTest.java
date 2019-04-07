@@ -310,8 +310,6 @@ public class ClientTest {
     ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
-    System.out.println(ackPacket.getPayload());
-    System.out.println(ackPacket.getPayload().getFrames().size());
 
     assertEquals(
         new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());

@@ -1,7 +1,6 @@
 package com.protocol7.nettyquic.client;
 
 import static com.protocol7.nettyquic.connection.State.Closed;
-import static com.protocol7.nettyquic.connection.State.Closing;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 import static java.util.Optional.of;
 
@@ -11,7 +10,11 @@ import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.logging.LoggingHandler;
-import com.protocol7.nettyquic.protocol.*;
+import com.protocol7.nettyquic.protocol.ConnectionId;
+import com.protocol7.nettyquic.protocol.PacketBuffer;
+import com.protocol7.nettyquic.protocol.PacketNumber;
+import com.protocol7.nettyquic.protocol.TransportError;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
@@ -33,13 +36,9 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.slf4j.MDC;
 
 public class ClientConnection implements InternalConnection {
-
-  private final Logger log = LoggerFactory.getLogger(ClientConnection.class);
 
   private ConnectionId remoteConnectionId;
   private int lastDestConnectionIdLength;
@@ -94,14 +93,14 @@ public class ClientConnection implements InternalConnection {
   }
 
   public Packet sendPacket(final Packet p) {
-    if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
+    if (stateMachine.getState() == Closed) {
       throw new IllegalStateException("Connection not open");
     }
 
     Packet newPacket = pipeline.send(this, p);
 
-    // TODO remove repeated check
-    if (stateMachine.getState() == Closing || stateMachine.getState() == Closed) {
+    // check again if any handler closed the connection
+    if (stateMachine.getState() == Closed) {
       throw new IllegalStateException("Connection not open");
     }
 
