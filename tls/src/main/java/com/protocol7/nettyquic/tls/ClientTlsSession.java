@@ -31,8 +31,8 @@ public class ClientTlsSession {
 
   private final TransportParameters transportParameters;
 
-  private AEADs aeads;
-  private KeyExchange kek;
+  private final AEADs aeads;
+  private final KeyExchange kek;
 
   private ByteBuf handshakeBuffer;
   private byte[] clientHello;
@@ -43,15 +43,8 @@ public class ClientTlsSession {
     this.transportParameters = transportParameters;
 
     aeads = new AEADs(initialAEAD);
-    reset();
-  }
-
-  public void reset() {
     kek = KeyExchange.generate(Group.X25519);
     handshakeBuffer = Unpooled.buffer(); // replace with position keeping buffer
-    clientHello = null;
-    serverHello = null;
-    handshakeSecret = null;
   }
 
   public byte[] startHandshake() {

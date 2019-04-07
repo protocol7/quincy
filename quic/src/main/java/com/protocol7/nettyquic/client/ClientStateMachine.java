@@ -110,7 +110,7 @@ public class ClientStateMachine {
           connection.resetSendPacketNumber();
           connection.setToken(retryPacket.getRetryToken());
 
-          tlsSession.reset();
+          resetTlsSession(connection.getRemoteConnectionId().get());
 
           sendInitialPacket();
         } else if (packet instanceof VersionNegotiationPacket) {
