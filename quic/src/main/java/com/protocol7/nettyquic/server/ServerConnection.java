@@ -20,6 +20,7 @@ import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.reliability.PacketBuffer;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.streams.StreamManager;
@@ -64,7 +65,7 @@ public class ServerConnection implements InternalConnection {
     final TransportParameters transportParameters = TransportParameters.defaults(version.asBytes());
 
     final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
-    final PacketBuffer packetBuffer = new PacketBuffer(this);
+    final PacketBuffer packetBuffer = new PacketBuffer();
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 

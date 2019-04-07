@@ -1,12 +1,14 @@
-package com.protocol7.nettyquic.protocol;
+package com.protocol7.nettyquic.reliability;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.State;
+import com.protocol7.nettyquic.protocol.ConnectionId;
+import com.protocol7.nettyquic.protocol.PacketNumber;
+import com.protocol7.nettyquic.protocol.Payload;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -24,7 +26,6 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class PacketBufferTest {
 
-  @Mock private InternalConnection connection;
   @Mock private PipelineContext ctx;
 
   private PacketBuffer buffer;
@@ -33,7 +34,7 @@ public class PacketBufferTest {
   public void setUp() {
     when(ctx.getState()).thenReturn(State.Ready);
 
-    buffer = new PacketBuffer(connection);
+    buffer = new PacketBuffer();
   }
 
   private Packet packet(long pn, Frame... frames) {

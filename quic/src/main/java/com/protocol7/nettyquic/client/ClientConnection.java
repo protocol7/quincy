@@ -12,7 +12,6 @@ import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.logging.LoggingHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
-import com.protocol7.nettyquic.protocol.PacketBuffer;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.Version;
@@ -24,6 +23,7 @@ import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
 import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.reliability.PacketBuffer;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -70,7 +70,7 @@ public class ClientConnection implements InternalConnection {
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
-    this.packetBuffer = new PacketBuffer(this);
+    this.packetBuffer = new PacketBuffer();
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, TransportParameters.defaults(version.asBytes()));
 

@@ -10,6 +10,8 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class FlowControlCounter {
 
+  // TODO make sure max bytes does not grow forever
+
   private final AtomicLong connectionMaxBytes;
   private final long defaultStreamMaxBytes;
 

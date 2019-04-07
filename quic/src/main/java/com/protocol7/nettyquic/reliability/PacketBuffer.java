@@ -1,4 +1,4 @@
-package com.protocol7.nettyquic.protocol;
+package com.protocol7.nettyquic.reliability;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
@@ -6,8 +6,8 @@ import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.OutboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.State;
+import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -31,19 +31,10 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
   private final BlockingQueue<PacketNumber> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
-  private final Connection connection;
-
-  public PacketBuffer(final Connection connection) {
-    this.connection = connection;
-  }
 
   @VisibleForTesting
   protected Map<PacketNumber, Packet> getBuffer() {
     return buffer;
-  }
-
-  public PacketNumber getLargestAcked() {
-    return largestAcked.get();
   }
 
   @Override
