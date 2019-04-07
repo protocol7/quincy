@@ -1,29 +1,43 @@
 package com.protocol7.nettyquic.tls.extensions;
 
-import com.protocol7.nettyquic.utils.Hex;
 import io.netty.buffer.ByteBuf;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class SupportedVersions implements Extension {
 
-  public static final SupportedVersions TLS13 = new SupportedVersions(new byte[] {3, 4});
+  public static final SupportedVersions TLS13 = new SupportedVersions(SupportedVersion.TLS13);
 
   public static SupportedVersions parse(ByteBuf bb, boolean isClient) {
     int len = 2;
     if (!isClient) {
       len = bb.readByte();
     }
+    if (len % 2 != 0) {
+      throw new IllegalArgumentException("Invalid version length, must be divisible by 2: " + len);
+    }
+    len /= 2;
 
-    byte[] version = new byte[len];
-    bb.readBytes(version);
+    List<SupportedVersion> versions = new ArrayList<>(len);
+    byte[] b = new byte[2];
+    for (int i = 0; i < len; i++) {
+      bb.readBytes(b);
+      versions.add(SupportedVersion.fromValue(b));
+    }
 
-    return new SupportedVersions(version);
+    return new SupportedVersions(versions);
   }
 
-  private final byte[] version;
+  private final List<SupportedVersion> versions;
 
-  private SupportedVersions(byte[] version) {
-    this.version = version;
+  private SupportedVersions(List<SupportedVersion> versions) {
+    this.versions = versions;
+  }
+
+  private SupportedVersions(SupportedVersion... versions) {
+    this.versions = Arrays.asList(versions);
   }
 
   @Override
@@ -31,33 +45,35 @@ public class SupportedVersions implements Extension {
     return ExtensionType.supported_versions;
   }
 
-  public byte[] getVersion() {
-    return version;
+  public List<SupportedVersion> getVersions() {
+    return versions;
   }
 
   @Override
   public void write(ByteBuf bb, boolean isClient) {
     if (isClient) {
-      bb.writeByte(version.length);
+      bb.writeByte(versions.size() * 2);
     }
-    bb.writeBytes(version);
+    for (SupportedVersion version : versions) {
+      bb.writeBytes(version.getValue());
+    }
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    SupportedVersions that = (SupportedVersions) o;
-    return Arrays.equals(version, that.version);
+    final SupportedVersions that = (SupportedVersions) o;
+    return Objects.equals(versions, that.versions);
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(version);
+    return Objects.hash(versions);
   }
 
   @Override
   public String toString() {
-    return "SupportedVersions{" + Hex.hex(version) + '}';
+    return "SupportedVersions{" + "versions=" + versions + '}';
   }
 }

@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.tls;
 
 import static com.protocol7.nettyquic.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static com.protocol7.nettyquic.utils.Hex.dehex;
-import static com.protocol7.nettyquic.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
@@ -12,6 +11,7 @@ import com.protocol7.nettyquic.tls.extensions.Extension;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
 import com.protocol7.nettyquic.tls.extensions.SupportedGroups;
+import com.protocol7.nettyquic.tls.extensions.SupportedVersion;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.tls.messages.ClientHello;
@@ -61,10 +61,9 @@ public class ClientTlsSessionTest {
         List.of(Group.X25519),
         ((SupportedGroups) hello.getExtension(ExtensionType.supported_groups).get()).getGroups());
     assertEquals(
-        "0304",
-        hex(
-            ((SupportedVersions) hello.getExtension(ExtensionType.supported_versions).get())
-                .getVersion()));
+        List.of(SupportedVersion.TLS13),
+        ((SupportedVersions) hello.getExtension(ExtensionType.supported_versions).get())
+            .getVersions());
 
     TransportParameters tps = (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
     assertEquals(TransportParameters.defaults(version), tps);

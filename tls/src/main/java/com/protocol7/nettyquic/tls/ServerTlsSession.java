@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
+import com.protocol7.nettyquic.tls.extensions.SupportedVersion;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.tls.messages.ClientFinished;
@@ -59,12 +60,11 @@ public class ServerTlsSession {
     ClientHello ch = ClientHello.parse(msg, false);
 
     // verify expected extensions
-    SupportedVersions version =
+    SupportedVersions versions =
         (SupportedVersions)
             ch.getExtension(ExtensionType.supported_versions)
                 .orElseThrow(IllegalArgumentException::new);
-    System.out.println(version);
-    if (!version.equals(SupportedVersions.TLS13)) {
+    if (!versions.getVersions().contains(SupportedVersion.TLS13)) {
       throw new IllegalArgumentException("Illegal version");
     }
 

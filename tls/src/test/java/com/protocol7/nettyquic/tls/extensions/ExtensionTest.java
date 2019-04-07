@@ -2,7 +2,6 @@ package com.protocol7.nettyquic.tls.extensions;
 
 import static com.protocol7.nettyquic.tls.Group.X25519;
 import static com.protocol7.nettyquic.tls.TestUtil.assertHex;
-import static com.protocol7.nettyquic.utils.Hex.hex;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.nettyquic.utils.Hex;
@@ -24,7 +23,7 @@ public class ExtensionTest {
     Iterator<Extension> iter = ext.iterator();
 
     SupportedVersions supportedVersions = (SupportedVersions) iter.next();
-    assertEquals("0304", hex(supportedVersions.getVersion()));
+    assertEquals(List.of(SupportedVersion.TLS13), supportedVersions.getVersions());
 
     KeyShare keyShare = (KeyShare) iter.next();
     assertEquals(1, keyShare.getKeys().size());

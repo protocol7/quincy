@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.tls.KeyExchange;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
 import com.protocol7.nettyquic.tls.extensions.SupportedGroups;
+import com.protocol7.nettyquic.tls.extensions.SupportedVersion;
 import com.protocol7.nettyquic.tls.extensions.SupportedVersions;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.utils.Hex;
@@ -75,7 +76,7 @@ public class ClientHelloTest {
 
     SupportedVersions supportedVersions =
         (SupportedVersions) ch.getExtension(ExtensionType.supported_versions).get();
-    assertEquals("0304", Hex.hex(supportedVersions.getVersion()));
+    assertEquals(List.of(SupportedVersion.TLS13), supportedVersions.getVersions());
 
     TransportParameters transportParameters =
         (TransportParameters) ch.getExtension(ExtensionType.QUIC).get();
