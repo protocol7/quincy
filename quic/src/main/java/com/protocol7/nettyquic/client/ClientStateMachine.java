@@ -140,15 +140,10 @@ public class ClientStateMachine {
             tlsSession.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
-          tlsSession.setOneRttAead(result.get().getOneRttAead());
+          // send as handshake message
+          connection.send(new CryptoFrame(0, result.get().getFin()));
 
-          connection.sendPacket(
-              HandshakePacket.create(
-                  connection.getRemoteConnectionId(),
-                  connection.getLocalConnectionId(),
-                  connection.nextSendPacketNumber(),
-                  connection.getVersion(),
-                  new CryptoFrame(0, result.get().getFin())));
+          tlsSession.setOneRttAead(result.get().getOneRttAead());
 
           state = State.Ready;
           handshakeFuture.setSuccess(null);

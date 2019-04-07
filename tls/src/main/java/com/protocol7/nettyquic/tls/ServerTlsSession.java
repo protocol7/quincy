@@ -150,7 +150,7 @@ public class ServerTlsSession {
   }
 
   public void setHandshakeAead(final AEAD handshakeAEAD) {
-    aeads.setOneRttAead(handshakeAEAD);
+    aeads.setHandshakeAead(handshakeAEAD);
   }
 
   public void setOneRttAead(final AEAD oneRttAEAD) {

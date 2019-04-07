@@ -13,7 +13,6 @@ import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import java.security.PrivateKey;
 import java.util.List;
-import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -75,27 +74,15 @@ public class ServerStateMachine {
 
           ServerHelloAndHandshake shah = tlsSession.handleClientHello(cf.getCryptoData());
 
+          // sent as initial packet
+          connection.send(new CryptoFrame(0, shah.getServerHello()));
+
           tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
+
+          // sent as handshake packet
+          connection.send(new CryptoFrame(0, shah.getServerHandshake()));
+
           tlsSession.setOneRttAead(shah.getOneRttAEAD());
-
-          InitialPacket serverHello =
-              InitialPacket.create(
-                  connection.getRemoteConnectionId(),
-                  connection.getLocalConnectionId(),
-                  connection.nextSendPacketNumber(),
-                  connection.getVersion(),
-                  Optional.empty(),
-                  new CryptoFrame(0, shah.getServerHello()));
-          connection.sendPacket(serverHello);
-
-          HandshakePacket handshake =
-              HandshakePacket.create(
-                  connection.getRemoteConnectionId(),
-                  connection.getLocalConnectionId(),
-                  connection.nextSendPacketNumber(),
-                  connection.getVersion(),
-                  new CryptoFrame(0, shah.getServerHandshake()));
-          connection.sendPacket(handshake);
 
           state = State.BeforeReady;
         }
