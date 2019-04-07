@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
+import com.protocol7.nettyquic.logging.LoggingHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -75,15 +76,18 @@ public class ServerConnection implements InternalConnection {
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 
+    final LoggingHandler logger = new LoggingHandler(false);
+
     this.pipeline =
         new Pipeline(
             List.of(
+                logger,
                 new ServerRetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
                 tlsManager,
                 packetBuffer,
                 streamManager,
                 flowControlHandler),
-            List.of(flowControlHandler, packetBuffer));
+            List.of(flowControlHandler, packetBuffer, logger));
 
     this.localConnectionId = Optional.of(localConnectionId);
 
@@ -149,12 +153,9 @@ public class ServerConnection implements InternalConnection {
 
   private void sendPacketUnbuffered(Packet packet) {
     packetSender.send(packet, getAEAD(Initial)).awaitUninterruptibly(); // TODO fix
-    log.debug("Server sent {}", packet);
   }
 
   public void onPacket(Packet packet) {
-    log.debug("Server got {}", packet);
-
     // with incorrect conn ID
     stateMachine.processPacket(packet);
 

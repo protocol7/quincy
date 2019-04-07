@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.TestUtil;
@@ -28,9 +27,12 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ServerRetryHandlerTest {
 
   @Mock PipelineContext ctx;
@@ -42,8 +44,6 @@ public class ServerRetryHandlerTest {
 
   @Before
   public void setUp() {
-    initMocks(this);
-
     when(ctx.getVersion()).thenReturn(Version.DRAFT_18);
     when(ctx.getPeerAddress()).thenReturn(TestUtil.getTestAddress());
     when(ctx.getState()).thenReturn(State.Started);

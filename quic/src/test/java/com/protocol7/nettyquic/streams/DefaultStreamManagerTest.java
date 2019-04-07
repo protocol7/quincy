@@ -7,7 +7,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
@@ -22,8 +21,11 @@ import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class DefaultStreamManagerTest {
 
   private static final byte[] DATA1 = "hello".getBytes();
@@ -37,8 +39,6 @@ public class DefaultStreamManagerTest {
 
   @Before
   public void setUp() {
-    initMocks(this);
-
     when(ctx.send(any(Frame.class))).thenReturn(packet);
     when(ctx.getState()).thenReturn(State.Ready);
     when(packet.getPacketNumber()).thenReturn(new PacketNumber(456));

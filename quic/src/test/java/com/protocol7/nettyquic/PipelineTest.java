@@ -6,15 +6,16 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyZeroInteractions;
-import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import java.util.List;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PipelineTest {
 
   private static class PropagatingInboundHandler implements InboundHandler {
@@ -43,11 +44,6 @@ public class PipelineTest {
 
   @Mock Connection connection;
   @Mock Packet packet;
-
-  @Before
-  public void setUp() {
-    initMocks(this);
-  }
 
   @Test
   public void inboundPropagation() {

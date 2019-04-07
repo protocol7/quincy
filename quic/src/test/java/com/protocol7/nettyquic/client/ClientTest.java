@@ -25,10 +25,12 @@ import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClientTest {
 
   private static final byte[] DATA = "Hello".getBytes();
@@ -48,8 +50,6 @@ public class ClientTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())

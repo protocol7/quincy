@@ -24,10 +24,12 @@ import java.net.InetSocketAddress;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PacketRouterTest {
 
   private AEAD aead = TestAEAD.create();
@@ -44,11 +46,8 @@ public class PacketRouterTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     router = new PacketRouter(Version.DRAFT_18, connections, listener);
 
-    when(connections.get(any())).thenReturn(of(connection));
     when(connections.get(any(), any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);

@@ -6,9 +6,11 @@ import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.protocol.StreamId;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class StreamsTest {
 
   @Mock PipelineContext ctx;
@@ -18,8 +20,6 @@ public class StreamsTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     this.streams = new Streams(ctx);
   }
 

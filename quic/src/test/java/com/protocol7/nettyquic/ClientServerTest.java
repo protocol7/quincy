@@ -28,9 +28,11 @@ import java.security.PrivateKey;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class ClientServerTest {
 
   private static final byte[] PING = "ping".getBytes();
@@ -73,8 +75,6 @@ public class ClientServerTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
     clientConnection =
         new ClientConnection(
             Version.DRAFT_18,

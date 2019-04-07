@@ -10,6 +10,7 @@ import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
+import com.protocol7.nettyquic.logging.LoggingHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -73,10 +74,12 @@ public class ClientConnection implements InternalConnection {
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, TransportParameters.defaults(version.asBytes()));
 
+    final LoggingHandler logger = new LoggingHandler(true);
+
     this.pipeline =
         new Pipeline(
-            List.of(tlsManager, packetBuffer, streamManager, flowControlHandler),
-            List.of(packetBuffer));
+            List.of(logger, tlsManager, packetBuffer, streamManager, flowControlHandler),
+            List.of(packetBuffer, logger));
 
     this.stateMachine = new ClientStateMachine(this);
   }
@@ -162,13 +165,9 @@ public class ClientConnection implements InternalConnection {
     packetSender
         .send(packet, getAEAD(getEncryptionLevel(packet)))
         .awaitUninterruptibly(); // TODO fix
-
-    log.debug("Client sent {}", packet);
   }
 
   public void onPacket(final Packet packet) {
-    log.debug("Client got {}", packet);
-
     if (packet.getDestinationConnectionId().isPresent()) {
       lastDestConnectionIdLength = packet.getDestinationConnectionId().get().getLength();
     } else {

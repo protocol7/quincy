@@ -16,10 +16,12 @@ import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnitRunner;
 
+@RunWith(MockitoJUnitRunner.class)
 public class PacketBufferTest {
 
   @Mock private InternalConnection connection;
@@ -29,12 +31,6 @@ public class PacketBufferTest {
 
   @Before
   public void setUp() {
-    MockitoAnnotations.initMocks(this);
-
-    when(connection.getRemoteConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.getLocalConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
-    when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
-
     when(ctx.getState()).thenReturn(State.Ready);
 
     buffer = new PacketBuffer(connection);
