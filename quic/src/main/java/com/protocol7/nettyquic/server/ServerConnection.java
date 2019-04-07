@@ -94,10 +94,6 @@ public class ServerConnection implements InternalConnection {
     this.stateMachine = new ServerStateMachine(this);
   }
 
-  private void resetTlsSession() {
-    tlsManager.resetTlsSession(localConnectionId.get());
-  }
-
   public Optional<ConnectionId> getRemoteConnectionId() {
     return remoteConnectionId;
   }
@@ -108,12 +104,6 @@ public class ServerConnection implements InternalConnection {
 
   public void setRemoteConnectionId(ConnectionId remoteConnectionId) {
     this.remoteConnectionId = Optional.of(remoteConnectionId);
-  }
-
-  public void setLocalConnectionId(ConnectionId localConnectionId) {
-    this.localConnectionId = Optional.of(localConnectionId);
-
-    resetTlsSession();
   }
 
   public Version getVersion() {

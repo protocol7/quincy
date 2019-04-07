@@ -125,7 +125,7 @@ public class ClientHello {
     return extensions;
   }
 
-  public Optional<Extension> geExtension(ExtensionType type) {
+  public Optional<Extension> getExtension(ExtensionType type) {
     for (Extension ext : extensions) {
       if (ext.getType().equals(type)) {
         return Optional.of(ext);

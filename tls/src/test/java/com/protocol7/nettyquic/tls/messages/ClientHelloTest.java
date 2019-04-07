@@ -65,20 +65,20 @@ public class ClientHelloTest {
     assertEquals(0, ch.getSessionId().length);
     assertEquals(List.of(TLS_AES_128_GCM_SHA256), ch.getCipherSuites());
 
-    KeyShare keyShare = (KeyShare) ch.geExtension(ExtensionType.key_share).get();
+    KeyShare keyShare = (KeyShare) ch.getExtension(ExtensionType.key_share).get();
     assertEquals(1, keyShare.getKeys().size());
     assertEquals(Hex.hex(kek.getPublicKey()), Hex.hex(keyShare.getKey(Group.X25519).get()));
 
     SupportedGroups supportedGroups =
-        (SupportedGroups) ch.geExtension(ExtensionType.supported_groups).get();
+        (SupportedGroups) ch.getExtension(ExtensionType.supported_groups).get();
     assertEquals(List.of(Group.X25519), supportedGroups.getGroups());
 
     SupportedVersions supportedVersions =
-        (SupportedVersions) ch.geExtension(ExtensionType.supported_versions).get();
+        (SupportedVersions) ch.getExtension(ExtensionType.supported_versions).get();
     assertEquals("0304", Hex.hex(supportedVersions.getVersion()));
 
     TransportParameters transportParameters =
-        (TransportParameters) ch.geExtension(ExtensionType.QUIC).get();
+        (TransportParameters) ch.getExtension(ExtensionType.QUIC).get();
     assertEquals(TransportParameters.defaults(version), transportParameters);
   }
 }

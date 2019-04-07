@@ -17,23 +17,12 @@ import java.util.List;
 public class ServerTLSManager implements InboundHandler {
 
   private ServerTlsSession tlsSession;
-  private final TransportParameters transportParameters;
-  private final PrivateKey privateKey;
-  private final List<byte[]> certificates;
 
   public ServerTLSManager(
       final ConnectionId connectionId,
       final TransportParameters transportParameters,
       final PrivateKey privateKey,
       final List<byte[]> certificates) {
-    this.transportParameters = transportParameters;
-    this.privateKey = privateKey;
-    this.certificates = certificates;
-
-    resetTlsSession(connectionId);
-  }
-
-  public void resetTlsSession(ConnectionId connectionId) {
     this.tlsSession =
         new ServerTlsSession(
             InitialAEAD.create(connectionId.asBytes(), false),

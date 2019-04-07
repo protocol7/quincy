@@ -53,20 +53,20 @@ public class ClientTlsSessionTest {
 
     assertEquals(
         32,
-        ((KeyShare) hello.geExtension(ExtensionType.key_share).get())
+        ((KeyShare) hello.getExtension(ExtensionType.key_share).get())
             .getKey(Group.X25519)
             .get()
             .length);
     assertEquals(
         List.of(Group.X25519),
-        ((SupportedGroups) hello.geExtension(ExtensionType.supported_groups).get()).getGroups());
+        ((SupportedGroups) hello.getExtension(ExtensionType.supported_groups).get()).getGroups());
     assertEquals(
         "0304",
         hex(
-            ((SupportedVersions) hello.geExtension(ExtensionType.supported_versions).get())
+            ((SupportedVersions) hello.getExtension(ExtensionType.supported_versions).get())
                 .getVersion()));
 
-    TransportParameters tps = (TransportParameters) hello.geExtension(ExtensionType.QUIC).get();
+    TransportParameters tps = (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
     assertEquals(TransportParameters.defaults(version), tps);
   }
 

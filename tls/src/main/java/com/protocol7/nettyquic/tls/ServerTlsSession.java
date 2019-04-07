@@ -61,15 +61,16 @@ public class ServerTlsSession {
     // verify expected extensions
     SupportedVersions version =
         (SupportedVersions)
-            ch.geExtension(ExtensionType.supported_versions)
+            ch.getExtension(ExtensionType.supported_versions)
                 .orElseThrow(IllegalArgumentException::new);
+    System.out.println(version);
     if (!version.equals(SupportedVersions.TLS13)) {
       throw new IllegalArgumentException("Illegal version");
     }
 
     KeyShare keyShareExtension =
         (KeyShare)
-            ch.geExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
+            ch.getExtension(ExtensionType.key_share).orElseThrow(IllegalArgumentException::new);
 
     // create ServerHello
     serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));

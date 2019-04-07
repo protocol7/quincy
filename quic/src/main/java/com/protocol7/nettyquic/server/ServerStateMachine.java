@@ -38,7 +38,9 @@ public class ServerStateMachine {
         InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
-          connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
+          if (packet.getSourceConnectionId().isPresent()) {
+            connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
+          }
         }
       }
     } else if (state == State.Ready) {
