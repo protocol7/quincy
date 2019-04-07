@@ -32,6 +32,7 @@ import com.protocol7.nettyquic.streams.StreamManager;
 import com.protocol7.nettyquic.tls.ClientTlsManager;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.utils.Ticker;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -70,7 +71,8 @@ public class ClientConnection implements InternalConnection {
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
-    this.packetBuffer = new PacketBuffer();
+    this.packetBuffer =
+        new PacketBuffer(configuration.getAckDelayExponent(), Ticker.systemTicker());
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
 

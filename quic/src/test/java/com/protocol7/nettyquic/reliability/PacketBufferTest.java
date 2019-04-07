@@ -15,6 +15,7 @@ import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.PingFrame;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.utils.Ticker;
 import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,6 +28,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PacketBufferTest {
 
   @Mock private PipelineContext ctx;
+  @Mock private Ticker ticker;
 
   private PacketBuffer buffer;
 
@@ -34,7 +36,9 @@ public class PacketBufferTest {
   public void setUp() {
     when(ctx.getState()).thenReturn(State.Ready);
 
-    buffer = new PacketBuffer();
+    when(ticker.nanoTime()).thenReturn(0L);
+
+    buffer = new PacketBuffer(3, ticker);
   }
 
   private Packet packet(long pn, Frame... frames) {
@@ -82,7 +86,7 @@ public class PacketBufferTest {
     buffer.onReceivePacket(pingPacket, ctx);
 
     AckFrame actual = (AckFrame) verifySent();
-
+    assertEquals(0, actual.getAckDelay());
     assertEquals(AckBlock.fromLongs(2, 2), actual.getBlocks().get(0));
   }
 

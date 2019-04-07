@@ -127,7 +127,7 @@ public class ShortPacket implements FullPacket {
   }
 
   @Override
-  public Packet addFrame(Frame frame) {
+  public FullPacket addFrame(Frame frame) {
     return new ShortPacket(keyPhase, connectionId, packetNumber, payload.addFrame(frame));
   }
 

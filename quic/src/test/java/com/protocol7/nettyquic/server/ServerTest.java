@@ -147,8 +147,9 @@ public class ServerTest {
     ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertTrue(ackPacket.getDestinationConnectionId().isPresent());
-    assertEquals(
-        new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
+
+    List<AckBlock> actual = ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
+    assertEquals(List.of(new AckBlock(smallest, largest)), actual);
   }
 
   @Test(expected = IllegalStateException.class)

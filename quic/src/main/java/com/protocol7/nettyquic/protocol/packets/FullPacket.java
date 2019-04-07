@@ -8,7 +8,7 @@ public interface FullPacket extends Packet {
 
   PacketType getType();
 
-  Packet addFrame(Frame frame);
+  FullPacket addFrame(Frame frame);
 
   PacketNumber getPacketNumber();
 

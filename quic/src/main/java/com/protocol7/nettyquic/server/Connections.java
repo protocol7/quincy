@@ -52,7 +52,8 @@ public class Connections {
               packetSender,
               certificates,
               privateKey,
-              new DefaultFlowControlHandler(49152, 32768),
+              new DefaultFlowControlHandler(
+                  configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
               peerAddress);
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {

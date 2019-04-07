@@ -29,6 +29,7 @@ import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.ServerTLSManager;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
+import com.protocol7.nettyquic.utils.Ticker;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
@@ -66,7 +67,8 @@ public class ServerConnection implements InternalConnection {
     final TransportParameters transportParameters = configuration.toTransportParameters();
 
     final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
-    final PacketBuffer packetBuffer = new PacketBuffer();
+    final PacketBuffer packetBuffer =
+        new PacketBuffer(configuration.getAckDelayExponent(), Ticker.systemTicker());
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 
