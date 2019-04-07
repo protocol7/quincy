@@ -5,8 +5,8 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
@@ -35,7 +35,7 @@ public class PacketBufferTest {
     when(connection.getLocalConnectionId()).thenReturn(Optional.of(ConnectionId.random()));
     when(connection.nextSendPacketNumber()).thenReturn(new PacketNumber(3));
 
-    when(ctx.getState()).thenReturn(ClientState.Ready);
+    when(ctx.getState()).thenReturn(State.Ready);
 
     buffer = new PacketBuffer(connection);
   }

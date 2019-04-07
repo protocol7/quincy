@@ -1,12 +1,12 @@
 package com.protocol7.nettyquic.client;
 
-import static com.protocol7.nettyquic.client.ClientState.*;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.*;
@@ -91,7 +91,7 @@ public class ClientTest {
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
-    assertEquals(WaitingForServerHello, connection.getState());
+    assertEquals(State.BeforeHello, connection.getState());
 
     byte[] retryToken = Rnd.rndBytes(20);
 
@@ -121,7 +121,7 @@ public class ClientTest {
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
-    assertEquals(WaitingForServerHello, connection.getState());
+    assertEquals(State.BeforeHello, connection.getState());
 
     ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
 
@@ -140,7 +140,7 @@ public class ClientTest {
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
-    assertEquals(WaitingForHandshake, connection.getState());
+    assertEquals(State.BeforeHandshake, connection.getState());
 
     // receive server handshake
     connection.onPacket(
@@ -160,7 +160,7 @@ public class ClientTest {
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
-    assertEquals(Ready, connection.getState());
+    assertEquals(State.Ready, connection.getState());
   }
 
   @Test
@@ -253,7 +253,7 @@ public class ClientTest {
     // TODO must be acked
     // assertAck(4, 3, 2, 3);
 
-    assertEquals(ClientState.Closed, connection.getState());
+    assertEquals(State.Closed, connection.getState());
 
     try {
       connection.send(PingFrame.INSTANCE);
@@ -269,7 +269,7 @@ public class ClientTest {
 
     connection.close().awaitUninterruptibly();
 
-    assertEquals(ClientState.Closed, connection.getState());
+    assertEquals(State.Closed, connection.getState());
 
     try {
       connection.send(PingFrame.INSTANCE);

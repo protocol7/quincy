@@ -7,6 +7,7 @@ import com.protocol7.nettyquic.addressvalidation.RetryHandler;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
@@ -160,7 +161,7 @@ public class ServerConnection implements Connection {
     return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
   }
 
-  public ServerState getState() {
+  public State getState() {
     return stateMachine.getState();
   }
 

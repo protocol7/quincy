@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
@@ -74,7 +75,7 @@ public class ServerTest {
 
   @Test
   public void handshake() {
-    assertEquals(ServerState.BeforeInitial, connection.getState());
+    assertEquals(State.Started, connection.getState());
     byte[] ch = clientTlsSession.startHandshake();
 
     connection.onPacket(initialPacket(destConnectionId, empty(), new CryptoFrame(0, ch)));
@@ -113,7 +114,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, new CryptoFrame(0, hr.getFin())));
 
-    assertEquals(ServerState.Ready, connection.getState());
+    assertEquals(State.Ready, connection.getState());
   }
 
   @Test
@@ -154,13 +155,13 @@ public class ServerTest {
   @Test
   public void frameBeforeHandshake() {
     // not handshaking
-    assertEquals(ServerState.BeforeInitial, connection.getState());
+    assertEquals(State.Started, connection.getState());
 
     connection.onPacket(packet(destConnectionId, PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
     verify(packetSender, never()).send(any(), any());
-    assertEquals(ServerState.BeforeInitial, connection.getState());
+    assertEquals(State.Started, connection.getState());
   }
 
   private InitialPacket initialPacket(

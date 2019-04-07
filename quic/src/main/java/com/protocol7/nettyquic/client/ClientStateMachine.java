@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.client;
 
 import com.google.common.annotations.VisibleForTesting;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -20,7 +21,7 @@ public class ClientStateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ClientStateMachine.class);
 
-  private ClientState state = ClientState.BeforeInitial;
+  private State state = State.Started;
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture =
       new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
@@ -35,10 +36,10 @@ public class ClientStateMachine {
   public Future<Void> handshake() {
     synchronized (this) {
       // send initial packet
-      if (state == ClientState.BeforeInitial) {
+      if (state == State.Started) {
 
         sendInitialPacket();
-        state = ClientState.WaitingForServerHello;
+        state = State.BeforeHello;
         log.info("Client connection state initial sent");
       } else {
         throw new IllegalStateException("Can't handshake in state " + state);
@@ -72,7 +73,7 @@ public class ClientStateMachine {
 
     synchronized (this) { // TODO refactor to make non-synchronized
       // TODO validate connection ID
-      if (state == ClientState.WaitingForServerHello) {
+      if (state == State.BeforeHello) {
         if (packet instanceof InitialPacket) {
 
           connection.setRemoteConnectionId(packet.getSourceConnectionId().get(), false);
@@ -83,7 +84,7 @@ public class ClientStateMachine {
 
               final AEAD handshakeAead = tlsSession.handleServerHello(cf.getCryptoData());
               connection.setHandshakeAead(handshakeAead);
-              state = ClientState.WaitingForHandshake;
+              state = State.BeforeHandshake;
             }
           }
           log.info("Client connection state ready");
@@ -99,23 +100,23 @@ public class ClientStateMachine {
         } else if (packet instanceof VersionNegotiationPacket) {
           // we only support a single version, so nothing more to do
           log.debug("Incompatible versions, closing connection");
-          state = ClientState.Closing;
+          state = State.Closing;
           connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
           log.debug("Connection closed");
-          state = ClientState.Closed;
+          state = State.Closed;
         } else {
           log.warn("Got packet in an unexpected state: {} - {}", state, packet);
         }
-      } else if (state == ClientState.WaitingForHandshake) {
+      } else if (state == State.BeforeHandshake) {
         if (packet instanceof HandshakePacket) {
           handleHandshake((HandshakePacket) packet);
         } else {
           log.warn("Got handshake packet in an unexpected state: {} - {}", state, packet);
         }
 
-      } else if (state == ClientState.Ready
-          || state == ClientState.Closing
-          || state == ClientState.Closed) { // TODO don't allow when closed
+      } else if (state == State.Ready
+          || state == State.Closing
+          || state == State.Closed) { // TODO don't allow when closed
         if (packet instanceof FullPacket) {
           for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
             handleFrame(frame);
@@ -146,7 +147,7 @@ public class ClientStateMachine {
                   connection.getVersion(),
                   new CryptoFrame(0, result.get().getFin())));
 
-          state = ClientState.Ready;
+          state = State.Ready;
           handshakeFuture.setSuccess(null);
         }
       }
@@ -163,18 +164,18 @@ public class ClientStateMachine {
 
   private void handlePeerClose() {
     log.debug("Peer closing connection");
-    state = ClientState.Closing;
+    state = State.Closing;
     connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
     log.debug("Connection closed");
-    state = ClientState.Closed;
+    state = State.Closed;
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {
     connection.send(ccf);
 
-    state = ClientState.Closing;
+    state = State.Closing;
 
-    state = ClientState.Closed;
+    state = State.Closed;
   }
 
   public void closeImmediate() {
@@ -184,7 +185,7 @@ public class ClientStateMachine {
   }
 
   @VisibleForTesting
-  protected ClientState getState() {
+  protected State getState() {
     return state;
   }
 }

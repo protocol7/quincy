@@ -7,16 +7,15 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import com.protocol7.nettyquic.client.ClientConnection;
-import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.server.ServerConnection;
-import com.protocol7.nettyquic.server.ServerState;
 import com.protocol7.nettyquic.streams.DefaultStream;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -109,8 +108,8 @@ public class ClientServerTest {
 
     sleep();
 
-    assertEquals(ClientState.Ready, clientConnection.getState());
-    assertEquals(ServerState.Ready, serverConnection.getState());
+    assertEquals(State.Ready, clientConnection.getState());
+    assertEquals(State.Ready, serverConnection.getState());
   }
 
   @Test
@@ -145,8 +144,8 @@ public class ClientServerTest {
 
     sleep();
 
-    assertEquals(ClientState.Closed, clientConnection.getState());
-    assertEquals(ServerState.Closed, serverConnection.getState());
+    assertEquals(State.Closed, clientConnection.getState());
+    assertEquals(State.Closed, serverConnection.getState());
   }
 
   @Test
@@ -157,8 +156,8 @@ public class ClientServerTest {
 
     sleep();
 
-    assertEquals(ClientState.Closed, clientConnection.getState());
-    assertEquals(ServerState.Closed, serverConnection.getState());
+    assertEquals(State.Closed, clientConnection.getState());
+    assertEquals(State.Closed, serverConnection.getState());
   }
 
   private void sleep() {

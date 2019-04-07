@@ -1,12 +1,13 @@
 package com.protocol7.nettyquic.client;
 
-import static com.protocol7.nettyquic.client.ClientState.Closed;
-import static com.protocol7.nettyquic.client.ClientState.Closing;
+import static com.protocol7.nettyquic.connection.State.Closed;
+import static com.protocol7.nettyquic.connection.State.Closing;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.PacketSender;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.flowcontrol.FlowControlHandler;
 import com.protocol7.nettyquic.protocol.*;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
@@ -164,7 +165,7 @@ public class ClientConnection implements Connection {
 
       stateMachine.handlePacket(packet);
 
-      if (getState() != ClientState.Closed) {
+      if (getState() != State.Closed) {
         pipeline.onPacket(this, packet);
       }
     } else {
@@ -224,7 +225,7 @@ public class ClientConnection implements Connection {
     return packetSender.destroy();
   }
 
-  public ClientState getState() {
+  public State getState() {
     return stateMachine.getState();
   }
 }

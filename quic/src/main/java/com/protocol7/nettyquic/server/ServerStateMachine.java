@@ -1,8 +1,6 @@
 package com.protocol7.nettyquic.server;
 
-import static com.protocol7.nettyquic.server.ServerState.Ready;
-import static com.protocol7.nettyquic.server.ServerState.WaitingForFinished;
-
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
@@ -19,11 +17,11 @@ public class ServerStateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ServerStateMachine.class);
 
-  public ServerState getState() {
+  public State getState() {
     return state;
   }
 
-  private ServerState state = ServerState.BeforeInitial;
+  private State state = State.Started;
   private final ServerConnection connection;
   private final ServerTlsSession tlsEngine;
 
@@ -44,7 +42,7 @@ public class ServerStateMachine {
         packet.getDestinationConnectionId());
 
     // TODO check version
-    if (state == ServerState.BeforeInitial) {
+    if (state == State.Started) {
       if (packet instanceof InitialPacket) {
         InitialPacket initialPacket = (InitialPacket) packet;
 
@@ -79,20 +77,20 @@ public class ServerStateMachine {
                   new CryptoFrame(0, shah.getServerHandshake()));
           connection.sendPacket(handshake);
 
-          state = WaitingForFinished;
+          state = State.BeforeReady;
         }
       } else {
         log.warn("Unexpected packet in BeforeInitial: " + packet);
       }
-    } else if (state == WaitingForFinished) {
+    } else if (state == State.BeforeReady) {
       FullPacket fp = (FullPacket) packet;
       CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
       tlsEngine.handleClientFinished(cryptoFrame.getCryptoData());
 
-      state = Ready;
+      state = State.Ready;
 
       handleFrames(fp);
-    } else if (state == Ready) {
+    } else if (state == State.Ready) {
       handleFrames((FullPacket) packet);
     }
   }
@@ -109,18 +107,18 @@ public class ServerStateMachine {
 
   private void handlePeerClose() {
     log.debug("Peer closing connection");
-    state = ServerState.Closing;
+    state = State.Closing;
     connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
     log.debug("Connection closed");
-    state = ServerState.Closed;
+    state = State.Closed;
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {
     connection.send(ccf);
 
-    state = ServerState.Closing;
+    state = State.Closing;
 
-    state = ServerState.Closed;
+    state = State.Closed;
   }
 
   public void closeImmediate() {

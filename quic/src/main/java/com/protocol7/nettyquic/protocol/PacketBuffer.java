@@ -6,13 +6,11 @@ import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.OutboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.client.ClientState;
 import com.protocol7.nettyquic.connection.Connection;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
-import com.protocol7.nettyquic.server.ServerState;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -71,10 +69,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
-      State state = ctx.getState();
-      if ((state instanceof ServerState && state != ServerState.BeforeInitial)
-          || (state instanceof ClientState && state != ClientState.BeforeInitial)) {
-
+      if (ctx.getState() != State.Started) {
         ackQueue.add(((FullPacket) packet).getPacketNumber());
         log.debug("Acked packet {}", ((FullPacket) packet).getPacketNumber());
 
