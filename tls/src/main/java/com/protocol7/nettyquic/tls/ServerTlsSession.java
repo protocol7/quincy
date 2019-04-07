@@ -157,6 +157,10 @@ public class ServerTlsSession {
     aeads.setOneRttAead(oneRttAEAD);
   }
 
+  public boolean available(final EncryptionLevel level) {
+    return aeads.available(level);
+  }
+
   public static class ServerHelloAndHandshake {
 
     private final byte[] serverHello;

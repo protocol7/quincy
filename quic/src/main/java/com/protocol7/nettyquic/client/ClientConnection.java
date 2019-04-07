@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.client;
 import static com.protocol7.nettyquic.connection.State.Closed;
 import static com.protocol7.nettyquic.connection.State.Closing;
 import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
+import static java.util.Optional.of;
 
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.connection.InternalConnection;
@@ -14,6 +15,8 @@ import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
@@ -38,7 +41,7 @@ public class ClientConnection implements InternalConnection {
 
   private ConnectionId remoteConnectionId;
   private int lastDestConnectionIdLength;
-  private Optional<ConnectionId> localConnectionId = Optional.of(ConnectionId.random());
+  private Optional<ConnectionId> localConnectionId = of(ConnectionId.random());
   private final PacketSender packetSender;
 
   private final Version version;
@@ -100,10 +103,25 @@ public class ClientConnection implements InternalConnection {
   }
 
   public FullPacket send(final Frame... frames) {
-    return (FullPacket)
-        sendPacket(
-            new ShortPacket(
-                false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+    Packet packet;
+    if (stateMachine.available(EncryptionLevel.OneRtt)) {
+      packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
+    } else if (stateMachine.available(EncryptionLevel.Handshake)) {
+      packet =
+          HandshakePacket.create(
+              of(remoteConnectionId), localConnectionId, nextSendPacketNumber(), version, frames);
+    } else {
+      packet =
+          InitialPacket.create(
+              of(remoteConnectionId),
+              localConnectionId,
+              nextSendPacketNumber(),
+              version,
+              token,
+              frames);
+    }
+
+    return (FullPacket) sendPacket(packet);
   }
 
   @Override
@@ -129,7 +147,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   public void setToken(byte[] token) {
-    this.token = Optional.of(token);
+    this.token = of(token);
   }
 
   public int getLastDestConnectionIdLength() {

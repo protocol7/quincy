@@ -97,6 +97,14 @@ public class ShortPacket implements FullPacket {
     };
   }
 
+  public static ShortPacket create(
+      boolean keyPhase,
+      Optional<ConnectionId> connectionId,
+      PacketNumber packetNumber,
+      Frame... frames) {
+    return new ShortPacket(keyPhase, connectionId, packetNumber, new Payload(frames));
+  }
+
   private final boolean keyPhase;
   private final Optional<ConnectionId> connectionId;
   private final PacketNumber packetNumber;

@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.server;
 
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
+import static java.util.Optional.empty;
 
 import com.protocol7.nettyquic.Pipeline;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
@@ -14,6 +15,8 @@ import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
@@ -117,11 +120,26 @@ public class ServerConnection implements InternalConnection {
     return newPacket;
   }
 
-  public FullPacket send(Frame... frames) {
-    return (FullPacket)
-        sendPacket(
-            new ShortPacket(
-                false, getRemoteConnectionId(), nextSendPacketNumber(), new Payload(frames)));
+  public FullPacket send(final Frame... frames) {
+    Packet packet;
+    if (stateMachine.available(EncryptionLevel.OneRtt)) {
+      packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
+    } else if (stateMachine.available(EncryptionLevel.Handshake)) {
+      packet =
+          HandshakePacket.create(
+              remoteConnectionId, localConnectionId, nextSendPacketNumber(), version, frames);
+    } else {
+      packet =
+          InitialPacket.create(
+              remoteConnectionId,
+              localConnectionId,
+              nextSendPacketNumber(),
+              version,
+              empty(),
+              frames);
+    }
+
+    return (FullPacket) sendPacket(packet);
   }
 
   private void sendPacketUnbuffered(Packet packet) {

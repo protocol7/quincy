@@ -154,4 +154,8 @@ public class ServerStateMachine {
   public AEAD getAEAD(final EncryptionLevel level) {
     return tlsSession.getAEAD(level);
   }
+
+  public boolean available(final EncryptionLevel level) {
+    return tlsSession.available(level);
+  }
 }
