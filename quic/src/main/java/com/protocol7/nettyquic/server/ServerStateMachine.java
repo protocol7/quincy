@@ -1,18 +1,12 @@
 package com.protocol7.nettyquic.server;
 
 import com.protocol7.nettyquic.connection.State;
-import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
-import com.protocol7.nettyquic.protocol.frames.*;
-import com.protocol7.nettyquic.protocol.packets.*;
-import com.protocol7.nettyquic.tls.EncryptionLevel;
-import com.protocol7.nettyquic.tls.ServerTlsSession;
-import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
-import com.protocol7.nettyquic.tls.aead.AEAD;
-import com.protocol7.nettyquic.tls.aead.InitialAEAD;
-import com.protocol7.nettyquic.tls.extensions.TransportParameters;
-import java.security.PrivateKey;
-import java.util.List;
+import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
+import com.protocol7.nettyquic.protocol.frames.Frame;
+import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.protocol.packets.InitialPacket;
+import com.protocol7.nettyquic.protocol.packets.Packet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -26,31 +20,9 @@ public class ServerStateMachine {
 
   private State state = State.Started;
   private final ServerConnection connection;
-  private ServerTlsSession tlsSession;
-  private final TransportParameters transportParameters;
-  private final PrivateKey privateKey;
-  private final List<byte[]> certificates;
 
-  public ServerStateMachine(
-      final ServerConnection connection,
-      final TransportParameters transportParameters,
-      PrivateKey privateKey,
-      List<byte[]> certificates) {
+  public ServerStateMachine(final ServerConnection connection) {
     this.connection = connection;
-    this.privateKey = privateKey;
-    this.certificates = certificates;
-    this.transportParameters = transportParameters;
-
-    resetTlsSession(connection.getLocalConnectionId().get());
-  }
-
-  public void resetTlsSession(ConnectionId localConnectionId) {
-    this.tlsSession =
-        new ServerTlsSession(
-            InitialAEAD.create(localConnectionId.asBytes(), true),
-            transportParameters,
-            certificates,
-            privateKey);
   }
 
   public synchronized void processPacket(Packet packet) {
@@ -67,34 +39,8 @@ public class ServerStateMachine {
 
         if (initialPacket.getToken().isPresent()) {
           connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
-
-          CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
-
-          ServerHelloAndHandshake shah = tlsSession.handleClientHello(cf.getCryptoData());
-
-          // sent as initial packet
-          connection.send(new CryptoFrame(0, shah.getServerHello()));
-
-          tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
-
-          // sent as handshake packet
-          connection.send(new CryptoFrame(0, shah.getServerHandshake()));
-
-          tlsSession.setOneRttAead(shah.getOneRttAEAD());
-
-          state = State.BeforeReady;
         }
-      } else {
-        log.warn("Unexpected packet in BeforeInitial: " + packet);
       }
-    } else if (state == State.BeforeReady) {
-      FullPacket fp = (FullPacket) packet;
-      CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
-      tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
-
-      state = State.Ready;
-
-      handleFrames(fp);
     } else if (state == State.Ready) {
       handleFrames((FullPacket) packet);
     }
@@ -102,9 +48,7 @@ public class ServerStateMachine {
 
   private void handleFrames(FullPacket packet) {
     for (Frame frame : packet.getPayload().getFrames()) {
-      if (frame instanceof PingFrame) {
-        // ignore
-      } else if (frame instanceof ConnectionCloseFrame) {
+      if (frame instanceof ConnectionCloseFrame) {
         handlePeerClose();
       }
     }
@@ -134,13 +78,5 @@ public class ServerStateMachine {
 
   public void setState(final State state) {
     this.state = state;
-  }
-
-  public AEAD getAEAD(final EncryptionLevel level) {
-    return tlsSession.getAEAD(level);
-  }
-
-  public boolean available(final EncryptionLevel level) {
-    return tlsSession.available(level);
   }
 }

@@ -155,16 +155,12 @@ public class ServerTest {
         new Payload(new AckFrame(123, new AckBlock(smallest, largest))), ackPacket.getPayload());
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void frameBeforeHandshake() {
     // not handshaking
     assertEquals(State.Started, connection.getState());
 
     connection.onPacket(packet(destConnectionId, PingFrame.INSTANCE));
-
-    // ignoring in unexpected state, nothing should happen
-    verify(packetSender, never()).send(any(), any());
-    assertEquals(State.Started, connection.getState());
   }
 
   private InitialPacket initialPacket(
