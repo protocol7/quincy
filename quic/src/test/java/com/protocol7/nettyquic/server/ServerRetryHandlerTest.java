@@ -11,8 +11,8 @@ import static org.mockito.MockitoAnnotations.initMocks;
 
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.TestUtil;
-import com.protocol7.nettyquic.addressvalidation.RetryHandler;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
+import com.protocol7.nettyquic.addressvalidation.ServerRetryHandler;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
@@ -31,12 +31,13 @@ import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 
-public class RetryHandlerTest {
+public class ServerRetryHandlerTest {
 
   @Mock PipelineContext ctx;
   private RetryToken retryToken =
       new RetryToken(KeyUtil.getPrivateKey("src/test/resources/server.der"));
-  private RetryHandler handler = new RetryHandler(retryToken, 10000, TimeUnit.MILLISECONDS);
+  private ServerRetryHandler handler =
+      new ServerRetryHandler(retryToken, 10000, TimeUnit.MILLISECONDS);
   private InetAddress address = TestUtil.getTestAddress().getAddress();
 
   @Before

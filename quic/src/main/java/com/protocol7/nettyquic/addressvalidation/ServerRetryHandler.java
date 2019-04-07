@@ -10,12 +10,13 @@ import com.protocol7.nettyquic.protocol.packets.RetryPacket;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
-public class RetryHandler implements InboundHandler {
+public class ServerRetryHandler implements InboundHandler {
 
   private final RetryToken retryTokenManager;
   private final long ttlMs;
 
-  public RetryHandler(final RetryToken retryTokenManager, final long ttl, final TimeUnit timeUnit) {
+  public ServerRetryHandler(
+      final RetryToken retryTokenManager, final long ttl, final TimeUnit timeUnit) {
     this.retryTokenManager = retryTokenManager;
     this.ttlMs = timeUnit.toMillis(ttl);
   }

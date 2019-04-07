@@ -3,8 +3,8 @@ package com.protocol7.nettyquic.server;
 import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 
 import com.protocol7.nettyquic.Pipeline;
-import com.protocol7.nettyquic.addressvalidation.RetryHandler;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
+import com.protocol7.nettyquic.addressvalidation.ServerRetryHandler;
 import com.protocol7.nettyquic.connection.InternalConnection;
 import com.protocol7.nettyquic.connection.PacketSender;
 import com.protocol7.nettyquic.connection.State;
@@ -75,7 +75,7 @@ public class ServerConnection implements InternalConnection {
     this.pipeline =
         new Pipeline(
             List.of(
-                new RetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
+                new ServerRetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
                 packetBuffer,
                 streamManager,
                 flowControlHandler),
