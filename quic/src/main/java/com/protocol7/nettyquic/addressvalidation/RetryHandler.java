@@ -2,6 +2,7 @@ package com.protocol7.nettyquic.addressvalidation;
 
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
@@ -21,29 +22,29 @@ public class RetryHandler implements InboundHandler {
 
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
-    // TODO validate state
+    if (ctx.getState() == State.Started) {
+      if (packet instanceof InitialPacket) {
+        final InitialPacket initialPacket = (InitialPacket) packet;
 
-    if (packet instanceof InitialPacket) {
-      final InitialPacket initialPacket = (InitialPacket) packet;
+        if (initialPacket.getToken().isPresent()) {
+          if (retryTokenManager.validate(
+              initialPacket.getToken().get(), ctx.getPeerAddress().getAddress(), now())) {
+            // good to go
+          } else {
+            // send retry
+            sendRetry(ctx, initialPacket);
 
-      if (initialPacket.getToken().isPresent()) {
-        if (retryTokenManager.validate(
-            initialPacket.getToken().get(), ctx.getPeerAddress().getAddress(), now())) {
-          // good to go
+            return;
+          }
         } else {
           // send retry
+          // TODO close old connection
+
           sendRetry(ctx, initialPacket);
 
+          // don't propagate packet
           return;
         }
-      } else {
-        // send retry
-        // TODO close old connection
-
-        sendRetry(ctx, initialPacket);
-
-        // don't propagate packet
-        return;
       }
     }
 

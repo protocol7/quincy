@@ -13,6 +13,7 @@ import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.TestUtil;
 import com.protocol7.nettyquic.addressvalidation.RetryHandler;
 import com.protocol7.nettyquic.addressvalidation.RetryToken;
+import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Payload;
@@ -44,6 +45,7 @@ public class RetryHandlerTest {
 
     when(ctx.getVersion()).thenReturn(Version.DRAFT_18);
     when(ctx.getPeerAddress()).thenReturn(TestUtil.getTestAddress());
+    when(ctx.getState()).thenReturn(State.Started);
   }
 
   @Test
@@ -51,21 +53,14 @@ public class RetryHandlerTest {
     InitialPacket initialPacket = p(Optional.empty());
     handler.onReceivePacket(initialPacket, ctx);
 
-    ArgumentCaptor<RetryPacket> retryCaptor = ArgumentCaptor.forClass(RetryPacket.class);
-
-    verify(ctx).sendPacket(retryCaptor.capture());
-
-    RetryPacket retry = retryCaptor.getValue();
-
-    assertEquals(initialPacket.getSourceConnectionId(), retry.getDestinationConnectionId());
-    // TODO verify token
+    assertToken(initialPacket.getSourceConnectionId());
 
     // initial packet was not propagated
     verify(ctx, never()).next(any(Packet.class));
   }
 
   @Test
-  public void retryExists() {
+  public void withToken() {
     InitialPacket initialPacket = p(of(retryToken.create(address, currentTimeMillis() + 10000)));
     handler.onReceivePacket(initialPacket, ctx);
 
@@ -73,6 +68,42 @@ public class RetryHandlerTest {
     verify(ctx, never()).sendPacket(any(Packet.class));
 
     // initial packet propagated
+    verify(ctx).next(initialPacket);
+  }
+
+  @Test
+  public void withInvalidToken() {
+    InitialPacket initialPacket = p(of("this is not a token".getBytes()));
+    handler.onReceivePacket(initialPacket, ctx);
+
+    assertToken(initialPacket.getSourceConnectionId());
+
+    // initial packet was not propagated
+    verify(ctx, never()).next(any(Packet.class));
+  }
+
+  private void assertToken(final Optional<ConnectionId> expectedDestConnId) {
+    ArgumentCaptor<RetryPacket> retryCaptor = ArgumentCaptor.forClass(RetryPacket.class);
+    verify(ctx).sendPacket(retryCaptor.capture());
+
+    RetryPacket retry = retryCaptor.getValue();
+    assertEquals(expectedDestConnId, retry.getDestinationConnectionId());
+    retryToken.validate(retry.getRetryToken(), address, currentTimeMillis() + 10000);
+  }
+
+  @Test
+  public void verifyState() {
+    // retry handler should only validate messages in the Started state.
+    // TODO if this correct?
+    when(ctx.getState()).thenReturn(State.BeforeHello);
+
+    InitialPacket initialPacket = p(Optional.empty());
+    handler.onReceivePacket(initialPacket, ctx);
+
+    // no retry packet sent
+    verify(ctx, never()).sendPacket(any(RetryPacket.class));
+
+    // initial instead packet propagated
     verify(ctx).next(initialPacket);
   }
 
