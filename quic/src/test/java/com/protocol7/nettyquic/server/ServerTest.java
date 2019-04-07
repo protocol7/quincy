@@ -18,6 +18,7 @@ import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.tls.ClientTlsSession;
 import com.protocol7.nettyquic.tls.ClientTlsSession.HandshakeResult;
 import com.protocol7.nettyquic.tls.KeyUtil;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
@@ -43,7 +44,9 @@ public class ServerTest {
   private StreamId streamId = StreamId.random(true, true);
 
   private ClientTlsSession clientTlsSession =
-      new ClientTlsSession(TransportParameters.defaults(Version.DRAFT_18.asBytes()));
+      new ClientTlsSession(
+          InitialAEAD.create(destConnectionId.asBytes(), true),
+          TransportParameters.defaults(Version.DRAFT_18.asBytes()));
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;

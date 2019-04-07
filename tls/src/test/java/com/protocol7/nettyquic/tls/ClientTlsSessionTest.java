@@ -7,6 +7,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.Extension;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
 import com.protocol7.nettyquic.tls.extensions.KeyShare;
@@ -29,9 +30,11 @@ public class ClientTlsSessionTest {
   private final byte[] version = dehex("51474fff");
 
   private final ClientTlsSession engine =
-      new ClientTlsSession(TransportParameters.defaults(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
   private final ClientTlsSession started =
-      new ClientTlsSession(TransportParameters.defaults(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
 
   @Before
   public void setUp() {

@@ -3,9 +3,11 @@ package com.protocol7.nettyquic.tls;
 import static com.protocol7.nettyquic.utils.Hex.dehex;
 
 import com.protocol7.nettyquic.tls.ServerTlsSession.ServerHelloAndHandshake;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import com.protocol7.nettyquic.tls.messages.ServerHandshake;
 import com.protocol7.nettyquic.utils.Bytes;
+import com.protocol7.nettyquic.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PrivateKey;
@@ -13,13 +15,14 @@ import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
 
-public class TlsSessions {
+public class TlsSessionTest {
 
   private final byte[] version = dehex("51474fff");
 
   private PrivateKey privateKey;
   private final ClientTlsSession client =
-      new ClientTlsSession(TransportParameters.defaults(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true), TransportParameters.defaults(version));
   private ServerTlsSession server;
 
   @Before

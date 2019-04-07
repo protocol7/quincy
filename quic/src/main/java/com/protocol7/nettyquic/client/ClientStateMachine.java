@@ -2,11 +2,14 @@ package com.protocol7.nettyquic.client;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.protocol7.nettyquic.connection.State;
+import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.*;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.tls.ClientTlsSession;
+import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.aead.InitialAEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
@@ -25,12 +28,25 @@ public class ClientStateMachine {
   private final ClientConnection connection;
   private final DefaultPromise<Void> handshakeFuture =
       new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
-  private final ClientTlsSession tlsSession;
+  private final TransportParameters transportParameters;
+  private ClientTlsSession tlsSession;
 
   public ClientStateMachine(
       final ClientConnection connection, TransportParameters transportParameters) {
     this.connection = connection;
-    this.tlsSession = new ClientTlsSession(transportParameters);
+    this.transportParameters = transportParameters;
+
+    resetTlsSession(connection.getRemoteConnectionId().get());
+  }
+
+  public void resetTlsSession(ConnectionId remoteConnectionId) {
+    this.tlsSession =
+        new ClientTlsSession(
+            InitialAEAD.create(remoteConnectionId.asBytes(), true), transportParameters);
+  }
+
+  public boolean available(EncryptionLevel encLevel) {
+    return tlsSession.available(encLevel);
   }
 
   public Future<Void> handshake() {
@@ -83,7 +99,7 @@ public class ClientStateMachine {
               final CryptoFrame cf = (CryptoFrame) frame;
 
               final AEAD handshakeAead = tlsSession.handleServerHello(cf.getCryptoData());
-              connection.setHandshakeAead(handshakeAead);
+              tlsSession.setHandshakeAead(handshakeAead);
               state = State.BeforeHandshake;
             }
           }
@@ -137,7 +153,7 @@ public class ClientStateMachine {
             tlsSession.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
-          connection.setOneRttAead(result.get().getOneRttAead());
+          tlsSession.setOneRttAead(result.get().getOneRttAead());
 
           connection.sendPacket(
               HandshakePacket.create(
@@ -191,5 +207,9 @@ public class ClientStateMachine {
 
   public void setState(final State state) {
     this.state = state;
+  }
+
+  public AEAD getAEAD(final EncryptionLevel level) {
+    return tlsSession.getAEAD(level);
   }
 }

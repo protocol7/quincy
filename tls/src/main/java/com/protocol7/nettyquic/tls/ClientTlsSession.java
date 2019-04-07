@@ -3,6 +3,7 @@ package com.protocol7.nettyquic.tls;
 import static com.protocol7.nettyquic.tls.aead.Labels.CLIENT_HANDSHAKE_TRAFFIC_SECRET;
 
 import com.protocol7.nettyquic.tls.aead.AEAD;
+import com.protocol7.nettyquic.tls.aead.AEADs;
 import com.protocol7.nettyquic.tls.aead.HandshakeAEAD;
 import com.protocol7.nettyquic.tls.aead.OneRttAEAD;
 import com.protocol7.nettyquic.tls.extensions.ExtensionType;
@@ -30,6 +31,7 @@ public class ClientTlsSession {
 
   private final TransportParameters transportParameters;
 
+  private AEADs aeads;
   private KeyExchange kek;
 
   private ByteBuf handshakeBuffer;
@@ -37,8 +39,10 @@ public class ClientTlsSession {
   private byte[] serverHello;
   private byte[] handshakeSecret;
 
-  public ClientTlsSession(final TransportParameters transportParameters) {
+  public ClientTlsSession(final AEAD initialAEAD, final TransportParameters transportParameters) {
     this.transportParameters = transportParameters;
+
+    aeads = new AEADs(initialAEAD);
     reset();
   }
 
@@ -180,6 +184,22 @@ public class ClientTlsSession {
     if (!valid) {
       throw new RuntimeException("Invalid server certificate verify");
     }
+  }
+
+  public boolean available(final EncryptionLevel encLevel) {
+    return aeads.available(encLevel);
+  }
+
+  public AEAD getAEAD(final EncryptionLevel level) {
+    return aeads.get(level);
+  }
+
+  public void setHandshakeAead(final AEAD handshakeAead) {
+    aeads.setHandshakeAead(handshakeAead);
+  }
+
+  public void setOneRttAead(final AEAD oneRttAead) {
+    aeads.setOneRttAead(oneRttAead);
   }
 
   public static class HandshakeResult {
