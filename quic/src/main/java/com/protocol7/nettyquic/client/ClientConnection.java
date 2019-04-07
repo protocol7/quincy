@@ -23,6 +23,7 @@ import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
 import com.protocol7.nettyquic.streams.StreamManager;
+import com.protocol7.nettyquic.tls.ClientTlsManager;
 import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.tls.aead.AEAD;
 import com.protocol7.nettyquic.tls.extensions.TransportParameters;
@@ -52,6 +53,7 @@ public class ClientConnection implements InternalConnection {
   private Optional<byte[]> token = Optional.empty();
 
   private final StreamManager streamManager;
+  private final ClientTlsManager tlsManager;
   private final Pipeline pipeline;
   private final InetSocketAddress peerAddress;
 
@@ -68,22 +70,24 @@ public class ClientConnection implements InternalConnection {
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
     this.packetBuffer = new PacketBuffer(this);
+    this.tlsManager =
+        new ClientTlsManager(remoteConnectionId, TransportParameters.defaults(version.asBytes()));
 
     this.pipeline =
         new Pipeline(
-            List.of(packetBuffer, streamManager, flowControlHandler), List.of(packetBuffer));
+            List.of(tlsManager, packetBuffer, streamManager, flowControlHandler),
+            List.of(packetBuffer));
 
-    this.stateMachine =
-        new ClientStateMachine(this, TransportParameters.defaults(version.asBytes()));
+    this.stateMachine = new ClientStateMachine(this);
   }
 
   private void resetTlsSession() {
-    stateMachine.resetTlsSession(remoteConnectionId);
+    tlsManager.resetTlsSession(remoteConnectionId);
   }
 
   public Future<Void> handshake() {
     MDC.put("actor", "client");
-    return stateMachine.handshake();
+    return tlsManager.handshake(this);
   }
 
   public Packet sendPacket(final Packet p) {
@@ -104,9 +108,9 @@ public class ClientConnection implements InternalConnection {
 
   public FullPacket send(final Frame... frames) {
     Packet packet;
-    if (stateMachine.available(EncryptionLevel.OneRtt)) {
+    if (tlsManager.available(EncryptionLevel.OneRtt)) {
       packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
-    } else if (stateMachine.available(EncryptionLevel.Handshake)) {
+    } else if (tlsManager.available(EncryptionLevel.Handshake)) {
       packet =
           HandshakePacket.create(
               of(remoteConnectionId), localConnectionId, nextSendPacketNumber(), version, frames);
@@ -172,9 +176,8 @@ public class ClientConnection implements InternalConnection {
     }
 
     EncryptionLevel encLevel = getEncryptionLevel(packet);
-    if (stateMachine.available(encLevel)) {
+    if (tlsManager.available(encLevel)) {
       stateMachine.handlePacket(packet);
-
       if (getState() != State.Closed) {
         pipeline.onPacket(this, packet);
       }
@@ -185,7 +188,7 @@ public class ClientConnection implements InternalConnection {
 
   @Override
   public AEAD getAEAD(final EncryptionLevel level) {
-    return stateMachine.getAEAD(level);
+    return tlsManager.getAEAD(level);
   }
 
   public Version getVersion() {
