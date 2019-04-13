@@ -129,7 +129,7 @@ public class PacketBufferManagerTest {
 
     resendTask.run();
 
-    verify(frameSender).sendPacket(pingPacket);
+    verify(frameSender).send(PingFrame.INSTANCE);
   }
 
   private Packet packet(long pn, Frame... frames) {

@@ -13,6 +13,7 @@ import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
+import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.utils.Pair;
 import com.protocol7.nettyquic.utils.Ticker;
@@ -56,8 +57,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   public void resend() {
-    final Collection<Packet> toResend = buffer.getSince(100, MILLISECONDS);
-    toResend.stream().forEach(frameSender::sendPacket);
+    final Collection<Frame> toResend = buffer.drainSince(100, MILLISECONDS);
+    toResend.stream().forEach(frameSender::send);
   }
 
   @Override
