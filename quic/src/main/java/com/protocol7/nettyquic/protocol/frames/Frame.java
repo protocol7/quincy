@@ -26,6 +26,8 @@ public abstract class Frame implements Writeable {
       return ResetStreamFrame.parse(bb);
     } else if (type == FrameType.CONNECTION_CLOSE) {
       return ConnectionCloseFrame.parse(bb);
+    } else if (type == FrameType.APPLICATION_CLOSE) {
+      return ApplicationCloseFrame.parse(bb);
     } else if (type == FrameType.MAX_STREAM_DATA) {
       return MaxStreamDataFrame.parse(bb);
     } else if (type == FrameType.MAX_DATA) {

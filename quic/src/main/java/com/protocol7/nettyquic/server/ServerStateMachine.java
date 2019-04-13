@@ -4,6 +4,7 @@ import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.TransportError;
 import com.protocol7.nettyquic.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
+import com.protocol7.nettyquic.protocol.frames.FrameType;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
@@ -68,8 +69,8 @@ public class ServerStateMachine {
 
   public void closeImmediate() {
     closeImmediate(
-        ConnectionCloseFrame.connection(
-            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+        new ConnectionCloseFrame(
+            TransportError.NO_ERROR.getValue(), FrameType.PADDING, "Closing connection"));
   }
 
   public void setState(final State state) {

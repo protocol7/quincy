@@ -254,7 +254,7 @@ public class ClientTest {
   public void peerCloseConnection() {
     handshake();
 
-    connection.onPacket(packet(ConnectionCloseFrame.connection(123, 124, "Closed")));
+    connection.onPacket(packet(new ConnectionCloseFrame(123, FrameType.STREAM, "Closed")));
 
     // verify ack
     // TODO must be acked

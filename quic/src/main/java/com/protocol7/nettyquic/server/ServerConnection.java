@@ -174,8 +174,7 @@ public class ServerConnection implements InternalConnection {
 
   public Future<Void> close(
       final TransportError error, final FrameType frameType, final String msg) {
-    stateMachine.closeImmediate(
-        ConnectionCloseFrame.connection(error.getValue(), frameType.getType(), msg));
+    stateMachine.closeImmediate(new ConnectionCloseFrame(error.getValue(), frameType, msg));
 
     return packetSender.destroy();
   }

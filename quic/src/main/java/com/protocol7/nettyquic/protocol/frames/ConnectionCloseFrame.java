@@ -21,19 +21,12 @@ public class ConnectionCloseFrame extends Frame {
 
   public static ConnectionCloseFrame parse(final ByteBuf bb) {
     final byte type = bb.readByte();
-    if (type != 0x1c && type != 0x1d) {
+    if (type != 0x1c) {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final boolean application = type == 0x1d;
-
     final int errorCode = bb.readShort();
-    final int frameType;
-    if (!application) {
-      frameType = Varint.readAsInt(bb);
-    } else {
-      frameType = 0;
-    }
+    final FrameType frameType = FrameType.fromByte(Varint.readAsByte(bb));
 
     final int reasonPhraseLength = Varint.readAsInt(bb);
 
@@ -41,30 +34,16 @@ public class ConnectionCloseFrame extends Frame {
     bb.readBytes(reasonPhraseBytes);
 
     return new ConnectionCloseFrame(
-        application, errorCode, frameType, new String(reasonPhraseBytes, StandardCharsets.UTF_8));
+        errorCode, frameType, new String(reasonPhraseBytes, StandardCharsets.UTF_8));
   }
 
-  public static ConnectionCloseFrame connection(
-      final int errorCode, final int frameType, final String reasonPhrase) {
-    return new ConnectionCloseFrame(false, errorCode, frameType, reasonPhrase);
-  }
-
-  public static ConnectionCloseFrame application(final int errorCode, final String reasonPhrase) {
-    return new ConnectionCloseFrame(true, errorCode, 0, reasonPhrase);
-  }
-
-  private final boolean application;
   private final int errorCode;
-  private final int frameType;
+  private final FrameType frameType;
   private final String reasonPhrase;
 
-  private ConnectionCloseFrame(
-      final boolean application,
-      final int errorCode,
-      final int frameType,
-      final String reasonPhrase) {
+  public ConnectionCloseFrame(
+      final int errorCode, final FrameType frameType, final String reasonPhrase) {
     super(FrameType.CONNECTION_CLOSE);
-    this.application = application;
     this.errorCode = errorCode;
     this.frameType = frameType;
     this.reasonPhrase = reasonPhrase;
@@ -74,7 +53,7 @@ public class ConnectionCloseFrame extends Frame {
     return errorCode;
   }
 
-  public int getFrameType() {
+  public FrameType getFrameType() {
     return frameType;
   }
 
@@ -84,16 +63,10 @@ public class ConnectionCloseFrame extends Frame {
 
   @Override
   public void write(final ByteBuf bb) {
-    if (application) {
-      bb.writeByte(0x1d);
-    } else {
-      bb.writeByte(0x1c);
-    }
+    bb.writeByte(0x1c);
 
     bb.writeShort(errorCode);
-    if (!application) {
-      Varint.write(frameType, bb);
-    }
+    Varint.write(frameType.getType(), bb);
 
     byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
 
@@ -104,8 +77,6 @@ public class ConnectionCloseFrame extends Frame {
   @Override
   public String toString() {
     return "ConnectionCloseFrame{"
-        + "application="
-        + application
         + ", errorCode="
         + errorCode
         + ", frameType="

@@ -47,14 +47,14 @@ public class FrameTest {
 
   @Test
   public void connectionCloseFrame() {
-    ConnectionCloseFrame ccf = ConnectionCloseFrame.connection(12, 13, "hello");
+    ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, FrameType.STREAM, "hello");
     assertFrame(ccf);
   }
 
   @Test
   public void applicationCloseFrame() {
-    ConnectionCloseFrame ccf = ConnectionCloseFrame.application(12, "hello");
-    assertFrame(ccf);
+    ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "hello");
+    assertFrame(acf);
   }
 
   @Test

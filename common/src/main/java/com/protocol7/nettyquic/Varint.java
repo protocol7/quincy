@@ -34,6 +34,10 @@ public class Varint {
     return (int) read(b);
   }
 
+  public static byte readAsByte(ByteBuf bb) {
+    return (byte) read(bb);
+  }
+
   private static long read(ByteBuf bb) {
     int first = (bb.readByte() & 0xFF);
     int size = ((first & 0b11000000) & 0xFF);

@@ -17,13 +17,13 @@ public class ConnectionCloseFrameTest {
     ConnectionCloseFrame ccf = ConnectionCloseFrame.parse(bb);
 
     assertEquals(0x19, ccf.getErrorCode());
-    assertEquals(0, ccf.getFrameType());
+    assertEquals(FrameType.PADDING, ccf.getFrameType());
     assertEquals("No recent network activity.", ccf.getReasonPhrase());
   }
 
   @Test
   public void roundtripConnection() {
-    ConnectionCloseFrame ccf = ConnectionCloseFrame.connection(12, 13, "Hello world");
+    ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, FrameType.STREAM, "Hello world");
 
     ByteBuf bb = Unpooled.buffer();
     ccf.write(bb);
@@ -32,20 +32,6 @@ public class ConnectionCloseFrameTest {
 
     assertEquals(ccf.getErrorCode(), parsed.getErrorCode());
     assertEquals(ccf.getFrameType(), parsed.getFrameType());
-    assertEquals(ccf.getReasonPhrase(), parsed.getReasonPhrase());
-  }
-
-  @Test
-  public void roundtripApplication() {
-    ConnectionCloseFrame ccf = ConnectionCloseFrame.application(12, "Hello world");
-
-    ByteBuf bb = Unpooled.buffer();
-    ccf.write(bb);
-
-    ConnectionCloseFrame parsed = ConnectionCloseFrame.parse(bb);
-
-    assertEquals(ccf.getErrorCode(), parsed.getErrorCode());
-    assertEquals(0, parsed.getFrameType());
     assertEquals(ccf.getReasonPhrase(), parsed.getReasonPhrase());
   }
 }

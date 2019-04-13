@@ -72,8 +72,8 @@ public class ClientStateMachine {
 
   public void closeImmediate() {
     closeImmediate(
-        ConnectionCloseFrame.connection(
-            TransportError.NO_ERROR.getValue(), 0, "Closing connection"));
+        new ConnectionCloseFrame(
+            TransportError.NO_ERROR.getValue(), FrameType.PADDING, "Closing connection"));
   }
 
   @VisibleForTesting

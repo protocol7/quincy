@@ -22,15 +22,18 @@ public enum FrameType {
   RETIRE_CONNECTION_ID(0x19),
   PATH_CHALLENGE(0x1a),
   PATH_RESPONSE(0x1b),
-  CONNECTION_CLOSE(0x1c); // 0x1c-0x1d
+  CONNECTION_CLOSE(0x1c),
+  APPLICATION_CLOSE(0x1d);
 
   public static FrameType fromByte(final byte b) {
     if (b == PADDING.type) {
       return PADDING;
     } else if (b == RESET_STREAM.type) {
       return RESET_STREAM;
-    } else if (b == 0x1c || b == 0x1d) {
+    } else if (b == 0x1c) {
       return CONNECTION_CLOSE;
+    } else if (b == 0x1d) {
+      return APPLICATION_CLOSE;
     } else if (b == MAX_DATA.type) {
       return MAX_DATA;
     } else if (b == MAX_STREAM_DATA.type) {
