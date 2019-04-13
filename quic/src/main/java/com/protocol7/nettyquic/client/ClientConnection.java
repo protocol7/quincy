@@ -25,7 +25,7 @@ import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import com.protocol7.nettyquic.reliability.AckDelay;
-import com.protocol7.nettyquic.reliability.PacketBuffer;
+import com.protocol7.nettyquic.reliability.PacketBufferManager;
 import com.protocol7.nettyquic.streams.DefaultStreamManager;
 import com.protocol7.nettyquic.streams.Stream;
 import com.protocol7.nettyquic.streams.StreamListener;
@@ -51,7 +51,7 @@ public class ClientConnection implements InternalConnection {
   private final Version version;
   private final AtomicReference<PacketNumber> sendPacketNumber =
       new AtomicReference<>(new PacketNumber(0));
-  private final PacketBuffer packetBuffer;
+  private final PacketBufferManager packetBuffer;
   private final ClientStateMachine stateMachine;
   private Optional<byte[]> token = Optional.empty();
 
@@ -73,7 +73,8 @@ public class ClientConnection implements InternalConnection {
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
     this.packetBuffer =
-        new PacketBuffer(new AckDelay(configuration.getAckDelayExponent(), Ticker.systemTicker()));
+        new PacketBufferManager(
+            new AckDelay(configuration.getAckDelayExponent(), Ticker.systemTicker()));
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
 

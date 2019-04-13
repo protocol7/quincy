@@ -25,12 +25,12 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class PacketBufferTest {
+public class PacketBufferManagerTest {
 
   @Mock private PipelineContext ctx;
   @Mock private AckDelay ackDelay;
 
-  private PacketBuffer buffer;
+  private PacketBufferManager buffer;
 
   @Before
   public void setUp() {
@@ -40,7 +40,7 @@ public class PacketBufferTest {
     when(ackDelay.delay(anyLong())).thenReturn(45L);
     when(ackDelay.calculate(anyLong(), any(TimeUnit.class))).thenReturn(67L);
 
-    buffer = new PacketBuffer(ackDelay);
+    buffer = new PacketBufferManager(ackDelay);
   }
 
   @Test

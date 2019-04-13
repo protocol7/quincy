@@ -28,9 +28,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 // TODO resends
-public class PacketBuffer implements InboundHandler, OutboundHandler {
+public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
-  private final Logger log = LoggerFactory.getLogger(PacketBuffer.class);
+  private final Logger log = LoggerFactory.getLogger(PacketBufferManager.class);
 
   private final Map<PacketNumber, Packet> buffer = new ConcurrentHashMap<>();
   private final BlockingQueue<Pair<Long, Long>> ackQueue = Queues.newArrayBlockingQueue(1000);
@@ -38,7 +38,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
       new AtomicReference<>(PacketNumber.MIN);
   private final AckDelay ackDelay;
 
-  public PacketBuffer(final AckDelay ackDelay) {
+  public PacketBufferManager(final AckDelay ackDelay) {
     this.ackDelay = ackDelay;
   }
 
