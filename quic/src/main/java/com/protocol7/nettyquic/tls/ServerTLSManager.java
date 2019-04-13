@@ -60,9 +60,9 @@ public class ServerTLSManager implements InboundHandler {
       } else {
         throw new IllegalStateException("Unexpected packet in BeforeInitial: " + packet);
       }
-    } else if (state == State.BeforeReady) {
-      HandshakePacket fp = (HandshakePacket) packet;
-      CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
+    } else if (state == State.BeforeReady && packet instanceof HandshakePacket) {
+      final HandshakePacket fp = (HandshakePacket) packet;
+      final CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
       tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
 
       ctx.setState(State.Ready);

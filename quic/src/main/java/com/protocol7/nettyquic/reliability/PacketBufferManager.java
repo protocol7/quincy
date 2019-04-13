@@ -57,7 +57,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   public void resend() {
-    final Collection<Frame> toResend = buffer.drainSince(100, MILLISECONDS);
+    final Collection<Frame> toResend = buffer.drainSince(1000, MILLISECONDS);
     toResend.stream().forEach(frameSender::send);
   }
 

@@ -73,7 +73,10 @@ public class QuiclyTest {
       assertTrue(packets.get(3).isInbound());
     } finally {
       if (client != null) {
-        client.close();
+        try {
+          client.close();
+        } catch (IllegalStateException ignored) {
+        }
       }
     }
   }

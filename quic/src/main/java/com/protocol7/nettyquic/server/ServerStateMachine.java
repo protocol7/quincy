@@ -37,9 +37,9 @@ public class ServerStateMachine {
           }
         }
       }
-    } else if (state == State.Ready) {
-      handleFrames((FullPacket) packet);
     }
+
+    handleFrames((FullPacket) packet);
   }
 
   private void handleFrames(FullPacket packet) {
