@@ -16,7 +16,7 @@ public class AckQueue {
 
   public void add(final FullPacket packet, final long time) {
     requireNonNull(packet);
-    ackQueue.add(new Pair<>(packet.getPacketNumber().asLong(), time));
+    ackQueue.add(Pair.of(packet.getPacketNumber().asLong(), time));
   }
 
   public Collection<Pair<Long, Long>> drain() {

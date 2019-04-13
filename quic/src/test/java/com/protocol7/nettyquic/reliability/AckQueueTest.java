@@ -36,7 +36,7 @@ public class AckQueueTest {
     queue.add(packet1, 123);
     queue.add(packet2, 456);
 
-    assertEquals(List.of(new Pair<>(1L, 123L), new Pair<>(2L, 456L)), queue.drain());
+    assertEquals(List.of(Pair.of(1L, 123L), Pair.of(2L, 456L)), queue.drain());
 
     assertTrue(queue.drain().isEmpty());
   }

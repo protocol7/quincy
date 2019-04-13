@@ -6,10 +6,14 @@ import java.util.Objects;
 
 public class Pair<F, S> {
 
+  public static <F, S> Pair<F, S> of(F f, S s) {
+    return new Pair<>(f, s);
+  }
+
   private final F first;
   private final S second;
 
-  public Pair(final F first, final S second) {
+  private Pair(final F first, final S second) {
     this.first = requireNonNull(first);
     this.second = requireNonNull(second);
   }

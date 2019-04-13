@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ScheduledExecutorService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,14 +24,17 @@ public class Connections {
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
+  private final ScheduledExecutorService scheduler;
 
   public Connections(
       final Configuration configuration,
       final List<byte[]> certificates,
-      final PrivateKey privateKey) {
+      final PrivateKey privateKey,
+      final ScheduledExecutorService scheduler) {
     this.configuration = configuration;
     this.certificates = certificates;
     this.privateKey = privateKey;
+    this.scheduler = scheduler;
   }
 
   public ServerConnection get(
@@ -54,7 +58,8 @@ public class Connections {
               privateKey,
               new DefaultFlowControlHandler(
                   configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
-              peerAddress);
+              peerAddress,
+              scheduler);
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

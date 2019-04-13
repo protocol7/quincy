@@ -5,6 +5,7 @@ import static org.mockito.Mockito.when;
 
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
+import com.protocol7.nettyquic.utils.Ticker;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,7 +18,7 @@ public class PacketBufferTest {
   @Mock private FullPacket packet;
   private PacketNumber pn = PacketNumber.MIN;
 
-  private PacketBuffer buffer = new PacketBuffer();
+  private PacketBuffer buffer = new PacketBuffer(Ticker.systemTicker());
 
   @Before
   public void setUp() {

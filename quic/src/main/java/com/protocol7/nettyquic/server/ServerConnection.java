@@ -36,6 +36,7 @@ import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -61,16 +62,20 @@ public class ServerConnection implements InternalConnection {
       final List<byte[]> certificates,
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
-      final InetSocketAddress peerAddress) {
+      final InetSocketAddress peerAddress,
+      final ScheduledExecutorService scheduler) {
     this.version = configuration.getVersion();
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     final TransportParameters transportParameters = configuration.toTransportParameters();
 
     final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
+
+    final Ticker ticker = Ticker.systemTicker();
+
     final PacketBufferManager packetBuffer =
         new PacketBufferManager(
-            new AckDelay(configuration.getAckDelayExponent(), Ticker.systemTicker()));
+            new AckDelay(configuration.getAckDelayExponent(), ticker), this, scheduler, ticker);
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
+import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.PipelineContext;
 import com.protocol7.nettyquic.connection.State;
 import com.protocol7.nettyquic.protocol.ConnectionId;
@@ -15,7 +16,9 @@ import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.PingFrame;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.utils.Ticker;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -28,19 +31,32 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PacketBufferManagerTest {
 
   @Mock private PipelineContext ctx;
+  @Mock private FrameSender frameSender;
   @Mock private AckDelay ackDelay;
+  @Mock private ScheduledExecutorService scheduler;
+  @Mock private Ticker ticker;
 
   private PacketBufferManager buffer;
+  private Runnable resendTask;
 
   @Before
   public void setUp() {
     when(ctx.getState()).thenReturn(State.Ready);
 
-    when(ackDelay.time()).thenReturn(123L);
+    when(ackDelay.time()).thenReturn(2000_0000_0000L);
     when(ackDelay.delay(anyLong())).thenReturn(45L);
     when(ackDelay.calculate(anyLong(), any(TimeUnit.class))).thenReturn(67L);
 
-    buffer = new PacketBufferManager(ackDelay);
+    when(ticker.nanoTime()).thenReturn(2000_0000_0000L);
+
+    ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
+    when(scheduler.scheduleAtFixedRate(
+            taskCaptor.capture(), anyLong(), anyLong(), any(TimeUnit.class)))
+        .thenReturn(null);
+
+    buffer = new PacketBufferManager(ackDelay, frameSender, scheduler, ticker);
+
+    resendTask = taskCaptor.getValue();
   }
 
   @Test
@@ -100,6 +116,20 @@ public class PacketBufferManagerTest {
 
     // all messages should now have been acked
     assertBufferEmpty();
+  }
+
+  @Test
+  public void resend() {
+    Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    buffer.beforeSendPacket(pingPacket, ctx);
+    assertBuffered(2);
+
+    // move time forward
+    when(ticker.nanoTime()).thenReturn(3000_0000_0000L);
+
+    resendTask.run();
+
+    verify(frameSender).sendPacket(pingPacket);
   }
 
   private Packet packet(long pn, Frame... frames) {

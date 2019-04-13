@@ -40,7 +40,7 @@ public class ConnectionId {
     final int dcil = firstLength(cil);
     final int scil = lastLength(cil);
 
-    return new Pair(readOptional(dcil, bb), readOptional(scil, bb));
+    return Pair.of(readOptional(dcil, bb), readOptional(scil, bb));
   }
 
   private static int firstLength(final int cil) {

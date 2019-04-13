@@ -25,6 +25,7 @@ import io.netty.util.concurrent.SucceededFuture;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -50,6 +51,7 @@ public class ServerTest {
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
+  @Mock private ScheduledExecutorService scheduler;
   private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   @Before
@@ -69,7 +71,8 @@ public class ServerTest {
             certificates,
             privateKey,
             flowControlHandler,
-            TestUtil.getTestAddress());
+            TestUtil.getTestAddress(),
+            scheduler);
   }
 
   @Test

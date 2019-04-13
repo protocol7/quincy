@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.reliability;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.VisibleForTesting;
@@ -14,34 +15,49 @@ import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.utils.Pair;
+import com.protocol7.nettyquic.utils.Ticker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-// TODO resends
 public class PacketBufferManager implements InboundHandler, OutboundHandler {
+
+  private static final long RESEND_DELAY = 10;
 
   private final Logger log = LoggerFactory.getLogger(PacketBufferManager.class);
 
-  private final PacketBuffer buffer = new PacketBuffer();
+  private final PacketBuffer buffer;
   private final AckQueue ackQueue = new AckQueue();
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
   private final AckDelay ackDelay;
+  private final FrameSender frameSender;
+  private final ScheduledExecutorService scheduler;
 
-  public PacketBufferManager(final AckDelay ackDelay) {
+  public PacketBufferManager(
+      final AckDelay ackDelay,
+      final FrameSender frameSender,
+      final ScheduledExecutorService scheduler,
+      final Ticker ticker) {
     this.ackDelay = requireNonNull(ackDelay);
+    this.frameSender = frameSender;
+
+    buffer = new PacketBuffer(ticker);
+
+    this.scheduler = scheduler;
+    this.scheduler.scheduleAtFixedRate(this::resend, RESEND_DELAY, RESEND_DELAY, MILLISECONDS);
   }
 
-  @VisibleForTesting
-  protected PacketBuffer getBuffer() {
-    return buffer;
+  public void resend() {
+    final Collection<Packet> toResend = buffer.getSince(100, MILLISECONDS);
+    toResend.stream().forEach(frameSender::sendPacket);
   }
 
   @Override
@@ -145,7 +161,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   private Pair<List<AckBlock>, Long> drainAcks() {
     final Collection<Pair<Long, Long>> pns = ackQueue.drain();
     if (pns.isEmpty()) {
-      return new Pair<>(Collections.emptyList(), 0L);
+      return Pair.of(Collections.emptyList(), 0L);
     }
 
     long largestPnQueueTime =
@@ -173,10 +189,15 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     }
     blocks.add(AckBlock.fromLongs(lower, upper));
 
-    return new Pair<>(blocks, ackDelay.delay(largestPnQueueTime));
+    return Pair.of(blocks, ackDelay.delay(largestPnQueueTime));
   }
 
   private static boolean acksOnly(final FullPacket packet) {
     return packet.getPayload().getFrames().stream().allMatch(frame -> frame instanceof AckFrame);
+  }
+
+  @VisibleForTesting
+  protected PacketBuffer getBuffer() {
+    return buffer;
   }
 }

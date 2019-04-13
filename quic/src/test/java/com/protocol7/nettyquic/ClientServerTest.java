@@ -28,6 +28,7 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.SucceededFuture;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.concurrent.ScheduledExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -51,6 +52,7 @@ public class ClientServerTest {
 
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
+  private @Mock ScheduledExecutorService scheduler;
   private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   public static class ForwardingPacketSender implements PacketSender {
@@ -85,7 +87,8 @@ public class ClientServerTest {
             clientListener,
             clientSender,
             flowControlHandler,
-            TestUtil.getTestAddress());
+            TestUtil.getTestAddress(),
+            scheduler);
 
     List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
@@ -99,7 +102,8 @@ public class ClientServerTest {
             certificates,
             privateKey,
             flowControlHandler,
-            TestUtil.getTestAddress());
+            TestUtil.getTestAddress(),
+            scheduler);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

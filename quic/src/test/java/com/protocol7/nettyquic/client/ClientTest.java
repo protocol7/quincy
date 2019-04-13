@@ -23,6 +23,7 @@ import io.netty.util.concurrent.*;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -47,6 +48,7 @@ public class ClientTest {
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
   @Mock private FlowControlHandler flowControlHandler;
+  @Mock private ScheduledExecutorService scheduler;
 
   @Before
   public void setUp() {
@@ -62,7 +64,8 @@ public class ClientTest {
             streamListener,
             packetSender,
             flowControlHandler,
-            TestUtil.getTestAddress());
+            TestUtil.getTestAddress(),
+            scheduler);
 
     PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
     List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");

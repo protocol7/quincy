@@ -38,6 +38,7 @@ import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.MDC;
 
@@ -66,15 +67,19 @@ public class ClientConnection implements InternalConnection {
       final StreamListener streamListener,
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
-      final InetSocketAddress peerAddress) {
+      final InetSocketAddress peerAddress,
+      final ScheduledExecutorService scheduler) {
     this.version = configuration.getVersion();
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
     this.streamManager = new DefaultStreamManager(this, streamListener);
+
+    final Ticker ticker = Ticker.systemTicker();
+
     this.packetBuffer =
         new PacketBufferManager(
-            new AckDelay(configuration.getAckDelayExponent(), Ticker.systemTicker()));
+            new AckDelay(configuration.getAckDelayExponent(), ticker), this, scheduler, ticker);
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
 
@@ -215,7 +220,7 @@ public class ClientConnection implements InternalConnection {
     stateMachine.closeImmediate(
         ConnectionCloseFrame.connection(error.getValue(), frameType.getType(), msg));
 
-    return packetSender.destroy();
+    return closeInternal();
   }
 
   @Override
@@ -226,10 +231,14 @@ public class ClientConnection implements InternalConnection {
   public Future<Void> close() {
     stateMachine.closeImmediate();
 
-    return packetSender.destroy();
+    return closeInternal();
   }
 
   public Future<Void> closeByPeer() {
+    return closeInternal();
+  }
+
+  private Future<Void> closeInternal() {
     return packetSender.destroy();
   }
 
