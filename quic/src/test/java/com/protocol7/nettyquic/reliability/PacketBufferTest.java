@@ -15,8 +15,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PacketBufferTest {
 
   @Mock private FullPacket packet;
-
   private PacketNumber pn = PacketNumber.MIN;
+
   private PacketBuffer buffer = new PacketBuffer();
 
   @Before

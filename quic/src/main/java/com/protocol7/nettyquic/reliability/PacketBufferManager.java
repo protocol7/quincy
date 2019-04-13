@@ -4,7 +4,6 @@ import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.VisibleForTesting;
-import com.google.common.collect.Queues;
 import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.OutboundHandler;
@@ -16,10 +15,10 @@ import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.utils.Pair;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   private final Logger log = LoggerFactory.getLogger(PacketBufferManager.class);
 
   private final PacketBuffer buffer = new PacketBuffer();
-  private final BlockingQueue<Pair<Long, Long>> ackQueue = Queues.newArrayBlockingQueue(1000);
+  private final AckQueue ackQueue = new AckQueue();
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
   private final AckDelay ackDelay;
@@ -77,7 +76,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
       FullPacket fp = (FullPacket) packet;
       if (ctx.getState() != State.Started) {
-        ackQueue.add(new Pair<>(fp.getPacketNumber().asLong(), ackDelay.time()));
+        ackQueue.add(fp, ackDelay.time());
         log.debug("Acked packet {}", fp.getPacketNumber());
 
         handleAcks(packet);
@@ -144,8 +143,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   // TODO break out and test directly
   private Pair<List<AckBlock>, Long> drainAcks() {
-    final List<Pair<Long, Long>> pns = new ArrayList<>();
-    ackQueue.drainTo(pns);
+    final Collection<Pair<Long, Long>> pns = ackQueue.drain();
     if (pns.isEmpty()) {
       return new Pair<>(Collections.emptyList(), 0L);
     }
