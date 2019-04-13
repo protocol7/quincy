@@ -1,5 +1,7 @@
 package com.protocol7.nettyquic.reliability;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.nettyquic.utils.Ticker;
 import java.util.concurrent.TimeUnit;
 
@@ -10,7 +12,7 @@ public class AckDelay {
 
   public AckDelay(final int ackDelayExponent, final Ticker ticker) {
     this.ackDelayMultiplier = (int) Math.pow(2, ackDelayExponent);
-    this.ticker = ticker;
+    this.ticker = requireNonNull(ticker);
   }
 
   public long calculate(long delay, TimeUnit unit) {

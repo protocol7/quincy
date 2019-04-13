@@ -36,7 +36,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   private final AckDelay ackDelay;
 
   public PacketBufferManager(final AckDelay ackDelay) {
-    this.ackDelay = ackDelay;
+    this.ackDelay = requireNonNull(ackDelay);
   }
 
   @VisibleForTesting
@@ -133,7 +133,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     final Pair<List<AckBlock>, Long> drained = drainAcks();
     List<AckBlock> blocks = drained.getFirst();
     if (!blocks.isEmpty()) {
-      long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
+      final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
       final AckFrame ackFrame = new AckFrame(delay, blocks);
       sender.send(ackFrame);
 
@@ -152,8 +152,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         pns.stream().max(Comparator.comparingLong(Pair::getFirst)).get().getSecond();
 
     final List<Long> pnsLong =
-        pns.stream().map(pair -> pair.getFirst()).collect(Collectors.toList());
-    Collections.sort(pnsLong);
+        pns.stream().map(Pair::getFirst).sorted().collect(Collectors.toList());
 
     final List<AckBlock> blocks = new ArrayList<>();
     long lower = -1;
