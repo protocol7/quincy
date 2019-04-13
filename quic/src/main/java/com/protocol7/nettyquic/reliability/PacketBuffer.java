@@ -1,6 +1,7 @@
 package com.protocol7.nettyquic.reliability;
 
 import static java.util.Objects.requireNonNull;
+import static java.util.concurrent.TimeUnit.NANOSECONDS;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Queues;
@@ -14,7 +15,6 @@ import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.packets.*;
 import com.protocol7.nettyquic.utils.Pair;
-import com.protocol7.nettyquic.utils.Ticker;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -36,12 +36,10 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
   private final BlockingQueue<Pair<Long, Long>> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
-  private final int ackDelayMultiplier;
-  private final Ticker ticker;
+  private final AckDelay ackDelay;
 
-  public PacketBuffer(final int ackDelayExponent, final Ticker ticker) {
-    this.ackDelayMultiplier = (int) Math.pow(2, ackDelayExponent);
-    this.ticker = ticker;
+  public PacketBuffer(final AckDelay ackDelay) {
+    this.ackDelay = ackDelay;
   }
 
   @VisibleForTesting
@@ -62,8 +60,8 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
       final List<AckBlock> ackBlocks = drained.getFirst();
       if (!ackBlocks.isEmpty()) {
         // add to packet
-        long ackDelay = toAckDelay(drained.getSecond());
-        final AckFrame ackFrame = new AckFrame(ackDelay, ackBlocks);
+        long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
+        final AckFrame ackFrame = new AckFrame(delay, ackBlocks);
         fp = fp.addFrame(ackFrame);
       }
 
@@ -81,7 +79,7 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
       FullPacket fp = (FullPacket) packet;
       if (ctx.getState() != State.Started) {
-        ackQueue.add(new Pair<>(fp.getPacketNumber().asLong(), ticker.nanoTime()));
+        ackQueue.add(new Pair<>(fp.getPacketNumber().asLong(), ackDelay.time()));
         log.debug("Acked packet {}", fp.getPacketNumber());
 
         handleAcks(packet);
@@ -138,16 +136,12 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     final Pair<List<AckBlock>, Long> drained = drainAcks();
     List<AckBlock> blocks = drained.getFirst();
     if (!blocks.isEmpty()) {
-      long ackDelay = toAckDelay(drained.getSecond());
-      final AckFrame ackFrame = new AckFrame(ackDelay, blocks);
+      long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
+      final AckFrame ackFrame = new AckFrame(delay, blocks);
       sender.send(ackFrame);
 
       log.debug("Flushed acks {}", blocks);
     }
-  }
-
-  private long toAckDelay(long delayNs) {
-    return delayNs / 1000 / ackDelayMultiplier;
   }
 
   // TODO break out and test directly
@@ -155,13 +149,11 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     final List<Pair<Long, Long>> pns = new ArrayList<>();
     ackQueue.drainTo(pns);
     if (pns.isEmpty()) {
-      return new Pair(Collections.emptyList(), 0);
+      return new Pair<>(Collections.emptyList(), 0L);
     }
 
     long largestPnQueueTime =
         pns.stream().max(Comparator.comparingLong(Pair::getFirst)).get().getSecond();
-
-    long delay = Math.max(ticker.nanoTime() - largestPnQueueTime, 0);
 
     final List<Long> pnsLong =
         pns.stream().map(pair -> pair.getFirst()).collect(Collectors.toList());
@@ -186,10 +178,10 @@ public class PacketBuffer implements InboundHandler, OutboundHandler {
     }
     blocks.add(AckBlock.fromLongs(lower, upper));
 
-    return new Pair(blocks, delay);
+    return new Pair<>(blocks, ackDelay.delay(largestPnQueueTime));
   }
 
-  private boolean acksOnly(final FullPacket packet) {
+  private static boolean acksOnly(final FullPacket packet) {
     return packet.getPayload().getFrames().stream().allMatch(frame -> frame instanceof AckFrame);
   }
 }
