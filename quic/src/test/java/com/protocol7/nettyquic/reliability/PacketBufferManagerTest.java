@@ -123,7 +123,7 @@ public class PacketBufferManagerTest {
 
   private void assertBuffered(long packetNumber) {
     // packet buffered for future acking
-    assertTrue(buffer.getBuffer().containsKey(new PacketNumber(packetNumber)));
+    assertTrue(buffer.getBuffer().contains(new PacketNumber(packetNumber)));
   }
 
   private void assertBufferEmpty() {

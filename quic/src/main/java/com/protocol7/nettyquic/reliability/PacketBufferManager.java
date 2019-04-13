@@ -19,9 +19,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -32,7 +30,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private final Logger log = LoggerFactory.getLogger(PacketBufferManager.class);
 
-  private final Map<PacketNumber, Packet> buffer = new ConcurrentHashMap<>();
+  private final PacketBuffer buffer = new PacketBuffer();
   private final BlockingQueue<Pair<Long, Long>> ackQueue = Queues.newArrayBlockingQueue(1000);
   private final AtomicReference<PacketNumber> largestAcked =
       new AtomicReference<>(PacketNumber.MIN);
@@ -43,7 +41,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   @VisibleForTesting
-  protected Map<PacketNumber, Packet> getBuffer() {
+  protected PacketBuffer getBuffer() {
     return buffer;
   }
 
@@ -54,7 +52,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
     if (packet instanceof FullPacket) {
       FullPacket fp = (FullPacket) packet;
-      buffer.put(fp.getPacketNumber(), packet);
+      buffer.put(fp);
 
       final Pair<List<AckBlock>, Long> drained = drainAcks();
       final List<AckBlock> ackBlocks = drained.getFirst();
@@ -125,7 +123,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     final long largest = block.getLargest().asLong();
     for (long i = smallest; i <= largest; i++) {
       final PacketNumber pn = new PacketNumber(i);
-      if (buffer.remove(pn) != null) {
+      if (buffer.remove(pn)) {
         log.debug("Acked packet {}", pn);
         largestAcked.getAndAccumulate(pn, PacketNumber::max);
       }
