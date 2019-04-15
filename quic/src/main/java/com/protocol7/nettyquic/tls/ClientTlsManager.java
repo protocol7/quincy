@@ -99,10 +99,13 @@ public class ClientTlsManager implements InboundHandler {
             tlsSession.handleHandshake(cf.getCryptoData());
 
         if (result.isPresent()) {
+          tlsSession.unsetInitialAead();
+
           ctx.send(new CryptoFrame(0, result.get().getFin()));
 
           tlsSession.setOneRttAead(result.get().getOneRttAead());
 
+          tlsSession.unsetHandshakeAead();
           ctx.setState(State.Ready);
           handshakeFuture.setSuccess(null);
         }

@@ -11,17 +11,17 @@ public class AEADs {
 
   private final Logger log = LoggerFactory.getLogger(AEADs.class);
 
-  private final AEAD initialAead;
+  private final AtomicReference<AEAD> initialAead;
   private final AtomicReference<AEAD> handshakeAead = new AtomicReference<>();
   private final AtomicReference<AEAD> oneRttAead = new AtomicReference<>();
 
   public AEADs(final AEAD initialAead) {
-    this.initialAead = requireNonNull(initialAead);
+    this.initialAead = new AtomicReference<>(requireNonNull(initialAead));
   }
 
   public boolean available(final EncryptionLevel level) {
     if (level == EncryptionLevel.Initial) {
-      return true;
+      return initialAead.get() != null;
     } else if (level == EncryptionLevel.Handshake) {
       return handshakeAead.get() != null;
     } else {
@@ -33,8 +33,13 @@ public class AEADs {
     requireNonNull(level);
 
     if (level == EncryptionLevel.Initial) {
-      log.debug("Using initial AEAD: {}", initialAead);
-      return initialAead;
+      final AEAD aead = initialAead.get();
+      if (aead == null) {
+        throw new IllegalStateException("Initial AEAD not set");
+      }
+
+      log.debug("Using initial AEAD: {}", aead);
+      return aead;
     } else if (level == EncryptionLevel.Handshake) {
       final AEAD aead = handshakeAead.get();
       if (aead == null) {
@@ -52,6 +57,14 @@ public class AEADs {
       log.debug("Using 1-RTT AEAD: {}", aead);
       return aead;
     }
+  }
+
+  public void unsetInitialAead() {
+    this.initialAead.set(null);
+  }
+
+  public void unsetHandshakeAead() {
+    this.handshakeAead.set(null);
   }
 
   public void setHandshakeAead(final AEAD handshakeAead) {

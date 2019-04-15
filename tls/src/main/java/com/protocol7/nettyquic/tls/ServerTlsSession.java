@@ -162,6 +162,14 @@ public class ServerTlsSession {
     return aeads.available(level);
   }
 
+  public void unsetInitialAead() {
+    aeads.unsetInitialAead();
+  }
+
+  public void unsetHandshakeAead() {
+    aeads.unsetHandshakeAead();
+  }
+
   public static class ServerHelloAndHandshake {
 
     private final byte[] serverHello;

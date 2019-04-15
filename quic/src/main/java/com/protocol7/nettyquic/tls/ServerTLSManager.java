@@ -65,6 +65,9 @@ public class ServerTLSManager implements InboundHandler {
       final CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
       tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
 
+      tlsSession.unsetInitialAead();
+      tlsSession.unsetHandshakeAead();
+
       ctx.setState(State.Ready);
     }
 

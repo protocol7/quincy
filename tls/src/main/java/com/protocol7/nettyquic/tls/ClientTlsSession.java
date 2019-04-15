@@ -195,6 +195,14 @@ public class ClientTlsSession {
     aeads.setOneRttAead(oneRttAead);
   }
 
+  public void unsetInitialAead() {
+    aeads.unsetInitialAead();
+  }
+
+  public void unsetHandshakeAead() {
+    aeads.unsetHandshakeAead();
+  }
+
   public static class HandshakeResult {
     private final byte[] fin;
     private final AEAD oneRttAead;
