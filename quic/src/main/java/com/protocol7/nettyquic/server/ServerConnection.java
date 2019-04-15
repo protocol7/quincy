@@ -1,6 +1,5 @@
 package com.protocol7.nettyquic.server;
 
-import static com.protocol7.nettyquic.tls.EncryptionLevel.Initial;
 import static java.util.Optional.empty;
 
 import com.protocol7.nettyquic.Configuration;
@@ -145,7 +144,9 @@ public class ServerConnection implements InternalConnection {
   }
 
   private void sendPacketUnbuffered(Packet packet) {
-    packetSender.send(packet, getAEAD(Initial)).awaitUninterruptibly(); // TODO fix
+    packetSender
+        .send(packet, getAEAD(Packet.getEncryptionLevel(packet)))
+        .awaitUninterruptibly(); // TODO fix
   }
 
   public void onPacket(Packet packet) {
