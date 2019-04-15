@@ -24,8 +24,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class PacketBufferTest {
 
   @Mock private Ticker ticker;
-  private PacketNumber pn1 = new PacketNumber(1);
-  private PacketNumber pn2 = new PacketNumber(2);
+  private long pn1 = 1;
+  private long pn2 = 2;
   private FullPacket packet1 = p(pn1);
   private FullPacket packet2 = p(pn2);
 
@@ -79,8 +79,8 @@ public class PacketBufferTest {
     assertTrue(buffer.drainSince(10, TimeUnit.NANOSECONDS).isEmpty());
   }
 
-  private FullPacket p(PacketNumber pn) {
-    return ShortPacket.create(false, Optional.empty(), pn, f(pn.asLong()));
+  private FullPacket p(long pn) {
+    return ShortPacket.create(false, Optional.empty(), new PacketNumber(pn), f(pn));
   }
 
   private Frame f(long i) {

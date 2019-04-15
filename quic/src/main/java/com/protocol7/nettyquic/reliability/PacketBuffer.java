@@ -3,7 +3,6 @@ package com.protocol7.nettyquic.reliability;
 import static com.protocol7.nettyquic.utils.Pair.of;
 import static java.util.Objects.requireNonNull;
 
-import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.packets.FullPacket;
 import com.protocol7.nettyquic.utils.Pair;
@@ -18,8 +17,7 @@ import java.util.stream.Collectors;
 
 public class PacketBuffer {
 
-  private final ConcurrentMap<PacketNumber, Pair<List<Frame>, Long>> buffer =
-      new ConcurrentHashMap<>();
+  private final ConcurrentMap<Long, Pair<List<Frame>, Long>> buffer = new ConcurrentHashMap<>();
   private final Ticker ticker;
 
   public PacketBuffer(final Ticker ticker) {
@@ -28,16 +26,15 @@ public class PacketBuffer {
 
   public void put(final FullPacket packet) {
     requireNonNull(packet);
-    buffer.put(packet.getPacketNumber(), of(packet.getPayload().getFrames(), ticker.nanoTime()));
+    buffer.put(
+        packet.getPacketNumber().asLong(), of(packet.getPayload().getFrames(), ticker.nanoTime()));
   }
 
-  public boolean remove(final PacketNumber packetNumber) {
-    requireNonNull(packetNumber);
+  public boolean remove(final long packetNumber) {
     return buffer.remove(packetNumber) != null;
   }
 
-  public boolean contains(final PacketNumber packetNumber) {
-    requireNonNull(packetNumber);
+  public boolean contains(final long packetNumber) {
     return buffer.containsKey(packetNumber);
   }
 
@@ -48,7 +45,7 @@ public class PacketBuffer {
   public Collection<Frame> drainSince(final long ttl, final TimeUnit unit) {
     final long since = ticker.nanoTime() - unit.toNanos(ttl);
 
-    final List<Entry<PacketNumber, Pair<List<Frame>, Long>>> toDrain =
+    final List<Entry<Long, Pair<List<Frame>, Long>>> toDrain =
         buffer
             .entrySet()
             .stream()

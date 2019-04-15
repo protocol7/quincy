@@ -1,11 +1,12 @@
 package com.protocol7.nettyquic.reliability;
 
+import static com.protocol7.nettyquic.tls.EncryptionLevel.OneRtt;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
 import com.protocol7.nettyquic.protocol.PacketNumber;
-import com.protocol7.nettyquic.protocol.packets.FullPacket;
-import com.protocol7.nettyquic.utils.Pair;
+import com.protocol7.nettyquic.protocol.packets.ShortPacket;
+import com.protocol7.nettyquic.reliability.AckQueue.Entry;
 import java.util.List;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,8 +17,8 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class AckQueueTest {
 
-  @Mock private FullPacket packet1;
-  @Mock private FullPacket packet2;
+  @Mock private ShortPacket packet1;
+  @Mock private ShortPacket packet2;
   private PacketNumber pn1 = new PacketNumber(1);
   private PacketNumber pn2 = new PacketNumber(2);
 
@@ -31,13 +32,13 @@ public class AckQueueTest {
 
   @Test
   public void test() {
-    assertTrue(queue.drain().isEmpty());
+    assertTrue(queue.drain(OneRtt).isEmpty());
 
     queue.add(packet1, 123);
     queue.add(packet2, 456);
 
-    assertEquals(List.of(Pair.of(1L, 123L), Pair.of(2L, 456L)), queue.drain());
+    assertEquals(List.of(new Entry(1L, 123L), new Entry(2L, 456L)), queue.drain(OneRtt));
 
-    assertTrue(queue.drain().isEmpty());
+    assertTrue(queue.drain(OneRtt).isEmpty());
   }
 }

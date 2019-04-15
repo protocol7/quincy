@@ -1,5 +1,6 @@
 package com.protocol7.nettyquic.reliability;
 
+import static com.protocol7.nettyquic.protocol.packets.Packet.getEncryptionLevel;
 import static java.util.Objects.requireNonNull;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.NANOSECONDS;
@@ -9,12 +10,12 @@ import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.InboundHandler;
 import com.protocol7.nettyquic.OutboundHandler;
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.State;
-import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.packets.*;
+import com.protocol7.nettyquic.reliability.AckQueue.Entry;
+import com.protocol7.nettyquic.tls.EncryptionLevel;
 import com.protocol7.nettyquic.utils.Pair;
 import com.protocol7.nettyquic.utils.Ticker;
 import java.util.ArrayList;
@@ -34,10 +35,11 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private final Logger log = LoggerFactory.getLogger(PacketBufferManager.class);
 
+  private final PacketBuffer initialBuffer;
+  private final PacketBuffer handshakeBuffer;
   private final PacketBuffer buffer;
   private final AckQueue ackQueue = new AckQueue();
-  private final AtomicReference<PacketNumber> largestAcked =
-      new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<Long> largestAcked = new AtomicReference<>(0L);
   private final AckDelay ackDelay;
   private final FrameSender frameSender;
   private final ScheduledExecutorService scheduler;
@@ -50,6 +52,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     this.ackDelay = requireNonNull(ackDelay);
     this.frameSender = frameSender;
 
+    initialBuffer = new PacketBuffer(ticker);
+    handshakeBuffer = new PacketBuffer(ticker);
     buffer = new PacketBuffer(ticker);
 
     this.scheduler = scheduler;
@@ -68,9 +72,9 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
     if (packet instanceof FullPacket) {
       FullPacket fp = (FullPacket) packet;
-      buffer.put(fp);
+      buffer(fp);
 
-      final Pair<List<AckBlock>, Long> drained = drainAcks();
+      final Pair<List<AckBlock>, Long> drained = drainAcks(getEncryptionLevel(fp));
       final List<AckBlock> ackBlocks = drained.getFirst();
       if (!ackBlocks.isEmpty()) {
         // add to packet
@@ -85,23 +89,33 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     }
   }
 
+  private void buffer(FullPacket packet) {
+    EncryptionLevel level = getEncryptionLevel(packet);
+    if (level == EncryptionLevel.Initial) {
+      initialBuffer.put(packet);
+    } else if (level == EncryptionLevel.Handshake) {
+      handshakeBuffer.put(packet);
+    } else {
+      buffer.put(packet);
+    }
+  }
+
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
     requireNonNull(packet);
     requireNonNull(ctx);
 
-    if (packet instanceof FullPacket && !(packet instanceof InitialPacket)) {
+    if (packet instanceof FullPacket) {
       FullPacket fp = (FullPacket) packet;
-      if (ctx.getState() != State.Started) {
-        ackQueue.add(fp, ackDelay.time());
-        log.debug("Acked packet {}", fp.getPacketNumber());
+      ackQueue.add(fp, ackDelay.time());
+      log.debug("Acked packet {}", fp.getPacketNumber());
 
-        handleAcks(packet);
+      handleAcks(packet);
 
-        if (shouldFlush(packet)) {
-          log.debug("Directly acking packet");
-          flushAcks(ctx);
-        }
+      if (shouldFlush(packet)) {
+        log.debug("Directly acking packet");
+        final EncryptionLevel level = getEncryptionLevel(packet);
+        flushAcks(level, ctx);
       }
     }
 
@@ -120,34 +134,45 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private void handleAcks(final Packet packet) {
     if (packet instanceof FullPacket) {
+      EncryptionLevel level = getEncryptionLevel(packet);
+
       ((FullPacket) packet)
           .getPayload()
           .getFrames()
           .stream()
           .filter(frame -> frame instanceof AckFrame)
-          .forEach(frame -> handleAcks((AckFrame) frame));
+          .forEach(frame -> handleAcks((AckFrame) frame, level));
     }
   }
 
-  private void handleAcks(final AckFrame frame) {
-    frame.getBlocks().forEach(this::handleAcks);
+  private void handleAcks(final AckFrame frame, final EncryptionLevel level) {
+    frame.getBlocks().forEach(b -> handleAcks(b, level));
   }
 
-  private void handleAcks(final AckBlock block) {
+  private void handleAcks(final AckBlock block, final EncryptionLevel level) {
     // TODO optimize
     final long smallest = block.getSmallest().asLong();
     final long largest = block.getLargest().asLong();
-    for (long i = smallest; i <= largest; i++) {
-      final PacketNumber pn = new PacketNumber(i);
-      if (buffer.remove(pn)) {
-        log.debug("Acked packet {}", pn);
-        largestAcked.getAndAccumulate(pn, PacketNumber::max);
+    for (long pn = smallest; pn <= largest; pn++) {
+      if (ack(pn, level)) {
+        log.debug("Acked packet {} at level {}", pn, level);
+        largestAcked.getAndAccumulate(pn, Math::max);
       }
     }
   }
 
-  private void flushAcks(final FrameSender sender) {
-    final Pair<List<AckBlock>, Long> drained = drainAcks();
+  private boolean ack(long pn, final EncryptionLevel level) {
+    if (level == EncryptionLevel.Initial) {
+      return initialBuffer.remove(pn);
+    } else if (level == EncryptionLevel.Handshake) {
+      return handshakeBuffer.remove(pn);
+    } else {
+      return buffer.remove(pn);
+    }
+  }
+
+  private void flushAcks(final EncryptionLevel level, final FrameSender sender) {
+    final Pair<List<AckBlock>, Long> drained = drainAcks(level);
     List<AckBlock> blocks = drained.getFirst();
     if (!blocks.isEmpty()) {
       final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
@@ -159,17 +184,17 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   // TODO break out and test directly
-  private Pair<List<AckBlock>, Long> drainAcks() {
-    final Collection<Pair<Long, Long>> pns = ackQueue.drain();
+  private Pair<List<AckBlock>, Long> drainAcks(final EncryptionLevel level) {
+    final Collection<Entry> pns = ackQueue.drain(level);
     if (pns.isEmpty()) {
       return Pair.of(Collections.emptyList(), 0L);
     }
 
     long largestPnQueueTime =
-        pns.stream().max(Comparator.comparingLong(Pair::getFirst)).get().getSecond();
+        pns.stream().max(Comparator.comparingLong(Entry::getPacketNumber)).get().getTimestamp();
 
     final List<Long> pnsLong =
-        pns.stream().map(Pair::getFirst).sorted().collect(Collectors.toList());
+        pns.stream().map(Entry::getPacketNumber).sorted().collect(Collectors.toList());
 
     final List<AckBlock> blocks = new ArrayList<>();
     long lower = -1;
@@ -200,5 +225,15 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   @VisibleForTesting
   protected PacketBuffer getBuffer() {
     return buffer;
+  }
+
+  @VisibleForTesting
+  protected PacketBuffer getInitialBuffer() {
+    return initialBuffer;
+  }
+
+  @VisibleForTesting
+  protected PacketBuffer getHandshakeBuffer() {
+    return handshakeBuffer;
   }
 }

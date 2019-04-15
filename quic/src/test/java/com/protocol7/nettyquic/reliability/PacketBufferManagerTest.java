@@ -1,19 +1,23 @@
 package com.protocol7.nettyquic.reliability;
 
+import static com.protocol7.nettyquic.protocol.ConnectionId.random;
+import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.nettyquic.FrameSender;
 import com.protocol7.nettyquic.PipelineContext;
-import com.protocol7.nettyquic.connection.State;
-import com.protocol7.nettyquic.protocol.ConnectionId;
 import com.protocol7.nettyquic.protocol.PacketNumber;
 import com.protocol7.nettyquic.protocol.Payload;
+import com.protocol7.nettyquic.protocol.Version;
 import com.protocol7.nettyquic.protocol.frames.AckBlock;
 import com.protocol7.nettyquic.protocol.frames.AckFrame;
 import com.protocol7.nettyquic.protocol.frames.Frame;
 import com.protocol7.nettyquic.protocol.frames.PingFrame;
+import com.protocol7.nettyquic.protocol.packets.HandshakePacket;
+import com.protocol7.nettyquic.protocol.packets.InitialPacket;
 import com.protocol7.nettyquic.protocol.packets.Packet;
 import com.protocol7.nettyquic.protocol.packets.ShortPacket;
 import com.protocol7.nettyquic.utils.Ticker;
@@ -41,8 +45,6 @@ public class PacketBufferManagerTest {
 
   @Before
   public void setUp() {
-    when(ctx.getState()).thenReturn(State.Ready);
-
     when(ackDelay.time()).thenReturn(2000_0000_0000L);
     when(ackDelay.delay(anyLong())).thenReturn(45L);
     when(ackDelay.calculate(anyLong(), any(TimeUnit.class))).thenReturn(67L);
@@ -90,6 +92,75 @@ public class PacketBufferManagerTest {
   }
 
   @Test
+  public void ackInitial() {
+    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+
+    assertTrue(buffer.getBuffer().isEmpty());
+    assertTrue(buffer.getHandshakeBuffer().isEmpty());
+    assertFalse(buffer.getInitialBuffer().isEmpty());
+
+    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    assertTrue(buffer.getInitialBuffer().isEmpty());
+  }
+
+  @Test
+  public void ackInitialWithInvalidPacketType() {
+    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+
+    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    // must not be acked
+    assertFalse(buffer.getInitialBuffer().isEmpty());
+  }
+
+  @Test
+  public void ackHandshake() {
+    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+
+    assertTrue(buffer.getBuffer().isEmpty());
+    assertFalse(buffer.getHandshakeBuffer().isEmpty());
+    assertTrue(buffer.getInitialBuffer().isEmpty());
+
+    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    assertTrue(buffer.getHandshakeBuffer().isEmpty());
+  }
+
+  @Test
+  public void ackHandshakeWithInvalidPacketType() {
+    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+
+    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    // must not be acked
+    assertFalse(buffer.getHandshakeBuffer().isEmpty());
+  }
+
+  @Test
+  public void ackPacket() {
+    buffer.beforeSendPacket(packet(2, PingFrame.INSTANCE), ctx);
+
+    assertFalse(buffer.getBuffer().isEmpty());
+    assertTrue(buffer.getHandshakeBuffer().isEmpty());
+    assertTrue(buffer.getInitialBuffer().isEmpty());
+
+    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    assertTrue(buffer.getBuffer().isEmpty());
+  }
+
+  @Test
+  public void ackPacketWithInvalidPacketType() {
+    buffer.beforeSendPacket(packet(2, PingFrame.INSTANCE), ctx);
+
+    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+
+    // must not be acked
+    assertFalse(buffer.getBuffer().isEmpty());
+  }
+
+  @Test
   public void send() {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
@@ -100,22 +171,6 @@ public class PacketBufferManagerTest {
     assertEquals(pingPacket, actual);
 
     assertBuffered(2);
-  }
-
-  @Test
-  public void ackSentPacket() {
-    // send packet to buffer it
-
-    Packet pingPacket = packet(2, PingFrame.INSTANCE);
-    buffer.beforeSendPacket(pingPacket, ctx);
-    assertBuffered(2);
-
-    // now ack the packet
-    Packet ackPacket = packet(3, new AckFrame(123, AckBlock.fromLongs(2, 2)));
-    buffer.onReceivePacket(ackPacket, ctx);
-
-    // all messages should now have been acked
-    assertBufferEmpty();
   }
 
   @Test
@@ -133,8 +188,22 @@ public class PacketBufferManagerTest {
   }
 
   private Packet packet(long pn, Frame... frames) {
-    return new ShortPacket(
-        false, Optional.of(ConnectionId.random()), new PacketNumber(pn), new Payload(frames));
+    return new ShortPacket(false, of(random()), new PacketNumber(pn), new Payload(frames));
+  }
+
+  private Packet ip(long pn, Frame... frames) {
+    return InitialPacket.create(
+        of(random()),
+        of(random()),
+        new PacketNumber(pn),
+        Version.DRAFT_18,
+        Optional.empty(),
+        frames);
+  }
+
+  private Packet hp(long pn, Frame... frames) {
+    return HandshakePacket.create(
+        of(random()), of(random()), new PacketNumber(pn), Version.DRAFT_18, frames);
   }
 
   private Packet verifyNext() {
@@ -153,7 +222,7 @@ public class PacketBufferManagerTest {
 
   private void assertBuffered(long packetNumber) {
     // packet buffered for future acking
-    assertTrue(buffer.getBuffer().contains(new PacketNumber(packetNumber)));
+    assertTrue(buffer.getBuffer().contains(packetNumber));
   }
 
   private void assertBufferEmpty() {

@@ -143,7 +143,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));
 
-    assertAck(4, 3, 3, 4);
+    assertAck(4, 3, 4, 4);
   }
 
   private void assertAck(int number, int packetNumber, int smallest, int largest) {
