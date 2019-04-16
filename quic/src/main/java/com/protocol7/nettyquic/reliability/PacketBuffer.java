@@ -30,6 +30,10 @@ public class PacketBuffer {
         packet.getPacketNumber().asLong(), of(packet.getPayload().getFrames(), ticker.nanoTime()));
   }
 
+  public void clear() {
+    buffer.clear();
+  }
+
   public boolean remove(final long packetNumber) {
     return buffer.remove(packetNumber) != null;
   }

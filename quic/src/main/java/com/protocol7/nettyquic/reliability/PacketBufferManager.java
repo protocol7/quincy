@@ -106,6 +106,14 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     requireNonNull(ctx);
 
     if (packet instanceof FullPacket) {
+      if (packet instanceof HandshakePacket) {
+        // implicitly ack all initial packets
+        initialBuffer.clear();
+      } else if (packet instanceof ShortPacket) {
+        // implicitly ack all handshake packets
+        handshakeBuffer.clear();
+      }
+
       FullPacket fp = (FullPacket) packet;
       ackQueue.add(fp, ackDelay.time());
       log.debug("Acked packet {}", fp.getPacketNumber());

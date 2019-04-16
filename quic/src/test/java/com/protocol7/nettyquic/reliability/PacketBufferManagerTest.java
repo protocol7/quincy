@@ -105,6 +105,16 @@ public class PacketBufferManagerTest {
   }
 
   @Test
+  public void ackInitialWithHandshake() {
+    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+
+    // handshake packet implicitly acks any initial packets
+    buffer.onReceivePacket(hp(3, PingFrame.INSTANCE), ctx);
+
+    assertTrue(buffer.getInitialBuffer().isEmpty());
+  }
+
+  @Test
   public void ackInitialWithInvalidPacketType() {
     buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
 
@@ -128,10 +138,19 @@ public class PacketBufferManagerTest {
   }
 
   @Test
+  public void ackHandshakeWithShort() {
+    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+
+    buffer.onReceivePacket(packet(3, PingFrame.INSTANCE), ctx);
+
+    assertTrue(buffer.getHandshakeBuffer().isEmpty());
+  }
+
+  @Test
   public void ackHandshakeWithInvalidPacketType() {
     buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
 
-    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
 
     // must not be acked
     assertFalse(buffer.getHandshakeBuffer().isEmpty());
