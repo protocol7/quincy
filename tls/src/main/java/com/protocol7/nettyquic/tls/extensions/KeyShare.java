@@ -79,8 +79,9 @@ public class KeyShare implements Extension {
 
   @Override
   public String toString() {
-    StringBuilder sb = new StringBuilder();
-    for (Map.Entry<Group, byte[]> key : keys.entrySet()) {
+
+    final StringBuilder sb = new StringBuilder();
+    for (final Map.Entry<Group, byte[]> key : keys.entrySet()) {
       sb.append('{')
           .append(key.getKey().name())
           .append('=')
@@ -88,6 +89,6 @@ public class KeyShare implements Extension {
           .append('}');
     }
 
-    return "KeyShare{" + keys + '}';
+    return "KeyShare{" + sb + '}';
   }
 }
