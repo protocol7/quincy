@@ -6,7 +6,7 @@
 
   <parent>
     <groupId>com.protocol7</groupId>
-    <artifactId>netty-quic-parent</artifactId>
+    <artifactId>quincy-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
   </parent>
   
@@ -17,7 +17,7 @@
     </dependency>
     <dependency>
       <groupId>com.protocol7</groupId>
-      <artifactId>netty-quic-common</artifactId>
+      <artifactId>quincy-common</artifactId>
     </dependency>
     <dependency>
       <groupId>com.google.guava</groupId>

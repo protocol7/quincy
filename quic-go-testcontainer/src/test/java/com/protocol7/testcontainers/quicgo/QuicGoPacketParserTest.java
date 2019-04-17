@@ -5,7 +5,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.nettyquic.utils.Hex;
+import com.protocol7.quincy.utils.Hex;
 import java.util.List;
 import org.junit.Assert;
 import org.junit.Test;

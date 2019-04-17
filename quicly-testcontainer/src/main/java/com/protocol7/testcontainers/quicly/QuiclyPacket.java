@@ -1,6 +1,6 @@
 package com.protocol7.testcontainers.quicly;
 
-import com.protocol7.nettyquic.utils.Hex;
+import com.protocol7.quincy.utils.Hex;
 
 public class QuiclyPacket {
 

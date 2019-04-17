@@ -3,7 +3,7 @@ package com.protocol7.testcontainers.quicly;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.protocol7.nettyquic.utils.Hex;
+import com.protocol7.quincy.utils.Hex;
 import java.util.List;
 import org.junit.Test;
 

@@ -2,7 +2,7 @@ package com.protocol7.testcontainers.quicgo;
 
 import com.google.common.base.Strings;
 import com.google.common.primitives.Longs;
-import com.protocol7.nettyquic.utils.Hex;
+import com.protocol7.quincy.utils.Hex;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;

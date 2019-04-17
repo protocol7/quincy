@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>com.protocol7</groupId>
-    <artifactId>netty-quic-parent</artifactId>
+    <artifactId>quincy-parent</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <packaging>pom</packaging>
 
@@ -19,9 +19,9 @@
     </parent>
 
     <scm>
-        <connection>scm:git:https://github.com/protocol7/netty-quic.git</connection>
-        <developerConnection>scm:git:git@github.com:protocol7/netty-quic.git</developerConnection>
-        <url>scm:https://github.com/protocol7/netty-quic/</url>
+        <connection>scm:git:https://github.com/protocol7/quincy.git</connection>
+        <developerConnection>scm:git:git@github.com:protocol7/quincy.git</developerConnection>
+        <url>scm:https://github.com/protocol7/quincy/</url>
     </scm>
 
     <licenses>
@@ -45,17 +45,17 @@
         <dependencies>
             <dependency>
                 <groupId>com.protocol7</groupId>
-                <artifactId>netty-quic-common</artifactId>
+                <artifactId>quincy-common</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.protocol7</groupId>
-                <artifactId>netty-quic-tls</artifactId>
+                <artifactId>quincy-tls</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
                 <groupId>com.protocol7</groupId>
-                <artifactId>netty-quic-tls</artifactId>
+                <artifactId>quincy-tls</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
                 <classifier>tests</classifier>
                 <type>test-jar</type>
@@ -72,7 +72,7 @@
             </dependency>
             <dependency>
                 <groupId>com.protocol7</groupId>
-                <artifactId>netty-quic</artifactId>
+                <artifactId>quincy</artifactId>
                 <version>0.0.1-SNAPSHOT</version>
             </dependency>
             <dependency>
