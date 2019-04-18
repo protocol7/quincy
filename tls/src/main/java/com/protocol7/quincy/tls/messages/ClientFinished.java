@@ -7,20 +7,21 @@ import io.netty.buffer.ByteBuf;
 
 public class ClientFinished implements Writeable {
 
-  public static ClientFinished create(byte[] clientHandshakeTrafficSecret, byte[] finHash) {
-    byte[] verifyData = VerifyData.create(clientHandshakeTrafficSecret, finHash);
+  public static ClientFinished create(
+      final byte[] clientHandshakeTrafficSecret, final byte[] finHash) {
+    final byte[] verifyData = VerifyData.create(clientHandshakeTrafficSecret, finHash);
 
     return new ClientFinished(verifyData);
   }
 
-  public static ClientFinished parse(ByteBuf bb) {
-    int type = bb.readByte();
+  public static ClientFinished parse(final ByteBuf bb) {
+    final int type = bb.readByte();
     if (type != 0x14) {
       throw new IllegalArgumentException("Invalid type: " + type);
     }
 
-    int len = Bytes.read24(bb);
-    byte[] verifyData = new byte[len];
+    final int len = Bytes.read24(bb);
+    final byte[] verifyData = new byte[len];
     bb.readBytes(verifyData);
 
     return new ClientFinished(verifyData);
@@ -28,7 +29,7 @@ public class ClientFinished implements Writeable {
 
   private final byte[] verificationData;
 
-  public ClientFinished(byte[] verificationData) {
+  public ClientFinished(final byte[] verificationData) {
     this.verificationData = verificationData;
   }
 
@@ -36,7 +37,7 @@ public class ClientFinished implements Writeable {
     return verificationData;
   }
 
-  public void write(ByteBuf bb) {
+  public void write(final ByteBuf bb) {
     bb.writeByte(0x14);
 
     Bytes.write24(bb, verificationData.length);

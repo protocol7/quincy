@@ -25,10 +25,10 @@ public class RetryPacketTest {
 
   @Test
   public void roundtrip() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    RetryPacket parsed = RetryPacket.parse(bb).complete(l -> aead);
+    final RetryPacket parsed = RetryPacket.parse(bb).complete(l -> aead);
 
     assertEquals(dest, parsed.getDestinationConnectionId().get());
     assertEquals(src, parsed.getSourceConnectionId().get());

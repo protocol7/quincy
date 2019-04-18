@@ -35,12 +35,13 @@ public class ClientTlsManager implements InboundHandler {
     resetTlsSession(connectionId);
   }
 
-  public void resetTlsSession(ConnectionId connectionId) {
+  public void resetTlsSession(final ConnectionId connectionId) {
     this.tlsSession =
         new ClientTlsSession(InitialAEAD.create(connectionId.asBytes(), true), transportParameters);
   }
 
-  public Future<Void> handshake(State state, FrameSender sender, Consumer<State> stateSetter) {
+  public Future<Void> handshake(
+      final State state, final FrameSender sender, final Consumer<State> stateSetter) {
     // send initial packet
     if (state == State.Started) {
       sendInitialPacket(sender);
@@ -57,7 +58,7 @@ public class ClientTlsManager implements InboundHandler {
 
     if (state == State.BeforeHello) {
       if (packet instanceof InitialPacket) {
-        InitialPacket ip = (InitialPacket) packet;
+        final InitialPacket ip = (InitialPacket) packet;
 
         for (final Frame frame : ip.getPayload().getFrames()) {
           if (frame instanceof CryptoFrame) {
@@ -90,7 +91,7 @@ public class ClientTlsManager implements InboundHandler {
     ctx.next(packet);
   }
 
-  private void handleHandshake(final HandshakePacket packet, PipelineContext ctx) {
+  private void handleHandshake(final HandshakePacket packet, final PipelineContext ctx) {
     for (final Frame frame : packet.getPayload().getFrames()) {
       if (frame instanceof CryptoFrame) {
         final CryptoFrame cf = (CryptoFrame) frame;
@@ -113,7 +114,7 @@ public class ClientTlsManager implements InboundHandler {
     }
   }
 
-  private void sendInitialPacket(FrameSender frameSender) {
+  private void sendInitialPacket(final FrameSender frameSender) {
     int len = 1200;
 
     final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake());

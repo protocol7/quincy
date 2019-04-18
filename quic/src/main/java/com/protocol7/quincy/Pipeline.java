@@ -25,10 +25,10 @@ public class Pipeline {
     this.outboundHandlers = outboundHandlers;
   }
 
-  public void onPacket(Connection connection, Packet packet) {
+  public void onPacket(final Connection connection, final Packet packet) {
     final Iterator<InboundHandler> iter = inboundHandlers.iterator();
 
-    PipelineContext ctx =
+    final PipelineContext ctx =
         new PipelineContext() {
           @Override
           public void next(final Packet newPacket) {
@@ -81,11 +81,11 @@ public class Pipeline {
     }
   }
 
-  public Packet send(Connection connection, Packet packet) {
+  public Packet send(final Connection connection, final Packet packet) {
     final Iterator<OutboundHandler> iter = outboundHandlers.iterator();
     final AtomicReference<Packet> processedPacket = new AtomicReference<>();
 
-    PipelineContext ctx =
+    final PipelineContext ctx =
         new PipelineContext() {
           @Override
           public void next(final Packet newPacket) {

@@ -36,11 +36,11 @@ public class StreamTest {
 
   @Test
   public void write() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
 
     stream.write(DATA, false);
 
-    StreamFrame frame = (StreamFrame) captureFrame();
+    final StreamFrame frame = (StreamFrame) captureFrame();
 
     assertEquals(DATA, frame.getData());
     assertEquals(0, frame.getOffset());
@@ -50,27 +50,27 @@ public class StreamTest {
 
   @Test
   public void writeWithOffset() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
 
     stream.write(DATA, false);
-    StreamFrame frame1 = (StreamFrame) captureFrame();
+    final StreamFrame frame1 = (StreamFrame) captureFrame();
     assertEquals(0, frame1.getOffset());
 
     stream.write(DATA, false);
-    StreamFrame frame2 = (StreamFrame) captureFrame();
+    final StreamFrame frame2 = (StreamFrame) captureFrame();
     assertEquals(DATA.length, frame2.getOffset());
   }
 
   @Test
   public void reset() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
 
     stream.write(DATA, false);
     captureFrame();
 
     stream.reset(123);
     assertTrue(stream.isFinished());
-    ResetStreamFrame frame2 = (ResetStreamFrame) captureFrame();
+    final ResetStreamFrame frame2 = (ResetStreamFrame) captureFrame();
 
     assertEquals(streamId, frame2.getStreamId());
     assertEquals(123, frame2.getApplicationErrorCode());
@@ -79,7 +79,7 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void resetOnClosed() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
 
     stream.reset(123);
     stream.reset(123);
@@ -87,21 +87,21 @@ public class StreamTest {
 
   @Test(expected = IllegalStateException.class)
   public void writeOnClosed() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
     stream.write(DATA, true);
     assertTrue(stream.isFinished());
     stream.write(DATA, true);
   }
 
   private Frame captureFrame() {
-    ArgumentCaptor<Frame> packetCaptor = ArgumentCaptor.forClass(Frame.class);
+    final ArgumentCaptor<Frame> packetCaptor = ArgumentCaptor.forClass(Frame.class);
     verify(ctx, atLeastOnce()).send(packetCaptor.capture());
     return packetCaptor.getValue();
   }
 
   @Test
   public void onData() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
     stream.onData(0, true, DATA);
 
     verify(listener).onData(stream, DATA);
@@ -109,7 +109,7 @@ public class StreamTest {
 
   @Test
   public void onReset() {
-    DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
+    final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
     stream.onReset(123, 456);
 
     verify(listener).onReset(stream, 123, 456);

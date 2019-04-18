@@ -11,7 +11,7 @@ public class PacketParserTest {
 
   @Test
   public void parse() {
-    List<QuiclyPacket> packets =
+    final List<QuiclyPacket> packets =
         PacketParser.parse(
             List.of(
                 "recvmsg (1252 bytes):\n",
@@ -35,7 +35,7 @@ public class PacketParserTest {
         packets.get(1));
   }
 
-  private void assertPacket(boolean inbound, byte[] bytes, QuiclyPacket actual) {
+  private void assertPacket(final boolean inbound, final byte[] bytes, final QuiclyPacket actual) {
     assertEquals(inbound, actual.isInbound());
     assertArrayEquals(bytes, actual.getBytes());
   }

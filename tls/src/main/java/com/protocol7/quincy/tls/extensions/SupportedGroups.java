@@ -9,13 +9,13 @@ import java.util.Optional;
 
 public class SupportedGroups implements Extension {
 
-  public static SupportedGroups parse(ByteBuf bb) {
+  public static SupportedGroups parse(final ByteBuf bb) {
     bb.readShort();
 
-    Builder<Group> groups = ImmutableList.builder();
+    final Builder<Group> groups = ImmutableList.builder();
 
     while (bb.isReadable()) {
-      Optional<Group> group = Group.fromValue(bb.readShort());
+      final Optional<Group> group = Group.fromValue(bb.readShort());
       group.ifPresent(groups::add);
     }
 
@@ -24,11 +24,11 @@ public class SupportedGroups implements Extension {
 
   private final List<Group> groups;
 
-  public SupportedGroups(List<Group> groups) {
+  public SupportedGroups(final List<Group> groups) {
     this.groups = groups;
   }
 
-  public SupportedGroups(Group... groups) {
+  public SupportedGroups(final Group... groups) {
     this.groups = ImmutableList.copyOf(groups);
   }
 
@@ -42,10 +42,10 @@ public class SupportedGroups implements Extension {
   }
 
   @Override
-  public void write(ByteBuf bb, boolean isClient) {
+  public void write(final ByteBuf bb, final boolean isClient) {
     bb.writeShort(groups.size() * 2);
 
-    for (Group group : groups) {
+    for (final Group group : groups) {
       bb.writeShort(group.getValue());
     }
   }

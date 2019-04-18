@@ -87,7 +87,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
       final List<AckBlock> ackBlocks = drained.getFirst();
       if (!ackBlocks.isEmpty()) {
         // add to packet
-        long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
+        final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
         final AckFrame ackFrame = new AckFrame(delay, ackBlocks);
         fp = fp.addFrame(ackFrame);
       }
@@ -98,8 +98,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     }
   }
 
-  private void buffer(FullPacket packet) {
-    EncryptionLevel level = getEncryptionLevel(packet);
+  private void buffer(final FullPacket packet) {
+    final EncryptionLevel level = getEncryptionLevel(packet);
     if (level == EncryptionLevel.Initial) {
       initialBuffer.put(packet);
     } else if (level == EncryptionLevel.Handshake) {
@@ -123,7 +123,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         handshakeBuffer.clear();
       }
 
-      FullPacket fp = (FullPacket) packet;
+      final FullPacket fp = (FullPacket) packet;
       ackQueue.add(fp, ackDelay.time());
       log.debug("Acked packet {}", fp.getPacketNumber());
 
@@ -151,7 +151,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private void handleAcks(final Packet packet) {
     if (packet instanceof FullPacket) {
-      EncryptionLevel level = getEncryptionLevel(packet);
+      final EncryptionLevel level = getEncryptionLevel(packet);
 
       ((FullPacket) packet)
           .getPayload()
@@ -178,7 +178,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     }
   }
 
-  private boolean ack(long pn, final EncryptionLevel level) {
+  private boolean ack(final long pn, final EncryptionLevel level) {
     if (level == EncryptionLevel.Initial) {
       return initialBuffer.remove(pn);
     } else if (level == EncryptionLevel.Handshake) {
@@ -190,7 +190,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private void flushAcks(final EncryptionLevel level, final FrameSender sender) {
     final Pair<List<AckBlock>, Long> drained = drainAcks(level);
-    List<AckBlock> blocks = drained.getFirst();
+    final List<AckBlock> blocks = drained.getFirst();
     if (!blocks.isEmpty()) {
       final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
       final AckFrame ackFrame = new AckFrame(delay, blocks);
@@ -207,7 +207,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
       return Pair.of(Collections.emptyList(), 0L);
     }
 
-    long largestPnQueueTime =
+    final long largestPnQueueTime =
         pns.stream().max(Comparator.comparingLong(Entry::getPacketNumber)).get().getTimestamp();
 
     final List<Long> pnsLong =
@@ -216,7 +216,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     final List<AckBlock> blocks = new ArrayList<>();
     long lower = -1;
     long upper = -1;
-    for (long pn : pnsLong) {
+    for (final long pn : pnsLong) {
       if (lower == -1) {
         lower = pn;
         upper = pn;

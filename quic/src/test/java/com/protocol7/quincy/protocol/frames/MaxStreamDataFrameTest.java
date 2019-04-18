@@ -11,12 +11,12 @@ public class MaxStreamDataFrameTest {
 
   @Test
   public void roundtrip() {
-    MaxStreamDataFrame frame = new MaxStreamDataFrame(new StreamId(123), 456);
+    final MaxStreamDataFrame frame = new MaxStreamDataFrame(new StreamId(123), 456);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    MaxStreamDataFrame parsed = MaxStreamDataFrame.parse(bb);
+    final MaxStreamDataFrame parsed = MaxStreamDataFrame.parse(bb);
 
     assertEquals(frame.getStreamId(), parsed.getStreamId());
     assertEquals(frame.getMaxStreamData(), parsed.getMaxStreamData());

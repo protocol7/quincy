@@ -7,8 +7,8 @@ import io.netty.buffer.Unpooled;
 public abstract class Frame implements Writeable {
 
   public static Frame parse(final ByteBuf bb) {
-    byte typeByte = bb.getByte(bb.readerIndex());
-    FrameType type = FrameType.fromByte(typeByte);
+    final byte typeByte = bb.getByte(bb.readerIndex());
+    final FrameType type = FrameType.fromByte(typeByte);
 
     if (type == FrameType.STREAM) {
       return StreamFrame.parse(bb);
@@ -57,7 +57,7 @@ public abstract class Frame implements Writeable {
 
   public int calculateLength() {
     // TODO implement in subclasses, this is slow
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     try {
       write(bb);
       return bb.writerIndex();

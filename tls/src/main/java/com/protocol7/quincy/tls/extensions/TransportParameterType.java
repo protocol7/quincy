@@ -20,14 +20,14 @@ public enum TransportParameterType {
   DISABLE_MIGRATION(0x000c),
   PREFERRED_ADDRESS(0x000d);
 
-  public static TransportParameterType fromValue(byte[] value) {
+  public static TransportParameterType fromValue(final byte[] value) {
     Preconditions.checkArgument(value.length == 2);
 
     return fromValue(value[0] << 8 | value[1]);
   }
 
-  public static TransportParameterType fromValue(int value) {
-    for (TransportParameterType tp : EnumSet.allOf(TransportParameterType.class)) {
+  public static TransportParameterType fromValue(final int value) {
+    for (final TransportParameterType tp : EnumSet.allOf(TransportParameterType.class)) {
       if (tp.value == value) {
         return tp;
       }
@@ -37,7 +37,7 @@ public enum TransportParameterType {
 
   private final short value;
 
-  TransportParameterType(int value) {
+  TransportParameterType(final int value) {
     this.value = (short) value;
   }
 

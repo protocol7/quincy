@@ -14,20 +14,20 @@ import java.util.Optional;
 
 public class RetryPacket implements Packet {
 
-  public static HalfParsedPacket<RetryPacket> parse(ByteBuf bb) {
-    byte b = bb.readByte(); // TODO verify reserved and packet types
+  public static HalfParsedPacket<RetryPacket> parse(final ByteBuf bb) {
+    final byte b = bb.readByte(); // TODO verify reserved and packet types
 
-    int odcil = ConnectionId.lastLength(b & 0xFF);
-    Version version = Version.read(bb);
+    final int odcil = ConnectionId.lastLength(b & 0xFF);
+    final Version version = Version.read(bb);
 
     final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
     final Optional<ConnectionId> destConnId = cids.getFirst();
     final Optional<ConnectionId> srcConnId = cids.getSecond();
 
-    ConnectionId orgConnId = ConnectionId.readOptional(odcil, bb).get();
+    final ConnectionId orgConnId = ConnectionId.readOptional(odcil, bb).get();
 
-    byte[] retryToken = new byte[bb.readableBytes()];
+    final byte[] retryToken = new byte[bb.readableBytes()];
     bb.readBytes(retryToken);
 
     return new HalfParsedPacket<>() {
@@ -43,7 +43,7 @@ public class RetryPacket implements Packet {
       }
 
       @Override
-      public RetryPacket complete(AEADProvider aeadProvider) {
+      public RetryPacket complete(final AEADProvider aeadProvider) {
         return new RetryPacket(version, destConnId, srcConnId, orgConnId, retryToken);
       }
     };
@@ -56,11 +56,11 @@ public class RetryPacket implements Packet {
   private final byte[] retryToken;
 
   public RetryPacket(
-      Version version,
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      ConnectionId originalConnectionId,
-      byte[] retryToken) {
+      final Version version,
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId originalConnectionId,
+      final byte[] retryToken) {
     this.version = version;
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -73,7 +73,7 @@ public class RetryPacket implements Packet {
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD aead) {
+  public void write(final ByteBuf bb, final AEAD aead) {
     int b = (PACKET_TYPE_MASK | PacketType.Retry.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
 

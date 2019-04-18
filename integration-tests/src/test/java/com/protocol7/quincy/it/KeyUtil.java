@@ -14,26 +14,26 @@ import java.util.List;
 
 public class KeyUtil {
 
-  public static List<byte[]> getCertsFromCrt(String path) {
+  public static List<byte[]> getCertsFromCrt(final String path) {
     try {
-      FileInputStream fin = new FileInputStream(path);
-      CertificateFactory f = CertificateFactory.getInstance("X.509");
-      Certificate cert = f.generateCertificate(fin);
+      final FileInputStream fin = new FileInputStream(path);
+      final CertificateFactory f = CertificateFactory.getInstance("X.509");
+      final Certificate cert = f.generateCertificate(fin);
       return List.of(cert.getEncoded());
-    } catch (GeneralSecurityException | IOException e) {
+    } catch (final GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);
     }
   }
 
-  public static PrivateKey getPrivateKey(String path) {
+  public static PrivateKey getPrivateKey(final String path) {
     try {
-      byte[] b = Files.readAllBytes(Path.of(path));
-      PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(b);
+      final byte[] b = Files.readAllBytes(Path.of(path));
+      final PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(b);
 
-      KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+      final KeyFactory keyFactory = KeyFactory.getInstance("RSA");
 
       return keyFactory.generatePrivate(keySpec);
-    } catch (GeneralSecurityException | IOException e) {
+    } catch (final GeneralSecurityException | IOException e) {
       throw new RuntimeException(e);
     }
   }

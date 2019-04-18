@@ -12,7 +12,7 @@ public class VersionTest {
 
   @Test
   public void write() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Version.DRAFT_15.write(bb);
 
     TestUtil.assertBuffer("ff00000f", bb);
@@ -21,7 +21,7 @@ public class VersionTest {
 
   @Test
   public void writeQuicGo() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Version.QUIC_GO.write(bb);
 
     TestUtil.assertBuffer("51474fff", bb);
@@ -38,18 +38,18 @@ public class VersionTest {
     assertEquals(Version.UNKNOWN, Version.read(b("abcdabcd")));
   }
 
-  private ByteBuf b(String d) {
-    ByteBuf bb = Unpooled.buffer();
+  private ByteBuf b(final String d) {
+    final ByteBuf bb = Unpooled.buffer();
     bb.writeBytes(Hex.dehex(d));
     return bb;
   }
 
   @Test
   public void roundtrip() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Version.DRAFT_15.write(bb);
 
-    Version parsed = Version.read(bb);
+    final Version parsed = Version.read(bb);
 
     assertEquals(Version.DRAFT_15, parsed);
   }

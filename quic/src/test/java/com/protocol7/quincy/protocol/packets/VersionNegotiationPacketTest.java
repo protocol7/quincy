@@ -25,10 +25,10 @@ public class VersionNegotiationPacketTest {
 
   @Test
   public void roundtrip() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb).complete(l -> aead);
+    final VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb).complete(l -> aead);
 
     assertEquals(dest, parsed.getDestinationConnectionId().get());
     assertEquals(src, parsed.getSourceConnectionId().get());
@@ -37,7 +37,7 @@ public class VersionNegotiationPacketTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void readInvalidMarker() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
     bb.setByte(0, 0);
 
@@ -47,13 +47,13 @@ public class VersionNegotiationPacketTest {
   @Test
   public void randomMarker() {
     // marker must be random except for first bit
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
-    byte marker1 = bb.readByte();
+    final byte marker1 = bb.readByte();
 
-    ByteBuf bb2 = Unpooled.buffer();
+    final ByteBuf bb2 = Unpooled.buffer();
     packet.write(bb2, aead);
-    byte marker2 = bb2.readByte();
+    final byte marker2 = bb2.readByte();
 
     assertTrue((0x80 & marker1) == 0x80);
     assertTrue((0x80 & marker2) == 0x80);

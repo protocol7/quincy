@@ -27,13 +27,13 @@ public class InitialPacketTest {
 
   @Test
   public void roundtrip() {
-    InitialPacket packet = p(new PacketNumber(123), Optional.of(token));
+    final InitialPacket packet = p(new PacketNumber(123), Optional.of(token));
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     packet.write(bb, aead);
 
-    InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
+    final InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
     assertEquals(srcConnId, parsed.getSourceConnectionId().get());
@@ -46,13 +46,13 @@ public class InitialPacketTest {
 
   @Test
   public void roundtripMultiple() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     p(new PacketNumber(1), Optional.of(token)).write(bb, aead);
     p(new PacketNumber(2), Optional.of(token)).write(bb, aead);
 
-    InitialPacket parsed1 = InitialPacket.parse(bb).complete(l -> aead);
-    InitialPacket parsed2 = InitialPacket.parse(bb).complete(l -> aead);
+    final InitialPacket parsed1 = InitialPacket.parse(bb).complete(l -> aead);
+    final InitialPacket parsed2 = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(parsed1.getDestinationConnectionId(), parsed2.getDestinationConnectionId());
     assertEquals(parsed1.getSourceConnectionId(), parsed2.getSourceConnectionId());
@@ -64,13 +64,13 @@ public class InitialPacketTest {
 
   @Test
   public void roundtripNoToken() {
-    InitialPacket packet = p(new PacketNumber(123), empty());
+    final InitialPacket packet = p(new PacketNumber(123), empty());
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     packet.write(bb, aead);
 
-    InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
+    final InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
     assertEquals(srcConnId, parsed.getSourceConnectionId().get());
@@ -81,7 +81,7 @@ public class InitialPacketTest {
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
   }
 
-  private InitialPacket p(PacketNumber pn, Optional<byte[]> token) {
+  private InitialPacket p(final PacketNumber pn, final Optional<byte[]> token) {
     return InitialPacket.create(
         Optional.ofNullable(destConnId),
         Optional.ofNullable(srcConnId),

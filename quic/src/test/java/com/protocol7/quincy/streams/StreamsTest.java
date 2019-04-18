@@ -25,19 +25,19 @@ public class StreamsTest {
 
   @Test
   public void openStream() {
-    Stream stream = streams.openStream(false, false, listener);
+    final Stream stream = streams.openStream(false, false, listener);
     assertEquals(new StreamId(3), stream.getId());
   }
 
   @Test
   public void createAndThenGet() {
-    StreamId streamId = StreamId.random(true, true);
-    DefaultStream stream1 = streams.getOrCreate(streamId, listener);
-    DefaultStream stream2 = streams.getOrCreate(streamId, listener);
+    final StreamId streamId = StreamId.random(true, true);
+    final DefaultStream stream1 = streams.getOrCreate(streamId, listener);
+    final DefaultStream stream2 = streams.getOrCreate(streamId, listener);
 
     assertSame(stream1, stream2);
 
-    DefaultStream stream3 = streams.getOrCreate(StreamId.random(true, true), listener);
+    final DefaultStream stream3 = streams.getOrCreate(StreamId.random(true, true), listener);
     assertNotSame(stream1, stream3);
   }
 }

@@ -8,20 +8,20 @@ import java.util.concurrent.ExecutionException;
 
 public class ClientRunner {
 
-  public static void main(String[] args) throws ExecutionException, InterruptedException {
+  public static void main(final String[] args) throws ExecutionException, InterruptedException {
 
-    InetSocketAddress server1 = new InetSocketAddress("127.0.0.1", 6121);
-    InetSocketAddress server2 = new InetSocketAddress("127.0.0.1", 4433);
+    final InetSocketAddress server1 = new InetSocketAddress("127.0.0.1", 6121);
+    final InetSocketAddress server2 = new InetSocketAddress("127.0.0.1", 4433);
 
-    InetSocketAddress server = server2;
+    final InetSocketAddress server = server2;
 
-    QuicClient client =
+    final QuicClient client =
         QuicClient.connect(
                 Configuration.defaults(),
                 server,
                 new StreamListener() {
                   @Override
-                  public void onData(Stream stream, byte[] data) {
+                  public void onData(final Stream stream, final byte[] data) {
                     System.out.println(new String(data));
                   }
 
@@ -29,7 +29,8 @@ public class ClientRunner {
                   public void onFinished() {}
 
                   @Override
-                  public void onReset(Stream stream, int applicationErrorCode, long offset) {}
+                  public void onReset(
+                      final Stream stream, final int applicationErrorCode, final long offset) {}
                 })
             .get();
 

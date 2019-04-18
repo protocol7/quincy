@@ -53,7 +53,7 @@ public class QuicServer {
             new ChannelInitializer<NioDatagramChannel>() {
               @Override
               public void initChannel(final NioDatagramChannel ch) {
-                ChannelPipeline p = ch.pipeline();
+                final ChannelPipeline p = ch.pipeline();
                 p.addLast(new ServerHandler(router));
               }
             });

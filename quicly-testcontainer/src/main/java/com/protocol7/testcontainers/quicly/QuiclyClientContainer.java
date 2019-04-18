@@ -9,7 +9,7 @@ public class QuiclyClientContainer extends QuiclyContainer {
         .withFileFromClasspath("Dockerfile", "QuiclyClientDockerfile");
   }
 
-  public QuiclyClientContainer(String host, int port) {
+  public QuiclyClientContainer(final String host, final int port) {
     super(image());
 
     // withCommand("./cli", "-vv", "-x", "X25519", host, Integer.toString(port));

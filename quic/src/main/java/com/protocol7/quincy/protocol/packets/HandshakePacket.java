@@ -17,38 +17,38 @@ import java.util.Optional;
 public class HandshakePacket extends LongHeaderPacket {
 
   public static HandshakePacket create(
-      Optional<ConnectionId> destConnectionId,
-      Optional<ConnectionId> srcConnectionId,
-      PacketNumber packetNumber,
-      Version version,
-      Frame... frames) {
+      final Optional<ConnectionId> destConnectionId,
+      final Optional<ConnectionId> srcConnectionId,
+      final PacketNumber packetNumber,
+      final Version version,
+      final Frame... frames) {
     return create(destConnectionId, srcConnectionId, packetNumber, version, Arrays.asList(frames));
   }
 
   public static HandshakePacket create(
-      Optional<ConnectionId> destConnectionId,
-      Optional<ConnectionId> srcConnectionId,
-      PacketNumber packetNumber,
-      Version version,
-      List<Frame> frames) {
-    Payload payload = new Payload(frames);
+      final Optional<ConnectionId> destConnectionId,
+      final Optional<ConnectionId> srcConnectionId,
+      final PacketNumber packetNumber,
+      final Version version,
+      final List<Frame> frames) {
+    final Payload payload = new Payload(frames);
     return new HandshakePacket(destConnectionId, srcConnectionId, version, packetNumber, payload);
   }
 
-  public static HalfParsedPacket<HandshakePacket> parse(ByteBuf bb) {
+  public static HalfParsedPacket<HandshakePacket> parse(final ByteBuf bb) {
     // TODO merge with InitialPacket parsing
     // TODO validate marker
 
-    int bbOffset = bb.readerIndex();
+    final int bbOffset = bb.readerIndex();
 
-    byte firstByte = bb.readByte();
-    byte ptByte = (byte) ((firstByte & 0x30) >> 4);
-    PacketType packetType = PacketType.fromByte(ptByte);
+    final byte firstByte = bb.readByte();
+    final byte ptByte = (byte) ((firstByte & 0x30) >> 4);
+    final PacketType packetType = PacketType.fromByte(ptByte);
     if (packetType != PacketType.Handshake) {
       throw new IllegalArgumentException("Invalid packet type");
     }
 
-    Version version = Version.read(bb);
+    final Version version = Version.read(bb);
 
     final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
@@ -67,39 +67,39 @@ public class HandshakePacket extends LongHeaderPacket {
       }
 
       @Override
-      public HandshakePacket complete(AEADProvider aeadProvider) {
-        int length = Varint.readAsInt(bb);
+      public HandshakePacket complete(final AEADProvider aeadProvider) {
+        final int length = Varint.readAsInt(bb);
 
-        AEAD aead = aeadProvider.get(EncryptionLevel.Handshake);
+        final AEAD aead = aeadProvider.get(EncryptionLevel.Handshake);
 
-        int pnOffset = bb.readerIndex();
-        int sampleOffset = pnOffset + 4;
+        final int pnOffset = bb.readerIndex();
+        final int sampleOffset = pnOffset + 4;
 
-        byte[] sample = new byte[aead.getSampleLength()];
+        final byte[] sample = new byte[aead.getSampleLength()];
 
         bb.getBytes(sampleOffset, sample);
 
         // get 4 bytes for PN. Might be too long, but we'll handle that below
-        byte[] pn = new byte[4];
+        final byte[] pn = new byte[4];
         bb.getBytes(pnOffset, pn);
 
         // decrypt the protected header parts
         try {
-          byte[] decryptedHeader =
+          final byte[] decryptedHeader =
               aead.decryptHeader(sample, Bytes.concat(new byte[] {firstByte}, pn), false);
 
-          byte decryptedFirstByte = decryptedHeader[0];
-          int pnLen = (decryptedFirstByte & 0x3) + 1;
+          final byte decryptedFirstByte = decryptedHeader[0];
+          final int pnLen = (decryptedFirstByte & 0x3) + 1;
 
-          byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
+          final byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
 
-          PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+          final PacketNumber packetNumber = PacketNumber.parse(pnBytes);
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
-          int payloadLength = length - pnLen; // subtract parsed pn length
+          final int payloadLength = length - pnLen; // subtract parsed pn length
 
-          byte[] aad = new byte[bb.readerIndex() - bbOffset];
+          final byte[] aad = new byte[bb.readerIndex() - bbOffset];
           bb.getBytes(bbOffset, aad);
 
           // restore the AAD with the now removed header protected
@@ -108,10 +108,10 @@ public class HandshakePacket extends LongHeaderPacket {
             aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
 
-          Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+          final Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
           return new HandshakePacket(destConnId, srcConnId, version, packetNumber, payload);
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
       }
@@ -119,11 +119,11 @@ public class HandshakePacket extends LongHeaderPacket {
   }
 
   private HandshakePacket(
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      Version version,
-      PacketNumber packetNumber,
-      Payload payload) {
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final Version version,
+      final PacketNumber packetNumber,
+      final Payload payload) {
     super(
         PacketType.Handshake,
         destinationConnectionId,
@@ -134,7 +134,7 @@ public class HandshakePacket extends LongHeaderPacket {
   }
 
   @Override
-  public HandshakePacket addFrame(Frame frame) {
+  public HandshakePacket addFrame(final Frame frame) {
     return new HandshakePacket(
         getDestinationConnectionId(),
         getSourceConnectionId(),
@@ -144,7 +144,7 @@ public class HandshakePacket extends LongHeaderPacket {
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD aead) {
+  public void write(final ByteBuf bb, final AEAD aead) {
     writeInternal(bb, aead, byteBuf -> {});
   }
 

@@ -19,21 +19,21 @@ public class PayloadTest {
 
   @Test
   public void roundtrip() {
-    Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
+    final Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
 
-    Payload parsed = Payload.parse(bb, payload.calculateLength(), aead, pn, aad);
+    final Payload parsed = Payload.parse(bb, payload.calculateLength(), aead, pn, aad);
 
     assertEquals(payload, parsed);
   }
 
   @Test
   public void write() {
-    Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
+    final Payload payload = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     payload.write(bb, aead, pn, aad);
 
     TestUtil.assertBuffer("e1eca61dcd946af283d48c55a5d25967efd6", bb);
@@ -41,20 +41,20 @@ public class PayloadTest {
 
   @Test
   public void parse() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("e1eca61dcd946af283d48c55a5d25967efd6"));
-    Payload parsed = Payload.parse(bb, bb.writerIndex(), aead, pn, aad);
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("e1eca61dcd946af283d48c55a5d25967efd6"));
+    final Payload parsed = Payload.parse(bb, bb.writerIndex(), aead, pn, aad);
 
-    Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
+    final Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
     assertEquals(expected, parsed);
   }
 
   @Test
   public void addFrame() {
-    Payload payload = new Payload(PingFrame.INSTANCE);
+    final Payload payload = new Payload(PingFrame.INSTANCE);
 
-    Payload withAdded = payload.addFrame(new PaddingFrame(1));
+    final Payload withAdded = payload.addFrame(new PaddingFrame(1));
 
-    Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
+    final Payload expected = new Payload(PingFrame.INSTANCE, new PaddingFrame(1));
 
     assertEquals(expected, withAdded);
     assertEquals(new Payload(PingFrame.INSTANCE), payload); // must not been mutated

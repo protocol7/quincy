@@ -16,7 +16,7 @@ public class Hash {
             }
           });
 
-  public static byte[] sha256(byte[]... data) {
+  public static byte[] sha256(final byte[]... data) {
     return digests.get().digest(Bytes.concat(data));
   }
 }

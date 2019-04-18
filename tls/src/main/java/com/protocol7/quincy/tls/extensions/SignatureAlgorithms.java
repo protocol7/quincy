@@ -13,10 +13,10 @@ public class SignatureAlgorithms implements Extension {
     return new SignatureAlgorithms(0x0804); // RSA-PSS-RSAE-SHA256
   }
 
-  public static SignatureAlgorithms parse(ByteBuf bb) {
+  public static SignatureAlgorithms parse(final ByteBuf bb) {
     bb.readShort(); // length
 
-    List<Integer> algorithms = new ArrayList<>();
+    final List<Integer> algorithms = new ArrayList<>();
     while (bb.isReadable()) {
       algorithms.add((int) bb.readShort());
     }
@@ -44,10 +44,10 @@ public class SignatureAlgorithms implements Extension {
   }
 
   @Override
-  public void write(ByteBuf bb, boolean ignored) {
+  public void write(final ByteBuf bb, final boolean ignored) {
     bb.writeShort(algorithms.size() * 2);
 
-    for (int algorithm : algorithms) {
+    for (final int algorithm : algorithms) {
       bb.writeShort(algorithm);
     }
   }

@@ -25,25 +25,25 @@ public class RetryTokenTest {
 
   @Test
   public void roundtrip() {
-    byte[] token = rt.create(address, ttl + 100);
+    final byte[] token = rt.create(address, ttl + 100);
     assertTrue(rt.validate(token, address, ttl));
   }
 
   @Test
   public void roundtripFailTtl() {
-    byte[] token = rt.create(address, ttl - 100);
+    final byte[] token = rt.create(address, ttl - 100);
     assertFalse(rt.validate(token, address, ttl));
   }
 
   @Test
   public void roundtripFailAddress() throws UnknownHostException {
-    byte[] token = rt.create(address, ttl + 100);
+    final byte[] token = rt.create(address, ttl + 100);
     assertFalse(rt.validate(token, InetAddress.getByName("127.0.0.2"), ttl));
   }
 
   @Test
   public void roundtripFailHmac() {
-    byte[] token = rt.create(address, ttl + 100);
+    final byte[] token = rt.create(address, ttl + 100);
     token[token.length - 1]++; // invalidate HMAC
     assertFalse(rt.validate(token, address, ttl));
   }

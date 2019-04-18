@@ -52,22 +52,22 @@ public class ClientTlsSession {
       throw new IllegalStateException("Already started");
     }
 
-    ClientHello ch = ClientHello.defaults(kek, transportParameters);
+    final ClientHello ch = ClientHello.defaults(kek, transportParameters);
     clientHello = Bytes.write(bb -> ch.write(bb, true));
     return clientHello;
   }
 
-  public AEAD handleServerHello(byte[] msg) {
+  public AEAD handleServerHello(final byte[] msg) {
     if (clientHello == null) {
       throw new IllegalStateException("Not started");
     }
 
     serverHello = msg;
 
-    ByteBuf bb = Unpooled.wrappedBuffer(msg);
-    ServerHello hello = ServerHello.parse(bb, true);
+    final ByteBuf bb = Unpooled.wrappedBuffer(msg);
+    final ServerHello hello = ServerHello.parse(bb, true);
 
-    SupportedVersions version =
+    final SupportedVersions version =
         (SupportedVersions)
             hello
                 .geExtension(ExtensionType.SUPPORTED_VERSIONS)
@@ -76,20 +76,20 @@ public class ClientTlsSession {
       throw new IllegalArgumentException("Illegal version");
     }
 
-    KeyShare keyShareExtension =
+    final KeyShare keyShareExtension =
         (KeyShare)
             hello.geExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
-    byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
-    byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
+    final byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
+    final byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
 
-    byte[] helloHash = Hash.sha256(clientHello, serverHello);
+    final byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
 
     return HandshakeAEAD.create(handshakeSecret, helloHash, true);
   }
 
-  public synchronized Optional<HandshakeResult> handleHandshake(byte[] msg) {
+  public synchronized Optional<HandshakeResult> handleHandshake(final byte[] msg) {
     if (clientHello == null || serverHello == null) {
       throw new IllegalStateException("Got handshake in unexpected state");
     }
@@ -98,49 +98,49 @@ public class ClientTlsSession {
 
     handshakeBuffer.markReaderIndex();
     try {
-      int pos = handshakeBuffer.readerIndex();
-      EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer, true);
-      ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
+      final int pos = handshakeBuffer.readerIndex();
+      final EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer, true);
+      final ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
 
-      byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];
+      final byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];
       handshakeBuffer.resetReaderIndex();
       handshakeBuffer.readBytes(scvBytes);
 
-      ServerCertificateVerify scv = ServerCertificateVerify.parse(handshakeBuffer);
+      final ServerCertificateVerify scv = ServerCertificateVerify.parse(handshakeBuffer);
 
       validateServerCertificateVerify(sc, scv, scvBytes);
 
-      byte[] finBytes = new byte[handshakeBuffer.readerIndex() - pos];
+      final byte[] finBytes = new byte[handshakeBuffer.readerIndex() - pos];
       handshakeBuffer.resetReaderIndex();
       handshakeBuffer.readBytes(finBytes);
 
-      ServerHandshakeFinished fin = ServerHandshakeFinished.parse(handshakeBuffer);
+      final ServerHandshakeFinished fin = ServerHandshakeFinished.parse(handshakeBuffer);
 
-      byte[] helloHash = Hash.sha256(clientHello, serverHello);
+      final byte[] helloHash = Hash.sha256(clientHello, serverHello);
       validateServerFinish(fin, helloHash, finBytes);
 
       // TODO verify certificate
 
       handshakeBuffer.resetReaderIndex();
 
-      byte[] hs = Bytes.drainToArray(handshakeBuffer);
+      final byte[] hs = Bytes.drainToArray(handshakeBuffer);
       handshakeBuffer = Unpooled.buffer();
 
-      byte[] handshakeHash = Hash.sha256(clientHello, serverHello, hs);
+      final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, hs);
 
-      AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
+      final AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
 
       // TODO dedup
-      byte[] clientHandshakeTrafficSecret =
+      final byte[] clientHandshakeTrafficSecret =
           HKDF.expandLabel(handshakeSecret, CLIENT_HANDSHAKE_TRAFFIC_SECRET, helloHash, 32);
 
-      ClientFinished clientFinished =
+      final ClientFinished clientFinished =
           ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash);
 
-      byte[] b = Bytes.write(clientFinished);
+      final byte[] b = Bytes.write(clientFinished);
 
       return Optional.of(new HandshakeResult(b, aead));
-    } catch (IndexOutOfBoundsException e) {
+    } catch (final IndexOutOfBoundsException e) {
       // wait for more data
       log.debug("Need more data, waiting...");
       handshakeBuffer.resetReaderIndex();
@@ -150,14 +150,14 @@ public class ClientTlsSession {
   }
 
   private void validateServerFinish(
-      ServerHandshakeFinished fin, byte[] helloHash, byte[] finBytes) {
+      final ServerHandshakeFinished fin, final byte[] helloHash, final byte[] finBytes) {
     // verify server fin
-    byte[] finishedHash = Hash.sha256(clientHello, serverHello, finBytes);
+    final byte[] finishedHash = Hash.sha256(clientHello, serverHello, finBytes);
 
-    byte[] serverHandshakeTrafficSecret =
+    final byte[] serverHandshakeTrafficSecret =
         HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
 
-    boolean valid =
+    final boolean valid =
         VerifyData.verify(
             fin.getVerificationData(), serverHandshakeTrafficSecret, finishedHash, false);
     if (!valid) {
@@ -166,14 +166,14 @@ public class ClientTlsSession {
   }
 
   private void validateServerCertificateVerify(
-      ServerCertificate sc, ServerCertificateVerify scv, byte[] handshakeData) {
-    byte[] toVerify = Hash.sha256(clientHello, serverHello, handshakeData);
+      final ServerCertificate sc, final ServerCertificateVerify scv, final byte[] handshakeData) {
+    final byte[] toVerify = Hash.sha256(clientHello, serverHello, handshakeData);
 
-    byte[] serverSig = scv.getSignature();
+    final byte[] serverSig = scv.getSignature();
 
-    PublicKey serverKey = sc.getAsCertificiates().get(0).getPublicKey();
+    final PublicKey serverKey = sc.getAsCertificiates().get(0).getPublicKey();
 
-    boolean valid = CertificateVerify.verify(serverSig, toVerify, serverKey, false);
+    final boolean valid = CertificateVerify.verify(serverSig, toVerify, serverKey, false);
     if (!valid) {
       throw new RuntimeException("Invalid server certificate verify");
     }
@@ -207,7 +207,7 @@ public class ClientTlsSession {
     private final byte[] fin;
     private final AEAD oneRttAead;
 
-    public HandshakeResult(byte[] fin, AEAD oneRttAead) {
+    public HandshakeResult(final byte[] fin, final AEAD oneRttAead) {
       this.fin = fin;
       this.oneRttAead = oneRttAead;
     }

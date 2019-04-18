@@ -7,7 +7,7 @@ import com.google.common.hash.Hashing;
 
 public class VerifyData {
 
-  public static byte[] create(byte[] handshakeTrafficSecret, byte[] finishedHash) {
+  public static byte[] create(final byte[] handshakeTrafficSecret, final byte[] finishedHash) {
     checkArgument(handshakeTrafficSecret.length == 32);
     checkArgument(finishedHash.length == 32);
 
@@ -16,7 +16,7 @@ public class VerifyData {
     //    label = "finished",
     //    context = "",
     //    len = 32)
-    byte[] finishedKey = HKDF.expandLabel(handshakeTrafficSecret, FINISHED, new byte[0], 32);
+    final byte[] finishedKey = HKDF.expandLabel(handshakeTrafficSecret, FINISHED, new byte[0], 32);
 
     // verify_data = HMAC-SHA256(
     //	key = finished_key,
@@ -25,12 +25,15 @@ public class VerifyData {
   }
 
   public static boolean verify(
-      byte[] verifyData, byte[] handshakeTrafficSecret, byte[] finishedHash, boolean quic) {
+      final byte[] verifyData,
+      final byte[] handshakeTrafficSecret,
+      final byte[] finishedHash,
+      final boolean quic) {
     checkArgument(verifyData.length > 0);
     checkArgument(handshakeTrafficSecret.length == 32);
     checkArgument(finishedHash.length == 32);
 
-    byte[] actual = create(handshakeTrafficSecret, finishedHash);
+    final byte[] actual = create(handshakeTrafficSecret, finishedHash);
 
     return CryptoEquals.isEqual(verifyData, actual);
   }

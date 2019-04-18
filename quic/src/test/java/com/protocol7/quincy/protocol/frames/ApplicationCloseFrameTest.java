@@ -10,12 +10,12 @@ public class ApplicationCloseFrameTest {
 
   @Test
   public void roundtripApplication() {
-    ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "Hello world");
+    final ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "Hello world");
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     acf.write(bb);
 
-    ApplicationCloseFrame parsed = ApplicationCloseFrame.parse(bb);
+    final ApplicationCloseFrame parsed = ApplicationCloseFrame.parse(bb);
 
     assertEquals(acf.getErrorCode(), parsed.getErrorCode());
     assertEquals(acf.getReasonPhrase(), parsed.getReasonPhrase());

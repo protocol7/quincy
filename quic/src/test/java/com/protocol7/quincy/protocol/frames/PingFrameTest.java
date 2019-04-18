@@ -13,20 +13,20 @@ public class PingFrameTest {
 
   @Test
   public void roundtrip() {
-    ByteBuf bb = Unpooled.buffer();
-    PingFrame frame = PingFrame.INSTANCE;
+    final ByteBuf bb = Unpooled.buffer();
+    final PingFrame frame = PingFrame.INSTANCE;
 
     frame.write(bb);
 
-    PingFrame parsed = PingFrame.parse(bb);
+    final PingFrame parsed = PingFrame.parse(bb);
 
     assertEquals(frame, parsed);
   }
 
   @Test
   public void write() {
-    ByteBuf bb = Unpooled.buffer();
-    PingFrame frame = PingFrame.INSTANCE;
+    final ByteBuf bb = Unpooled.buffer();
+    final PingFrame frame = PingFrame.INSTANCE;
     frame.write(bb);
 
     TestUtil.assertBuffer("01", bb);

@@ -14,7 +14,7 @@ public class QuicGoPacketParserTest {
 
   @Test
   public void parse() {
-    List<String> logs =
+    final List<String> logs =
         List.of(
             "server <- Reading packet 0x2 (92 bytes) for connection 0x142de1af, Handshake\n",
             "server \tLong Header{Type: Handshake, DestConnectionID: 0x142de1af, SrcConnectionID: 0x5fec16f0569563feb5572630227285, PacketNumber: 0x2, PacketNumberLen: 4, Length: 65, Version: TLS dev version (WIP)}\n",
@@ -22,17 +22,17 @@ public class QuicGoPacketParserTest {
             "server -> Sending packet 0x2 (37 bytes) for connection 0x7245c5be, 1-RTT\n",
             "server \tShort Header{DestConnectionID: 0x5551cb7767435e519f01c1ea, PacketNumber: 0x2, PacketNumberLen: 2, KeyPhase: 0}");
 
-    List<QuicGoPacket> packets = QuicGoPacketParser.parse(logs);
+    final List<QuicGoPacket> packets = QuicGoPacketParser.parse(logs);
 
     assertEquals(2, packets.size());
-    QuicGoPacket p1 = packets.get(0);
+    final QuicGoPacket p1 = packets.get(0);
     assertEquals(true, p1.inbound);
     assertTrue(p1.longHeader);
     assertArrayEquals(Hex.dehex("142de1af"), p1.destinationConnectionId);
     assertArrayEquals(Hex.dehex("5fec16f0569563feb5572630227285"), p1.sourceConnectionId);
     assertEquals(2, p1.packetNumber);
 
-    QuicGoPacket p2 = packets.get(1);
+    final QuicGoPacket p2 = packets.get(1);
     Assert.assertFalse(p2.inbound);
     Assert.assertFalse(p2.longHeader);
     assertArrayEquals(Hex.dehex("5551cb7767435e519f01c1ea"), p2.destinationConnectionId);

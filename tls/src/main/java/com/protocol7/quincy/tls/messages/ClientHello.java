@@ -25,11 +25,11 @@ import java.util.Optional;
 
 public class ClientHello {
 
-  public static ClientHello defaults(KeyExchange ke, Extension... exts) {
-    byte[] clientRandom = Rnd.rndBytes(32);
-    byte[] sessionId = new byte[0];
-    List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
-    List<Extension> extensions =
+  public static ClientHello defaults(final KeyExchange ke, final Extension... exts) {
+    final byte[] clientRandom = Rnd.rndBytes(32);
+    final byte[] sessionId = new byte[0];
+    final List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
+    final List<Extension> extensions =
         ImmutableList.<Extension>builder()
             .add(
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
@@ -43,48 +43,48 @@ public class ClientHello {
     return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
   }
 
-  public static ClientHello parse(byte[] ch, boolean isClient) {
-    ByteBuf bb = Unpooled.wrappedBuffer(ch);
+  public static ClientHello parse(final byte[] ch, final boolean isClient) {
+    final ByteBuf bb = Unpooled.wrappedBuffer(ch);
 
-    byte handshakeType = bb.readByte();
+    final byte handshakeType = bb.readByte();
 
     if (handshakeType != 0x01) {
       throw new IllegalArgumentException("Invalid handshake type");
     }
 
-    byte[] b = new byte[3];
+    final byte[] b = new byte[3];
     bb.readBytes(b);
-    int payloadLength = (b[0] & 0xFF) << 16 | (b[1] & 0xFF) << 8 | (b[2] & 0xFF);
+    final int payloadLength = (b[0] & 0xFF) << 16 | (b[1] & 0xFF) << 8 | (b[2] & 0xFF);
     if (payloadLength != bb.readableBytes()) {
       throw new IllegalArgumentException(
           "Buffer incorrect length: actual " + payloadLength + ", expected " + bb.readableBytes());
     }
 
-    byte[] clientVersion = new byte[2];
+    final byte[] clientVersion = new byte[2];
     bb.readBytes(clientVersion);
     if (!Arrays.equals(clientVersion, new byte[] {3, 3})) {
       throw new IllegalArgumentException("Invalid client version: " + Hex.hex(clientVersion));
     }
 
-    byte[] clientRandom = new byte[32];
+    final byte[] clientRandom = new byte[32];
     bb.readBytes(clientRandom); // client random
 
-    int sessionIdLen = bb.readByte();
-    byte[] sessionId = new byte[sessionIdLen];
+    final int sessionIdLen = bb.readByte();
+    final byte[] sessionId = new byte[sessionIdLen];
     bb.readBytes(sessionId); // session ID
 
-    List<CipherSuite> cipherSuites = CipherSuite.parseKnown(bb);
+    final List<CipherSuite> cipherSuites = CipherSuite.parseKnown(bb);
 
-    byte[] compression = new byte[2];
+    final byte[] compression = new byte[2];
     bb.readBytes(compression);
     if (!Arrays.equals(compression, new byte[] {1, 0})) {
       throw new IllegalArgumentException("Compression must be disabled: " + Hex.hex(compression));
     }
 
-    int extensionsLen = bb.readShort();
-    ByteBuf extBB = bb.readBytes(extensionsLen);
+    final int extensionsLen = bb.readShort();
+    final ByteBuf extBB = bb.readBytes(extensionsLen);
     try {
-      List<Extension> ext = Extension.parseAll(extBB, isClient);
+      final List<Extension> ext = Extension.parseAll(extBB, isClient);
 
       return new ClientHello(clientRandom, sessionId, cipherSuites, ext);
     } finally {
@@ -98,10 +98,10 @@ public class ClientHello {
   private final List<Extension> extensions;
 
   public ClientHello(
-      byte[] clientRandom,
-      byte[] sessionId,
-      List<CipherSuite> cipherSuites,
-      List<Extension> extensions) {
+      final byte[] clientRandom,
+      final byte[] sessionId,
+      final List<CipherSuite> cipherSuites,
+      final List<Extension> extensions) {
     Preconditions.checkArgument(clientRandom.length == 32);
     this.clientRandom = clientRandom;
     this.sessionId = requireNonNull(sessionId);
@@ -125,8 +125,8 @@ public class ClientHello {
     return extensions;
   }
 
-  public Optional<Extension> getExtension(ExtensionType type) {
-    for (Extension ext : extensions) {
+  public Optional<Extension> getExtension(final ExtensionType type) {
+    for (final Extension ext : extensions) {
       if (ext.getType().equals(type)) {
         return Optional.of(ext);
       }
@@ -134,11 +134,11 @@ public class ClientHello {
     return Optional.empty();
   }
 
-  public void write(ByteBuf bb, boolean isClient) {
+  public void write(final ByteBuf bb, final boolean isClient) {
     bb.writeByte(0x01);
 
     // payload length
-    int lenPos = bb.writerIndex();
+    final int lenPos = bb.writerIndex();
     Bytes.write24(bb, 0); // placeholder
 
     // version
@@ -156,7 +156,7 @@ public class ClientHello {
     bb.writeByte(0x01);
     bb.writeByte(0x00);
 
-    int extLenPos = bb.writerIndex();
+    final int extLenPos = bb.writerIndex();
     bb.writeShort(0);
     Extension.writeAll(extensions, bb, isClient);
 

@@ -6,7 +6,7 @@ import java.util.Objects;
 
 public class Pair<F, S> {
 
-  public static <F, S> Pair<F, S> of(F f, S s) {
+  public static <F, S> Pair<F, S> of(final F f, final S s) {
     return new Pair<>(f, s);
   }
 

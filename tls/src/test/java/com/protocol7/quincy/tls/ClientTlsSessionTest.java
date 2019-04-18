@@ -41,9 +41,9 @@ public class ClientTlsSessionTest {
 
   @Test
   public void handshake() {
-    byte[] ch = engine.startHandshake();
+    final byte[] ch = engine.startHandshake();
 
-    ClientHello hello = ClientHello.parse(ch, false);
+    final ClientHello hello = ClientHello.parse(ch, false);
 
     assertEquals(32, hello.getClientRandom().length);
     assertEquals(0, hello.getSessionId().length);
@@ -63,7 +63,8 @@ public class ClientTlsSessionTest {
         ((SupportedVersions) hello.getExtension(ExtensionType.SUPPORTED_VERSIONS).get())
             .getVersions());
 
-    TransportParameters tps = (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
+    final TransportParameters tps =
+        (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
     assertEquals(TestUtil.tps(version), tps);
   }
 
@@ -73,30 +74,31 @@ public class ClientTlsSessionTest {
 
   @Test
   public void serverHello() {
-    List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps(version));
+    final List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps(version));
 
-    byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
+    final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
-    AEAD aead = started.handleServerHello(b);
+    final AEAD aead = started.handleServerHello(b);
 
     assertNotNull(aead);
     // TODO mock random and test AEAD keys
   }
 
-  private byte[] sh(byte[] serverRandom, CipherSuite cipherSuite, List<Extension> ext) {
-    ServerHello sh = new ServerHello(serverRandom, new byte[0], cipherSuite, ext);
-    ByteBuf bb = Unpooled.buffer();
+  private byte[] sh(
+      final byte[] serverRandom, final CipherSuite cipherSuite, final List<Extension> ext) {
+    final ServerHello sh = new ServerHello(serverRandom, new byte[0], cipherSuite, ext);
+    final ByteBuf bb = Unpooled.buffer();
     sh.write(bb);
     return Bytes.drainToArray(bb);
   }
 
-  private List<Extension> ext(Extension... extensions) {
+  private List<Extension> ext(final Extension... extensions) {
     return Arrays.asList(extensions);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloIllegalVersion() {
-    byte[] b =
+    final byte[] b =
         dehex(
             "0200009c"
                 + "9999"
@@ -107,7 +109,7 @@ public class ClientTlsSessionTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoKeyShare() {
-    byte[] b =
+    final byte[] b =
         sh(
             new byte[32],
             TLS_AES_128_GCM_SHA256,
@@ -118,14 +120,15 @@ public class ClientTlsSessionTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
-    byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps(version)));
+    final byte[] b =
+        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps(version)));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloIllegalSupportedVersion() {
-    byte[] b =
+    final byte[] b =
         dehex(
             "0200009c0303000000000000000000000000000000000000000000000000000000000000000000130100007400330024001d0020071967d323b1e8362ae9dfdb5280a220b4795019261715f54a6bfc251b17fc45002b0002"
                 + "9999"

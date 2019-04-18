@@ -28,7 +28,7 @@ public class SendStateMachine {
       Collections.newSetFromMap(new ConcurrentHashMap<>());
   private Optional<PacketNumber> outstandingResetPacket = Optional.empty();
 
-  public void onStream(PacketNumber pn, boolean fin) {
+  public void onStream(final PacketNumber pn, final boolean fin) {
     if (state == Open || state == Send) {
       if (fin) {
         state = DataSent;
@@ -40,7 +40,7 @@ public class SendStateMachine {
     }
   }
 
-  public void onReset(PacketNumber pn) {
+  public void onReset(final PacketNumber pn) {
     if (state == Open || state == Send || state == DataSent) {
       state = ResetSent;
       outstandingResetPacket = Optional.of(pn);
@@ -49,7 +49,7 @@ public class SendStateMachine {
     }
   }
 
-  public void onAck(PacketNumber pn) {
+  public void onAck(final PacketNumber pn) {
     outstandingStreamPackets.remove(pn);
 
     if (state == DataSent && outstandingStreamPackets.isEmpty()) {

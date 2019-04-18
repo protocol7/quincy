@@ -54,7 +54,7 @@ public class PacketBufferManagerTest {
 
     when(ticker.nanoTime()).thenReturn(2000_0000_0000L);
 
-    ArgumentCaptor<TimerTask> taskCaptor = ArgumentCaptor.forClass(TimerTask.class);
+    final ArgumentCaptor<TimerTask> taskCaptor = ArgumentCaptor.forClass(TimerTask.class);
     when(timer.newTimeout(taskCaptor.capture(), anyLong(), any(TimeUnit.class))).thenReturn(null);
 
     when(timeout.timer()).thenReturn(timer);
@@ -66,7 +66,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void dontAckOnlyAcks() {
-    Packet ackPacket = packet(1, new AckFrame(123, AckBlock.fromLongs(7, 8)));
+    final Packet ackPacket = packet(1, new AckFrame(123, AckBlock.fromLongs(7, 8)));
 
     buffer.onReceivePacket(ackPacket, ctx);
 
@@ -74,22 +74,22 @@ public class PacketBufferManagerTest {
     verify(ctx, never()).send(any(Frame.class));
     assertBufferEmpty();
 
-    Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    final Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.onReceivePacket(pingPacket, ctx);
 
-    AckFrame actual = (AckFrame) verifySent();
+    final AckFrame actual = (AckFrame) verifySent();
 
     assertEquals(AckBlock.fromLongs(1, 2), actual.getBlocks().get(0));
   }
 
   @Test
   public void ackOnPing() {
-    Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    final Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.onReceivePacket(pingPacket, ctx);
 
-    AckFrame actual = (AckFrame) verifySent();
+    final AckFrame actual = (AckFrame) verifySent();
     assertEquals(67, actual.getAckDelay());
     assertEquals(AckBlock.fromLongs(2, 2), actual.getBlocks().get(0));
   }
@@ -184,11 +184,11 @@ public class PacketBufferManagerTest {
 
   @Test
   public void send() {
-    Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    final Packet pingPacket = packet(2, PingFrame.INSTANCE);
 
     buffer.beforeSendPacket(pingPacket, ctx);
 
-    Packet actual = verifyNext();
+    final Packet actual = verifyNext();
 
     assertEquals(pingPacket, actual);
 
@@ -197,7 +197,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void resend() throws Exception {
-    Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    final Packet pingPacket = packet(2, PingFrame.INSTANCE);
     buffer.beforeSendPacket(pingPacket, ctx);
     assertBuffered(2);
 
@@ -209,11 +209,11 @@ public class PacketBufferManagerTest {
     verify(frameSender).send(PingFrame.INSTANCE);
   }
 
-  private Packet packet(long pn, Frame... frames) {
+  private Packet packet(final long pn, final Frame... frames) {
     return new ShortPacket(false, of(random()), new PacketNumber(pn), new Payload(frames));
   }
 
-  private Packet ip(long pn, Frame... frames) {
+  private Packet ip(final long pn, final Frame... frames) {
     return InitialPacket.create(
         of(random()),
         of(random()),
@@ -223,26 +223,26 @@ public class PacketBufferManagerTest {
         frames);
   }
 
-  private Packet hp(long pn, Frame... frames) {
+  private Packet hp(final long pn, final Frame... frames) {
     return HandshakePacket.create(
         of(random()), of(random()), new PacketNumber(pn), Version.DRAFT_18, frames);
   }
 
   private Packet verifyNext() {
-    ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
+    final ArgumentCaptor<Packet> captor = ArgumentCaptor.forClass(Packet.class);
     verify(ctx).next(captor.capture());
 
     return captor.getValue();
   }
 
   private Frame verifySent() {
-    ArgumentCaptor<Frame> captor = ArgumentCaptor.forClass(Frame.class);
+    final ArgumentCaptor<Frame> captor = ArgumentCaptor.forClass(Frame.class);
     verify(ctx).send(captor.capture());
 
     return captor.getValue();
   }
 
-  private void assertBuffered(long packetNumber) {
+  private void assertBuffered(final long packetNumber) {
     // packet buffered for future acking
     assertTrue(buffer.getBuffer().contains(packetNumber));
   }

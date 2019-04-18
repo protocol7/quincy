@@ -25,7 +25,7 @@ public class DefaultStream implements Stream {
       final StreamId id,
       final FrameSender sender,
       final StreamListener listener,
-      StreamType streamType) {
+      final StreamType streamType) {
     this.id = id;
     this.sender = sender;
     this.listener = listener;
@@ -40,17 +40,17 @@ public class DefaultStream implements Stream {
     return streamType;
   }
 
-  public void write(final byte[] b, boolean finish) {
+  public void write(final byte[] b, final boolean finish) {
     canWrite();
 
     final long frameOffset = offset.getAndAdd(b.length);
     final StreamFrame sf = new StreamFrame(id, frameOffset, finish, b);
-    FullPacket p = sender.send(sf);
+    final FullPacket p = sender.send(sf);
 
     sendStateMachine.onStream(p.getPacketNumber(), finish);
   }
 
-  public void reset(int applicationErrorCode) {
+  public void reset(final int applicationErrorCode) {
     canReset();
 
     final Frame frame = new ResetStreamFrame(id, applicationErrorCode, offset.get());
@@ -95,7 +95,7 @@ public class DefaultStream implements Stream {
     receiveStateMachine.onAppReadReset();
   }
 
-  public void onAck(PacketNumber pn) {
+  public void onAck(final PacketNumber pn) {
     sendStateMachine.onAck(pn);
   }
 

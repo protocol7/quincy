@@ -25,7 +25,7 @@ public class LoggingHandlerTest {
 
   @Test
   public void receive() {
-    Packet packet = p(PingFrame.INSTANCE);
+    final Packet packet = p(PingFrame.INSTANCE);
     handler.onReceivePacket(packet, ctx);
 
     verify(ctx).next(packet);
@@ -33,13 +33,13 @@ public class LoggingHandlerTest {
 
   @Test
   public void send() {
-    Packet packet = p(PingFrame.INSTANCE);
+    final Packet packet = p(PingFrame.INSTANCE);
     handler.beforeSendPacket(packet, ctx);
 
     verify(ctx).next(packet);
   }
 
-  private FullPacket p(Frame... frames) {
+  private FullPacket p(final Frame... frames) {
     return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frames));
   }
 }

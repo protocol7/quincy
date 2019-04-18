@@ -26,7 +26,7 @@ public class TlsSessionTest {
   @Before
   public void setUp() throws Exception {
     privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
-    byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
+    final byte[] serverCert = KeyUtil.getCertFromCrt("src/test/resources/server.crt").getEncoded();
 
     server =
         new ServerTlsSession(
@@ -38,32 +38,32 @@ public class TlsSessionTest {
 
   @Test
   public void handshake() {
-    byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake();
 
-    ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
+    final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(shah.getServerHello());
-    byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get().getFin();
+    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get().getFin();
 
     server.handleClientFinished(clientFin);
   }
 
   @Test(expected = RuntimeException.class)
   public void handshakeWithInvalidServerCertVerification() {
-    byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake();
 
-    ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
+    final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(shah.getServerHello());
 
-    ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
-    ServerHandshake handshake = ServerHandshake.parse(bb, true);
+    final ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
+    final ServerHandshake handshake = ServerHandshake.parse(bb, true);
 
-    byte[] sig = handshake.getServerCertificateVerify().getSignature();
+    final byte[] sig = handshake.getServerCertificateVerify().getSignature();
 
     sig[0]++; // modify signature
 
-    byte[] scv =
+    final byte[] scv =
         Bytes.write(
             handshake.getEncryptedExtensions(),
             handshake.getServerCertificate(),
@@ -71,19 +71,19 @@ public class TlsSessionTest {
                 handshake.getServerCertificateVerify().getType(), sig),
             handshake.getServerHandshakeFinished());
 
-    byte[] clientFin = client.handleHandshake(scv).get().getFin();
+    final byte[] clientFin = client.handleHandshake(scv).get().getFin();
 
     server.handleClientFinished(clientFin);
   }
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidClientFin() {
-    byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake();
 
-    ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
+    final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(shah.getServerHello());
-    byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get().getFin();
+    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get().getFin();
 
     // modify verification data
     clientFin[clientFin.length - 1]++;
@@ -93,20 +93,20 @@ public class TlsSessionTest {
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidServerFin() {
-    byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake();
 
-    ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
+    final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(shah.getServerHello());
 
-    ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
-    ServerHandshake handshake = ServerHandshake.parse(bb, true);
+    final ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
+    final ServerHandshake handshake = ServerHandshake.parse(bb, true);
 
-    byte[] vd = handshake.getServerHandshakeFinished().getVerificationData();
+    final byte[] vd = handshake.getServerHandshakeFinished().getVerificationData();
 
     vd[0]++; // modify verification data
 
-    byte[] scv =
+    final byte[] scv =
         Bytes.write(
             handshake.getEncryptedExtensions(),
             handshake.getServerCertificate(),

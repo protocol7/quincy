@@ -31,12 +31,12 @@ public class KeyShareTest {
     assertRoundtripSingle(false);
   }
 
-  private void assertRoundtripSingle(boolean clientToServer) {
-    ByteBuf bb = Unpooled.buffer();
+  private void assertRoundtripSingle(final boolean clientToServer) {
+    final ByteBuf bb = Unpooled.buffer();
 
     ext.write(bb, clientToServer);
 
-    KeyShare parsed = KeyShare.parse(bb, !clientToServer);
+    final KeyShare parsed = KeyShare.parse(bb, !clientToServer);
 
     assertEquals(ext.getKeys().size(), parsed.getKeys().size());
     assertArrayEquals(ext.getKey(Group.X25519).get(), parsed.getKey(Group.X25519).get());
@@ -44,11 +44,11 @@ public class KeyShareTest {
 
   @Test
   public void roundtripMultiple() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     extMultiple.write(bb, true);
 
-    KeyShare parsed = KeyShare.parse(bb, false);
+    final KeyShare parsed = KeyShare.parse(bb, false);
 
     assertEquals(extMultiple.getKeys().size(), parsed.getKeys().size());
     assertArrayEquals(extMultiple.getKey(Group.X25519).get(), parsed.getKey(Group.X25519).get());

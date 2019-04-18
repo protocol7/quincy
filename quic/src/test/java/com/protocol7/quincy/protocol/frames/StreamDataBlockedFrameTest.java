@@ -11,12 +11,12 @@ public class StreamDataBlockedFrameTest {
 
   @Test
   public void roundtrip() {
-    StreamDataBlockedFrame frame = new StreamDataBlockedFrame(new StreamId(123), 456);
+    final StreamDataBlockedFrame frame = new StreamDataBlockedFrame(new StreamId(123), 456);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    StreamDataBlockedFrame parsed = StreamDataBlockedFrame.parse(bb);
+    final StreamDataBlockedFrame parsed = StreamDataBlockedFrame.parse(bb);
 
     assertEquals(frame.getStreamId(), parsed.getStreamId());
     assertEquals(frame.getStreamDataLimit(), parsed.getStreamDataLimit());

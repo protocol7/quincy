@@ -47,7 +47,7 @@ public class AEADsTest {
     try {
       aeads.get(EncryptionLevel.Initial);
       fail();
-    } catch (IllegalStateException e) {
+    } catch (final IllegalStateException e) {
       // ignore
     }
   }
@@ -64,7 +64,7 @@ public class AEADsTest {
     try {
       aeads.get(EncryptionLevel.Handshake);
       fail();
-    } catch (IllegalStateException e) {
+    } catch (final IllegalStateException e) {
       // ignore
     }
   }
@@ -99,7 +99,7 @@ public class AEADsTest {
     aeads.setOneRttAead(null);
   }
 
-  private void assertAEAD(AEAD expected, AEAD actual) {
+  private void assertAEAD(final AEAD expected, final AEAD actual) {
     assertSame(expected, actual);
   }
 }

@@ -20,12 +20,12 @@ public class SupportedVersionsTest {
     assertRoundtrip(false);
   }
 
-  private void assertRoundtrip(boolean clientToServer) {
-    ByteBuf bb = Unpooled.buffer();
+  private void assertRoundtrip(final boolean clientToServer) {
+    final ByteBuf bb = Unpooled.buffer();
 
     TLS13.write(bb, clientToServer);
 
-    SupportedVersions parsed = SupportedVersions.parse(bb, !clientToServer);
+    final SupportedVersions parsed = SupportedVersions.parse(bb, !clientToServer);
     assertEquals(List.of(SupportedVersion.TLS13), parsed.getVersions());
   }
 }

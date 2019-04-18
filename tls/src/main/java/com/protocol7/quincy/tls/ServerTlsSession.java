@@ -43,8 +43,8 @@ public class ServerTlsSession {
   public ServerTlsSession(
       final AEAD initialAEAD,
       final TransportParameters transportParameters,
-      List<byte[]> certificates,
-      PrivateKey privateKey) {
+      final List<byte[]> certificates,
+      final PrivateKey privateKey) {
     this.transportParameters = transportParameters;
     Preconditions.checkArgument(!certificates.isEmpty());
 
@@ -54,13 +54,13 @@ public class ServerTlsSession {
     this.kek = KeyExchange.generate(Group.X25519);
   }
 
-  public ServerHelloAndHandshake handleClientHello(byte[] msg) {
+  public ServerHelloAndHandshake handleClientHello(final byte[] msg) {
     clientHello = msg;
 
-    ClientHello ch = ClientHello.parse(msg, false);
+    final ClientHello ch = ClientHello.parse(msg, false);
 
     // verify expected extensions
-    SupportedVersions versions =
+    final SupportedVersions versions =
         (SupportedVersions)
             ch.getExtension(ExtensionType.SUPPORTED_VERSIONS)
                 .orElseThrow(IllegalArgumentException::new);
@@ -68,76 +68,76 @@ public class ServerTlsSession {
       throw new IllegalArgumentException("Illegal version");
     }
 
-    KeyShare keyShareExtension =
+    final KeyShare keyShareExtension =
         (KeyShare)
             ch.getExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
 
     // create ServerHello
     serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));
 
-    ByteBuf handshakeBB = Unpooled.buffer();
+    final ByteBuf handshakeBB = Unpooled.buffer();
 
     // TODO decide on what parameters to send where
-    EncryptedExtensions ee = EncryptedExtensions.defaults(transportParameters);
+    final EncryptedExtensions ee = EncryptedExtensions.defaults(transportParameters);
     ee.write(handshakeBB);
 
-    ServerCertificate sc = new ServerCertificate(new byte[0], certificates);
+    final ServerCertificate sc = new ServerCertificate(new byte[0], certificates);
     sc.write(handshakeBB);
 
     // create server cert verification
-    byte[] toVerify = peekToArray(handshakeBB);
+    final byte[] toVerify = peekToArray(handshakeBB);
 
-    byte[] verificationSig =
+    final byte[] verificationSig =
         CertificateVerify.sign(Hash.sha256(clientHello, serverHello, toVerify), privateKey, false);
 
-    ServerCertificateVerify scv = new ServerCertificateVerify(2052, verificationSig);
+    final ServerCertificateVerify scv = new ServerCertificateVerify(2052, verificationSig);
     scv.write(handshakeBB);
 
     // create server finished
-    byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
-    byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
+    final byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
+    final byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
     handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
-    byte[] helloHash = Hash.sha256(clientHello, serverHello);
+    final byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     // create handshake AEAD
-    AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true);
+    final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true);
 
-    byte[] serverHandshakeTrafficSecret =
+    final byte[] serverHandshakeTrafficSecret =
         HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
 
     // finished_hash = SHA256(Client Hello ... Server Cert Verify)
-    byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
+    final byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
 
-    byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash);
+    final byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash);
 
-    ServerHandshakeFinished fin = new ServerHandshakeFinished(verifyData);
+    final ServerHandshakeFinished fin = new ServerHandshakeFinished(verifyData);
     fin.write(handshakeBB);
 
     // create 1-RTT AEAD
     handshake = Bytes.drainToArray(handshakeBB);
 
-    byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
-    AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
+    final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
+    final AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
 
     return new ServerHelloAndHandshake(serverHello, handshake, handshakeAEAD, oneRttAEAD);
   }
 
-  public synchronized void handleClientFinished(byte[] msg) {
+  public synchronized void handleClientFinished(final byte[] msg) {
     if (clientHello == null || serverHello == null || handshake == null) {
       throw new IllegalStateException("Got handshake in unexpected state");
     }
 
-    ByteBuf bb = Unpooled.wrappedBuffer(msg);
-    ClientFinished fin = ClientFinished.parse(bb);
+    final ByteBuf bb = Unpooled.wrappedBuffer(msg);
+    final ClientFinished fin = ClientFinished.parse(bb);
 
-    byte[] helloHash = Hash.sha256(clientHello, serverHello);
+    final byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
-    byte[] clientHandshakeTrafficSecret =
+    final byte[] clientHandshakeTrafficSecret =
         HKDF.expandLabel(handshakeSecret, "c hs traffic", helloHash, 32);
 
-    byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
+    final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
 
-    boolean valid =
+    final boolean valid =
         VerifyData.verify(
             fin.getVerificationData(), clientHandshakeTrafficSecret, handshakeHash, false);
 
@@ -179,7 +179,10 @@ public class ServerTlsSession {
     private final AEAD oneRttAEAD;
 
     public ServerHelloAndHandshake(
-        byte[] serverHello, byte[] serverHandshake, AEAD handshakeAEAD, AEAD oneRttAEAD) {
+        final byte[] serverHello,
+        final byte[] serverHandshake,
+        final AEAD handshakeAEAD,
+        final AEAD oneRttAEAD) {
       this.serverHello = serverHello;
       this.serverHandshake = serverHandshake;
       this.handshakeAEAD = handshakeAEAD;

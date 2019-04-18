@@ -46,7 +46,7 @@ public class RetryToken {
       final SecretKeySpec keySpec = new SecretKeySpec(key.getEncoded(), HMAC_SHA512);
       hmac.init(keySpec);
       return hmac.doFinal(data);
-    } catch (NoSuchAlgorithmException | InvalidKeyException e) {
+    } catch (final NoSuchAlgorithmException | InvalidKeyException e) {
       throw new RuntimeException("Retry token HMAC generation failed", e);
     }
   }
@@ -83,7 +83,7 @@ public class RetryToken {
       }
 
       return success;
-    } catch (IndexOutOfBoundsException | NegativeArraySizeException e) {
+    } catch (final IndexOutOfBoundsException | NegativeArraySizeException e) {
       // invalid token
       return false;
     }

@@ -35,7 +35,7 @@ public class QuicClient {
         Futures.thenSync(
             channelFuture,
             channel -> {
-              ClientConnection connection =
+              final ClientConnection connection =
                   new ClientConnection(
                       configuration,
                       ConnectionId.random(),

@@ -23,7 +23,7 @@ public class QuiclyClientTest {
                   new InetSocketAddress("0.0.0.0", 4444),
                   new StreamListener() {
                     @Override
-                    public void onData(Stream stream, byte[] data) {
+                    public void onData(final Stream stream, final byte[] data) {
                       System.out.println(new String(data));
                     }
 
@@ -31,7 +31,8 @@ public class QuiclyClientTest {
                     public void onFinished() {}
 
                     @Override
-                    public void onReset(Stream stream, int applicationErrorCode, long offset) {}
+                    public void onReset(
+                        final Stream stream, final int applicationErrorCode, final long offset) {}
                   },
                   KeyUtil.getCertsFromCrt("src/test/resources/server.crt"),
                   KeyUtil.getPrivateKey("src/test/resources/server.der"))

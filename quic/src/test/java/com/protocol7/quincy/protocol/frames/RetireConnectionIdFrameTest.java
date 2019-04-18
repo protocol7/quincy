@@ -10,12 +10,12 @@ public class RetireConnectionIdFrameTest {
 
   @Test
   public void roundtrip() {
-    RetireConnectionIdFrame rcif = new RetireConnectionIdFrame(123);
+    final RetireConnectionIdFrame rcif = new RetireConnectionIdFrame(123);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     rcif.write(bb);
 
-    RetireConnectionIdFrame parsed = RetireConnectionIdFrame.parse(bb);
+    final RetireConnectionIdFrame parsed = RetireConnectionIdFrame.parse(bb);
 
     assertEquals(rcif.getSequenceNumber(), parsed.getSequenceNumber());
   }

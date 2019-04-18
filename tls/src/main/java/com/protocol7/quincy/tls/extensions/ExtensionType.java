@@ -55,7 +55,7 @@ public class ExtensionType {
 
   public static final ExtensionType QUIC = of("QUIC", 0xffa5);
 
-  private static ExtensionType of(final String name, int value) {
+  private static ExtensionType of(final String name, final int value) {
     return new ExtensionType(name, value);
   }
 
@@ -108,8 +108,8 @@ public class ExtensionType {
           QUIC);
 
   // TODO optimize
-  public static ExtensionType fromValue(int value) {
-    for (ExtensionType type : ALL) {
+  public static ExtensionType fromValue(final int value) {
+    for (final ExtensionType type : ALL) {
       if (type.value == value) {
         return type;
       }
@@ -120,7 +120,7 @@ public class ExtensionType {
   private final String name;
   private final int value;
 
-  private ExtensionType(final String name, int value) {
+  private ExtensionType(final String name, final int value) {
     this.name = name;
     this.value = value;
   }
@@ -130,10 +130,10 @@ public class ExtensionType {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    ExtensionType that = (ExtensionType) o;
+    final ExtensionType that = (ExtensionType) o;
     return value == that.value;
   }
 

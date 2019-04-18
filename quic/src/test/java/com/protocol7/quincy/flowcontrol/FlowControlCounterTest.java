@@ -86,12 +86,12 @@ public class FlowControlCounterTest {
   }
 
   private void assertConsume(
-      TryConsumeResult actual,
-      boolean success,
-      long connectionOffset,
-      long connectionMax,
-      long streamOffset,
-      long streamMax) {
+      final TryConsumeResult actual,
+      final boolean success,
+      final long connectionOffset,
+      final long connectionMax,
+      final long streamOffset,
+      final long streamMax) {
     assertEquals(success, actual.isSuccess());
     assertEquals("Connection offset", connectionOffset, actual.getConnectionOffset());
     assertEquals("Connection max", connectionMax, actual.getConnectionMax());

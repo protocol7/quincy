@@ -19,7 +19,7 @@ public class ClientStateMachine {
     this.connection = connection;
   }
 
-  public void handlePacket(Packet packet) {
+  public void handlePacket(final Packet packet) {
     log.info("Client got {} in state {}: {}", packet.getClass().getCanonicalName(), state, packet);
 
     synchronized (this) { // TODO refactor to make non-synchronized

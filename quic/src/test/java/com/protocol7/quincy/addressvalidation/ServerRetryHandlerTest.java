@@ -49,7 +49,7 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void retry() {
-    InitialPacket initialPacket = p(Optional.empty());
+    final InitialPacket initialPacket = p(Optional.empty());
     handler.onReceivePacket(initialPacket, ctx);
 
     assertToken(initialPacket.getSourceConnectionId());
@@ -60,7 +60,8 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void withToken() {
-    InitialPacket initialPacket = p(of(retryToken.create(address, currentTimeMillis() + 10000)));
+    final InitialPacket initialPacket =
+        p(of(retryToken.create(address, currentTimeMillis() + 10000)));
     handler.onReceivePacket(initialPacket, ctx);
 
     // no retry sent
@@ -72,7 +73,7 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void withInvalidToken() {
-    InitialPacket initialPacket = p(of("this is not a token".getBytes()));
+    final InitialPacket initialPacket = p(of("this is not a token".getBytes()));
     handler.onReceivePacket(initialPacket, ctx);
 
     assertToken(initialPacket.getSourceConnectionId());
@@ -82,10 +83,10 @@ public class ServerRetryHandlerTest {
   }
 
   private void assertToken(final Optional<ConnectionId> expectedDestConnId) {
-    ArgumentCaptor<RetryPacket> retryCaptor = ArgumentCaptor.forClass(RetryPacket.class);
+    final ArgumentCaptor<RetryPacket> retryCaptor = ArgumentCaptor.forClass(RetryPacket.class);
     verify(ctx).sendPacket(retryCaptor.capture());
 
-    RetryPacket retry = retryCaptor.getValue();
+    final RetryPacket retry = retryCaptor.getValue();
     assertEquals(expectedDestConnId, retry.getDestinationConnectionId());
     retryToken.validate(retry.getRetryToken(), address, currentTimeMillis() + 10000);
   }
@@ -96,7 +97,7 @@ public class ServerRetryHandlerTest {
     // TODO if this correct?
     when(ctx.getState()).thenReturn(State.BeforeHello);
 
-    InitialPacket initialPacket = p(Optional.empty());
+    final InitialPacket initialPacket = p(Optional.empty());
     handler.onReceivePacket(initialPacket, ctx);
 
     // no retry packet sent
@@ -106,7 +107,7 @@ public class ServerRetryHandlerTest {
     verify(ctx).next(initialPacket);
   }
 
-  private InitialPacket p(Optional<byte[]> token) {
+  private InitialPacket p(final Optional<byte[]> token) {
     return new InitialPacket(
         of(ConnectionId.random()),
         of(ConnectionId.random()),

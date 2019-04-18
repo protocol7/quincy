@@ -10,12 +10,12 @@ public class DataBlockedFrameTest {
 
   @Test
   public void roundtrip() {
-    DataBlockedFrame frame = new DataBlockedFrame(456);
+    final DataBlockedFrame frame = new DataBlockedFrame(456);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    DataBlockedFrame parsed = DataBlockedFrame.parse(bb);
+    final DataBlockedFrame parsed = DataBlockedFrame.parse(bb);
 
     assertEquals(frame.getDataLimit(), parsed.getDataLimit());
   }

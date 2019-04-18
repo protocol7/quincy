@@ -11,13 +11,13 @@ public class SupportedGroupsTest {
 
   @Test
   public void roundtrip() {
-    SupportedGroups supportedGroups = new SupportedGroups(Group.X25519, Group.X448);
+    final SupportedGroups supportedGroups = new SupportedGroups(Group.X25519, Group.X448);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     supportedGroups.write(bb, true);
 
-    SupportedGroups parsed = SupportedGroups.parse(bb);
+    final SupportedGroups parsed = SupportedGroups.parse(bb);
 
     assertEquals(supportedGroups.getGroups(), parsed.getGroups());
   }

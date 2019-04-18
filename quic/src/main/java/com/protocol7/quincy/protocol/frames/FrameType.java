@@ -81,7 +81,7 @@ public enum FrameType {
     return type;
   }
 
-  public void write(ByteBuf bb) {
+  public void write(final ByteBuf bb) {
     bb.writeByte(type);
   }
 }

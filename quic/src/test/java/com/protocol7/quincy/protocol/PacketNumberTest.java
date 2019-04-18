@@ -30,13 +30,13 @@ public class PacketNumberTest {
 
   @Test
   public void write() {
-    byte[] b = new PacketNumber(123).write(4);
+    final byte[] b = new PacketNumber(123).write(4);
     TestUtil.assertHex("0000007b", b);
   }
 
   @Test
   public void next() {
-    PacketNumber pn = new PacketNumber(123);
+    final PacketNumber pn = new PacketNumber(123);
 
     assertEquals(new PacketNumber(124), pn.next());
     assertEquals(new PacketNumber(124), pn.next()); // doesn't mutate the original value
@@ -44,11 +44,11 @@ public class PacketNumberTest {
 
   @Test
   public void roundtrip() {
-    PacketNumber pn = new PacketNumber(123);
+    final PacketNumber pn = new PacketNumber(123);
 
-    byte[] b = pn.write(pn.getLength());
+    final byte[] b = pn.write(pn.getLength());
 
-    PacketNumber parsed = PacketNumber.parse(b);
+    final PacketNumber parsed = PacketNumber.parse(b);
 
     assertEquals(pn, parsed);
   }
@@ -69,22 +69,22 @@ public class PacketNumberTest {
     assertWrite(1160621137, "452dac51");
   }
 
-  private void assertRead(int expected, String h) {
-    PacketNumber pn = PacketNumber.parse(Hex.dehex(h));
+  private void assertRead(final int expected, final String h) {
+    final PacketNumber pn = PacketNumber.parse(Hex.dehex(h));
     assertEquals(expected, pn.asLong());
   }
 
-  private void assertWrite(int pn, String expected) {
-    ByteBuf bb = Unpooled.buffer();
-    PacketNumber p = new PacketNumber(pn);
+  private void assertWrite(final int pn, final String expected) {
+    final ByteBuf bb = Unpooled.buffer();
+    final PacketNumber p = new PacketNumber(pn);
     bb.writeBytes(p.write(p.getLength()));
 
-    byte[] b = Bytes.drainToArray(bb);
+    final byte[] b = Bytes.drainToArray(bb);
 
     assertEquals(expected, Hex.hex(b));
   }
 
-  private ByteBuf bb(String h) {
+  private ByteBuf bb(final String h) {
     return Unpooled.wrappedBuffer(Hex.dehex(h));
   }
 }

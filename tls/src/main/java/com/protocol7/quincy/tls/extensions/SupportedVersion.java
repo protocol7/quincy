@@ -6,7 +6,7 @@ public enum SupportedVersion {
   TLS13(new byte[] {3, 4}),
   UNKNOWN(new byte[0]);
 
-  public static SupportedVersion fromValue(byte[] value) {
+  public static SupportedVersion fromValue(final byte[] value) {
     if (value.length != 2) {
       throw new IllegalArgumentException("Invalid value length: " + value.length);
     }

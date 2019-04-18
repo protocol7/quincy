@@ -10,7 +10,7 @@ public class ReceivedDataBuffer {
   private long largestOffset = 0;
   private long readOffset = 0;
 
-  public void onData(byte[] data, long offset, boolean finish) {
+  public void onData(final byte[] data, final long offset, final boolean finish) {
     buffer.put(offset, data);
     if (finish) {
       this.largestOffset = offset;
@@ -18,7 +18,7 @@ public class ReceivedDataBuffer {
   }
 
   public Optional<byte[]> read() {
-    byte[] b = buffer.get(readOffset);
+    final byte[] b = buffer.get(readOffset);
 
     if (b != null) {
       readOffset += b.length;

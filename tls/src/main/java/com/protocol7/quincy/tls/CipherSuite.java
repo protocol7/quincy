@@ -16,23 +16,23 @@ public enum CipherSuite {
 
   public static final List<CipherSuite> SUPPORTED = List.of(TLS_AES_128_GCM_SHA256);
 
-  public static List<CipherSuite> parseKnown(ByteBuf bb) {
-    int len = bb.readShort() / 2;
+  public static List<CipherSuite> parseKnown(final ByteBuf bb) {
+    final int len = bb.readShort() / 2;
 
-    List<CipherSuite> css = new ArrayList<>(len);
+    final List<CipherSuite> css = new ArrayList<>(len);
     for (int i = 0; i < len; i++) {
       fromValue(bb.readShort()).ifPresent(css::add);
     }
     return css;
   }
 
-  public static Optional<CipherSuite> parseOne(ByteBuf bb) {
-    int value = bb.readShort();
+  public static Optional<CipherSuite> parseOne(final ByteBuf bb) {
+    final int value = bb.readShort();
     return fromValue(value);
   }
 
-  public static Optional<CipherSuite> fromValue(int value) {
-    for (CipherSuite cs : ALL) {
+  public static Optional<CipherSuite> fromValue(final int value) {
+    for (final CipherSuite cs : ALL) {
       if (cs.value == value) {
         return Optional.ofNullable(cs);
       }
@@ -40,17 +40,17 @@ public enum CipherSuite {
     return Optional.empty();
   }
 
-  public static void writeAll(ByteBuf bb, Collection<CipherSuite> css) {
+  public static void writeAll(final ByteBuf bb, final Collection<CipherSuite> css) {
     bb.writeShort(css.size() * 2);
 
-    for (CipherSuite cs : css) {
+    for (final CipherSuite cs : css) {
       bb.writeShort(cs.value);
     }
   }
 
   private final int value;
 
-  CipherSuite(int value) {
+  CipherSuite(final int value) {
     this.value = value;
   }
 

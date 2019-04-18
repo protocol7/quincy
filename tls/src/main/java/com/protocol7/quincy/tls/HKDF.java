@@ -24,26 +24,27 @@ public class HKDF {
   //                len = 32)
   private static final byte[] DERIVED_SECRET = expandLabel(EARLY_SECRET, "derived", EMPTY_HASH, 32);
 
-  public static byte[] calculateHandshakeSecret(byte[] sharedSecret) {
+  public static byte[] calculateHandshakeSecret(final byte[] sharedSecret) {
     //         handshake_secret = hkdf-Extract(
     //                salt = derived_secret,
     //                key = shared_secret)
     return hkdf.extract(DERIVED_SECRET, sharedSecret);
   }
 
-  public static byte[] extract(byte[] salt, byte[] inputKeyingMaterial) {
+  public static byte[] extract(final byte[] salt, final byte[] inputKeyingMaterial) {
     return hkdf.extract(salt, inputKeyingMaterial);
   }
 
-  public static byte[] expandLabel(byte[] key, String label, byte[] context, int length) {
-    byte[] expandedLabel = makeLabel(label, context, length);
+  public static byte[] expandLabel(
+      final byte[] key, final String label, final byte[] context, final int length) {
+    final byte[] expandedLabel = makeLabel(label, context, length);
     return hkdf.expand(key, expandedLabel, length);
   }
 
-  private static byte[] makeLabel(String label, byte[] context, int length) {
-    byte[] expandedLabel = (LABEL_PREFIX + label).getBytes(StandardCharsets.US_ASCII);
+  private static byte[] makeLabel(final String label, final byte[] context, final int length) {
+    final byte[] expandedLabel = (LABEL_PREFIX + label).getBytes(StandardCharsets.US_ASCII);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     bb.writeShort(length);
     bb.writeByte(expandedLabel.length);
 

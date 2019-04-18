@@ -4,17 +4,13 @@ import io.netty.buffer.ByteBuf;
 
 public class Debug {
 
-  public static String binary(int i) {
-    return Integer.toBinaryString(i);
-  }
-
-  public static void buffer(ByteBuf bb) {
+  public static void buffer(final ByteBuf bb) {
     buffer("", bb);
   }
 
-  public static void buffer(String msg, ByteBuf bb) {
-    int index = bb.readerIndex();
-    byte[] b = new byte[bb.readableBytes()];
+  public static void buffer(final String msg, final ByteBuf bb) {
+    final int index = bb.readerIndex();
+    final byte[] b = new byte[bb.readableBytes()];
     bb.readBytes(b);
     bb.readerIndex(index);
 

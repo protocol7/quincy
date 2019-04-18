@@ -44,7 +44,7 @@ public class TerminationManagerTest {
 
   @Test
   public void testConnectionCloseFrame() {
-    Packet packet = packet(new ConnectionCloseFrame(456, FrameType.PADDING, "Test"));
+    final Packet packet = packet(new ConnectionCloseFrame(456, FrameType.PADDING, "Test"));
 
     manager.onReceivePacket(packet, ctx);
 
@@ -69,7 +69,7 @@ public class TerminationManagerTest {
     verify(connection).close(eq(TransportError.NO_ERROR), eq(FrameType.PADDING), anyString());
   }
 
-  private Packet packet(Frame... frames) {
+  private Packet packet(final Frame... frames) {
     return new ShortPacket(false, of(random()), PacketNumber.MIN, new Payload(frames));
   }
 }

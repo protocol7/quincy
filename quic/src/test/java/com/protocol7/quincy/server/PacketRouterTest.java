@@ -56,7 +56,7 @@ public class PacketRouterTest {
 
   @Test
   public void route() {
-    InitialPacket packet =
+    final InitialPacket packet =
         InitialPacket.create(
             of(destConnId),
             empty(),
@@ -65,7 +65,7 @@ public class PacketRouterTest {
             empty(),
             PingFrame.INSTANCE);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
     router.route(bb, sender, peerAddress);
@@ -75,14 +75,14 @@ public class PacketRouterTest {
 
   @Test(expected = RuntimeException.class)
   public void invalidPacket() {
-    ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
+    final ByteBuf bb = Unpooled.wrappedBuffer("this is not a packet".getBytes());
 
     router.route(bb, sender, peerAddress);
   }
 
   @Test
   public void versionMismatch() {
-    InitialPacket packet =
+    final InitialPacket packet =
         InitialPacket.create(
             of(destConnId),
             empty(),
@@ -91,16 +91,16 @@ public class PacketRouterTest {
             empty(),
             PingFrame.INSTANCE);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
     router.route(bb, sender, peerAddress);
 
-    ArgumentCaptor<VersionNegotiationPacket> captor =
+    final ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);
     verify(sender).send(captor.capture(), any());
 
-    VersionNegotiationPacket verNeg = captor.getValue();
+    final VersionNegotiationPacket verNeg = captor.getValue();
 
     assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
     assertEquals(srcConnId, verNeg.getSourceConnectionId().get());

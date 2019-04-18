@@ -23,10 +23,10 @@ public class ShortPacketTest {
 
   @Test
   public void roundtrip() {
-    ShortPacket packet = packet();
-    ByteBuf bb = buffer(packet);
+    final ShortPacket packet = packet();
+    final ByteBuf bb = buffer(packet);
 
-    ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
+    final ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
 
     assertEquals(packet.getDestinationConnectionId(), parsed.getDestinationConnectionId());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
@@ -37,17 +37,17 @@ public class ShortPacketTest {
   public void roundtripPrefix() {
     // make sure packet doesn't need to start at 0 in buffer
 
-    ShortPacket packet = packet();
-    ByteBuf bb = Unpooled.buffer();
+    final ShortPacket packet = packet();
+    final ByteBuf bb = Unpooled.buffer();
 
-    byte[] b = new byte[123];
+    final byte[] b = new byte[123];
     bb.writeBytes(b);
 
     packet.write(bb, aead);
 
     bb.readBytes(b);
 
-    ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
+    final ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
 
     assertEquals(packet.getDestinationConnectionId(), parsed.getDestinationConnectionId());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
@@ -56,7 +56,7 @@ public class ShortPacketTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void invalidFirstBit() {
-    ByteBuf bb = buffer(packet());
+    final ByteBuf bb = buffer(packet());
     // switch on first bit, must make this payload invalid
     bb.setByte(0, Bits.set(bb.getByte(0), 7));
     ShortPacket.parse(bb, dest.getLength());
@@ -64,7 +64,7 @@ public class ShortPacketTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void invalidSecondBit() {
-    ByteBuf bb = buffer(packet());
+    final ByteBuf bb = buffer(packet());
     // switch off second bit, must make this payload invalid
     bb.setByte(0, Bits.unset(bb.getByte(0), 6));
     ShortPacket.parse(bb, dest.getLength());
@@ -74,8 +74,8 @@ public class ShortPacketTest {
     return new ShortPacket(false, of(dest), pn, new Payload(PingFrame.INSTANCE));
   }
 
-  private ByteBuf buffer(ShortPacket packet) {
-    ByteBuf bb = Unpooled.buffer();
+  private ByteBuf buffer(final ShortPacket packet) {
+    final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
     return bb;
   }

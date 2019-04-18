@@ -7,11 +7,11 @@ import java.util.List;
 
 public interface Extension {
 
-  static List<Extension> parseAll(ByteBuf bb, boolean isClient) {
-    List<Extension> extensions = new ArrayList<>();
+  static List<Extension> parseAll(final ByteBuf bb, final boolean isClient) {
+    final List<Extension> extensions = new ArrayList<>();
 
     while (bb.isReadable()) {
-      Extension ext = Extension.parse(bb, isClient);
+      final Extension ext = Extension.parse(bb, isClient);
 
       extensions.add(ext);
     }
@@ -19,10 +19,10 @@ public interface Extension {
     return extensions;
   }
 
-  static Extension parse(ByteBuf bb, boolean isClient) {
-    ExtensionType type = ExtensionType.fromValue(bb.readShort() & 0xFFFF);
+  static Extension parse(final ByteBuf bb, final boolean isClient) {
+    final ExtensionType type = ExtensionType.fromValue(bb.readShort() & 0xFFFF);
 
-    int len = bb.readShort();
+    final int len = bb.readShort();
     final ByteBuf b = bb.readBytes(len);
     try {
       if (type == ExtensionType.QUIC) {
@@ -45,11 +45,12 @@ public interface Extension {
     }
   }
 
-  static void writeAll(Collection<Extension> extensions, ByteBuf bb, boolean isClient) {
-    for (Extension extension : extensions) {
+  static void writeAll(
+      final Collection<Extension> extensions, final ByteBuf bb, final boolean isClient) {
+    for (final Extension extension : extensions) {
       bb.writeShort(extension.getType().getValue());
 
-      int lenPos = bb.writerIndex();
+      final int lenPos = bb.writerIndex();
       bb.writeShort(0);
 
       extension.write(bb, isClient);

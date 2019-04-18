@@ -20,13 +20,13 @@ public class QuiclyContainer extends GenericContainer {
 
   private final List<String> logStatements = new ArrayList<>();
 
-  public QuiclyContainer(ImageFromDockerfile image) {
+  public QuiclyContainer(final ImageFromDockerfile image) {
     super(image);
   }
 
   @Override
-  protected void containerIsStarted(InspectContainerResponse containerInfo) {
-    Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
+  protected void containerIsStarted(final InspectContainerResponse containerInfo) {
+    final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
     followOutput(logConsumer);
     followOutput(
         new Consumer<OutputFrame>() {

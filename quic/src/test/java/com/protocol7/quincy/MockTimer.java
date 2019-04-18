@@ -50,7 +50,7 @@ public class MockTimer implements Timer {
   }
 
   public void trigger() throws Exception {
-    for (Timeout timeout : timeouts) {
+    for (final Timeout timeout : timeouts) {
       timeout.task().run(timeout);
     }
   }

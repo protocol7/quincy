@@ -9,20 +9,20 @@ import io.netty.buffer.ByteBuf;
 
 public class TestUtil {
 
-  public static void assertHex(String expectedHex, byte[] actual) {
+  public static void assertHex(final String expectedHex, final byte[] actual) {
     assertEquals(expectedHex, hex(actual));
   }
 
-  public static void assertHex(String expectedHex, ByteBuf actual) {
-    byte[] actualBytes = Bytes.peekToArray(actual);
+  public static void assertHex(final String expectedHex, final ByteBuf actual) {
+    final byte[] actualBytes = Bytes.peekToArray(actual);
     assertHex(expectedHex, actualBytes);
   }
 
-  public static void assertHex(byte[] expected, byte[] actual) {
+  public static void assertHex(final byte[] expected, final byte[] actual) {
     assertEquals(hex(expected), hex(actual));
   }
 
-  public static TransportParameters tps(byte[] version) {
+  public static TransportParameters tps(final byte[] version) {
     return TransportParameters.newBuilder(version)
         .withInitialMaxStreamDataBidiLocal(32768)
         .withInitialMaxData(49152)

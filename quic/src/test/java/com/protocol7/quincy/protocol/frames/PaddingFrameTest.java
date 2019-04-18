@@ -12,21 +12,21 @@ public class PaddingFrameTest {
 
   @Test
   public void roundtrip() {
-    PaddingFrame frame = new PaddingFrame(10);
+    final PaddingFrame frame = new PaddingFrame(10);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     frame.write(bb);
 
-    PaddingFrame parsed = PaddingFrame.parse(bb);
+    final PaddingFrame parsed = PaddingFrame.parse(bb);
 
     assertEquals(frame, parsed);
   }
 
   @Test
   public void writeOne() {
-    PaddingFrame frame = new PaddingFrame(1);
-    ByteBuf bb = Unpooled.buffer();
+    final PaddingFrame frame = new PaddingFrame(1);
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
     TestUtil.assertBuffer("00", bb);
@@ -34,22 +34,22 @@ public class PaddingFrameTest {
 
   @Test
   public void parseOne() {
-    PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("00")));
+    final PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("00")));
 
     assertEquals(new PaddingFrame(1), frame);
   }
 
   @Test
   public void parseMulti() {
-    PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("000000000000")));
+    final PaddingFrame frame = PaddingFrame.parse(Unpooled.copiedBuffer(Hex.dehex("000000000000")));
 
     assertEquals(new PaddingFrame(6), frame);
   }
 
   @Test
   public void parseTrailing() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("000000000000FF"));
-    PaddingFrame frame = PaddingFrame.parse(bb);
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("000000000000FF"));
+    final PaddingFrame frame = PaddingFrame.parse(bb);
 
     assertEquals(new PaddingFrame(6), frame);
     assertEquals(1, bb.readableBytes());

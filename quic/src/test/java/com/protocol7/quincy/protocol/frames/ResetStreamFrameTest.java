@@ -33,13 +33,13 @@ public class ResetStreamFrameTest {
 
   @Test
   public void rountrip() {
-    StreamId streamId = StreamId.random(true, true);
-    ResetStreamFrame frame = new ResetStreamFrame(streamId, 123, 456);
+    final StreamId streamId = StreamId.random(true, true);
+    final ResetStreamFrame frame = new ResetStreamFrame(streamId, 123, 456);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    ResetStreamFrame parsed = ResetStreamFrame.parse(bb);
+    final ResetStreamFrame parsed = ResetStreamFrame.parse(bb);
 
     assertEquals(frame, parsed);
   }

@@ -11,7 +11,7 @@ public class FrameTest {
 
   @Test
   public void cryptoFrame() {
-    CryptoFrame frame = new CryptoFrame(0, "hello".getBytes());
+    final CryptoFrame frame = new CryptoFrame(0, "hello".getBytes());
     assertFrame(frame);
   }
 
@@ -47,13 +47,13 @@ public class FrameTest {
 
   @Test
   public void connectionCloseFrame() {
-    ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, FrameType.STREAM, "hello");
+    final ConnectionCloseFrame ccf = new ConnectionCloseFrame(12, FrameType.STREAM, "hello");
     assertFrame(ccf);
   }
 
   @Test
   public void applicationCloseFrame() {
-    ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "hello");
+    final ApplicationCloseFrame acf = new ApplicationCloseFrame(12, "hello");
     assertFrame(acf);
   }
 
@@ -97,11 +97,11 @@ public class FrameTest {
     assertFrame(new StreamsBlockedFrame(456, false));
   }
 
-  private void assertFrame(Frame frame) {
-    ByteBuf bb = Unpooled.buffer();
+  private void assertFrame(final Frame frame) {
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    Frame parsed = Frame.parse(bb);
+    final Frame parsed = Frame.parse(bb);
 
     assertTrue(parsed.getClass().equals(frame.getClass()));
   }

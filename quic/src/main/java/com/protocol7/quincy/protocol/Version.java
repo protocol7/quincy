@@ -15,7 +15,7 @@ public enum Version {
   UNKNOWN(new byte[0]);
 
   public static Version read(final ByteBuf bb) {
-    byte[] l = new byte[4];
+    final byte[] l = new byte[4];
     bb.readBytes(l);
 
     if (Arrays.equals(l, VERSION_NEGOTIATION.version)) {

@@ -10,12 +10,12 @@ public class MaxDataFrameTest {
 
   @Test
   public void roundtrip() {
-    MaxDataFrame frame = new MaxDataFrame(456);
+    final MaxDataFrame frame = new MaxDataFrame(456);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    MaxDataFrame parsed = MaxDataFrame.parse(bb);
+    final MaxDataFrame parsed = MaxDataFrame.parse(bb);
 
     assertEquals(frame.getMaxData(), parsed.getMaxData());
   }

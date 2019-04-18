@@ -59,8 +59,8 @@ public class ServerTest {
     when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
 
-    List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
-    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
+    final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
+    final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     connection =
         new ServerConnection(
@@ -78,41 +78,41 @@ public class ServerTest {
   @Test
   public void handshake() {
     assertEquals(State.Started, connection.getState());
-    byte[] ch = clientTlsSession.startHandshake();
+    final byte[] ch = clientTlsSession.startHandshake();
 
     connection.onPacket(initialPacket(destConnectionId, empty(), new CryptoFrame(0, ch)));
 
-    RetryPacket retry = (RetryPacket) captureSentPacket(1);
+    final RetryPacket retry = (RetryPacket) captureSentPacket(1);
     assertTrue(retry.getDestinationConnectionId().isPresent());
     assertEquals(srcConnectionId, retry.getDestinationConnectionId().get());
     assertEquals(destConnectionId, retry.getOriginalConnectionId());
     assertTrue(retry.getRetryToken().length > 0);
-    byte[] token = retry.getRetryToken();
+    final byte[] token = retry.getRetryToken();
 
     connection.onPacket(initialPacket(destConnectionId2, of(token), new CryptoFrame(0, ch)));
 
-    InitialPacket serverHello = (InitialPacket) captureSentPacket(2);
+    final InitialPacket serverHello = (InitialPacket) captureSentPacket(2);
     assertEquals(srcConnectionId, serverHello.getDestinationConnectionId().get());
 
     assertTrue(serverHello.getSourceConnectionId().isPresent());
 
-    ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId().get();
+    final ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId().get();
 
     assertEquals(1, serverHello.getPacketNumber().asLong());
     assertFalse(serverHello.getToken().isPresent());
     assertEquals(1, serverHello.getPayload().getFrames().size());
-    CryptoFrame cf = (CryptoFrame) serverHello.getPayload().getFrames().get(0);
+    final CryptoFrame cf = (CryptoFrame) serverHello.getPayload().getFrames().get(0);
 
     clientTlsSession.handleServerHello(cf.getCryptoData());
 
-    HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
+    final HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
     assertEquals(srcConnectionId, handshake.getDestinationConnectionId().get());
     assertEquals(newSourceConnectionId, handshake.getSourceConnectionId().get());
     assertEquals(2, handshake.getPacketNumber().asLong());
     assertEquals(1, handshake.getPayload().getFrames().size());
-    CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
+    final CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
 
-    HandshakeResult hr = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
+    final HandshakeResult hr = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
 
     connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, hr.getFin())));
 
@@ -146,12 +146,14 @@ public class ServerTest {
     assertAck(4, 3, 4, 4);
   }
 
-  private void assertAck(int number, int packetNumber, int smallest, int largest) {
-    ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
+  private void assertAck(
+      final int number, final int packetNumber, final int smallest, final int largest) {
+    final ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertTrue(ackPacket.getDestinationConnectionId().isPresent());
 
-    List<AckBlock> actual = ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
+    final List<AckBlock> actual =
+        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
     assertEquals(List.of(new AckBlock(smallest, largest)), actual);
   }
 
@@ -164,7 +166,7 @@ public class ServerTest {
   }
 
   private InitialPacket initialPacket(
-      ConnectionId destConnId, Optional<byte[]> token, Frame... frames) {
+      final ConnectionId destConnId, final Optional<byte[]> token, final Frame... frames) {
     return InitialPacket.create(
         of(destConnId),
         of(srcConnectionId),
@@ -174,11 +176,11 @@ public class ServerTest {
         List.of(frames));
   }
 
-  private Packet packet(ConnectionId destConnId, Frame... frames) {
+  private Packet packet(final ConnectionId destConnId, final Frame... frames) {
     return new ShortPacket(false, of(destConnId), nextPacketNumber(), new Payload(frames));
   }
 
-  private Packet hp(ConnectionId destConnId, Frame... frames) {
+  private Packet hp(final ConnectionId destConnId, final Frame... frames) {
     return HandshakePacket.create(
         of(destConnId), of(srcConnectionId), nextPacketNumber(), Version.DRAFT_18, frames);
   }
@@ -188,11 +190,11 @@ public class ServerTest {
     return packetNumber;
   }
 
-  private Packet captureSentPacket(int number) {
-    ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
+  private Packet captureSentPacket(final int number) {
+    final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
     verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
-    List<Packet> values = packetCaptor.getAllValues();
+    final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);
   }
 }

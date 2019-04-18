@@ -32,7 +32,7 @@ public class Streams {
       stream =
           new DefaultStream(
               streamId, frameSender, handler, StreamType.Bidirectional); // TODO support stream type
-      DefaultStream existingStream = streams.putIfAbsent(streamId, stream);
+      final DefaultStream existingStream = streams.putIfAbsent(streamId, stream);
       if (existingStream != null) {
         stream = existingStream;
       }

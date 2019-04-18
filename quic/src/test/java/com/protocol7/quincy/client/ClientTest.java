@@ -69,8 +69,8 @@ public class ClientTest {
             TestUtil.getTestAddress(),
             scheduler);
 
-    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
-    List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
+    final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
+    final List<byte[]> serverCert = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
 
     serverTlsSession =
         new ServerTlsSession(
@@ -83,15 +83,15 @@ public class ClientTest {
   @Test
   public void handshake() {
     // start handshake
-    Future<Void> handshakeFuture = connection.handshake();
+    final Future<Void> handshakeFuture = connection.handshake();
 
     // validate first packet sent
-    InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
+    final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
     assertEquals(1, initialPacket.getPacketNumber().asLong());
     assertEquals(destConnectionId, initialPacket.getDestinationConnectionId().get());
     assertTrue(initialPacket.getSourceConnectionId().isPresent());
 
-    ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
+    final ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
 
     assertFalse(initialPacket.getToken().isPresent());
     assertEquals(Version.DRAFT_18, initialPacket.getVersion());
@@ -102,7 +102,7 @@ public class ClientTest {
     assertFalse(handshakeFuture.isDone());
     assertEquals(State.BeforeHello, connection.getState());
 
-    byte[] retryToken = Rnd.rndBytes(20);
+    final byte[] retryToken = Rnd.rndBytes(20);
 
     // first packet did not contain token, server sends retry
     connection.onPacket(
@@ -114,17 +114,17 @@ public class ClientTest {
             retryToken));
 
     // validate new initial packet sent
-    InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
+    final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
     assertEquals(1, initialPacket2.getPacketNumber().asLong());
-    ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
+    final ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
     assertEquals(srcConnectionId, newDestConnId);
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertArrayEquals(retryToken, initialPacket2.getToken().get());
     assertEquals(Version.DRAFT_18, initialPacket2.getVersion());
 
-    CryptoFrame cf = (CryptoFrame) initialPacket2.getPayload().getFrames().get(0);
+    final CryptoFrame cf = (CryptoFrame) initialPacket2.getPayload().getFrames().get(0);
 
-    byte[] clientHello = cf.getCryptoData();
+    final byte[] clientHello = cf.getCryptoData();
 
     assertTrue(initialPacket2.getPayload().calculateLength() >= 1200);
 
@@ -132,7 +132,7 @@ public class ClientTest {
     assertFalse(handshakeFuture.isDone());
     assertEquals(State.BeforeHello, connection.getState());
 
-    ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
+    final ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(clientHello);
 
     // receive server hello
     connection.onPacket(
@@ -161,7 +161,7 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHandshake())));
 
     // validate client fin handshake packet
-    HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
+    final HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
     assertEquals(2, hp.getPacketNumber().asLong());
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertEquals(srcConnectionId, hp.getDestinationConnectionId().get());
@@ -178,7 +178,7 @@ public class ClientTest {
 
     connection.onPacket(packet(new StreamFrame(streamId, 0, true, DATA)));
 
-    ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
+    final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener).onData(any(), dataCaptor.capture());
 
     assertArrayEquals(DATA, dataCaptor.getValue());
@@ -194,10 +194,10 @@ public class ClientTest {
     connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
     connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
 
-    ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
+    final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
 
-    List<byte[]> datas = dataCaptor.getAllValues();
+    final List<byte[]> datas = dataCaptor.getAllValues();
 
     assertEquals(2, datas.size());
     assertArrayEquals(DATA, datas.get(0));
@@ -216,10 +216,10 @@ public class ClientTest {
     connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
     connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
 
-    ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
+    final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
     verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
 
-    List<byte[]> datas = dataCaptor.getAllValues();
+    final List<byte[]> datas = dataCaptor.getAllValues();
 
     assertEquals(2, datas.size());
     assertArrayEquals(DATA, datas.get(0));
@@ -267,7 +267,7 @@ public class ClientTest {
     try {
       connection.send(PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
-    } catch (IllegalStateException e) {
+    } catch (final IllegalStateException e) {
       // expected
     }
   }
@@ -283,7 +283,7 @@ public class ClientTest {
     try {
       connection.send(PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
-    } catch (IllegalStateException e) {
+    } catch (final IllegalStateException e) {
       // expected
     }
   }
@@ -291,14 +291,14 @@ public class ClientTest {
   @Test
   public void versionNegotiation() {
     // start handshake
-    Future<Void> handshakeFuture = connection.handshake();
+    final Future<Void> handshakeFuture = connection.handshake();
 
     // validate first packet sent
-    InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
+    final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
 
     // server does not support this version and sends a VerNeg
 
-    VersionNegotiationPacket verNeg =
+    final VersionNegotiationPacket verNeg =
         new VersionNegotiationPacket(
             Optional.of(destConnectionId), Optional.of(srcConnectionId), Version.FINAL);
 
@@ -311,12 +311,14 @@ public class ClientTest {
     verify(packetSender).destroy();
   }
 
-  private void assertAck(int number, int packetNumber, int smallest, int largest) {
-    ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
+  private void assertAck(
+      final int number, final int packetNumber, final int smallest, final int largest) {
+    final ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
 
-    List<AckBlock> actual = ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
+    final List<AckBlock> actual =
+        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
     assertEquals(List.of(new AckBlock(smallest, largest)), actual);
   }
 
@@ -330,15 +332,15 @@ public class ClientTest {
     verify(packetSender, never()).send(any(), any());
   }
 
-  private Packet captureSentPacket(int number) {
-    ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
+  private Packet captureSentPacket(final int number) {
+    final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
     verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
-    List<Packet> values = packetCaptor.getAllValues();
+    final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);
   }
 
-  private Packet packet(Frame... frames) {
+  private Packet packet(final Frame... frames) {
     return new ShortPacket(
         false,
         Optional.of(srcConnectionId), // TODO correct?

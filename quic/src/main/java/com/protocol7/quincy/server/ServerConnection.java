@@ -109,7 +109,7 @@ public class ServerConnection implements InternalConnection {
     return localConnectionId;
   }
 
-  public void setRemoteConnectionId(ConnectionId remoteConnectionId) {
+  public void setRemoteConnectionId(final ConnectionId remoteConnectionId) {
     this.remoteConnectionId = Optional.of(remoteConnectionId);
   }
 
@@ -117,9 +117,9 @@ public class ServerConnection implements InternalConnection {
     return version;
   }
 
-  public Packet sendPacket(Packet p) {
+  public Packet sendPacket(final Packet p) {
 
-    Packet newPacket = pipeline.send(this, p);
+    final Packet newPacket = pipeline.send(this, p);
 
     sendPacketUnbuffered(newPacket);
 
@@ -127,7 +127,7 @@ public class ServerConnection implements InternalConnection {
   }
 
   public FullPacket send(final Frame... frames) {
-    Packet packet;
+    final Packet packet;
     if (tlsManager.available(EncryptionLevel.OneRtt)) {
       packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
     } else if (tlsManager.available(EncryptionLevel.Handshake)) {
@@ -148,13 +148,13 @@ public class ServerConnection implements InternalConnection {
     return (FullPacket) sendPacket(packet);
   }
 
-  private void sendPacketUnbuffered(Packet packet) {
+  private void sendPacketUnbuffered(final Packet packet) {
     packetSender
         .send(packet, getAEAD(Packet.getEncryptionLevel(packet)))
         .awaitUninterruptibly(); // TODO fix
   }
 
-  public void onPacket(Packet packet) {
+  public void onPacket(final Packet packet) {
     // with incorrect conn ID
     stateMachine.processPacket(packet);
 
@@ -162,7 +162,7 @@ public class ServerConnection implements InternalConnection {
   }
 
   @Override
-  public AEAD getAEAD(EncryptionLevel level) {
+  public AEAD getAEAD(final EncryptionLevel level) {
     return tlsManager.getAEAD(level);
   }
 

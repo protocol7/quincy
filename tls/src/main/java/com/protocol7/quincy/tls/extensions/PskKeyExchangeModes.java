@@ -13,10 +13,10 @@ public class PskKeyExchangeModes implements Extension {
     return new PskKeyExchangeModes(0x01); // PSK with (EC)DHE key establishment
   }
 
-  public static PskKeyExchangeModes parse(ByteBuf bb) {
+  public static PskKeyExchangeModes parse(final ByteBuf bb) {
     bb.readByte(); // length
 
-    List<Integer> exchangeModes = new ArrayList<>();
+    final List<Integer> exchangeModes = new ArrayList<>();
     while (bb.isReadable()) {
       exchangeModes.add((int) bb.readByte());
     }
@@ -44,10 +44,10 @@ public class PskKeyExchangeModes implements Extension {
   }
 
   @Override
-  public void write(ByteBuf bb, boolean ignored) {
+  public void write(final ByteBuf bb, final boolean ignored) {
     bb.writeByte(exchangeModes.size());
 
-    for (int exchangeMode : exchangeModes) {
+    for (final int exchangeMode : exchangeModes) {
       bb.writeByte(exchangeMode);
     }
   }

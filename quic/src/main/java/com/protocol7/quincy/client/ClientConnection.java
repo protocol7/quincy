@@ -118,7 +118,7 @@ public class ClientConnection implements InternalConnection {
       throw new IllegalStateException("Connection not open");
     }
 
-    Packet newPacket = pipeline.send(this, p);
+    final Packet newPacket = pipeline.send(this, p);
 
     // check again if any handler closed the connection
     if (stateMachine.getState() == Closed) {
@@ -130,7 +130,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   public FullPacket send(final Frame... frames) {
-    Packet packet;
+    final Packet packet;
     if (tlsManager.available(EncryptionLevel.OneRtt)) {
       packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
     } else if (tlsManager.available(EncryptionLevel.Handshake)) {
@@ -161,7 +161,7 @@ public class ClientConnection implements InternalConnection {
     return Optional.ofNullable(remoteConnectionId);
   }
 
-  public void setRemoteConnectionId(final ConnectionId remoteConnectionId, boolean retry) {
+  public void setRemoteConnectionId(final ConnectionId remoteConnectionId, final boolean retry) {
     this.remoteConnectionId = requireNonNull(remoteConnectionId);
 
     if (retry) {
@@ -173,7 +173,7 @@ public class ClientConnection implements InternalConnection {
     return token;
   }
 
-  public void setToken(byte[] token) {
+  public void setToken(final byte[] token) {
     this.token = of(token);
   }
 
@@ -194,7 +194,7 @@ public class ClientConnection implements InternalConnection {
       lastDestConnectionIdLength = 0;
     }
 
-    EncryptionLevel encLevel = getEncryptionLevel(packet);
+    final EncryptionLevel encLevel = getEncryptionLevel(packet);
     if (tlsManager.available(encLevel)) {
       stateMachine.handlePacket(packet);
       if (getState() != State.Closed) {

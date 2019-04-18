@@ -10,12 +10,12 @@ public class PskKeyExchangeModesTest {
 
   @Test
   public void roundtrip() {
-    PskKeyExchangeModes ext = new PskKeyExchangeModes(0x01);
+    final PskKeyExchangeModes ext = new PskKeyExchangeModes(0x01);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     ext.write(bb, true);
 
-    PskKeyExchangeModes parsed = PskKeyExchangeModes.parse(bb);
+    final PskKeyExchangeModes parsed = PskKeyExchangeModes.parse(bb);
 
     assertEquals(ext, parsed);
   }

@@ -34,8 +34,8 @@ public class QuicGoContainer extends GenericContainer {
   }
 
   @Override
-  protected void containerIsStarted(InspectContainerResponse containerInfo) {
-    Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
+  protected void containerIsStarted(final InspectContainerResponse containerInfo) {
+    final Slf4jLogConsumer logConsumer = new Slf4jLogConsumer(log);
     followOutput(logConsumer);
     followOutput(
         new Consumer<OutputFrame>() {

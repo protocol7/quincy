@@ -48,7 +48,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void streamSingleWrite() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, true);
     verify(ctx).send(new StreamFrame(stream.getId(), 0, true, DATA1));
@@ -58,7 +58,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void streamMultiWrite() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
     verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
@@ -73,7 +73,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void streamReset() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
     verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
@@ -87,7 +87,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void receiveSingle() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, true, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
@@ -98,7 +98,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void receiveMulti() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
@@ -113,7 +113,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void receiveMultiOutOfOrder() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), ctx);
     verifyNoMoreInteractions(listener);
@@ -128,7 +128,7 @@ public class DefaultStreamManagerTest {
 
   @Test
   public void receiveReset() {
-    Stream stream = manager.openStream(true, true);
+    final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
     verify(listener).onData(stream, DATA1);
@@ -147,7 +147,7 @@ public class DefaultStreamManagerTest {
     manager.onReceivePacket(p(new StreamFrame(new StreamId(0), 0, false, DATA1)), ctx);
   }
 
-  private FullPacket p(Frame... frames) {
+  private FullPacket p(final Frame... frames) {
     return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frames));
   }
 }

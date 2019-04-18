@@ -12,12 +12,12 @@ public class CryptoFrameTest {
 
   @Test
   public void roundtrip() {
-    CryptoFrame frame = new CryptoFrame(123, Hex.dehex("1234"));
+    final CryptoFrame frame = new CryptoFrame(123, Hex.dehex("1234"));
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    CryptoFrame parsed = CryptoFrame.parse(bb);
+    final CryptoFrame parsed = CryptoFrame.parse(bb);
 
     assertEquals(parsed.getOffset(), frame.getOffset());
     assertArrayEquals(parsed.getCryptoData(), frame.getCryptoData());

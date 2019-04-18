@@ -28,7 +28,7 @@ public class StreamIdTest {
   @Test
   public void randomBounds() {
     for (int i = 0; i < 1000_000; i++) {
-      StreamId v = StreamId.random(true, true);
+      final StreamId v = StreamId.random(true, true);
       assertTrue(v.toString(), v.getValue() > 1 && v.getValue() < 4611686018427387903L);
     }
   }
@@ -36,7 +36,7 @@ public class StreamIdTest {
   @Test
   public void randomClient() {
     for (int i = 0; i < 1000; i++) {
-      StreamId id = StreamId.random(true, true);
+      final StreamId id = StreamId.random(true, true);
       assertTrue((id.getValue() & 1) == 0);
       assertTrue(id.isClient());
     }
@@ -45,7 +45,7 @@ public class StreamIdTest {
   @Test
   public void randomServer() {
     for (int i = 0; i < 1000; i++) {
-      StreamId id = StreamId.random(false, true);
+      final StreamId id = StreamId.random(false, true);
       assertTrue((id.getValue() & 1) == 1);
       assertFalse(id.isClient());
     }
@@ -54,7 +54,7 @@ public class StreamIdTest {
   @Test
   public void randomBidirectional() {
     for (int i = 0; i < 1000; i++) {
-      StreamId id = StreamId.random(true, true);
+      final StreamId id = StreamId.random(true, true);
       assertTrue((id.getValue() & 0b10) == 0);
       assertTrue(id.isBidirectional());
     }
@@ -63,7 +63,7 @@ public class StreamIdTest {
   @Test
   public void randomUnidirectional() {
     for (int i = 0; i < 1000; i++) {
-      StreamId id = StreamId.random(true, false);
+      final StreamId id = StreamId.random(true, false);
       assertTrue((id.getValue() & 0b10) == 0b10);
       assertFalse(id.isBidirectional());
     }
@@ -78,12 +78,12 @@ public class StreamIdTest {
 
   @Test
   public void roundtrip() {
-    StreamId streamId = StreamId.random(true, true);
+    final StreamId streamId = StreamId.random(true, true);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     streamId.write(bb);
 
-    StreamId parsed = StreamId.parse(bb);
+    final StreamId parsed = StreamId.parse(bb);
 
     assertEquals(streamId, parsed);
   }

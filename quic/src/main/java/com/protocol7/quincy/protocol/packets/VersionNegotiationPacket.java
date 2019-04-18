@@ -16,7 +16,7 @@ public class VersionNegotiationPacket implements Packet {
 
   private static final int MARKER = 0b10000000;
 
-  public static HalfParsedPacket<VersionNegotiationPacket> parse(ByteBuf bb) {
+  public static HalfParsedPacket<VersionNegotiationPacket> parse(final ByteBuf bb) {
     final byte marker = bb.readByte();
     if ((marker & MARKER) != MARKER) {
       throw new IllegalArgumentException("Illegal marker");
@@ -54,7 +54,7 @@ public class VersionNegotiationPacket implements Packet {
       }
 
       @Override
-      public VersionNegotiationPacket complete(AEADProvider aeadProvider) {
+      public VersionNegotiationPacket complete(final AEADProvider aeadProvider) {
         return new VersionNegotiationPacket(destConnId, srcConnId, supported);
       }
     };

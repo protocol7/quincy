@@ -46,7 +46,7 @@ public class ApplicationCloseFrame extends Frame {
 
     bb.writeShort(errorCode);
 
-    byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
+    final byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
 
     Varint.write(reasonPhraseBytes.length, bb);
     bb.writeBytes(reasonPhraseBytes);

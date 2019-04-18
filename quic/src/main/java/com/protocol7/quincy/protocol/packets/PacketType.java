@@ -6,7 +6,7 @@ public enum PacketType {
   Handshake((byte) 0x02),
   Retry((byte) 0x03);
 
-  public static PacketType fromByte(byte b) {
+  public static PacketType fromByte(final byte b) {
 
     if (b == Initial.type) {
       return Initial;

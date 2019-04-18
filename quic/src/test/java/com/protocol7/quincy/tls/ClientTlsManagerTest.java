@@ -44,22 +44,22 @@ public class ClientTlsManagerTest {
   @Test
   public void handshake() {
     // start handshake
-    PipelineContext ctx = mock(PipelineContext.class);
-    FrameSender sender = mock(FrameSender.class);
-    Consumer<State> stateSetter = mock(Consumer.class);
+    final PipelineContext ctx = mock(PipelineContext.class);
+    final FrameSender sender = mock(FrameSender.class);
+    final Consumer<State> stateSetter = mock(Consumer.class);
     manager.handshake(State.Started, sender, stateSetter);
 
-    ArgumentCaptor<CryptoFrame> chFrame = ArgumentCaptor.forClass(CryptoFrame.class);
+    final ArgumentCaptor<CryptoFrame> chFrame = ArgumentCaptor.forClass(CryptoFrame.class);
 
     verify(sender).send(chFrame.capture(), any(PaddingFrame.class));
     verify(stateSetter).accept(State.BeforeHello);
 
-    byte[] ch = chFrame.getValue().getCryptoData();
+    final byte[] ch = chFrame.getValue().getCryptoData();
 
-    ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(ch);
+    final ServerHelloAndHandshake shah = serverTlsSession.handleClientHello(ch);
 
     // receive server hello
-    InitialPacket shPacket = ip(shah.getServerHello());
+    final InitialPacket shPacket = ip(shah.getServerHello());
     when(ctx.getState()).thenReturn(State.BeforeHello);
     manager.onReceivePacket(shPacket, ctx);
 
@@ -68,7 +68,7 @@ public class ClientTlsManagerTest {
     verify(ctx).next(shPacket);
 
     // receive server handshake
-    HandshakePacket handshakePacket = hp(shah.getServerHandshake());
+    final HandshakePacket handshakePacket = hp(shah.getServerHandshake());
     when(ctx.getState()).thenReturn(State.BeforeHandshake);
     manager.onReceivePacket(handshakePacket, ctx);
 

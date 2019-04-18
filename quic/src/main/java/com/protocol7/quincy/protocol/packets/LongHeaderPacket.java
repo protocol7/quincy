@@ -20,12 +20,12 @@ public abstract class LongHeaderPacket implements FullPacket {
   private final Payload payload;
 
   public LongHeaderPacket(
-      PacketType packetType,
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      Version version,
-      PacketNumber packetNumber,
-      Payload payload) {
+      final PacketType packetType,
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final Version version,
+      final PacketNumber packetNumber,
+      final Payload payload) {
     this.packetType = packetType;
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -63,13 +63,14 @@ public abstract class LongHeaderPacket implements FullPacket {
     return payload;
   }
 
-  protected void writeInternal(ByteBuf bb, AEAD aead, Consumer<ByteBuf> tokenWriter) {
-    int bbOffset = bb.writerIndex();
+  protected void writeInternal(
+      final ByteBuf bb, final AEAD aead, final Consumer<ByteBuf> tokenWriter) {
+    final int bbOffset = bb.writerIndex();
 
     int b = (PACKET_TYPE_MASK | packetType.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
 
-    int pnLen = packetNumber.getLength();
+    final int pnLen = packetNumber.getLength();
     b = (byte) (b | (pnLen - 1)); // pn length
     bb.writeByte(b);
 
@@ -79,39 +80,39 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     tokenWriter.accept(bb);
 
-    byte[] pn = packetNumber.write(packetNumber.getLength());
+    final byte[] pn = packetNumber.write(packetNumber.getLength());
 
     Varint.write(payload.calculateLength() + pn.length, bb);
 
-    int pnOffset = bb.writerIndex();
-    int sampleOffset = pnOffset + 4;
+    final int pnOffset = bb.writerIndex();
+    final int sampleOffset = pnOffset + 4;
 
     bb.writeBytes(pn);
 
-    byte[] aad = new byte[bb.writerIndex() - bbOffset];
+    final byte[] aad = new byte[bb.writerIndex() - bbOffset];
     bb.getBytes(bbOffset, aad);
 
     payload.write(bb, aead, packetNumber, aad);
 
-    byte[] sample = new byte[aead.getSampleLength()];
+    final byte[] sample = new byte[aead.getSampleLength()];
     bb.getBytes(sampleOffset, sample);
 
-    byte firstBýte = bb.getByte(bbOffset);
-    byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
+    final byte firstBýte = bb.getByte(bbOffset);
+    final byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
     try {
-      byte[] encryptedHeader = aead.encryptHeader(sample, header, false);
+      final byte[] encryptedHeader = aead.encryptHeader(sample, header, false);
       bb.setByte(bbOffset, encryptedHeader[0]);
       bb.setBytes(pnOffset, encryptedHeader, 1, encryptedHeader.length - 1);
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    LongHeaderPacket that = (LongHeaderPacket) o;
+    final LongHeaderPacket that = (LongHeaderPacket) o;
     return packetType == that.packetType
         && Objects.equals(destinationConnectionId, that.destinationConnectionId)
         && Objects.equals(sourceConnectionId, that.sourceConnectionId)

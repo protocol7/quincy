@@ -30,35 +30,38 @@ public class CertificateVerify {
   private static final PSSParameterSpec PARAMETER_SPEC =
       new PSSParameterSpec("SHA-256", "MGF1", MGF1ParameterSpec.SHA256, 32, 1);
 
-  public static byte[] sign(byte[] data, PrivateKey key, boolean isClient) {
-    byte[] prefix = isClient ? CLIENT_PREFIX : SERVER_PREFIX;
-    byte[] toSign = Bytes.concat(prefix, data);
+  public static byte[] sign(final byte[] data, final PrivateKey key, final boolean isClient) {
+    final byte[] prefix = isClient ? CLIENT_PREFIX : SERVER_PREFIX;
+    final byte[] toSign = Bytes.concat(prefix, data);
 
     try {
-      Signature sig = Signature.getInstance(ALGORITHM);
+      final Signature sig = Signature.getInstance(ALGORITHM);
       sig.setParameter(PARAMETER_SPEC);
 
       sig.initSign(key);
       sig.update(toSign);
       return sig.sign();
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }
 
   public static boolean verify(
-      byte[] signature, byte[] data, PublicKey publicKey, boolean isClient) {
-    byte[] prefix = isClient ? CLIENT_PREFIX : SERVER_PREFIX;
-    byte[] toVerify = Bytes.concat(prefix, data);
+      final byte[] signature,
+      final byte[] data,
+      final PublicKey publicKey,
+      final boolean isClient) {
+    final byte[] prefix = isClient ? CLIENT_PREFIX : SERVER_PREFIX;
+    final byte[] toVerify = Bytes.concat(prefix, data);
 
     try {
-      Signature sig = Signature.getInstance(ALGORITHM);
+      final Signature sig = Signature.getInstance(ALGORITHM);
       sig.setParameter(PARAMETER_SPEC);
 
       sig.initVerify(publicKey);
       sig.update(toVerify);
       return sig.verify(signature);
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }

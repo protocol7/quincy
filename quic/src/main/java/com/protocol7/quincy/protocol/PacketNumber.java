@@ -9,8 +9,8 @@ import java.util.Objects;
 public class PacketNumber implements Comparable<PacketNumber> {
 
   public static PacketNumber parse(final byte[] b) {
-    byte[] pad = new byte[4 - b.length];
-    byte[] bs = Bytes.concat(pad, b);
+    final byte[] pad = new byte[4 - b.length];
+    final byte[] bs = Bytes.concat(pad, b);
 
     return new PacketNumber(Ints.fromByteArray(bs));
   }
@@ -30,7 +30,7 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return new PacketNumber(number + 1);
   }
 
-  public PacketNumber max(PacketNumber other) {
+  public PacketNumber max(final PacketNumber other) {
     if (this.compareTo(other) > 0) {
       return this;
     } else {
@@ -46,8 +46,8 @@ public class PacketNumber implements Comparable<PacketNumber> {
     return 4; // TODO
   }
 
-  public byte[] write(int length) {
-    byte[] b = new byte[length];
+  public byte[] write(final int length) {
+    final byte[] b = new byte[length];
     for (int j = length; j > 0; j--) {
       b[length - j] = (byte) ((number >> (8 * (j - 1))) & 0xFF);
     }
@@ -55,10 +55,10 @@ public class PacketNumber implements Comparable<PacketNumber> {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    PacketNumber that = (PacketNumber) o;
+    final PacketNumber that = (PacketNumber) o;
     return number == that.number;
   }
 

@@ -14,18 +14,18 @@ public class ExtensionTest {
 
   @Test
   public void parseKnown() {
-    byte[] b =
+    final byte[] b =
         Hex.dehex(
             "002b0002030400330024001d0020ae3492c510ba781d6e30ff69b66d47c710f7ef060f846e28bda2f995b4fb4645");
 
-    List<Extension> ext = Extension.parseAll(Unpooled.wrappedBuffer(b), true);
+    final List<Extension> ext = Extension.parseAll(Unpooled.wrappedBuffer(b), true);
 
-    Iterator<Extension> iter = ext.iterator();
+    final Iterator<Extension> iter = ext.iterator();
 
-    SupportedVersions supportedVersions = (SupportedVersions) iter.next();
+    final SupportedVersions supportedVersions = (SupportedVersions) iter.next();
     assertEquals(List.of(SupportedVersion.TLS13), supportedVersions.getVersions());
 
-    KeyShare keyShare = (KeyShare) iter.next();
+    final KeyShare keyShare = (KeyShare) iter.next();
     assertEquals(1, keyShare.getKeys().size());
     assertHex(
         "ae3492c510ba781d6e30ff69b66d47c710f7ef060f846e28bda2f995b4fb4645",

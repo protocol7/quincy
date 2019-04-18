@@ -6,15 +6,15 @@ import io.netty.buffer.ByteBuf;
 
 public class RawExtension implements Extension {
 
-  public static RawExtension parse(ExtensionType type, ByteBuf bb) {
-    byte[] b = Bytes.peekToArray(bb);
+  public static RawExtension parse(final ExtensionType type, final ByteBuf bb) {
+    final byte[] b = Bytes.peekToArray(bb);
     return new RawExtension(type, b);
   }
 
   private final ExtensionType type;
   private final byte[] data;
 
-  public RawExtension(ExtensionType type, byte[] data) {
+  public RawExtension(final ExtensionType type, final byte[] data) {
     this.type = type;
     this.data = data;
   }
@@ -29,7 +29,7 @@ public class RawExtension implements Extension {
   }
 
   @Override
-  public void write(ByteBuf bb, boolean isClient) {
+  public void write(final ByteBuf bb, final boolean isClient) {
     bb.writeBytes(data);
   }
 

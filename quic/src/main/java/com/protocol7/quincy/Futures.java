@@ -10,8 +10,8 @@ import java.util.function.Function;
 
 public class Futures {
 
-  public static <V, T> Future<T> thenSync(Future<V> future, Function<V, T> f) {
-    DefaultPromise<T> result = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
+  public static <V, T> Future<T> thenSync(final Future<V> future, final Function<V, T> f) {
+    final DefaultPromise<T> result = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
 
     future.addListener(
         new GenericFutureListener<Future<V>>() {
@@ -24,8 +24,8 @@ public class Futures {
     return result;
   }
 
-  public static <V, T> Future<T> thenAsync(Future<V> future, Function<V, Future<T>> f) {
-    DefaultPromise<T> result = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
+  public static <V, T> Future<T> thenAsync(final Future<V> future, final Function<V, Future<T>> f) {
+    final DefaultPromise<T> result = new DefaultPromise<>(GlobalEventExecutor.INSTANCE);
 
     future.addListener(
         new GenericFutureListener<Future<V>>() {
@@ -44,7 +44,7 @@ public class Futures {
     return result;
   }
 
-  public static Future<Channel> thenChannel(ChannelFuture future) {
+  public static Future<Channel> thenChannel(final ChannelFuture future) {
     return thenSync(future, aVoid -> future.channel());
   }
 }

@@ -149,7 +149,7 @@ public class TransportParameters implements Extension {
       final int supportVerLen = bb.readByte() / 4;
 
       for (int i = 0; i < supportVerLen; i++) {
-        byte[] b = new byte[4];
+        final byte[] b = new byte[4];
         bb.readBytes(b);
         supportedVersions.add(b);
       }
@@ -428,7 +428,7 @@ public class TransportParameters implements Extension {
         + '}';
   }
 
-  public void write(ByteBuf bb, boolean isClient) {
+  public void write(final ByteBuf bb, final boolean isClient) {
     bb.writeBytes(version);
 
     if (!isClient) {
@@ -503,7 +503,7 @@ public class TransportParameters implements Extension {
     bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
   }
 
-  private void writeVarint(ByteBuf bb, int value) {
+  private void writeVarint(final ByteBuf bb, final int value) {
     final byte[] b = Varint.write(value);
     bb.writeShort(b.length);
     bb.writeBytes(b);

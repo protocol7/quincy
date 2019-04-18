@@ -19,18 +19,21 @@ public class PacketRouter {
   private final Connections connections;
   private final StreamListener listener;
 
-  public PacketRouter(Version version, Connections connections, StreamListener listener) {
+  public PacketRouter(
+      final Version version, final Connections connections, final StreamListener listener) {
     this.version = version;
     this.connections = connections;
     this.listener = listener;
   }
 
   private boolean validateVersion(
-      HalfParsedPacket<?> halfParsed, PacketSender sender, Optional<ConnectionId> srcConnId) {
+      final HalfParsedPacket<?> halfParsed,
+      final PacketSender sender,
+      final Optional<ConnectionId> srcConnId) {
 
     if (halfParsed.getVersion().isPresent()) {
       if (halfParsed.getVersion().get() != version) {
-        VersionNegotiationPacket verNeg =
+        final VersionNegotiationPacket verNeg =
             new VersionNegotiationPacket(halfParsed.getConnectionId(), srcConnId, version);
         sender.send(verNeg, null); // TODO remove null
         return false;
@@ -39,12 +42,13 @@ public class PacketRouter {
     return true;
   }
 
-  public void route(ByteBuf bb, PacketSender sender, InetSocketAddress peerAddress) {
+  public void route(
+      final ByteBuf bb, final PacketSender sender, final InetSocketAddress peerAddress) {
 
     while (bb.isReadable()) {
-      HalfParsedPacket<?> halfParsed = Packet.parse(bb, -1);
+      final HalfParsedPacket<?> halfParsed = Packet.parse(bb, -1);
 
-      ServerConnection conn =
+      final ServerConnection conn =
           connections.get(
               halfParsed.getConnectionId(),
               listener,
@@ -53,7 +57,7 @@ public class PacketRouter {
 
       if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
 
-        Packet packet = halfParsed.complete(conn::getAEAD);
+        final Packet packet = halfParsed.complete(conn::getAEAD);
 
         MDC.put("actor", "server");
         if (packet instanceof FullPacket) {

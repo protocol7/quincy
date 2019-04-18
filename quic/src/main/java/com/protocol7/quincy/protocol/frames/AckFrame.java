@@ -31,10 +31,10 @@ public class AckFrame extends Frame {
     for (int i = 0; i < blockCount; i++) {
       if (i % 2 == 0) {
         // reading gap
-        long gap = Varint.readAsLong(bb);
+        final long gap = Varint.readAsLong(bb);
         largest = smallest - gap - 1;
       } else {
-        long ackBlock = Varint.readAsLong(bb);
+        final long ackBlock = Varint.readAsLong(bb);
         smallest = largest - ackBlock;
         blocks.add(AckBlock.fromLongs(smallest, largest));
       }
@@ -91,17 +91,17 @@ public class AckFrame extends Frame {
     Varint.write(ackDelay, bb);
     Varint.write((blocks.size() - 1) * 2, bb);
 
-    long largest = firstBlock.getLargest().asLong();
+    final long largest = firstBlock.getLargest().asLong();
     long smallest = firstBlock.getSmallest().asLong();
     Varint.write(largest - smallest, bb);
 
     for (int i = 1; i < blocks.size(); i++) {
       final AckBlock block = blocks.get(i);
 
-      long gap = smallest - block.getLargest().asLong() - 1;
+      final long gap = smallest - block.getLargest().asLong() - 1;
       Varint.write(gap, bb);
 
-      long nextBlock = block.getLargest().asLong() - block.getSmallest().asLong();
+      final long nextBlock = block.getLargest().asLong() - block.getSmallest().asLong();
       smallest = block.getSmallest().asLong();
       Varint.write(nextBlock, bb);
     }

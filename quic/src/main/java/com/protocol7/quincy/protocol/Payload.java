@@ -26,7 +26,7 @@ public class Payload {
     final byte[] raw;
     try {
       raw = aead.open(cipherText, pn.asLong(), aad);
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
 
@@ -58,7 +58,7 @@ public class Payload {
   }
 
   public Payload addFrame(final Frame frame) {
-    List<Frame> newFrames = new ArrayList<>(frames);
+    final List<Frame> newFrames = new ArrayList<>(frames);
     newFrames.add(frame);
     return new Payload(newFrames);
   }
@@ -77,7 +77,7 @@ public class Payload {
     try {
       final byte[] sealed = aead.seal(b, pn.asLong(), aad);
       bb.writeBytes(sealed);
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }

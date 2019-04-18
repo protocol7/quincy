@@ -15,7 +15,7 @@ import java.util.List;
 
 public class ServerHandshake {
 
-  public static ServerHandshake parse(ByteBuf bb, boolean isClient) {
+  public static ServerHandshake parse(final ByteBuf bb, final boolean isClient) {
 
     return new ServerHandshake(
         EncryptedExtensions.parse(bb, isClient),
@@ -30,10 +30,10 @@ public class ServerHandshake {
   private final ServerHandshakeFinished serverHandshakeFinished;
 
   public ServerHandshake(
-      EncryptedExtensions encryptedExtensions,
-      ServerCertificate serverCertificate,
-      ServerCertificateVerify serverCertificateVerify,
-      ServerHandshakeFinished serverHandshakeFinished) {
+      final EncryptedExtensions encryptedExtensions,
+      final ServerCertificate serverCertificate,
+      final ServerCertificateVerify serverCertificateVerify,
+      final ServerHandshakeFinished serverHandshakeFinished) {
     this.encryptedExtensions = encryptedExtensions;
     this.serverCertificate = serverCertificate;
     this.serverCertificateVerify = serverCertificateVerify;
@@ -58,23 +58,23 @@ public class ServerHandshake {
 
   public static class EncryptedExtensions implements Writeable {
 
-    public static EncryptedExtensions defaults(Extension... extensions) {
+    public static EncryptedExtensions defaults(final Extension... extensions) {
       return new EncryptedExtensions(List.of(extensions));
     }
 
-    public static EncryptedExtensions parse(ByteBuf bb, boolean isClient) {
+    public static EncryptedExtensions parse(final ByteBuf bb, final boolean isClient) {
       // EE
-      int eeType = bb.readByte();
+      final int eeType = bb.readByte();
       if (eeType != 0x08) {
         throw new IllegalArgumentException("Invalid EE type: " + eeType);
       }
 
-      int eeMsgLen = Bytes.read24(bb);
-      int extLen = bb.readShort();
+      final int eeMsgLen = Bytes.read24(bb);
+      final int extLen = bb.readShort();
 
-      ByteBuf ext = bb.readBytes(extLen);
+      final ByteBuf ext = bb.readBytes(extLen);
       try {
-        List<Extension> extensions = Extension.parseAll(ext, isClient);
+        final List<Extension> extensions = Extension.parseAll(ext, isClient);
 
         return new EncryptedExtensions(extensions);
       } finally {
@@ -84,11 +84,11 @@ public class ServerHandshake {
 
     private final List<Extension> extensions;
 
-    public EncryptedExtensions(List<Extension> extensions) {
+    public EncryptedExtensions(final List<Extension> extensions) {
       this.extensions = extensions;
     }
 
-    public EncryptedExtensions(Extension... extensions) {
+    public EncryptedExtensions(final Extension... extensions) {
       this.extensions = Arrays.asList(extensions);
     }
 
@@ -96,13 +96,13 @@ public class ServerHandshake {
       return extensions;
     }
 
-    public void write(ByteBuf bb) {
+    public void write(final ByteBuf bb) {
       // EE
       bb.writeByte(0x08);
-      int eeMsgLenPos = bb.writerIndex();
+      final int eeMsgLenPos = bb.writerIndex();
       Bytes.write24(bb, 0);
 
-      int extLenPos = bb.writerIndex();
+      final int extLenPos = bb.writerIndex();
       bb.writeShort(0);
 
       Extension.writeAll(extensions, bb, false);
@@ -114,34 +114,34 @@ public class ServerHandshake {
 
   public static class ServerCertificate implements Writeable {
 
-    public static ServerCertificate parse(ByteBuf bb) {
+    public static ServerCertificate parse(final ByteBuf bb) {
       // server cert
-      int serverCertType = bb.readByte();
+      final int serverCertType = bb.readByte();
       if (serverCertType != 0x0b) {
         throw new IllegalArgumentException("Invalid server cert type: " + serverCertType);
       }
 
-      int scMsgLen = Bytes.read24(bb);
-      int requestContextLen = bb.readByte();
+      final int scMsgLen = Bytes.read24(bb);
+      final int requestContextLen = bb.readByte();
 
-      byte[] requestContext = new byte[requestContextLen];
+      final byte[] requestContext = new byte[requestContextLen];
       bb.readBytes(requestContext);
 
-      int certsLen = Bytes.read24(bb);
-      ByteBuf certBB = bb.readBytes(certsLen);
+      final int certsLen = Bytes.read24(bb);
+      final ByteBuf certBB = bb.readBytes(certsLen);
       try {
-        List<byte[]> serverCertificates = new ArrayList<>();
+        final List<byte[]> serverCertificates = new ArrayList<>();
 
         while (certBB.isReadable()) {
-          int certLen = Bytes.read24(certBB);
+          final int certLen = Bytes.read24(certBB);
 
-          byte[] cert = new byte[certLen];
+          final byte[] cert = new byte[certLen];
           certBB.readBytes(cert);
 
           serverCertificates.add(cert);
 
-          int certExtLen = certBB.readShort();
-          byte[] certExt = new byte[certExtLen];
+          final int certExtLen = certBB.readShort();
+          final byte[] certExt = new byte[certExtLen];
           certBB.readBytes(certExt);
         }
 
@@ -154,12 +154,12 @@ public class ServerHandshake {
     private final byte[] requestContext;
     private final List<byte[]> serverCertificates;
 
-    public ServerCertificate(byte[] requestContext, List<byte[]> serverCertificates) {
+    public ServerCertificate(final byte[] requestContext, final List<byte[]> serverCertificates) {
       this.requestContext = requestContext;
       this.serverCertificates = serverCertificates;
     }
 
-    public ServerCertificate(byte[]... serverCertificates) {
+    public ServerCertificate(final byte[]... serverCertificates) {
       this(new byte[0], Arrays.asList(serverCertificates));
     }
 
@@ -172,34 +172,34 @@ public class ServerHandshake {
     }
 
     public List<Certificate> getAsCertificiates() {
-      List<Certificate> certs = new ArrayList<>();
+      final List<Certificate> certs = new ArrayList<>();
       try {
-        CertificateFactory f = CertificateFactory.getInstance("X.509");
+        final CertificateFactory f = CertificateFactory.getInstance("X.509");
 
-        for (byte[] certificate : serverCertificates) {
-          X509Certificate cert =
+        for (final byte[] certificate : serverCertificates) {
+          final X509Certificate cert =
               (X509Certificate) f.generateCertificate(new ByteArrayInputStream(certificate));
           certs.add(cert);
         }
         return certs;
-      } catch (GeneralSecurityException e) {
+      } catch (final GeneralSecurityException e) {
         throw new RuntimeException(e);
       }
     }
 
-    public void write(ByteBuf bb) {
+    public void write(final ByteBuf bb) {
       // server cert
       bb.writeByte(0x0b);
-      int scMsgLenPos = bb.writerIndex();
+      final int scMsgLenPos = bb.writerIndex();
       Bytes.write24(bb, 0);
 
       bb.writeByte(requestContext.length);
       bb.writeBytes(requestContext);
 
-      int certsLenPos = bb.writerIndex();
+      final int certsLenPos = bb.writerIndex();
       Bytes.write24(bb, 0);
 
-      for (byte[] cert : serverCertificates) {
+      for (final byte[] cert : serverCertificates) {
         Bytes.write24(bb, cert.length);
         bb.writeBytes(cert);
 
@@ -213,20 +213,20 @@ public class ServerHandshake {
 
   public static class ServerCertificateVerify implements Writeable {
 
-    public static ServerCertificateVerify parse(ByteBuf bb) {
+    public static ServerCertificateVerify parse(final ByteBuf bb) {
       // server cert verify
-      int serverCertVerifyType = bb.readByte();
+      final int serverCertVerifyType = bb.readByte();
       if (serverCertVerifyType != 0x0f) {
         throw new IllegalArgumentException(
             "Invalid server cert verify type: " + serverCertVerifyType);
       }
 
-      int scvMsgLen = Bytes.read24(bb);
+      final int scvMsgLen = Bytes.read24(bb);
 
-      int signType = bb.readShort();
-      int signLen = bb.readShort();
+      final int signType = bb.readShort();
+      final int signLen = bb.readShort();
 
-      byte[] sign = new byte[signLen];
+      final byte[] sign = new byte[signLen];
       bb.readBytes(sign);
 
       return new ServerCertificateVerify(signType, sign);
@@ -235,7 +235,7 @@ public class ServerHandshake {
     private final int type;
     private final byte[] signature;
 
-    public ServerCertificateVerify(int type, byte[] signature) {
+    public ServerCertificateVerify(final int type, final byte[] signature) {
       this.type = type;
       this.signature = signature;
     }
@@ -248,11 +248,11 @@ public class ServerHandshake {
       return signature;
     }
 
-    public void write(ByteBuf bb) {
+    public void write(final ByteBuf bb) {
       // server cert verify
       bb.writeByte(0x0f);
 
-      int scvMsgLenPos = bb.writerIndex();
+      final int scvMsgLenPos = bb.writerIndex();
       Bytes.write24(bb, 0);
 
       bb.writeShort(type);
@@ -265,16 +265,16 @@ public class ServerHandshake {
 
   public static class ServerHandshakeFinished implements Writeable {
 
-    public static ServerHandshakeFinished parse(ByteBuf bb) {
+    public static ServerHandshakeFinished parse(final ByteBuf bb) {
       // server handshake finished
-      int finType = bb.readByte();
+      final int finType = bb.readByte();
       if (finType != 0x14) {
         throw new IllegalArgumentException("Invalid fin type: " + finType);
       }
 
-      int finLen = Bytes.read24(bb);
+      final int finLen = Bytes.read24(bb);
 
-      byte[] verifyData = new byte[finLen];
+      final byte[] verifyData = new byte[finLen];
       bb.readBytes(verifyData);
 
       return new ServerHandshakeFinished(verifyData);
@@ -282,7 +282,7 @@ public class ServerHandshake {
 
     private final byte[] verificationData;
 
-    public ServerHandshakeFinished(byte[] verificationData) {
+    public ServerHandshakeFinished(final byte[] verificationData) {
       this.verificationData = verificationData;
     }
 
@@ -290,7 +290,7 @@ public class ServerHandshake {
       return verificationData;
     }
 
-    public void write(ByteBuf bb) {
+    public void write(final ByteBuf bb) {
       // server handshake finished
       bb.writeByte(0x14);
       Bytes.write24(bb, verificationData.length);

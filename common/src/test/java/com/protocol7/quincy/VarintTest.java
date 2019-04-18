@@ -12,7 +12,7 @@ public class VarintTest {
 
   @Test
   public void validateBounds() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Varint.write(0, bb);
     Varint.write(123, bb);
     Varint.write(4611686018427387903L, bb);
@@ -20,29 +20,29 @@ public class VarintTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooSmall() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Varint.write(-1, bb);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooLarge() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     Varint.write(4611686018427387904L, bb);
   }
 
   @Test
   public void randomBounds() {
     for (int i = 0; i < 1000_000; i++) {
-      long v = Varint.random();
+      final long v = Varint.random();
       assertTrue(v > 0 && v < 4611686018427387903L);
     }
   }
 
   @Test
   public void read8() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
 
-    long vi = Varint.readAsLong(bb);
+    final long vi = Varint.readAsLong(bb);
 
     assertEquals(151288809941952652L, vi);
     assertFalse(bb.isReadable());
@@ -50,16 +50,16 @@ public class VarintTest {
 
   @Test
   public void read8Bytes() {
-    long vi = Varint.readAsLong(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
+    final long vi = Varint.readAsLong(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
 
     assertEquals(151288809941952652L, vi);
   }
 
   @Test
   public void read4() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("9d 7f 3e 7d"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("9d 7f 3e 7d"));
 
-    long vi = Varint.readAsLong(bb);
+    final long vi = Varint.readAsLong(bb);
 
     assertEquals(494878333, vi);
     assertFalse(bb.isReadable());
@@ -67,16 +67,16 @@ public class VarintTest {
 
   @Test
   public void read4Bytes() {
-    long vi = Varint.readAsLong(Hex.dehex("9d 7f 3e 7d"));
+    final long vi = Varint.readAsLong(Hex.dehex("9d 7f 3e 7d"));
 
     assertEquals(494878333, vi);
   }
 
   @Test
   public void read2() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("7b bd"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("7b bd"));
 
-    long vi = Varint.readAsLong(bb);
+    final long vi = Varint.readAsLong(bb);
 
     assertEquals(15293, vi);
     assertFalse(bb.isReadable());
@@ -84,16 +84,16 @@ public class VarintTest {
 
   @Test
   public void read2Bytes() {
-    long vi = Varint.readAsLong(Hex.dehex("7b bd"));
+    final long vi = Varint.readAsLong(Hex.dehex("7b bd"));
 
     assertEquals(15293, vi);
   }
 
   @Test
   public void read1() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("25"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("25"));
 
-    long vi = Varint.readAsLong(bb);
+    final long vi = Varint.readAsLong(bb);
 
     assertEquals(37, vi);
     assertFalse(bb.isReadable());
@@ -101,7 +101,7 @@ public class VarintTest {
 
   @Test
   public void read1Bytes() {
-    long vi = Varint.readAsLong(Hex.dehex("25"));
+    final long vi = Varint.readAsLong(Hex.dehex("25"));
 
     assertEquals(37, vi);
   }
@@ -146,18 +146,18 @@ public class VarintTest {
     assertWriteBytes(Hex.dehex("25"), 37);
   }
 
-  private void assertWrite(byte[] expected, long vi) {
-    ByteBuf bb = Unpooled.buffer();
+  private void assertWrite(final byte[] expected, final long vi) {
+    final ByteBuf bb = Unpooled.buffer();
     Varint.write(vi, bb);
 
-    byte[] b = Bytes.drainToArray(bb);
+    final byte[] b = Bytes.drainToArray(bb);
 
     assertArrayEquals(expected, b);
     assertFalse(bb.isReadable());
   }
 
-  private void assertWriteBytes(byte[] expected, long vi) {
-    byte[] actual = Varint.write(vi);
+  private void assertWriteBytes(final byte[] expected, final long vi) {
+    final byte[] actual = Varint.write(vi);
     assertArrayEquals(expected, actual);
   }
 }

@@ -11,17 +11,17 @@ import java.util.SortedMap;
 
 public class KeyShare implements Extension {
 
-  public static KeyShare parse(ByteBuf bb, boolean isClient) {
+  public static KeyShare parse(final ByteBuf bb, final boolean isClient) {
     if (!isClient) {
       bb.readShort();
     }
 
-    Builder<Group, byte[]> builder = ImmutableSortedMap.naturalOrder();
+    final Builder<Group, byte[]> builder = ImmutableSortedMap.naturalOrder();
 
     while (bb.isReadable()) {
-      Optional<Group> group = Group.fromValue(bb.readShort());
-      int keyLen = bb.readShort();
-      byte[] key = new byte[keyLen];
+      final Optional<Group> group = Group.fromValue(bb.readShort());
+      final int keyLen = bb.readShort();
+      final byte[] key = new byte[keyLen];
       bb.readBytes(key);
 
       if (group.isPresent()) {
@@ -32,17 +32,18 @@ public class KeyShare implements Extension {
     return new KeyShare(builder.build());
   }
 
-  public static KeyShare of(Group group, byte[] publicKey) {
+  public static KeyShare of(final Group group, final byte[] publicKey) {
     return new KeyShare(ImmutableSortedMap.of(group, publicKey));
   }
 
-  public static KeyShare of(Group group1, byte[] key1, Group group2, byte[] key2) {
+  public static KeyShare of(
+      final Group group1, final byte[] key1, final Group group2, final byte[] key2) {
     return new KeyShare(ImmutableSortedMap.of(group1, key1, group2, key2));
   }
 
   private final SortedMap<Group, byte[]> keys;
 
-  private KeyShare(SortedMap<Group, byte[]> keys) {
+  private KeyShare(final SortedMap<Group, byte[]> keys) {
     this.keys = ImmutableSortedMap.copyOf(keys);
   }
 
@@ -55,18 +56,18 @@ public class KeyShare implements Extension {
     return keys;
   }
 
-  public Optional<byte[]> getKey(Group group) {
+  public Optional<byte[]> getKey(final Group group) {
     return Optional.ofNullable(keys.get(group));
   }
 
   @Override
-  public void write(ByteBuf bb, boolean isClient) {
-    int lenPos = bb.writerIndex();
+  public void write(final ByteBuf bb, final boolean isClient) {
+    final int lenPos = bb.writerIndex();
     if (isClient) {
       bb.writeShort(0);
     }
 
-    for (Map.Entry<Group, byte[]> entry : keys.entrySet()) {
+    for (final Map.Entry<Group, byte[]> entry : keys.entrySet()) {
       bb.writeShort(entry.getKey().getValue());
       bb.writeShort(entry.getValue().length);
       bb.writeBytes(entry.getValue());

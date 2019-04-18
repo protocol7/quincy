@@ -138,7 +138,7 @@ public class DefaultFlowControlHandlerTest {
     verify(ctx).next(packet);
   }
 
-  private FullPacket p(Frame frame) {
+  private FullPacket p(final Frame frame) {
     return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frame));
   }
 }

@@ -37,12 +37,12 @@ public class ServerTLSManager implements InboundHandler {
     final State state = ctx.getState();
     if (state == State.Started) {
       if (packet instanceof InitialPacket) {
-        InitialPacket initialPacket = (InitialPacket) packet;
+        final InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
-          CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
+          final CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
-          ServerTlsSession.ServerHelloAndHandshake shah =
+          final ServerTlsSession.ServerHelloAndHandshake shah =
               tlsSession.handleClientHello(cf.getCryptoData());
 
           // sent as initial packet

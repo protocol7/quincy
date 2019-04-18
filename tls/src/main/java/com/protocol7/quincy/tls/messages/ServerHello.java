@@ -25,11 +25,11 @@ public class ServerHello implements Writeable {
 
   private static final byte[] VERSION = new byte[] {0x03, 0x03};
 
-  public static ServerHello defaults(KeyExchange ke, Extension... exts) {
-    byte[] clientRandom = Rnd.rndBytes(32);
-    byte[] sessionId = new byte[0];
-    CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
-    List<Extension> extensions =
+  public static ServerHello defaults(final KeyExchange ke, final Extension... exts) {
+    final byte[] clientRandom = Rnd.rndBytes(32);
+    final byte[] sessionId = new byte[0];
+    final CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
+    final List<Extension> extensions =
         ImmutableList.<Extension>builder()
             .add(
                 KeyShare.of(ke.getGroup(), ke.getPublicKey()),
@@ -43,27 +43,27 @@ public class ServerHello implements Writeable {
     return new ServerHello(clientRandom, sessionId, cipherSuites, extensions);
   }
 
-  public static ServerHello parse(ByteBuf bb, boolean isClient) {
-    int messageType = bb.readByte(); // server hello
+  public static ServerHello parse(final ByteBuf bb, final boolean isClient) {
+    final int messageType = bb.readByte(); // server hello
     if (messageType != 0x02) {
       throw new IllegalArgumentException("Not a server hello");
     }
 
     Bytes.read24(bb); // payloadLength
 
-    byte[] version = new byte[2];
+    final byte[] version = new byte[2];
     bb.readBytes(version);
     if (!Arrays.equals(version, VERSION)) {
       throw new IllegalArgumentException("Illegal version");
     }
 
-    byte[] serverRandom = new byte[32];
+    final byte[] serverRandom = new byte[32];
     bb.readBytes(serverRandom); // server random
 
-    int sessionIdLen = bb.readByte();
-    byte[] sessionId = new byte[sessionIdLen];
+    final int sessionIdLen = bb.readByte();
+    final byte[] sessionId = new byte[sessionIdLen];
 
-    Optional<CipherSuite> cipherSuite = CipherSuite.parseOne(bb);
+    final Optional<CipherSuite> cipherSuite = CipherSuite.parseOne(bb);
     // TODO implement all know cipher suites
     if (!cipherSuite.isPresent()) {
       throw new IllegalArgumentException("Illegal cipher suite");
@@ -71,20 +71,20 @@ public class ServerHello implements Writeable {
 
     bb.readByte(); // compressionMethod
 
-    int extensionLen = bb.readShort();
-    ByteBuf extBB = bb.readBytes(extensionLen);
+    final int extensionLen = bb.readShort();
+    final ByteBuf extBB = bb.readBytes(extensionLen);
     try {
-      List<Extension> extensions = Extension.parseAll(extBB, isClient);
+      final List<Extension> extensions = Extension.parseAll(extBB, isClient);
       return new ServerHello(serverRandom, sessionId, cipherSuite.get(), extensions);
     } finally {
       extBB.release();
     }
   }
 
-  public void write(ByteBuf bb) {
+  public void write(final ByteBuf bb) {
     bb.writeByte(0x02);
 
-    int lenPosition = bb.writerIndex();
+    final int lenPosition = bb.writerIndex();
     // write placeholder
     bb.writeBytes(new byte[3]);
     bb.writeBytes(VERSION);
@@ -95,7 +95,7 @@ public class ServerHello implements Writeable {
     bb.writeShort(cipherSuites.getValue());
     bb.writeByte(0);
 
-    int extPosition = bb.writerIndex();
+    final int extPosition = bb.writerIndex();
     bb.writeShort(0); // placeholder
 
     Extension.writeAll(extensions, bb, false);
@@ -111,7 +111,10 @@ public class ServerHello implements Writeable {
   private final List<Extension> extensions;
 
   public ServerHello(
-      byte[] serverRandom, byte[] sessionId, CipherSuite cipherSuites, List<Extension> extensions) {
+      final byte[] serverRandom,
+      final byte[] sessionId,
+      final CipherSuite cipherSuites,
+      final List<Extension> extensions) {
     this.serverRandom = serverRandom;
     this.sessionId = sessionId;
     this.cipherSuites = cipherSuites;
@@ -134,8 +137,8 @@ public class ServerHello implements Writeable {
     return extensions;
   }
 
-  public Optional<Extension> geExtension(ExtensionType type) {
-    for (Extension ext : extensions) {
+  public Optional<Extension> geExtension(final ExtensionType type) {
+    for (final Extension ext : extensions) {
       if (ext.getType().equals(type)) {
         return Optional.of(ext);
       }

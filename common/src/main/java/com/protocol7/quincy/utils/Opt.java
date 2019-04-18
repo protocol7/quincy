@@ -3,7 +3,7 @@ package com.protocol7.quincy.utils;
 import java.util.Optional;
 
 public class Opt {
-  public static String toString(Optional<?> opt) {
+  public static String toString(final Optional<?> opt) {
     if (opt.isPresent()) {
       return "[" + opt.get().toString() + "]";
     } else {
@@ -11,7 +11,7 @@ public class Opt {
     }
   }
 
-  public static String toStringBytes(Optional<byte[]> opt) {
+  public static String toStringBytes(final Optional<byte[]> opt) {
     if (opt.isPresent()) {
       return "[" + Hex.hex(opt.get()) + "]";
     } else {

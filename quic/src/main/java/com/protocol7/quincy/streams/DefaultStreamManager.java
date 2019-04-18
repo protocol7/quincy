@@ -30,8 +30,8 @@ public class DefaultStreamManager implements StreamManager {
     requireNonNull(ctx);
 
     if (packet instanceof ShortPacket) {
-      ShortPacket sp = (ShortPacket) packet;
-      for (Frame frame : sp.getPayload().getFrames()) {
+      final ShortPacket sp = (ShortPacket) packet;
+      for (final Frame frame : sp.getPayload().getFrames()) {
         if (frame instanceof StreamFrame) {
           if (ctx.getState() != State.Ready) {
             throw new IllegalStateException("Stream frames can only be handled in ready state");
@@ -39,14 +39,14 @@ public class DefaultStreamManager implements StreamManager {
 
           final StreamFrame sf = (StreamFrame) frame;
 
-          DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
+          final DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
           stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
         } else if (frame instanceof ResetStreamFrame) {
           final ResetStreamFrame rsf = (ResetStreamFrame) frame;
           final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
           stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
         } else if (frame instanceof AckFrame) {
-          AckFrame af = (AckFrame) frame;
+          final AckFrame af = (AckFrame) frame;
           af.getBlocks().stream().forEach(this::handleAcks);
         }
       }
@@ -55,10 +55,10 @@ public class DefaultStreamManager implements StreamManager {
     ctx.next(packet);
   }
 
-  private void handleAcks(AckBlock block) {
+  private void handleAcks(final AckBlock block) {
     // TODO optimize
-    long smallest = block.getSmallest().asLong();
-    long largest = block.getLargest().asLong();
+    final long smallest = block.getSmallest().asLong();
+    final long largest = block.getLargest().asLong();
     for (long i = smallest; i <= largest; i++) {
       streams.onAck(new PacketNumber(i));
     }

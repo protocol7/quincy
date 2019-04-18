@@ -20,7 +20,7 @@ public class QuicGoTest {
 
   @Test
   public void test() throws ExecutionException, InterruptedException {
-    Configuration config = Configuration.newBuilder().withVersion(Version.QUIC_GO).build();
+    final Configuration config = Configuration.newBuilder().withVersion(Version.QUIC_GO).build();
 
     QuicClient client = null;
     try {
@@ -30,7 +30,7 @@ public class QuicGoTest {
                   quicGo.getAddress(),
                   new StreamListener() {
                     @Override
-                    public void onData(Stream stream, byte[] data) {
+                    public void onData(final Stream stream, final byte[] data) {
                       System.out.println(new String(data));
                     }
 
@@ -38,7 +38,8 @@ public class QuicGoTest {
                     public void onFinished() {}
 
                     @Override
-                    public void onReset(Stream stream, int applicationErrorCode, long offset) {}
+                    public void onReset(
+                        final Stream stream, final int applicationErrorCode, final long offset) {}
                   })
               .get();
 
@@ -49,7 +50,7 @@ public class QuicGoTest {
       }
     }
 
-    List<QuicGoPacket> packets = quicGo.getPackets();
+    final List<QuicGoPacket> packets = quicGo.getPackets();
 
     // client hello without token
     assertPacket(packets.get(0), true, true, "Initial", 0);
@@ -76,7 +77,11 @@ public class QuicGoTest {
   }
 
   private void assertPacket(
-      QuicGoPacket actual, boolean inbount, boolean longHeader, String type, long pn) {
+      final QuicGoPacket actual,
+      final boolean inbount,
+      final boolean longHeader,
+      final String type,
+      final long pn) {
     assertEquals(inbount, actual.inbound);
     assertEquals(longHeader, actual.longHeader);
     assertEquals(type, actual.type);

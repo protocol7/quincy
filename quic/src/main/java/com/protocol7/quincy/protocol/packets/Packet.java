@@ -15,21 +15,21 @@ public interface Packet {
 
   int PACKET_TYPE_MASK = 0b10000000;
 
-  static boolean isLongHeader(int b) {
+  static boolean isLongHeader(final int b) {
     return (PACKET_TYPE_MASK & b) == PACKET_TYPE_MASK;
   }
 
-  static HalfParsedPacket parse(ByteBuf bb, int connidLength) {
+  static HalfParsedPacket parse(final ByteBuf bb, final int connidLength) {
     bb.markReaderIndex();
-    int firstByte = bb.readByte() & 0xFF;
+    final int firstByte = bb.readByte() & 0xFF;
 
     if (isLongHeader(firstByte)) {
       // Long header packet
 
-      int packetType = (firstByte & 0x30) >> 4;
+      final int packetType = (firstByte & 0x30) >> 4;
 
       // might be a ver neg packet, so we must check the version
-      Version version = Version.read(bb);
+      final Version version = Version.read(bb);
       bb.resetReaderIndex();
 
       if (version == Version.VERSION_NEGOTIATION) {
@@ -50,7 +50,7 @@ public interface Packet {
     }
   }
 
-  static EncryptionLevel getEncryptionLevel(Packet packet) {
+  static EncryptionLevel getEncryptionLevel(final Packet packet) {
     if (packet instanceof InitialPacket
         || packet instanceof RetryPacket
         || packet instanceof VersionNegotiationPacket) {

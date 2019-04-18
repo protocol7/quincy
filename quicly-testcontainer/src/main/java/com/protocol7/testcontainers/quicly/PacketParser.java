@@ -9,12 +9,12 @@ import java.util.List;
 
 public class PacketParser {
 
-  public static List<QuiclyPacket> parse(List<String> logs) {
-    List<QuiclyPacket> packets = new ArrayList<>();
+  public static List<QuiclyPacket> parse(final List<String> logs) {
+    final List<QuiclyPacket> packets = new ArrayList<>();
 
     boolean inbound = false;
-    ByteBuf bb = Unpooled.buffer();
-    for (String log : List.copyOf(logs)) {
+    final ByteBuf bb = Unpooled.buffer();
+    for (final String log : List.copyOf(logs)) {
       if (log.startsWith("recvmsg") || log.startsWith("sendmsg")) {
         if (bb.writerIndex() > 0) {
           packets.add(new QuiclyPacket(inbound, Bytes.peekToArray(bb)));

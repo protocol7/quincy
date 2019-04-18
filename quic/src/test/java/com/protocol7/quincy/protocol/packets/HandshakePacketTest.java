@@ -23,13 +23,13 @@ public class HandshakePacketTest {
 
   @Test
   public void roundtrip() {
-    HandshakePacket packet = p(PacketNumber.MIN);
+    final HandshakePacket packet = p(PacketNumber.MIN);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     packet.write(bb, aead);
 
-    HandshakePacket parsed = HandshakePacket.parse(bb).complete(l -> aead);
+    final HandshakePacket parsed = HandshakePacket.parse(bb).complete(l -> aead);
 
     assertEquals(destConnId, parsed.getDestinationConnectionId().get());
     assertEquals(srcConnId, parsed.getSourceConnectionId().get());
@@ -41,15 +41,15 @@ public class HandshakePacketTest {
 
   @Test
   public void roundtripMultipePackets() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
 
     // write two packets to the same buffer
     p(new PacketNumber(1)).write(bb, aead);
     p(new PacketNumber(2)).write(bb, aead);
 
     // parse both packet
-    HandshakePacket parsed1 = HandshakePacket.parse(bb).complete(l -> aead);
-    HandshakePacket parsed2 = HandshakePacket.parse(bb).complete(l -> aead);
+    final HandshakePacket parsed1 = HandshakePacket.parse(bb).complete(l -> aead);
+    final HandshakePacket parsed2 = HandshakePacket.parse(bb).complete(l -> aead);
 
     assertEquals(parsed1.getDestinationConnectionId(), parsed2.getDestinationConnectionId());
     assertEquals(parsed1.getSourceConnectionId(), parsed2.getSourceConnectionId());
@@ -59,7 +59,7 @@ public class HandshakePacketTest {
     assertEquals(parsed1.getPayload(), parsed2.getPayload());
   }
 
-  private HandshakePacket p(PacketNumber pn) {
+  private HandshakePacket p(final PacketNumber pn) {
     return HandshakePacket.create(
         Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, PingFrame.INSTANCE);
   }

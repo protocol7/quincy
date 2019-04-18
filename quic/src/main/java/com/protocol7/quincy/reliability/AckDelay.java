@@ -15,7 +15,7 @@ public class AckDelay {
     this.ticker = requireNonNull(ticker);
   }
 
-  public long calculate(long delay, TimeUnit unit) {
+  public long calculate(final long delay, final TimeUnit unit) {
     return Math.max(unit.toMicros(delay) / ackDelayMultiplier, 0);
   }
 
@@ -23,7 +23,7 @@ public class AckDelay {
     return ticker.nanoTime();
   }
 
-  public long delay(long delay) {
+  public long delay(final long delay) {
     return Math.max(ticker.nanoTime() - delay, 0);
   }
 }

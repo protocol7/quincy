@@ -43,26 +43,26 @@ public class ServerTlsManagerTest {
   @Test
   public void handshake() {
     // start handshake
-    byte[] ch = clientTlsSession.startHandshake();
+    final byte[] ch = clientTlsSession.startHandshake();
 
-    PipelineContext ctx = mock(PipelineContext.class);
+    final PipelineContext ctx = mock(PipelineContext.class);
 
     when(ctx.getState()).thenReturn(State.Started);
-    Packet chPacket = ip(ch);
+    final Packet chPacket = ip(ch);
     manager.onReceivePacket(chPacket, ctx);
 
     // receive server hello
-    ArgumentCaptor<CryptoFrame> cfCaptor = ArgumentCaptor.forClass(CryptoFrame.class);
+    final ArgumentCaptor<CryptoFrame> cfCaptor = ArgumentCaptor.forClass(CryptoFrame.class);
     verify(ctx, times(2)).send(cfCaptor.capture());
     verify(ctx).setState(State.BeforeReady);
     verify(ctx).next(chPacket);
 
     clientTlsSession.handleServerHello(cfCaptor.getAllValues().get(0).getCryptoData());
-    ClientTlsSession.HandshakeResult hr =
+    final ClientTlsSession.HandshakeResult hr =
         clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData()).get();
 
     when(ctx.getState()).thenReturn(State.BeforeReady);
-    Packet finPacket = hp(hr.getFin());
+    final Packet finPacket = hp(hr.getFin());
     manager.onReceivePacket(finPacket, ctx);
 
     verify(ctx, times(2)).send(any(CryptoFrame.class)); // no more interactions

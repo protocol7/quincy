@@ -14,21 +14,21 @@ public class StreamFrameTest {
 
   @Test
   public void roundtrip() {
-    StreamFrame frame = new StreamFrame(StreamId.random(true, true), 0, true, DATA);
+    final StreamFrame frame = new StreamFrame(StreamId.random(true, true), 0, true, DATA);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
 
-    StreamFrame parsed = StreamFrame.parse(bb);
+    final StreamFrame parsed = StreamFrame.parse(bb);
 
     assertEquals(frame, parsed);
   }
 
   @Test
   public void parse() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("10c67daf169411a94e48656c6c6f"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("10c67daf169411a94e48656c6c6f"));
 
-    StreamFrame frame = StreamFrame.parse(bb);
+    final StreamFrame frame = StreamFrame.parse(bb);
 
     assertFalse(frame.isFin());
     assertEquals(0, frame.getOffset());
@@ -38,9 +38,9 @@ public class StreamFrameTest {
 
   @Test
   public void parseWithOffset() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("14c2ebcf9abc5cbf78407b48656c6c6f"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("14c2ebcf9abc5cbf78407b48656c6c6f"));
 
-    StreamFrame frame = StreamFrame.parse(bb);
+    final StreamFrame frame = StreamFrame.parse(bb);
 
     assertFalse(frame.isFin());
     assertEquals(123, frame.getOffset());
@@ -50,9 +50,9 @@ public class StreamFrameTest {
 
   @Test
   public void parseWithFin() {
-    ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("13f9b7193a8d0827c40548656c6c6f"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("13f9b7193a8d0827c40548656c6c6f"));
 
-    StreamFrame frame = StreamFrame.parse(bb);
+    final StreamFrame frame = StreamFrame.parse(bb);
 
     assertTrue(frame.isFin());
     assertEquals(0, frame.getOffset());
@@ -62,13 +62,13 @@ public class StreamFrameTest {
 
   @Test
   public void lengthWithoutOffset() {
-    StreamFrame frame = new StreamFrame(new StreamId(123), 0, false, DATA);
+    final StreamFrame frame = new StreamFrame(new StreamId(123), 0, false, DATA);
     assertEquals(9, frame.calculateLength());
   }
 
   @Test
   public void lengthWithOffset() {
-    StreamFrame frame = new StreamFrame(new StreamId(123), 123, false, DATA);
+    final StreamFrame frame = new StreamFrame(new StreamId(123), 123, false, DATA);
     assertEquals(11, frame.calculateLength());
   }
 }

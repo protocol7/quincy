@@ -24,11 +24,11 @@ public class ServerStateMachine {
     this.connection = connection;
   }
 
-  public synchronized void processPacket(Packet packet) {
+  public synchronized void processPacket(final Packet packet) {
     // TODO check version
     if (state == State.Started) {
       if (packet instanceof InitialPacket) {
-        InitialPacket initialPacket = (InitialPacket) packet;
+        final InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
           if (packet.getSourceConnectionId().isPresent()) {

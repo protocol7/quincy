@@ -15,7 +15,7 @@ public enum TransportError {
 
   private final int value;
 
-  TransportError(int value) {
+  TransportError(final int value) {
     this.value = value;
   }
 

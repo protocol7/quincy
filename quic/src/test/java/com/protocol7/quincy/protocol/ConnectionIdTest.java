@@ -17,7 +17,7 @@ public class ConnectionIdTest {
   @Test
   public void randomLength() {
     for (int i = 0; i < 1000; i++) {
-      ConnectionId connId = ConnectionId.random();
+      final ConnectionId connId = ConnectionId.random();
       assertTrue(connId.getLength() >= 8);
       assertTrue(connId.getLength() <= 18);
     }
@@ -44,46 +44,46 @@ public class ConnectionIdTest {
     assertRoundtrip(ConnectionId.random());
   }
 
-  private void assertRoundtrip(ConnectionId connectionId) {
-    ByteBuf bb = Unpooled.buffer();
+  private void assertRoundtrip(final ConnectionId connectionId) {
+    final ByteBuf bb = Unpooled.buffer();
     connectionId.write(bb);
 
-    ConnectionId parsed = ConnectionId.read(connectionId.getLength(), bb);
+    final ConnectionId parsed = ConnectionId.read(connectionId.getLength(), bb);
 
     assertEquals(parsed, connectionId);
   }
 
   @Test
   public void writeIds() {
-    byte[] b16 = new byte[16];
-    ConnectionId id16 = new ConnectionId(b16);
-    byte[] b18 = new byte[18];
+    final byte[] b16 = new byte[16];
+    final ConnectionId id16 = new ConnectionId(b16);
+    final byte[] b18 = new byte[18];
     Arrays.fill(b18, (byte) 1);
-    ConnectionId id18 = new ConnectionId(b18);
+    final ConnectionId id18 = new ConnectionId(b18);
 
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     ConnectionId.write(of(id16), of(id18), bb);
     assertEquals(0xdf, bb.readByte() & 0xFF);
 
-    byte[] a16 = new byte[16];
+    final byte[] a16 = new byte[16];
     bb.readBytes(a16);
     assertArrayEquals(b16, a16);
-    byte[] a18 = new byte[18];
+    final byte[] a18 = new byte[18];
     bb.readBytes(a18);
     assertArrayEquals(b18, a18);
   }
 
   @Test
   public void readPair() {
-    ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     bb.writeByte(0xdf);
-    byte[] b16 = new byte[16];
+    final byte[] b16 = new byte[16];
     bb.writeBytes(b16);
-    byte[] b18 = new byte[18];
+    final byte[] b18 = new byte[18];
     Arrays.fill(b18, (byte) 1);
     bb.writeBytes(b18);
 
-    Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
+    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
     assertArrayEquals(b16, cids.getFirst().get().asBytes());
     assertArrayEquals(b18, cids.getSecond().get().asBytes());

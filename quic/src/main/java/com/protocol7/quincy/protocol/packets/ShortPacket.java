@@ -13,24 +13,24 @@ import java.util.Optional;
 
 public class ShortPacket implements FullPacket {
 
-  public static HalfParsedPacket<ShortPacket> parse(ByteBuf bb, int connIdLength) {
-    int bbOffset = bb.readerIndex();
+  public static HalfParsedPacket<ShortPacket> parse(final ByteBuf bb, final int connIdLength) {
+    final int bbOffset = bb.readerIndex();
 
-    byte firstByte = bb.readByte();
+    final byte firstByte = bb.readByte();
 
-    boolean firstBit = (firstByte & 0x80) == 0x80;
+    final boolean firstBit = (firstByte & 0x80) == 0x80;
     if (firstBit) {
       throw new IllegalArgumentException("First bit must be 0");
     }
 
-    boolean reserved = (firstByte & 0x40) == 0x40;
+    final boolean reserved = (firstByte & 0x40) == 0x40;
     if (!reserved) {
       throw new IllegalArgumentException("Reserved bit must be 1");
     }
 
-    boolean keyPhase = (firstByte & 0x4) == 0x4;
+    final boolean keyPhase = (firstByte & 0x4) == 0x4;
 
-    Optional<ConnectionId> connId;
+    final Optional<ConnectionId> connId;
     if (connIdLength > 0) {
       connId = Optional.of(ConnectionId.read(connIdLength, bb));
     } else {
@@ -49,36 +49,36 @@ public class ShortPacket implements FullPacket {
       }
 
       @Override
-      public ShortPacket complete(AEADProvider aeadProvider) {
+      public ShortPacket complete(final AEADProvider aeadProvider) {
 
-        AEAD aead = aeadProvider.get(EncryptionLevel.OneRtt);
+        final AEAD aead = aeadProvider.get(EncryptionLevel.OneRtt);
 
-        int pnOffset = bb.readerIndex();
-        int sampleOffset = pnOffset + 4;
+        final int pnOffset = bb.readerIndex();
+        final int sampleOffset = pnOffset + 4;
 
-        byte[] sample = new byte[aead.getSampleLength()];
+        final byte[] sample = new byte[aead.getSampleLength()];
         bb.getBytes(sampleOffset, sample);
 
         // get 4 bytes for PN. Might be too long, but we'll handle that below
-        byte[] pn = new byte[4];
+        final byte[] pn = new byte[4];
         bb.getBytes(pnOffset, pn);
 
         // decrypt the protected header parts
         try {
-          byte[] decryptedHeader =
+          final byte[] decryptedHeader =
               aead.decryptHeader(sample, Bytes.concat(new byte[] {firstByte}, pn), true);
 
-          byte decryptedFirstByte = decryptedHeader[0];
-          int pnLen = (decryptedFirstByte & 0x3) + 1;
+          final byte decryptedFirstByte = decryptedHeader[0];
+          final int pnLen = (decryptedFirstByte & 0x3) + 1;
 
-          byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
+          final byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
 
-          PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+          final PacketNumber packetNumber = PacketNumber.parse(pnBytes);
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
 
-          byte[] aad = new byte[bb.readerIndex() - bbOffset];
+          final byte[] aad = new byte[bb.readerIndex() - bbOffset];
           bb.getBytes(bbOffset, aad);
 
           // restore the AAD with the now removed header protected
@@ -87,10 +87,10 @@ public class ShortPacket implements FullPacket {
             aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
 
-          Payload payload = Payload.parse(bb, bb.readableBytes(), aead, packetNumber, aad);
+          final Payload payload = Payload.parse(bb, bb.readableBytes(), aead, packetNumber, aad);
 
           return new ShortPacket(keyPhase, connId, packetNumber, payload);
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
       }
@@ -98,10 +98,10 @@ public class ShortPacket implements FullPacket {
   }
 
   public static ShortPacket create(
-      boolean keyPhase,
-      Optional<ConnectionId> connectionId,
-      PacketNumber packetNumber,
-      Frame... frames) {
+      final boolean keyPhase,
+      final Optional<ConnectionId> connectionId,
+      final PacketNumber packetNumber,
+      final Frame... frames) {
     return new ShortPacket(keyPhase, connectionId, packetNumber, new Payload(frames));
   }
 
@@ -111,10 +111,10 @@ public class ShortPacket implements FullPacket {
   private final Payload payload;
 
   public ShortPacket(
-      boolean keyPhase,
-      Optional<ConnectionId> connectionId,
-      PacketNumber packetNumber,
-      Payload payload) {
+      final boolean keyPhase,
+      final Optional<ConnectionId> connectionId,
+      final PacketNumber packetNumber,
+      final Payload payload) {
     this.keyPhase = keyPhase;
     this.connectionId = connectionId;
     this.packetNumber = packetNumber;
@@ -127,13 +127,13 @@ public class ShortPacket implements FullPacket {
   }
 
   @Override
-  public FullPacket addFrame(Frame frame) {
+  public FullPacket addFrame(final Frame frame) {
     return new ShortPacket(keyPhase, connectionId, packetNumber, payload.addFrame(frame));
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD aead) {
-    int bbOffset = bb.writerIndex();
+  public void write(final ByteBuf bb, final AEAD aead) {
+    final int bbOffset = bb.writerIndex();
 
     byte b = 0;
     b = (byte) (b | 0x40); // reserved must be 1
@@ -143,7 +143,7 @@ public class ShortPacket implements FullPacket {
     // TODO spin bit
     // TODO reserved bits
 
-    int pnLen = packetNumber.getLength();
+    final int pnLen = packetNumber.getLength();
 
     b = (byte) (b | (pnLen - 1)); // pn length
 
@@ -151,27 +151,27 @@ public class ShortPacket implements FullPacket {
 
     connectionId.get().write(bb);
 
-    int pnOffset = bb.writerIndex();
-    int sampleOffset = pnOffset + 4;
+    final int pnOffset = bb.writerIndex();
+    final int sampleOffset = pnOffset + 4;
 
-    byte[] pn = packetNumber.write(pnLen);
+    final byte[] pn = packetNumber.write(pnLen);
     bb.writeBytes(pn);
 
-    byte[] aad = new byte[bb.writerIndex() - bbOffset];
+    final byte[] aad = new byte[bb.writerIndex() - bbOffset];
     bb.getBytes(bbOffset, aad);
 
     payload.write(bb, aead, packetNumber, aad);
 
-    byte[] sample = new byte[aead.getSampleLength()];
+    final byte[] sample = new byte[aead.getSampleLength()];
     bb.getBytes(sampleOffset, sample);
 
-    byte firstBýte = bb.getByte(bbOffset);
-    byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
+    final byte firstBýte = bb.getByte(bbOffset);
+    final byte[] header = Bytes.concat(new byte[] {firstBýte}, pn);
     try {
-      byte[] encryptedHeader = aead.encryptHeader(sample, header, true);
+      final byte[] encryptedHeader = aead.encryptHeader(sample, header, true);
       bb.setByte(bbOffset, encryptedHeader[0]);
       bb.setBytes(pnOffset, encryptedHeader, 1, encryptedHeader.length - 1);
-    } catch (GeneralSecurityException e) {
+    } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
   }

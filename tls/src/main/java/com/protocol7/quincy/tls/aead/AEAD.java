@@ -77,12 +77,12 @@ public class AEAD {
     return 16;
   }
 
-  public byte[] decryptHeader(final byte[] sample, final byte[] bs, boolean shortHeader)
+  public byte[] decryptHeader(final byte[] sample, final byte[] bs, final boolean shortHeader)
       throws GeneralSecurityException {
     return processHeader(sample, bs, shortHeader, otherPnKey);
   }
 
-  public byte[] encryptHeader(final byte[] sample, final byte[] bs, boolean shortHeader)
+  public byte[] encryptHeader(final byte[] sample, final byte[] bs, final boolean shortHeader)
       throws GeneralSecurityException {
     return processHeader(sample, bs, shortHeader, myPnKey);
   }
@@ -98,18 +98,18 @@ public class AEAD {
           });
 
   private byte[] processHeader(
-      final byte[] sample, final byte[] bs, boolean shortHeader, byte[] key)
+      final byte[] sample, final byte[] bs, final boolean shortHeader, final byte[] key)
       throws GeneralSecurityException {
-    byte[] out = Arrays.copyOf(bs, bs.length);
+    final byte[] out = Arrays.copyOf(bs, bs.length);
 
     final Cipher cipher = pnCiphers.get();
     final SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
 
     cipher.init(Cipher.ENCRYPT_MODE, secretKey);
 
-    byte[] mask = cipher.doFinal(sample);
+    final byte[] mask = cipher.doFinal(sample);
 
-    byte maskMask;
+    final byte maskMask;
     if (shortHeader) {
       maskMask = 0x1f;
     } else {
@@ -144,7 +144,7 @@ public class AEAD {
       throws GeneralSecurityException {
     final Cipher cipher = aeadCiphers.get();
     final SecretKey secretKey = new SecretKeySpec(key, 0, key.length, "AES");
-    byte[] nonce = makeNonce(iv, packetNumber);
+    final byte[] nonce = makeNonce(iv, packetNumber);
     final GCMParameterSpec spec = new GCMParameterSpec(128, nonce);
 
     cipher.init(mode, secretKey, spec);

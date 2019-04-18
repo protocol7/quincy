@@ -46,11 +46,11 @@ public class PipelineTest {
 
   @Test
   public void inboundPropagation() {
-    InboundHandler handler1 = spy(new PropagatingInboundHandler());
-    InboundHandler handler2 = spy(new PropagatingInboundHandler());
-    InboundHandler handler3 = spy(new PropagatingInboundHandler());
+    final InboundHandler handler1 = spy(new PropagatingInboundHandler());
+    final InboundHandler handler2 = spy(new PropagatingInboundHandler());
+    final InboundHandler handler3 = spy(new PropagatingInboundHandler());
 
-    Pipeline pipeline = new Pipeline(List.of(handler1, handler2, handler3), List.of());
+    final Pipeline pipeline = new Pipeline(List.of(handler1, handler2, handler3), List.of());
 
     pipeline.onPacket(connection, packet);
 
@@ -61,11 +61,11 @@ public class PipelineTest {
 
   @Test
   public void inboundNonPropagation() {
-    InboundHandler handler1 = spy(new PropagatingInboundHandler());
-    InboundHandler handler2 = spy(new NonPropagatingInboundHandler());
-    InboundHandler handler3 = spy(new PropagatingInboundHandler());
+    final InboundHandler handler1 = spy(new PropagatingInboundHandler());
+    final InboundHandler handler2 = spy(new NonPropagatingInboundHandler());
+    final InboundHandler handler3 = spy(new PropagatingInboundHandler());
 
-    Pipeline pipeline = new Pipeline(List.of(handler1, handler2, handler3), List.of());
+    final Pipeline pipeline = new Pipeline(List.of(handler1, handler2, handler3), List.of());
 
     pipeline.onPacket(connection, packet);
 
@@ -76,11 +76,11 @@ public class PipelineTest {
 
   @Test
   public void outboundPropagation() {
-    OutboundHandler handler1 = spy(new PropagatingOutboundHandler());
-    OutboundHandler handler2 = spy(new PropagatingOutboundHandler());
-    OutboundHandler handler3 = spy(new PropagatingOutboundHandler());
+    final OutboundHandler handler1 = spy(new PropagatingOutboundHandler());
+    final OutboundHandler handler2 = spy(new PropagatingOutboundHandler());
+    final OutboundHandler handler3 = spy(new PropagatingOutboundHandler());
 
-    Pipeline pipeline = new Pipeline(List.of(), List.of(handler1, handler2, handler3));
+    final Pipeline pipeline = new Pipeline(List.of(), List.of(handler1, handler2, handler3));
 
     pipeline.send(connection, packet);
 
@@ -91,11 +91,11 @@ public class PipelineTest {
 
   @Test
   public void outboundNonPropagation() {
-    OutboundHandler handler1 = spy(new PropagatingOutboundHandler());
-    OutboundHandler handler2 = spy(new NonPropagatingOutboundHandler());
-    OutboundHandler handler3 = spy(new PropagatingOutboundHandler());
+    final OutboundHandler handler1 = spy(new PropagatingOutboundHandler());
+    final OutboundHandler handler2 = spy(new NonPropagatingOutboundHandler());
+    final OutboundHandler handler3 = spy(new PropagatingOutboundHandler());
 
-    Pipeline pipeline = new Pipeline(List.of(), List.of(handler1, handler2, handler3));
+    final Pipeline pipeline = new Pipeline(List.of(), List.of(handler1, handler2, handler3));
 
     pipeline.send(connection, packet);
 

@@ -79,11 +79,11 @@ public class PacketBufferTest {
     assertTrue(buffer.drainSince(10, TimeUnit.NANOSECONDS).isEmpty());
   }
 
-  private FullPacket p(long pn) {
+  private FullPacket p(final long pn) {
     return ShortPacket.create(false, Optional.empty(), new PacketNumber(pn), f(pn));
   }
 
-  private Frame f(long i) {
+  private Frame f(final long i) {
     return new MaxDataFrame(i);
   }
 }

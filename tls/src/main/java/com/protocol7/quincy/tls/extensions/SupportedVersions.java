@@ -10,7 +10,7 @@ public class SupportedVersions implements Extension {
 
   public static final SupportedVersions TLS13 = new SupportedVersions(SupportedVersion.TLS13);
 
-  public static SupportedVersions parse(ByteBuf bb, boolean isClient) {
+  public static SupportedVersions parse(final ByteBuf bb, final boolean isClient) {
     int len = 2;
     if (!isClient) {
       len = bb.readByte();
@@ -20,8 +20,8 @@ public class SupportedVersions implements Extension {
     }
     len /= 2;
 
-    List<SupportedVersion> versions = new ArrayList<>(len);
-    byte[] b = new byte[2];
+    final List<SupportedVersion> versions = new ArrayList<>(len);
+    final byte[] b = new byte[2];
     for (int i = 0; i < len; i++) {
       bb.readBytes(b);
       versions.add(SupportedVersion.fromValue(b));
@@ -32,11 +32,11 @@ public class SupportedVersions implements Extension {
 
   private final List<SupportedVersion> versions;
 
-  private SupportedVersions(List<SupportedVersion> versions) {
+  private SupportedVersions(final List<SupportedVersion> versions) {
     this.versions = versions;
   }
 
-  private SupportedVersions(SupportedVersion... versions) {
+  private SupportedVersions(final SupportedVersion... versions) {
     this.versions = Arrays.asList(versions);
   }
 
@@ -50,11 +50,11 @@ public class SupportedVersions implements Extension {
   }
 
   @Override
-  public void write(ByteBuf bb, boolean isClient) {
+  public void write(final ByteBuf bb, final boolean isClient) {
     if (isClient) {
       bb.writeByte(versions.size() * 2);
     }
-    for (SupportedVersion version : versions) {
+    for (final SupportedVersion version : versions) {
       bb.writeBytes(version.getValue());
     }
   }

@@ -51,12 +51,12 @@ public class AckQueue {
 
   public void add(final FullPacket packet, final long time) {
     requireNonNull(packet);
-    EncryptionLevel level = getEncryptionLevel(packet);
+    final EncryptionLevel level = getEncryptionLevel(packet);
     getQueue(level).add(new Entry(packet.getPacketNumber().asLong(), time));
   }
 
   public Collection<Entry> drain(final EncryptionLevel level) {
-    BlockingQueue<Entry> queue = getQueue(level);
+    final BlockingQueue<Entry> queue = getQueue(level);
 
     final List<Entry> pns = new ArrayList<>(queue.size());
     queue.drainTo(pns);

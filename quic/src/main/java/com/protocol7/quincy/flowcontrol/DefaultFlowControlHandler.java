@@ -34,10 +34,10 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
   @Override
   public void beforeSendPacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket) {
-      FullPacket fullPacket = (FullPacket) packet;
-      for (Frame frame : fullPacket.getPayload().getFrames()) {
+      final FullPacket fullPacket = (FullPacket) packet;
+      for (final Frame frame : fullPacket.getPayload().getFrames()) {
         if (frame.getType() == FrameType.STREAM) {
-          StreamFrame sf = (StreamFrame) frame;
+          final StreamFrame sf = (StreamFrame) frame;
 
           if (!tryConsume(sf.getStreamId(), sf.getOffset() + sf.getData().length, ctx)) {
             throw new IllegalStateException("Stream or connection blocked");
@@ -74,7 +74,7 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
 
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
     if (packet instanceof FullPacket) {
-      FullPacket fp = (FullPacket) packet;
+      final FullPacket fp = (FullPacket) packet;
       // listen for flow control frames
       for (final Frame frame : fp.getPayload().getFrames()) {
         if (frame.getType() == FrameType.MAX_STREAM_DATA) {

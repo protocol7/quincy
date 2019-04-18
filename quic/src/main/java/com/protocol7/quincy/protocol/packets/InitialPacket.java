@@ -21,12 +21,12 @@ import java.util.function.Consumer;
 public class InitialPacket extends LongHeaderPacket {
 
   public static InitialPacket create(
-      Optional<ConnectionId> destConnectionId,
-      Optional<ConnectionId> srcConnectionId,
-      PacketNumber packetNumber,
-      Version version,
-      Optional<byte[]> token,
-      Frame... frames) { // TODO validate frame types
+      final Optional<ConnectionId> destConnectionId,
+      final Optional<ConnectionId> srcConnectionId,
+      final PacketNumber packetNumber,
+      final Version version,
+      final Optional<byte[]> token,
+      final Frame... frames) { // TODO validate frame types
     return create(
         destConnectionId,
         srcConnectionId,
@@ -37,34 +37,34 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   public static InitialPacket create(
-      Optional<ConnectionId> destConnectionId,
-      Optional<ConnectionId> srcConnectionId,
-      PacketNumber packetNumber,
-      Version version,
-      Optional<byte[]> token,
-      List<Frame> frames) { // TODO validate frame types
-    Payload payload = new Payload(frames);
+      final Optional<ConnectionId> destConnectionId,
+      final Optional<ConnectionId> srcConnectionId,
+      final PacketNumber packetNumber,
+      final Version version,
+      final Optional<byte[]> token,
+      final List<Frame> frames) { // TODO validate frame types
+    final Payload payload = new Payload(frames);
     return new InitialPacket(
         destConnectionId, srcConnectionId, version, packetNumber, payload, token);
   }
 
-  public static HalfParsedPacket<InitialPacket> parse(ByteBuf bb) {
-    int bbOffset = bb.readerIndex();
+  public static HalfParsedPacket<InitialPacket> parse(final ByteBuf bb) {
+    final int bbOffset = bb.readerIndex();
 
-    byte firstByte = bb.readByte(); // TODO validate
+    final byte firstByte = bb.readByte(); // TODO validate
 
-    Version version = Version.read(bb);
+    final Version version = Version.read(bb);
 
     final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
 
     final Optional<ConnectionId> destConnId = cids.getFirst();
     final Optional<ConnectionId> srcConnId = cids.getSecond();
 
-    int tokenLength = Varint.readAsInt(bb);
+    final int tokenLength = Varint.readAsInt(bb);
 
-    byte[] tokenBytes = new byte[tokenLength];
+    final byte[] tokenBytes = new byte[tokenLength];
     bb.readBytes(tokenBytes);
-    Optional<byte[]> token;
+    final Optional<byte[]> token;
     if (tokenBytes.length > 0) {
       token = Optional.of(tokenBytes);
     } else {
@@ -83,39 +83,39 @@ public class InitialPacket extends LongHeaderPacket {
       }
 
       @Override
-      public InitialPacket complete(AEADProvider aeadProvider) {
-        int length = Varint.readAsInt(bb);
+      public InitialPacket complete(final AEADProvider aeadProvider) {
+        final int length = Varint.readAsInt(bb);
 
-        AEAD aead = aeadProvider.get(EncryptionLevel.Initial);
+        final AEAD aead = aeadProvider.get(EncryptionLevel.Initial);
 
-        int pnOffset = bb.readerIndex();
-        int sampleOffset = pnOffset + 4;
+        final int pnOffset = bb.readerIndex();
+        final int sampleOffset = pnOffset + 4;
 
-        byte[] sample = new byte[aead.getSampleLength()];
+        final byte[] sample = new byte[aead.getSampleLength()];
 
         bb.getBytes(sampleOffset, sample);
 
         // get 4 bytes for PN. Might be too long, but we'll handle that below
-        byte[] pn = new byte[4];
+        final byte[] pn = new byte[4];
         bb.getBytes(pnOffset, pn);
 
         // decrypt the protected header parts
         try {
-          byte[] decryptedHeader =
+          final byte[] decryptedHeader =
               aead.decryptHeader(sample, Bytes.concat(new byte[] {firstByte}, pn), false);
 
-          byte decryptedFirstByte = decryptedHeader[0];
-          int pnLen = (decryptedFirstByte & 0x3) + 1;
+          final byte decryptedFirstByte = decryptedHeader[0];
+          final int pnLen = (decryptedFirstByte & 0x3) + 1;
 
-          byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
+          final byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
 
-          PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+          final PacketNumber packetNumber = PacketNumber.parse(pnBytes);
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
-          int payloadLength = length - pnLen; // subtract parsed pn length
+          final int payloadLength = length - pnLen; // subtract parsed pn length
 
-          byte[] aad = new byte[bb.readerIndex() - bbOffset];
+          final byte[] aad = new byte[bb.readerIndex() - bbOffset];
           bb.getBytes(bbOffset, aad);
 
           // restore the AAD with the now removed header protected
@@ -124,12 +124,12 @@ public class InitialPacket extends LongHeaderPacket {
             aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
 
-          Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
+          final Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
           return InitialPacket.create(
               destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
 
-        } catch (GeneralSecurityException e) {
+        } catch (final GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
       }
@@ -139,12 +139,12 @@ public class InitialPacket extends LongHeaderPacket {
   private final Optional<byte[]> token;
 
   public InitialPacket(
-      Optional<ConnectionId> destinationConnectionId,
-      Optional<ConnectionId> sourceConnectionId,
-      Version version,
-      PacketNumber packetNumber,
-      Payload payload,
-      Optional<byte[]> token) {
+      final Optional<ConnectionId> destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
+      final Version version,
+      final PacketNumber packetNumber,
+      final Payload payload,
+      final Optional<byte[]> token) {
     super(
         PacketType.Initial,
         destinationConnectionId,
@@ -156,7 +156,7 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   @Override
-  public InitialPacket addFrame(Frame frame) {
+  public InitialPacket addFrame(final Frame frame) {
     return new InitialPacket(
         getDestinationConnectionId(),
         getSourceConnectionId(),
@@ -167,7 +167,7 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   @Override
-  public void write(ByteBuf bb, AEAD aead) {
+  public void write(final ByteBuf bb, final AEAD aead) {
     writeInternal(
         bb,
         aead,
@@ -175,7 +175,7 @@ public class InitialPacket extends LongHeaderPacket {
           @Override
           public void accept(final ByteBuf byteBuf) {
             if (token.isPresent()) {
-              byte[] t = token.get();
+              final byte[] t = token.get();
               Varint.write(t.length, bb);
               bb.writeBytes(t);
             } else {
@@ -190,11 +190,11 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   @Override
-  public boolean equals(Object o) {
+  public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
-    InitialPacket that = (InitialPacket) o;
+    final InitialPacket that = (InitialPacket) o;
     return Objects.equals(token, that.token);
   }
 

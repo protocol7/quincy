@@ -9,7 +9,7 @@ public class ServerHandler extends SimpleChannelInboundHandler<DatagramPacket> {
 
   private final PacketRouter router;
 
-  public ServerHandler(PacketRouter router) {
+  public ServerHandler(final PacketRouter router) {
     this.router = router;
   }
 

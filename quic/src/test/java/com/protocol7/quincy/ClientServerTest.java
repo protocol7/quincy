@@ -61,12 +61,12 @@ public class ClientServerTest {
 
     private InternalConnection peer;
 
-    public void setPeer(InternalConnection peer) {
+    public void setPeer(final InternalConnection peer) {
       this.peer = peer;
     }
 
     @Override
-    public Future<Void> send(Packet packet, AEAD aead) {
+    public Future<Void> send(final Packet packet, final AEAD aead) {
       executor.execute(() -> peer.onPacket(packet));
 
       return new SucceededFuture(executor, null);
@@ -90,8 +90,8 @@ public class ClientServerTest {
             TestUtil.getTestAddress(),
             scheduler);
 
-    List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
-    PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
+    final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
+    final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
         new ServerConnection(
@@ -134,7 +134,7 @@ public class ClientServerTest {
         .onData(any(), eq(PING));
 
     // send ping
-    Stream stream = clientConnection.openStream();
+    final Stream stream = clientConnection.openStream();
     stream.write(PING, true);
 
     sleep();
@@ -151,7 +151,7 @@ public class ClientServerTest {
     // and verifies that they all arrive in order. The amount of data sent is meant to require flow
     // control.
 
-    Stream stream = clientConnection.openStream();
+    final Stream stream = clientConnection.openStream();
 
     for (int i = 0; i < 100; i++) {
       stream.write(b(i), i == 99);
@@ -173,7 +173,7 @@ public class ClientServerTest {
       assertEquals(100, captor.getAllValues().size());
 
       for (int i = 0; i < 100; i++) {
-        byte[] value = captor.getAllValues().get(i);
+        final byte[] value = captor.getAllValues().get(i);
         assertArrayEquals(b(i), value);
       }
     } else {
@@ -181,8 +181,8 @@ public class ClientServerTest {
     }
   }
 
-  private byte[] b(int i) {
-    byte[] b = new byte[1000];
+  private byte[] b(final int i) {
+    final byte[] b = new byte[1000];
     b[0] = (byte) i;
     return b;
   }
@@ -214,7 +214,7 @@ public class ClientServerTest {
   private void sleep() {
     try {
       Thread.sleep(200);
-    } catch (InterruptedException e) {
+    } catch (final InterruptedException e) {
       throw new RuntimeException(e);
     }
   }

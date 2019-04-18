@@ -35,7 +35,7 @@ public class QuiclyTest {
                   quicly.getAddress(),
                   new StreamListener() {
                     @Override
-                    public void onData(Stream stream, byte[] data) {
+                    public void onData(final Stream stream, final byte[] data) {
                       capturedData.add(data);
                     }
 
@@ -43,13 +43,15 @@ public class QuiclyTest {
                     public void onFinished() {}
 
                     @Override
-                    public void onReset(Stream stream, int applicationErrorCode, long offset) {}
+                    public void onReset(
+                        final Stream stream, final int applicationErrorCode, final long offset) {}
                   })
               .get();
 
       client.openStream().write("Hello world".getBytes(), true);
 
-      String actual = new String(capturedData.poll(10000, MILLISECONDS), StandardCharsets.US_ASCII);
+      final String actual =
+          new String(capturedData.poll(10000, MILLISECONDS), StandardCharsets.US_ASCII);
 
       // checking that the error message is correct. Shows that we've been able to perform the
       // handshake and opening a stream
@@ -58,7 +60,7 @@ public class QuiclyTest {
       // TODO fix waiting for closing packets
       Thread.sleep(1000);
 
-      List<QuiclyPacket> packets = quicly.getPackets();
+      final List<QuiclyPacket> packets = quicly.getPackets();
 
       // initial client hello
       assertTrue(packets.get(0).isInbound());
@@ -75,7 +77,7 @@ public class QuiclyTest {
       if (client != null) {
         try {
           client.close();
-        } catch (IllegalStateException ignored) {
+        } catch (final IllegalStateException ignored) {
         }
       }
     }

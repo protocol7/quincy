@@ -84,7 +84,7 @@ public class AEADTest {
 
   @Test
   public void seal() throws GeneralSecurityException {
-    byte[] actual = aead.seal(plainText, packetNumber, aad);
+    final byte[] actual = aead.seal(plainText, packetNumber, aad);
     assertArrayEquals(myCipherText, actual);
   }
 
@@ -100,21 +100,21 @@ public class AEADTest {
 
   @Test
   public void open() throws GeneralSecurityException {
-    byte[] actual = aead.open(otherCipherText, packetNumber, aad);
+    final byte[] actual = aead.open(otherCipherText, packetNumber, aad);
     assertArrayEquals(plainText, actual);
   }
 
   @Test(expected = AEADBadTagException.class)
   public void openBadAad() throws GeneralSecurityException {
-    byte[] actual = aead.open(otherCipherText, packetNumber, new byte[aad.length]);
+    final byte[] actual = aead.open(otherCipherText, packetNumber, new byte[aad.length]);
     assertArrayEquals(plainText, actual);
   }
 
   @Test
   public void testAEAD() throws GeneralSecurityException {
-    AEAD testAEAD = TestAEAD.create();
-    byte[] ct = testAEAD.seal(plainText, packetNumber, aad);
-    byte[] pt = testAEAD.open(ct, packetNumber, aad);
+    final AEAD testAEAD = TestAEAD.create();
+    final byte[] ct = testAEAD.seal(plainText, packetNumber, aad);
+    final byte[] pt = testAEAD.open(ct, packetNumber, aad);
 
     assertArrayEquals(pt, plainText);
   }
@@ -122,22 +122,22 @@ public class AEADTest {
   @Test
   public void headerRoundtripLongHeader() throws GeneralSecurityException {
 
-    byte[] encrypted = aead.encryptHeader(sample, header, false);
+    final byte[] encrypted = aead.encryptHeader(sample, header, false);
 
     assertEquals(header[0] & 0xF0, encrypted[0] & 0xF0);
 
-    byte[] decrypted = aead.decryptHeader(sample, encrypted, false);
+    final byte[] decrypted = aead.decryptHeader(sample, encrypted, false);
 
     assertHex(header, decrypted);
   }
 
   @Test
   public void headerRoundtripShortHeader() throws GeneralSecurityException {
-    byte[] encrypted = aead.encryptHeader(sample, header, true);
+    final byte[] encrypted = aead.encryptHeader(sample, header, true);
 
     assertEquals(header[0] & 0b11100000, encrypted[0] & 0b11100000);
 
-    byte[] decrypted = aead.decryptHeader(sample, encrypted, true);
+    final byte[] decrypted = aead.decryptHeader(sample, encrypted, true);
 
     assertHex(header, decrypted);
   }
