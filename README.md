@@ -21,7 +21,9 @@ anything missing, incomplete or wrong.
 - [ ] PMTU
 - [X] Version negotiation
 - [X] Streams
-- [ ] Reliability/resends/ack
+- [ ] Reliability
+  - [X] Acking
+  - [ ] Resends
 - [ ] Flow control
   - [X] Max data
   - [ ] Max streams
@@ -31,7 +33,7 @@ anything missing, incomplete or wrong.
   - [ ] Path validation
 - [ ] Connection migration
 - [ ] Connection termination
-  - [ ] Idle timeout
+  - [X] Idle timeout
   - [X] Immediate close
   - [ ] Stateless reset
 - [ ] HTTP binding
