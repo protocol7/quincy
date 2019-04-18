@@ -36,30 +36,12 @@ public class ClientStateMachine {
           // we only support a single version, so nothing more to do
           log.debug("Incompatible versions, closing connection");
           state = State.Closing;
-          connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
+          connection.closeByPeer();
           log.debug("Connection closed");
           state = State.Closed;
         }
-      } else if (state == State.Ready
-          || state == State.Closing
-          || state == State.Closed) { // TODO don't allow when closed
-        if (packet instanceof FullPacket) {
-          for (Frame frame : ((FullPacket) packet).getPayload().getFrames()) {
-            if (frame instanceof ConnectionCloseFrame) {
-              handlePeerClose();
-            }
-          }
-        }
       }
     }
-  }
-
-  private void handlePeerClose() {
-    log.debug("Peer closing connection");
-    state = State.Closing;
-    connection.closeByPeer().awaitUninterruptibly(); // TODO fix, make async
-    log.debug("Connection closed");
-    state = State.Closed;
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {

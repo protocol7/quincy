@@ -7,4 +7,6 @@ public interface InternalConnection extends Connection {
   void onPacket(Packet packet);
 
   void setState(State state);
+
+  void closeByPeer();
 }

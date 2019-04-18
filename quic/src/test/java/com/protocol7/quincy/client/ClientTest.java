@@ -9,6 +9,7 @@ import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
+import com.protocol7.quincy.flowcontrol.MockFlowControlHandler;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
@@ -45,9 +46,10 @@ public class ClientTest {
   private PacketNumber packetNumber = new PacketNumber(0);
   private StreamId streamId = StreamId.random(true, true);
 
+  private FlowControlHandler flowControlHandler = new MockFlowControlHandler();
+
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
-  @Mock private FlowControlHandler flowControlHandler;
   @Mock private Timer scheduler;
 
   @Before

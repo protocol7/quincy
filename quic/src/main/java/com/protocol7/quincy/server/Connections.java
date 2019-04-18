@@ -24,17 +24,17 @@ public class Connections {
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
-  private final Timer scheduler;
+  private final Timer timer;
 
   public Connections(
       final Configuration configuration,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final Timer scheduler) {
+      final Timer timer) {
     this.configuration = configuration;
     this.certificates = certificates;
     this.privateKey = privateKey;
-    this.scheduler = scheduler;
+    this.timer = timer;
   }
 
   public ServerConnection get(
@@ -59,7 +59,7 @@ public class Connections {
               new DefaultFlowControlHandler(
                   configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
               peerAddress,
-              scheduler);
+              timer);
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

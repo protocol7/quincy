@@ -30,6 +30,7 @@ import com.protocol7.quincy.streams.DefaultStreamManager;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.streams.StreamManager;
+import com.protocol7.quincy.termination.TerminationManager;
 import com.protocol7.quincy.tls.ClientTlsManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
@@ -39,6 +40,7 @@ import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.MDC;
 
@@ -68,7 +70,7 @@ public class ClientConnection implements InternalConnection {
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final Timer scheduler) {
+      final Timer timer) {
     this.version = configuration.getVersion();
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;
@@ -79,15 +81,24 @@ public class ClientConnection implements InternalConnection {
 
     this.packetBuffer =
         new PacketBufferManager(
-            new AckDelay(configuration.getAckDelayExponent(), ticker), this, scheduler, ticker);
+            new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
         new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
 
     final LoggingHandler logger = new LoggingHandler(true);
 
+    final TerminationManager terminationManager =
+        new TerminationManager(this, timer, configuration.getIdleTimeout(), TimeUnit.SECONDS);
+
     this.pipeline =
         new Pipeline(
-            List.of(logger, tlsManager, packetBuffer, streamManager, flowControlHandler),
+            List.of(
+                logger,
+                tlsManager,
+                packetBuffer,
+                streamManager,
+                flowControlHandler,
+                terminationManager),
             List.of(packetBuffer, logger));
 
     this.stateMachine = new ClientStateMachine(this);
@@ -233,8 +244,8 @@ public class ClientConnection implements InternalConnection {
     return closeInternal();
   }
 
-  public Future<Void> closeByPeer() {
-    return closeInternal();
+  public void closeByPeer() {
+    closeInternal().awaitUninterruptibly(); // TODO fis
   }
 
   private Future<Void> closeInternal() {

@@ -25,6 +25,7 @@ import com.protocol7.quincy.reliability.PacketBufferManager;
 import com.protocol7.quincy.streams.DefaultStreamManager;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.streams.StreamManager;
+import com.protocol7.quincy.termination.TerminationManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.ServerTLSManager;
 import com.protocol7.quincy.tls.aead.AEAD;
@@ -62,7 +63,7 @@ public class ServerConnection implements InternalConnection {
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final Timer scheduler) {
+      final Timer timer) {
     this.version = configuration.getVersion();
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
@@ -74,11 +75,14 @@ public class ServerConnection implements InternalConnection {
 
     final PacketBufferManager packetBuffer =
         new PacketBufferManager(
-            new AckDelay(configuration.getAckDelayExponent(), ticker), this, scheduler, ticker);
+            new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
         new ServerTLSManager(localConnectionId, transportParameters, privateKey, certificates);
 
     final LoggingHandler logger = new LoggingHandler(false);
+
+    final TerminationManager terminationManager =
+        new TerminationManager(this, timer, configuration.getIdleTimeout(), TimeUnit.SECONDS);
 
     this.pipeline =
         new Pipeline(
@@ -88,7 +92,8 @@ public class ServerConnection implements InternalConnection {
                 tlsManager,
                 packetBuffer,
                 streamManager,
-                flowControlHandler),
+                flowControlHandler,
+                terminationManager),
             List.of(flowControlHandler, packetBuffer, logger));
 
     this.localConnectionId = Optional.of(localConnectionId);
@@ -191,7 +196,7 @@ public class ServerConnection implements InternalConnection {
     return packetSender.destroy();
   }
 
-  public Future<Void> closeByPeer() {
-    return packetSender.destroy();
+  public void closeByPeer() {
+    packetSender.destroy().awaitUninterruptibly(); // TOOD fix
   }
 }

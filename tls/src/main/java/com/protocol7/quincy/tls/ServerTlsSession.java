@@ -59,8 +59,6 @@ public class ServerTlsSession {
 
     ClientHello ch = ClientHello.parse(msg, false);
 
-    System.out.println(ch);
-
     // verify expected extensions
     SupportedVersions versions =
         (SupportedVersions)
