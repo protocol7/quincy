@@ -1,5 +1,6 @@
 package com.protocol7.testcontainers.quicgo;
 
+import com.protocol7.quincy.utils.Hex;
 import java.util.Arrays;
 import java.util.Objects;
 
@@ -62,9 +63,9 @@ public class QuicGoPacket {
         + type
         + '\''
         + ", destinationConnectionId="
-        + destinationConnectionId
+        + Hex.hex(destinationConnectionId)
         + ", sourceConnectionId="
-        + sourceConnectionId
+        + Hex.hex(sourceConnectionId)
         + ", packetNumber="
         + packetNumber
         + '}';

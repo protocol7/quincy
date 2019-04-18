@@ -16,6 +16,7 @@ import static com.protocol7.quincy.tls.extensions.TransportParameterType.STATELE
 
 import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.Varint;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Collections;
@@ -396,7 +397,7 @@ public class TransportParameters implements Extension {
   public String toString() {
     return "TransportParameters{"
         + "version="
-        + version
+        + Hex.hex(version)
         + "suppoerdVersions="
         + supportedVersions
         + "initialMaxStreamDataBidiLocal="
