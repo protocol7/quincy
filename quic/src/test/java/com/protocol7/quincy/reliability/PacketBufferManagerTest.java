@@ -21,8 +21,10 @@ import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.utils.Ticker;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -37,11 +39,12 @@ public class PacketBufferManagerTest {
   @Mock private PipelineContext ctx;
   @Mock private FrameSender frameSender;
   @Mock private AckDelay ackDelay;
-  @Mock private ScheduledExecutorService scheduler;
+  @Mock private Timer timer;
   @Mock private Ticker ticker;
+  @Mock private Timeout timeout;
 
   private PacketBufferManager buffer;
-  private Runnable resendTask;
+  private TimerTask resendTask;
 
   @Before
   public void setUp() {
@@ -51,12 +54,12 @@ public class PacketBufferManagerTest {
 
     when(ticker.nanoTime()).thenReturn(2000_0000_0000L);
 
-    ArgumentCaptor<Runnable> taskCaptor = ArgumentCaptor.forClass(Runnable.class);
-    when(scheduler.scheduleAtFixedRate(
-            taskCaptor.capture(), anyLong(), anyLong(), any(TimeUnit.class)))
-        .thenReturn(null);
+    ArgumentCaptor<TimerTask> taskCaptor = ArgumentCaptor.forClass(TimerTask.class);
+    when(timer.newTimeout(taskCaptor.capture(), anyLong(), any(TimeUnit.class))).thenReturn(null);
 
-    buffer = new PacketBufferManager(ackDelay, frameSender, scheduler, ticker);
+    when(timeout.timer()).thenReturn(timer);
+
+    buffer = new PacketBufferManager(ackDelay, frameSender, timer, ticker);
 
     resendTask = taskCaptor.getValue();
   }
@@ -193,7 +196,7 @@ public class PacketBufferManagerTest {
   }
 
   @Test
-  public void resend() {
+  public void resend() throws Exception {
     Packet pingPacket = packet(2, PingFrame.INSTANCE);
     buffer.beforeSendPacket(pingPacket, ctx);
     assertBuffered(2);
@@ -201,7 +204,7 @@ public class PacketBufferManagerTest {
     // move time forward
     when(ticker.nanoTime()).thenReturn(3000_0000_0000L);
 
-    resendTask.run();
+    resendTask.run(timeout);
 
     verify(frameSender).send(PingFrame.INSTANCE);
   }

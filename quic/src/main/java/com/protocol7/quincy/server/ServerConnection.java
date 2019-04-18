@@ -30,12 +30,12 @@ import com.protocol7.quincy.tls.ServerTLSManager;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import com.protocol7.quincy.utils.Ticker;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -62,7 +62,7 @@ public class ServerConnection implements InternalConnection {
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final ScheduledExecutorService scheduler) {
+      final Timer scheduler) {
     this.version = configuration.getVersion();
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;

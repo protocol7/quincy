@@ -34,11 +34,11 @@ import com.protocol7.quincy.tls.ClientTlsManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Ticker;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.MDC;
 
@@ -68,7 +68,7 @@ public class ClientConnection implements InternalConnection {
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final ScheduledExecutorService scheduler) {
+      final Timer scheduler) {
     this.version = configuration.getVersion();
     this.remoteConnectionId = initialRemoteConnectionId;
     this.packetSender = packetSender;

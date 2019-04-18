@@ -9,13 +9,13 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.EventExecutorGroup;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class QuicServer {
 
@@ -26,11 +26,9 @@ public class QuicServer {
       final List<byte[]> certificates,
       final PrivateKey privateKey) {
 
-    final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
-
     return Futures.thenSync(
-        bindImpl(configuration, address, streamHandler, certificates, privateKey, scheduler),
-        g -> new QuicServer(g, scheduler));
+        bindImpl(configuration, address, streamHandler, certificates, privateKey),
+        g -> new QuicServer(g));
   }
 
   private static Future<EventExecutorGroup> bindImpl(
@@ -38,12 +36,12 @@ public class QuicServer {
       final InetSocketAddress address,
       final StreamListener streamHandler,
       final List<byte[]> certificates,
-      final PrivateKey privateKey,
-      final ScheduledExecutorService scheduler) {
+      final PrivateKey privateKey) {
     final NioEventLoopGroup group = new NioEventLoopGroup();
 
-    final Connections connections =
-        new Connections(configuration, certificates, privateKey, scheduler);
+    final Timer timer = new HashedWheelTimer();
+
+    final Connections connections = new Connections(configuration, certificates, privateKey, timer);
     final PacketRouter router =
         new PacketRouter(configuration.getVersion(), connections, streamHandler);
 
@@ -65,16 +63,12 @@ public class QuicServer {
   }
 
   private final EventExecutorGroup group;
-  private final ScheduledExecutorService scheduler;
 
-  private QuicServer(final EventExecutorGroup group, final ScheduledExecutorService scheduler) {
+  private QuicServer(final EventExecutorGroup group) {
     this.group = group;
-    this.scheduler = scheduler;
   }
 
   public Future<?> close() {
-    scheduler.shutdown();
-
     return group.shutdownGracefully();
   }
 }

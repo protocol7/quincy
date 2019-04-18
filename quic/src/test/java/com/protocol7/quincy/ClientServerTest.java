@@ -23,12 +23,12 @@ import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.aead.AEAD;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.SucceededFuture;
 import java.security.PrivateKey;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,7 +52,7 @@ public class ClientServerTest {
 
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
-  private @Mock ScheduledExecutorService scheduler;
+  private @Mock Timer scheduler;
   private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   public static class ForwardingPacketSender implements PacketSender {

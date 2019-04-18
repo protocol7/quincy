@@ -19,11 +19,11 @@ import com.protocol7.quincy.tls.ServerTlsSession;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.utils.Rnd;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.*;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ScheduledExecutorService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +48,7 @@ public class ClientTest {
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
   @Mock private FlowControlHandler flowControlHandler;
-  @Mock private ScheduledExecutorService scheduler;
+  @Mock private Timer scheduler;
 
   @Before
   public void setUp() {

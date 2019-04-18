@@ -18,12 +18,14 @@ import com.protocol7.quincy.reliability.AckQueue.Entry;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.utils.Pair;
 import com.protocol7.quincy.utils.Ticker;
+import io.netty.util.Timeout;
+import io.netty.util.Timer;
+import io.netty.util.TimerTask;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import org.slf4j.Logger;
@@ -42,12 +44,11 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   private final AtomicReference<Long> largestAcked = new AtomicReference<>(0L);
   private final AckDelay ackDelay;
   private final FrameSender frameSender;
-  private final ScheduledExecutorService scheduler;
 
   public PacketBufferManager(
       final AckDelay ackDelay,
       final FrameSender frameSender,
-      final ScheduledExecutorService scheduler,
+      final Timer timer,
       final Ticker ticker) {
     this.ackDelay = requireNonNull(ackDelay);
     this.frameSender = frameSender;
@@ -56,8 +57,16 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     handshakeBuffer = new PacketBuffer(ticker);
     buffer = new PacketBuffer(ticker);
 
-    this.scheduler = scheduler;
-    this.scheduler.scheduleAtFixedRate(this::resend, RESEND_DELAY, RESEND_DELAY, MILLISECONDS);
+    final TimerTask task =
+        new TimerTask() {
+          @Override
+          public void run(final Timeout timeout) {
+            resend();
+            timeout.timer().newTimeout(this, RESEND_DELAY, MILLISECONDS);
+          }
+        };
+
+    timer.newTimeout(task, RESEND_DELAY, MILLISECONDS);
   }
 
   public void resend() {

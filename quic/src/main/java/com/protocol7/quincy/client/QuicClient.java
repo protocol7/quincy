@@ -11,10 +11,10 @@ import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import io.netty.util.HashedWheelTimer;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 public class QuicClient {
 
@@ -29,7 +29,7 @@ public class QuicClient {
 
     final Future<Channel> channelFuture = Futures.thenChannel(b.bind(0));
 
-    final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    final Timer timer = new HashedWheelTimer();
 
     final Future<ClientConnection> conn =
         Futures.thenSync(
@@ -45,7 +45,7 @@ public class QuicClient {
                           configuration.getInitialMaxData(),
                           configuration.getInitialMaxStreamDataUni()),
                       serverAddress,
-                      scheduler);
+                      timer);
               handler.setConnection(connection); // TODO fix cyclic creation
               return connection;
             });
@@ -56,20 +56,15 @@ public class QuicClient {
             clientConnection ->
                 Futures.thenSync(clientConnection.handshake(), aVoid -> clientConnection));
 
-    return Futures.thenSync(f, v -> new QuicClient(group, v, scheduler));
+    return Futures.thenSync(f, v -> new QuicClient(group, v));
   }
 
   private final NioEventLoopGroup group;
   private final ClientConnection connection;
-  private final ScheduledExecutorService scheduler;
 
-  private QuicClient(
-      final NioEventLoopGroup group,
-      final ClientConnection connection,
-      final ScheduledExecutorService scheduler) {
+  private QuicClient(final NioEventLoopGroup group, final ClientConnection connection) {
     this.group = group;
     this.connection = connection;
-    this.scheduler = scheduler;
   }
 
   public Stream openStream() {
@@ -77,8 +72,6 @@ public class QuicClient {
   }
 
   public Future<?> close() {
-    scheduler.shutdown();
-
     return Futures.thenAsync(
         connection.close(), aVoid -> (Future<Void>) group.shutdownGracefully());
   }
