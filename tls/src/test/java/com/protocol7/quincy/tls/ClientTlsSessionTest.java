@@ -5,6 +5,7 @@ import static com.protocol7.quincy.utils.Hex.dehex;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 
+import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.Extension;
@@ -30,9 +31,15 @@ public class ClientTlsSessionTest {
   private final byte[] version = dehex("51474fff");
 
   private final ClientTlsSession engine =
-      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true),
+          TestUtil.tps(version),
+          new NoopCertificateValidator());
   private final ClientTlsSession started =
-      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true),
+          TestUtil.tps(version),
+          new NoopCertificateValidator());
 
   @Before
   public void setUp() {
@@ -143,7 +150,7 @@ public class ClientTlsSessionTest {
   }
 
   @Test(expected = IllegalStateException.class)
-  public void serverHandshakeWithoutStart() {
+  public void serverHandshakeWithoutStart() throws CertificateInvalidException {
     engine.handleHandshake(new byte[0]);
   }
 }

@@ -7,6 +7,7 @@ import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.tls.NoopCertificateValidator;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -45,6 +46,7 @@ public class QuicClient {
                           configuration.getInitialMaxData(),
                           configuration.getInitialMaxStreamDataUni()),
                       serverAddress,
+                      new NoopCertificateValidator(), // cert validation disabled
                       timer);
               handler.setConnection(connection); // TODO fix cyclic creation
               return connection;

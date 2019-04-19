@@ -32,7 +32,8 @@ public class ClientTlsManagerTest {
 
   private ConnectionId connectionId = ConnectionId.random();
   private TransportParameters tps = Configuration.defaults().toTransportParameters();
-  private ClientTlsManager manager = new ClientTlsManager(connectionId, tps);
+  private ClientTlsManager manager =
+      new ClientTlsManager(connectionId, tps, new NoopCertificateValidator());
 
   private ServerTlsSession serverTlsSession =
       new ServerTlsSession(

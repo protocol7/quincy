@@ -22,6 +22,7 @@ import com.protocol7.quincy.streams.DefaultStream;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.KeyUtil;
+import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
@@ -53,7 +54,7 @@ public class ClientServerTest {
   private @Mock StreamListener clientListener;
   private @Mock StreamListener serverListener;
   private @Mock Timer scheduler;
-  private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
+  private final FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   public static class ForwardingPacketSender implements PacketSender {
 
@@ -88,6 +89,7 @@ public class ClientServerTest {
             clientSender,
             flowControlHandler,
             TestUtil.getTestAddress(),
+            new NoopCertificateValidator(),
             scheduler);
 
     final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");

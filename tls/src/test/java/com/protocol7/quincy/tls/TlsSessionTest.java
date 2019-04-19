@@ -2,6 +2,7 @@ package com.protocol7.quincy.tls;
 
 import static com.protocol7.quincy.utils.Hex.dehex;
 
+import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.messages.ServerHandshake;
@@ -20,7 +21,10 @@ public class TlsSessionTest {
 
   private PrivateKey privateKey;
   private final ClientTlsSession client =
-      new ClientTlsSession(InitialAEAD.create(Rnd.rndBytes(4), true), TestUtil.tps(version));
+      new ClientTlsSession(
+          InitialAEAD.create(Rnd.rndBytes(4), true),
+          TestUtil.tps(version),
+          new NoopCertificateValidator());
   private ServerTlsSession server;
 
   @Before
@@ -37,7 +41,7 @@ public class TlsSessionTest {
   }
 
   @Test
-  public void handshake() {
+  public void handshake() throws CertificateInvalidException {
     final byte[] clientHello = client.startHandshake();
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
@@ -49,7 +53,7 @@ public class TlsSessionTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void handshakeWithInvalidServerCertVerification() {
+  public void handshakeWithInvalidServerCertVerification() throws CertificateInvalidException {
     final byte[] clientHello = client.startHandshake();
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
@@ -77,7 +81,7 @@ public class TlsSessionTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void handshakeInvalidClientFin() {
+  public void handshakeInvalidClientFin() throws CertificateInvalidException {
     final byte[] clientHello = client.startHandshake();
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
@@ -92,7 +96,7 @@ public class TlsSessionTest {
   }
 
   @Test(expected = RuntimeException.class)
-  public void handshakeInvalidServerFin() {
+  public void handshakeInvalidServerFin() throws CertificateInvalidException {
     final byte[] clientHello = client.startHandshake();
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);

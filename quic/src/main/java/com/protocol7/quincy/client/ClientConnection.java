@@ -31,6 +31,7 @@ import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.streams.StreamManager;
 import com.protocol7.quincy.termination.TerminationManager;
+import com.protocol7.quincy.tls.CertificateValidator;
 import com.protocol7.quincy.tls.ClientTlsManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
@@ -70,6 +71,7 @@ public class ClientConnection implements InternalConnection {
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
+      final CertificateValidator certificateValidator,
       final Timer timer) {
     this.version = configuration.getVersion();
     this.remoteConnectionId = initialRemoteConnectionId;
@@ -83,7 +85,8 @@ public class ClientConnection implements InternalConnection {
         new PacketBufferManager(
             new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
-        new ClientTlsManager(remoteConnectionId, configuration.toTransportParameters());
+        new ClientTlsManager(
+            remoteConnectionId, configuration.toTransportParameters(), certificateValidator);
 
     final LoggingHandler logger = new LoggingHandler(true);
 

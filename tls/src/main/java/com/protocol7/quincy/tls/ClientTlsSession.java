@@ -27,22 +27,29 @@ import org.slf4j.LoggerFactory;
 
 public class ClientTlsSession {
 
+  public static class CertificateInvalidException extends Exception {}
+
   private final Logger log = LoggerFactory.getLogger(ClientTlsSession.class);
 
   private final TransportParameters transportParameters;
 
   private final AEADs aeads;
   private final KeyExchange kek;
+  private final CertificateValidator certificateValidator;
 
   private ByteBuf handshakeBuffer;
   private byte[] clientHello;
   private byte[] serverHello;
   private byte[] handshakeSecret;
 
-  public ClientTlsSession(final AEAD initialAEAD, final TransportParameters transportParameters) {
+  public ClientTlsSession(
+      final AEAD initialAEAD,
+      final TransportParameters transportParameters,
+      final CertificateValidator certificateValidator) {
     this.transportParameters = transportParameters;
 
     aeads = new AEADs(initialAEAD);
+    this.certificateValidator = certificateValidator;
     kek = KeyExchange.generate(Group.X25519);
     handshakeBuffer = Unpooled.buffer(); // replace with position keeping buffer
   }
@@ -89,7 +96,8 @@ public class ClientTlsSession {
     return HandshakeAEAD.create(handshakeSecret, helloHash, true);
   }
 
-  public synchronized Optional<HandshakeResult> handleHandshake(final byte[] msg) {
+  public synchronized Optional<HandshakeResult> handleHandshake(final byte[] msg)
+      throws CertificateInvalidException {
     if (clientHello == null || serverHello == null) {
       throw new IllegalStateException("Got handshake in unexpected state");
     }
@@ -119,7 +127,9 @@ public class ClientTlsSession {
       final byte[] helloHash = Hash.sha256(clientHello, serverHello);
       validateServerFinish(fin, helloHash, finBytes);
 
-      // TODO verify certificate
+      if (!certificateValidator.validate(sc.getServerCertificates())) {
+        throw new CertificateInvalidException();
+      }
 
       handshakeBuffer.resetReaderIndex();
 

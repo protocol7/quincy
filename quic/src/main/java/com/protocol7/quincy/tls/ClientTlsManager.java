@@ -5,13 +5,16 @@ import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
+import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
+import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
@@ -27,17 +30,24 @@ public class ClientTlsManager implements InboundHandler {
   private final DefaultPromise<Void> handshakeFuture =
       new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
   private final TransportParameters transportParameters;
+  private final CertificateValidator certificateValidator;
 
   public ClientTlsManager(
-      final ConnectionId connectionId, final TransportParameters transportParameters) {
+      final ConnectionId connectionId,
+      final TransportParameters transportParameters,
+      final CertificateValidator certificateValidator) {
     this.transportParameters = transportParameters;
+    this.certificateValidator = certificateValidator;
 
     resetTlsSession(connectionId);
   }
 
   public void resetTlsSession(final ConnectionId connectionId) {
     this.tlsSession =
-        new ClientTlsSession(InitialAEAD.create(connectionId.asBytes(), true), transportParameters);
+        new ClientTlsSession(
+            InitialAEAD.create(connectionId.asBytes(), true),
+            transportParameters,
+            certificateValidator);
   }
 
   public Future<Void> handshake(
@@ -81,7 +91,12 @@ public class ClientTlsManager implements InboundHandler {
       }
     } else if (state == State.BeforeHandshake) {
       if (packet instanceof HandshakePacket) {
-        handleHandshake((HandshakePacket) packet, ctx);
+        try {
+          handleHandshake((HandshakePacket) packet, ctx);
+        } catch (final CertificateInvalidException e) {
+          ctx.closeConnection(TransportError.PROTOCOL_VIOLATION, FrameType.CRYPTO, "");
+          return;
+        }
       } else {
         throw new IllegalStateException(
             "Got packet in an unexpected state: " + state + " - " + packet);
@@ -91,7 +106,8 @@ public class ClientTlsManager implements InboundHandler {
     ctx.next(packet);
   }
 
-  private void handleHandshake(final HandshakePacket packet, final PipelineContext ctx) {
+  private void handleHandshake(final HandshakePacket packet, final PipelineContext ctx)
+      throws CertificateInvalidException {
     for (final Frame frame : packet.getPayload().getFrames()) {
       if (frame instanceof CryptoFrame) {
         final CryptoFrame cf = (CryptoFrame) frame;

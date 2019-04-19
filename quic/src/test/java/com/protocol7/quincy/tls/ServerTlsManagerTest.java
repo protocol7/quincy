@@ -18,6 +18,7 @@ import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import org.junit.Test;
@@ -38,10 +39,11 @@ public class ServerTlsManagerTest {
           KeyUtil.getCertsFromCrt("src/test/resources/server.crt"));
 
   private ClientTlsSession clientTlsSession =
-      new ClientTlsSession(InitialAEAD.create(connectionId.asBytes(), true), tps);
+      new ClientTlsSession(
+          InitialAEAD.create(connectionId.asBytes(), true), tps, new NoopCertificateValidator());
 
   @Test
-  public void handshake() {
+  public void handshake() throws CertificateInvalidException {
     // start handshake
     final byte[] ch = clientTlsSession.startHandshake();
 

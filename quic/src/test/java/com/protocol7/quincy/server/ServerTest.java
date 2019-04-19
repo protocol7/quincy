@@ -17,8 +17,10 @@ import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.ClientTlsSession;
+import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.ClientTlsSession.HandshakeResult;
 import com.protocol7.quincy.tls.KeyUtil;
+import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
@@ -47,7 +49,8 @@ public class ServerTest {
   private ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
-          Configuration.defaults().toTransportParameters());
+          Configuration.defaults().toTransportParameters(),
+          new NoopCertificateValidator());
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
@@ -76,7 +79,7 @@ public class ServerTest {
   }
 
   @Test
-  public void handshake() {
+  public void handshake() throws CertificateInvalidException {
     assertEquals(State.Started, connection.getState());
     final byte[] ch = clientTlsSession.startHandshake();
 
@@ -120,7 +123,7 @@ public class ServerTest {
   }
 
   @Test
-  public void streamFrame() {
+  public void streamFrame() throws CertificateInvalidException {
     handshake();
 
     connection.onPacket(packet(destConnectionId2, new StreamFrame(streamId, 0, false, DATA)));
@@ -129,7 +132,7 @@ public class ServerTest {
   }
 
   @Test
-  public void resetStreamFrame() {
+  public void resetStreamFrame() throws CertificateInvalidException {
     handshake();
 
     connection.onPacket(packet(destConnectionId2, new ResetStreamFrame(streamId, 123, 456)));
@@ -138,7 +141,7 @@ public class ServerTest {
   }
 
   @Test
-  public void ping() {
+  public void ping() throws CertificateInvalidException {
     handshake();
 
     connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));

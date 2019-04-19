@@ -16,6 +16,7 @@ import com.protocol7.quincy.protocol.packets.*;
 import com.protocol7.quincy.streams.DefaultStream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.KeyUtil;
+import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.ServerTlsSession;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
@@ -67,6 +68,7 @@ public class ClientTest {
             packetSender,
             flowControlHandler,
             TestUtil.getTestAddress(),
+            new NoopCertificateValidator(),
             scheduler);
 
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
