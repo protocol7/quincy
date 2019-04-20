@@ -37,6 +37,8 @@ public interface Extension {
         return SignatureAlgorithms.parse(b);
       } else if (type == ExtensionType.PSK_KEY_EXCHANGE_MODES) {
         return PskKeyExchangeModes.parse(b);
+      } else if (type == ExtensionType.SERVER_NAME) {
+        return ServerName.parse(b);
       } else {
         return RawExtension.parse(type, b);
       }

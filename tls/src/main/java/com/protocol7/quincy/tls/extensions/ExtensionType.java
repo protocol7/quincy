@@ -4,7 +4,7 @@ import com.google.common.collect.Sets;
 import java.util.Objects;
 import java.util.Set;
 
-public class ExtensionType {
+public final class ExtensionType {
 
   public static final ExtensionType SERVER_NAME = of("server_name", 0);
   public static final ExtensionType MAX_FRAGMENT_LENGTH = of("max_fragment_length", 1);

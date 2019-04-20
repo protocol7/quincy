@@ -107,7 +107,7 @@ public class ClientTlsSession {
     handshakeBuffer.markReaderIndex();
     try {
       final int pos = handshakeBuffer.readerIndex();
-      final EncryptedExtensions ee = EncryptedExtensions.parse(handshakeBuffer, true);
+      EncryptedExtensions.parse(handshakeBuffer, true);
       final ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
 
       final byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];

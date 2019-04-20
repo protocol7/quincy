@@ -21,6 +21,7 @@ public class DefaultCertificateValidator implements CertificateValidator {
     this.truststore = truststore;
   }
 
+  @Override
   public boolean validate(final List<byte[]> certificates) {
     try {
       final CertificateFactory cf = CertificateFactory.getInstance("X.509");
