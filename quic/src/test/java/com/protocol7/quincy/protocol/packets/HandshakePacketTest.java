@@ -6,7 +6,7 @@ import static org.junit.Assert.*;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.protocol.frames.PingFrame;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
@@ -16,8 +16,8 @@ import org.junit.Test;
 
 public class HandshakePacketTest {
 
-  private ConnectionId destConnId = ConnectionId.random();
-  private ConnectionId srcConnId = ConnectionId.random();
+  private final ConnectionId destConnId = ConnectionId.random();
+  private final ConnectionId srcConnId = ConnectionId.random();
 
   private final AEAD aead = TestAEAD.create();
 
@@ -36,7 +36,7 @@ public class HandshakePacketTest {
     assertEquals(PacketNumber.MIN, parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
-    assertTrue(parsed.getPayload().getFrames().get(0) instanceof PingFrame);
+    assertTrue(parsed.getPayload().getFrames().get(0) instanceof PaddingFrame);
   }
 
   @Test
@@ -61,6 +61,6 @@ public class HandshakePacketTest {
 
   private HandshakePacket p(final PacketNumber pn) {
     return HandshakePacket.create(
-        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, PingFrame.INSTANCE);
+        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, new PaddingFrame(1));
   }
 }

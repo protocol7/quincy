@@ -1,5 +1,7 @@
 package com.protocol7.quincy.protocol.frames;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import io.netty.buffer.ByteBuf;
 import java.util.Objects;
 
@@ -29,10 +31,8 @@ public class PaddingFrame extends Frame {
 
   public PaddingFrame(final int length) {
     super(FrameType.PADDING);
-    if (length < 1) {
-      throw new IllegalArgumentException("Length must be at least 1");
-    }
 
+    checkArgument(length > 0);
     this.length = length;
   }
 

@@ -4,13 +4,13 @@ import static java.util.Optional.empty;
 import static org.junit.Assert.assertTrue;
 
 import com.protocol7.quincy.protocol.*;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.frames.PingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.TestAEAD;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -29,7 +29,7 @@ public class PacketTest {
             pn,
             Version.DRAFT_18,
             empty(),
-            List.of(PingFrame.INSTANCE));
+            new PaddingFrame(1));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -68,7 +68,7 @@ public class PacketTest {
   public void parseHandshakePacket() {
     final HandshakePacket packet =
         HandshakePacket.create(
-            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_18, PingFrame.INSTANCE);
+            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_18, new PaddingFrame(1));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

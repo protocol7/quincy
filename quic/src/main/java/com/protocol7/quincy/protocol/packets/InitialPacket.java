@@ -1,6 +1,5 @@
 package com.protocol7.quincy.protocol.packets;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.Varint;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -26,14 +25,8 @@ public class InitialPacket extends LongHeaderPacket {
       final PacketNumber packetNumber,
       final Version version,
       final Optional<byte[]> token,
-      final Frame... frames) { // TODO validate frame types
-    return create(
-        destConnectionId,
-        srcConnectionId,
-        packetNumber,
-        version,
-        token,
-        ImmutableList.copyOf(frames));
+      final Frame... frames) {
+    return create(destConnectionId, srcConnectionId, packetNumber, version, token, List.of(frames));
   }
 
   public static InitialPacket create(
@@ -42,10 +35,9 @@ public class InitialPacket extends LongHeaderPacket {
       final PacketNumber packetNumber,
       final Version version,
       final Optional<byte[]> token,
-      final List<Frame> frames) { // TODO validate frame types
-    final Payload payload = new Payload(frames);
+      final List<Frame> frames) {
     return new InitialPacket(
-        destConnectionId, srcConnectionId, version, packetNumber, payload, token);
+        destConnectionId, srcConnectionId, version, packetNumber, new Payload(frames), token);
   }
 
   public static HalfParsedPacket<InitialPacket> parse(final ByteBuf bb) {
@@ -138,7 +130,7 @@ public class InitialPacket extends LongHeaderPacket {
 
   private final Optional<byte[]> token;
 
-  public InitialPacket(
+  private InitialPacket(
       final Optional<ConnectionId> destinationConnectionId,
       final Optional<ConnectionId> sourceConnectionId,
       final Version version,
@@ -151,7 +143,7 @@ public class InitialPacket extends LongHeaderPacket {
         sourceConnectionId,
         version,
         packetNumber,
-        payload);
+        validateFrames(payload));
     this.token = token;
   }
 

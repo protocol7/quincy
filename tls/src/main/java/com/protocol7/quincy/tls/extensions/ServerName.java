@@ -33,7 +33,7 @@ public class ServerName implements Extension {
 
   @Override
   public ExtensionType getType() {
-    return ExtensionType.SIGNATURE_ALGORITHMS;
+    return ExtensionType.SERVER_NAME;
   }
 
   @Override

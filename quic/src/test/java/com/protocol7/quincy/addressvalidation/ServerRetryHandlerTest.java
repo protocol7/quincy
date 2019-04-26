@@ -13,9 +13,8 @@ import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.protocol.frames.PingFrame;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
@@ -34,11 +33,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ServerRetryHandlerTest {
 
   @Mock PipelineContext ctx;
-  private RetryToken retryToken =
+  private final RetryToken retryToken =
       new RetryToken(KeyUtil.getPrivateKey("src/test/resources/server.der"));
-  private ServerRetryHandler handler =
+  private final ServerRetryHandler handler =
       new ServerRetryHandler(retryToken, 10000, TimeUnit.MILLISECONDS);
-  private InetAddress address = TestUtil.getTestAddress().getAddress();
+  private final InetAddress address = TestUtil.getTestAddress().getAddress();
 
   @Before
   public void setUp() {
@@ -108,12 +107,12 @@ public class ServerRetryHandlerTest {
   }
 
   private InitialPacket p(final Optional<byte[]> token) {
-    return new InitialPacket(
+    return InitialPacket.create(
         of(ConnectionId.random()),
         of(ConnectionId.random()),
-        Version.DRAFT_18,
         PacketNumber.MIN,
-        new Payload(PingFrame.INSTANCE),
-        token);
+        Version.DRAFT_18,
+        token,
+        new PaddingFrame(1));
   }
 }

@@ -130,7 +130,7 @@ public class HandshakePacket extends LongHeaderPacket {
         sourceConnectionId,
         version,
         packetNumber,
-        payload);
+        validateFrames(payload));
   }
 
   @Override

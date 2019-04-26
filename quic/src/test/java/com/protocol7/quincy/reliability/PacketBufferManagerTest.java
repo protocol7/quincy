@@ -15,6 +15,7 @@ import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.AckBlock;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.frames.PingFrame;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
@@ -96,7 +97,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void ackInitial() {
-    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(ip(2, new PaddingFrame(1)), ctx);
 
     assertTrue(buffer.getBuffer().isEmpty());
     assertTrue(buffer.getHandshakeBuffer().isEmpty());
@@ -109,17 +110,17 @@ public class PacketBufferManagerTest {
 
   @Test
   public void ackInitialWithHandshake() {
-    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(ip(2, new PaddingFrame(1)), ctx);
 
     // handshake packet implicitly acks any initial packets
-    buffer.onReceivePacket(hp(3, PingFrame.INSTANCE), ctx);
+    buffer.onReceivePacket(hp(3, new PaddingFrame(1)), ctx);
 
     assertTrue(buffer.getInitialBuffer().isEmpty());
   }
 
   @Test
   public void ackInitialWithInvalidPacketType() {
-    buffer.beforeSendPacket(ip(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(ip(2, new PaddingFrame(1)), ctx);
 
     buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
 
@@ -129,7 +130,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void ackHandshake() {
-    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(hp(2, new PaddingFrame(1)), ctx);
 
     assertTrue(buffer.getBuffer().isEmpty());
     assertFalse(buffer.getHandshakeBuffer().isEmpty());
@@ -142,7 +143,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void ackHandshakeWithShort() {
-    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(hp(2, new PaddingFrame(1)), ctx);
 
     buffer.onReceivePacket(packet(3, PingFrame.INSTANCE), ctx);
 
@@ -151,7 +152,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void ackHandshakeWithInvalidPacketType() {
-    buffer.beforeSendPacket(hp(2, PingFrame.INSTANCE), ctx);
+    buffer.beforeSendPacket(hp(2, new PaddingFrame(1)), ctx);
 
     buffer.onReceivePacket(ip(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
 

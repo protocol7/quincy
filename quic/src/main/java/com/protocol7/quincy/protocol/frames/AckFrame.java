@@ -1,5 +1,6 @@
 package com.protocol7.quincy.protocol.frames;
 
+import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Varint;
@@ -53,8 +54,9 @@ public class AckFrame extends Frame {
   public AckFrame(final long ackDelay, final List<AckBlock> blocks) {
     super(FrameType.ACK);
 
-    requireNonNull(ackDelay);
+    checkArgument(ackDelay >= 0);
     requireNonNull(blocks);
+    checkArgument(blocks.size() > 0);
 
     this.ackDelay = ackDelay;
     this.blocks = orderBlocks(blocks);

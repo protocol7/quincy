@@ -12,7 +12,7 @@ import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.protocol.frames.PingFrame;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.quincy.streams.StreamListener;
@@ -63,7 +63,7 @@ public class PacketRouterTest {
             new PacketNumber(2),
             Version.DRAFT_18,
             empty(),
-            PingFrame.INSTANCE);
+            new PaddingFrame(1));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
@@ -89,7 +89,7 @@ public class PacketRouterTest {
             new PacketNumber(2),
             Version.FINAL,
             empty(),
-            PingFrame.INSTANCE);
+            new PaddingFrame(1));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);

@@ -2,6 +2,12 @@ package com.protocol7.quincy.protocol.packets;
 
 import com.protocol7.quincy.Varint;
 import com.protocol7.quincy.protocol.*;
+import com.protocol7.quincy.protocol.frames.AckFrame;
+import com.protocol7.quincy.protocol.frames.ApplicationCloseFrame;
+import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
+import com.protocol7.quincy.protocol.frames.CryptoFrame;
+import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -11,6 +17,22 @@ import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class LongHeaderPacket implements FullPacket {
+
+  /** Validate frame types for initial and handshake packets */
+  protected static Payload validateFrames(final Payload payload) {
+    for (final Frame frame : payload.getFrames()) {
+      if (frame instanceof CryptoFrame
+          || frame instanceof AckFrame
+          || frame instanceof PaddingFrame
+          || frame instanceof ConnectionCloseFrame
+          || frame instanceof ApplicationCloseFrame) {
+        // ok
+      } else {
+        throw new IllegalArgumentException("Illegal frame type for packet type");
+      }
+    }
+    return payload;
+  }
 
   private final PacketType packetType;
   private final Optional<ConnectionId> destinationConnectionId;
