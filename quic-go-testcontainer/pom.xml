@@ -16,7 +16,7 @@
       <artifactId>testcontainers</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.protocol7</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>quincy-common</artifactId>
     </dependency>
     <dependency>

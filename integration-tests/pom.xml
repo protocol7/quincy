@@ -13,15 +13,15 @@
 
   <dependencies>
     <dependency>
-      <groupId>com.protocol7</groupId>
-      <artifactId>quincy</artifactId>
+      <groupId>${project.groupId}</groupId>
+      <artifactId>quincy-quic</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.protocol7</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>quic-go-testcontainer</artifactId>
     </dependency>
     <dependency>
-      <groupId>com.protocol7</groupId>
+      <groupId>${project.groupId}</groupId>
       <artifactId>quicly-testcontainer</artifactId>
     </dependency>
 
