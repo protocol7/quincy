@@ -20,32 +20,32 @@ import io.netty.util.internal.UnstableApi;
 @UnstableApi
 public final class Http2FrameStreamEvent {
 
-    private final Http2FrameStream stream;
-    private final Type type;
+  private final Http2FrameStream stream;
+  private final Type type;
 
-    enum Type {
-        State,
-        Writability
-    }
+  enum Type {
+    State,
+    Writability
+  }
 
-    private Http2FrameStreamEvent(final Http2FrameStream stream, final Type type) {
-        this.stream = stream;
-        this.type = type;
-    }
+  private Http2FrameStreamEvent(final Http2FrameStream stream, final Type type) {
+    this.stream = stream;
+    this.type = type;
+  }
 
-    public Http2FrameStream stream() {
-        return stream;
-    }
+  public Http2FrameStream stream() {
+    return stream;
+  }
 
-    public Type type() {
-        return type;
-    }
+  public Type type() {
+    return type;
+  }
 
-    static Http2FrameStreamEvent stateChanged(final Http2FrameStream stream) {
-        return new Http2FrameStreamEvent(stream, Type.State);
-    }
+  static Http2FrameStreamEvent stateChanged(final Http2FrameStream stream) {
+    return new Http2FrameStreamEvent(stream, Type.State);
+  }
 
-    static Http2FrameStreamEvent writabilityChanged(final Http2FrameStream stream) {
-        return new Http2FrameStreamEvent(stream, Type.Writability);
-    }
+  static Http2FrameStreamEvent writabilityChanged(final Http2FrameStream stream) {
+    return new Http2FrameStreamEvent(stream, Type.Writability);
+  }
 }

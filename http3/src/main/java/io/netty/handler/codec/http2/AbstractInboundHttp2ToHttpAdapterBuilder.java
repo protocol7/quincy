@@ -14,123 +14,123 @@
  */
 package io.netty.handler.codec.http2;
 
+import static io.netty.util.internal.ObjectUtil.checkNotNull;
+
 import io.netty.handler.codec.TooLongFrameException;
 import io.netty.util.internal.UnstableApi;
 
-import static io.netty.util.internal.ObjectUtil.checkNotNull;
-
-/**
- * A skeletal builder implementation of {@link InboundHttp2ToHttpAdapter} and its subtypes.
- */
+/** A skeletal builder implementation of {@link InboundHttp2ToHttpAdapter} and its subtypes. */
 @UnstableApi
 public abstract class AbstractInboundHttp2ToHttpAdapterBuilder<
-        T extends InboundHttp2ToHttpAdapter, B extends AbstractInboundHttp2ToHttpAdapterBuilder<T, B>> {
+    T extends InboundHttp2ToHttpAdapter, B extends AbstractInboundHttp2ToHttpAdapterBuilder<T, B>> {
 
-    private final Http2Connection connection;
-    private int maxContentLength;
-    private boolean validateHttpHeaders;
-    private boolean propagateSettings;
+  private final Http2Connection connection;
+  private int maxContentLength;
+  private boolean validateHttpHeaders;
+  private boolean propagateSettings;
 
-    /**
-     * Creates a new {@link InboundHttp2ToHttpAdapter} builder for the specified {@link Http2Connection}.
-     *
-     * @param connection the object which will provide connection notification events
-     *                   for the current connection
-     */
-    protected AbstractInboundHttp2ToHttpAdapterBuilder(final Http2Connection connection) {
-        this.connection = checkNotNull(connection, "connection");
+  /**
+   * Creates a new {@link InboundHttp2ToHttpAdapter} builder for the specified {@link
+   * Http2Connection}.
+   *
+   * @param connection the object which will provide connection notification events for the current
+   *     connection
+   */
+  protected AbstractInboundHttp2ToHttpAdapterBuilder(final Http2Connection connection) {
+    this.connection = checkNotNull(connection, "connection");
+  }
+
+  @SuppressWarnings("unchecked")
+  protected final B self() {
+    return (B) this;
+  }
+
+  /** Returns the {@link Http2Connection}. */
+  protected Http2Connection connection() {
+    return connection;
+  }
+
+  /** Returns the maximum length of the message content. */
+  protected int maxContentLength() {
+    return maxContentLength;
+  }
+
+  /**
+   * Specifies the maximum length of the message content.
+   *
+   * @param maxContentLength the maximum length of the message content. If the length of the message
+   *     content exceeds this value, a {@link TooLongFrameException} will be raised
+   * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link
+   *     InboundHttp2ToHttpAdapter}
+   */
+  protected B maxContentLength(final int maxContentLength) {
+    this.maxContentLength = maxContentLength;
+    return self();
+  }
+
+  /** Return {@code true} if HTTP header validation should be performed. */
+  protected boolean isValidateHttpHeaders() {
+    return validateHttpHeaders;
+  }
+
+  /**
+   * Specifies whether validation of HTTP headers should be performed.
+   *
+   * @param validate
+   *     <ul>
+   *       <li>{@code true} to validate HTTP headers in the http-codec
+   *       <li>{@code false} not to validate HTTP headers in the http-codec
+   *     </ul>
+   *
+   * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link
+   *     InboundHttp2ToHttpAdapter}
+   */
+  protected B validateHttpHeaders(final boolean validate) {
+    validateHttpHeaders = validate;
+    return self();
+  }
+
+  /**
+   * Returns {@code true} if a read settings frame should be propagated along the channel pipeline.
+   */
+  protected boolean isPropagateSettings() {
+    return propagateSettings;
+  }
+
+  /**
+   * Specifies whether a read settings frame should be propagated along the channel pipeline.
+   *
+   * @param propagate if {@code true} read settings will be passed along the pipeline. This can be
+   *     useful to clients that need hold off sending data until they have received the settings.
+   * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link
+   *     InboundHttp2ToHttpAdapter}
+   */
+  protected B propagateSettings(final boolean propagate) {
+    propagateSettings = propagate;
+    return self();
+  }
+
+  /**
+   * Builds/creates a new {@link InboundHttp2ToHttpAdapter} instance using this builder's current
+   * settings.
+   */
+  protected T build() {
+    final T instance;
+    try {
+      instance =
+          build(connection(), maxContentLength(), isValidateHttpHeaders(), isPropagateSettings());
+    } catch (final Throwable t) {
+      throw new IllegalStateException("failed to create a new InboundHttp2ToHttpAdapter", t);
     }
+    connection.addListener(instance);
+    return instance;
+  }
 
-    @SuppressWarnings("unchecked")
-    protected final B self() {
-        return (B) this;
-    }
-
-    /**
-     * Returns the {@link Http2Connection}.
-     */
-    protected Http2Connection connection() {
-        return connection;
-    }
-
-    /**
-     * Returns the maximum length of the message content.
-     */
-    protected int maxContentLength() {
-        return maxContentLength;
-    }
-
-    /**
-     * Specifies the maximum length of the message content.
-     *
-     * @param maxContentLength the maximum length of the message content. If the length of the message content
-     *        exceeds this value, a {@link TooLongFrameException} will be raised
-     * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link InboundHttp2ToHttpAdapter}
-     */
-    protected B maxContentLength(final int maxContentLength) {
-        this.maxContentLength = maxContentLength;
-        return self();
-    }
-
-    /**
-     * Return {@code true} if HTTP header validation should be performed.
-     */
-    protected boolean isValidateHttpHeaders() {
-        return validateHttpHeaders;
-    }
-
-    /**
-     * Specifies whether validation of HTTP headers should be performed.
-     *
-     * @param validate
-     * <ul>
-     * <li>{@code true} to validate HTTP headers in the http-codec</li>
-     * <li>{@code false} not to validate HTTP headers in the http-codec</li>
-     * </ul>
-     * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link InboundHttp2ToHttpAdapter}
-     */
-    protected B validateHttpHeaders(final boolean validate) {
-        validateHttpHeaders = validate;
-        return self();
-    }
-
-    /**
-     * Returns {@code true} if a read settings frame should be propagated along the channel pipeline.
-     */
-    protected boolean isPropagateSettings() {
-        return propagateSettings;
-    }
-
-    /**
-     * Specifies whether a read settings frame should be propagated along the channel pipeline.
-     *
-     * @param propagate if {@code true} read settings will be passed along the pipeline. This can be useful
-     *                     to clients that need hold off sending data until they have received the settings.
-     * @return {@link AbstractInboundHttp2ToHttpAdapterBuilder} the builder for the {@link InboundHttp2ToHttpAdapter}
-     */
-    protected B propagateSettings(final boolean propagate) {
-        propagateSettings = propagate;
-        return self();
-    }
-
-    /**
-     * Builds/creates a new {@link InboundHttp2ToHttpAdapter} instance using this builder's current settings.
-     */
-    protected T build() {
-        final T instance;
-        try {
-            instance = build(connection(), maxContentLength(),
-                                     isValidateHttpHeaders(), isPropagateSettings());
-        } catch (final Throwable t) {
-            throw new IllegalStateException("failed to create a new InboundHttp2ToHttpAdapter", t);
-        }
-        connection.addListener(instance);
-        return instance;
-    }
-
-    /**
-     * Creates a new {@link InboundHttp2ToHttpAdapter} with the specified properties.
-     */
-    protected abstract T build(Http2Connection connection, int maxContentLength,
-                               boolean validateHttpHeaders, boolean propagateSettings) throws Exception;
+  /** Creates a new {@link InboundHttp2ToHttpAdapter} with the specified properties. */
+  protected abstract T build(
+      Http2Connection connection,
+      int maxContentLength,
+      boolean validateHttpHeaders,
+      boolean propagateSettings)
+      throws Exception;
 }

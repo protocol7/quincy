@@ -19,60 +19,56 @@ package io.netty.handler.codec.http2;
 import io.netty.util.internal.StringUtil;
 import io.netty.util.internal.UnstableApi;
 
-/**
- * The default {@link Http2PingFrame} implementation.
- */
+/** The default {@link Http2PingFrame} implementation. */
 @UnstableApi
 public class DefaultHttp2PingFrame implements Http2PingFrame {
 
-    private final long content;
-    private final boolean ack;
+  private final long content;
+  private final boolean ack;
 
-    public DefaultHttp2PingFrame(final long content) {
-        this(content, false);
-    }
+  public DefaultHttp2PingFrame(final long content) {
+    this(content, false);
+  }
 
-    /**
-     * A user cannot send a ping ack, as this is done automatically when a ping is received.
-     */
-    DefaultHttp2PingFrame(final long content, final boolean ack) {
-        this.content = content;
-        this.ack = ack;
-    }
+  /** A user cannot send a ping ack, as this is done automatically when a ping is received. */
+  DefaultHttp2PingFrame(final long content, final boolean ack) {
+    this.content = content;
+    this.ack = ack;
+  }
 
-    @Override
-    public boolean ack() {
-        return ack;
-    }
+  @Override
+  public boolean ack() {
+    return ack;
+  }
 
-    @Override
-    public String name() {
-        return "PING";
-    }
+  @Override
+  public String name() {
+    return "PING";
+  }
 
-    @Override
-    public long content() {
-        return content;
-    }
+  @Override
+  public long content() {
+    return content;
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof Http2PingFrame)) {
-            return false;
-        }
-        final Http2PingFrame other = (Http2PingFrame) o;
-        return ack == other.ack() &&  content == other.content();
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof Http2PingFrame)) {
+      return false;
     }
+    final Http2PingFrame other = (Http2PingFrame) o;
+    return ack == other.ack() && content == other.content();
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = super.hashCode();
-        hash = hash * 31 + (ack ? 1 : 0);
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = super.hashCode();
+    hash = hash * 31 + (ack ? 1 : 0);
+    return hash;
+  }
 
-    @Override
-    public String toString() {
-        return StringUtil.simpleClassName(this) + "(content=" + content + ", ack=" + ack + ')';
-    }
+  @Override
+  public String toString() {
+    return StringUtil.simpleClassName(this) + "(content=" + content + ", ack=" + ack + ')';
+  }
 }

@@ -15,6 +15,9 @@
  */
 package io.netty.handler.codec.http2;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.junit.Assert.assertFalse;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
@@ -28,116 +31,125 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
 import io.netty.util.NetUtil;
 import io.netty.util.ReferenceCountUtil;
+import java.net.InetSocketAddress;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.atomic.AtomicReference;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.net.InetSocketAddress;
-import java.util.concurrent.CountDownLatch;
-import java.util.concurrent.atomic.AtomicReference;
-
-import static java.util.concurrent.TimeUnit.MILLISECONDS;
-import static org.junit.Assert.assertFalse;
-
 public class Http2MultiplexCodecTransportTest {
-    private EventLoopGroup eventLoopGroup;
-    private Channel clientChannel;
-    private Channel serverChannel;
-    private Channel serverConnectedChannel;
+  private EventLoopGroup eventLoopGroup;
+  private Channel clientChannel;
+  private Channel serverChannel;
+  private Channel serverConnectedChannel;
 
-    @Before
-    public void setup() {
-        eventLoopGroup = new NioEventLoopGroup();
+  @Before
+  public void setup() {
+    eventLoopGroup = new NioEventLoopGroup();
+  }
+
+  @After
+  public void teardown() {
+    if (clientChannel != null) {
+      clientChannel.close();
     }
-
-    @After
-    public void teardown() {
-        if (clientChannel != null) {
-            clientChannel.close();
-        }
-        if (serverChannel != null) {
-            serverChannel.close();
-        }
-        if (serverConnectedChannel != null) {
-            serverConnectedChannel.close();
-        }
-        eventLoopGroup.shutdownGracefully(0, 0, MILLISECONDS);
+    if (serverChannel != null) {
+      serverChannel.close();
     }
+    if (serverConnectedChannel != null) {
+      serverConnectedChannel.close();
+    }
+    eventLoopGroup.shutdownGracefully(0, 0, MILLISECONDS);
+  }
 
-    @Test(timeout = 10000)
-    public void asyncSettingsAck() throws InterruptedException {
-        // The client expects 2 settings frames. One from the connection setup and one from this test.
-        final CountDownLatch serverAckOneLatch = new CountDownLatch(1);
-        final CountDownLatch serverAckAllLatch = new CountDownLatch(2);
-        final CountDownLatch clientSettingsLatch = new CountDownLatch(2);
-        final CountDownLatch serverConnectedChannelLatch = new CountDownLatch(1);
-        final AtomicReference<Channel> serverConnectedChannelRef = new AtomicReference<Channel>();
-        ServerBootstrap sb = new ServerBootstrap();
-        sb.group(eventLoopGroup);
-        sb.channel(NioServerSocketChannel.class);
-        sb.childHandler(new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel ch) {
-                ch.pipeline().addLast(Http2MultiplexCodecBuilder.forServer(new HttpInboundHandler()).build());
-                ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                    @Override
-                    public void channelActive(ChannelHandlerContext ctx) {
+  @Test(timeout = 10000)
+  public void asyncSettingsAck() throws InterruptedException {
+    // The client expects 2 settings frames. One from the connection setup and one from this test.
+    final CountDownLatch serverAckOneLatch = new CountDownLatch(1);
+    final CountDownLatch serverAckAllLatch = new CountDownLatch(2);
+    final CountDownLatch clientSettingsLatch = new CountDownLatch(2);
+    final CountDownLatch serverConnectedChannelLatch = new CountDownLatch(1);
+    final AtomicReference<Channel> serverConnectedChannelRef = new AtomicReference<Channel>();
+    final ServerBootstrap sb = new ServerBootstrap();
+    sb.group(eventLoopGroup);
+    sb.channel(NioServerSocketChannel.class);
+    sb.childHandler(
+        new ChannelInitializer<Channel>() {
+          @Override
+          protected void initChannel(final Channel ch) {
+            ch.pipeline()
+                .addLast(Http2MultiplexCodecBuilder.forServer(new HttpInboundHandler()).build());
+            ch.pipeline()
+                .addLast(
+                    new ChannelInboundHandlerAdapter() {
+                      @Override
+                      public void channelActive(final ChannelHandlerContext ctx) {
                         serverConnectedChannelRef.set(ctx.channel());
                         serverConnectedChannelLatch.countDown();
-                    }
+                      }
 
-                    @Override
-                    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+                      @Override
+                      public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
                         if (msg instanceof Http2SettingsAckFrame) {
-                            serverAckOneLatch.countDown();
-                            serverAckAllLatch.countDown();
+                          serverAckOneLatch.countDown();
+                          serverAckAllLatch.countDown();
                         }
                         ReferenceCountUtil.release(msg);
-                    }
-                });
-            }
+                      }
+                    });
+          }
         });
-        serverChannel = sb.bind(new InetSocketAddress(NetUtil.LOCALHOST, 0)).awaitUninterruptibly().channel();
+    serverChannel =
+        sb.bind(new InetSocketAddress(NetUtil.LOCALHOST, 0)).awaitUninterruptibly().channel();
 
-        Bootstrap bs = new Bootstrap();
-        bs.group(eventLoopGroup);
-        bs.channel(NioSocketChannel.class);
-        bs.handler(new ChannelInitializer<Channel>() {
-            @Override
-            protected void initChannel(Channel ch) {
-                ch.pipeline().addLast(Http2MultiplexCodecBuilder
-                        .forClient(new HttpInboundHandler()).autoAckSettingsFrame(false).build());
-                ch.pipeline().addLast(new ChannelInboundHandlerAdapter() {
-                    @Override
-                    public void channelRead(ChannelHandlerContext ctx, Object msg) {
+    final Bootstrap bs = new Bootstrap();
+    bs.group(eventLoopGroup);
+    bs.channel(NioSocketChannel.class);
+    bs.handler(
+        new ChannelInitializer<Channel>() {
+          @Override
+          protected void initChannel(final Channel ch) {
+            ch.pipeline()
+                .addLast(
+                    Http2MultiplexCodecBuilder.forClient(new HttpInboundHandler())
+                        .autoAckSettingsFrame(false)
+                        .build());
+            ch.pipeline()
+                .addLast(
+                    new ChannelInboundHandlerAdapter() {
+                      @Override
+                      public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
                         if (msg instanceof Http2SettingsFrame) {
-                            clientSettingsLatch.countDown();
+                          clientSettingsLatch.countDown();
                         }
                         ReferenceCountUtil.release(msg);
-                    }
-                });
-            }
+                      }
+                    });
+          }
         });
-        clientChannel = bs.connect(serverChannel.localAddress()).awaitUninterruptibly().channel();
-        serverConnectedChannelLatch.await();
-        serverConnectedChannel = serverConnectedChannelRef.get();
+    clientChannel = bs.connect(serverChannel.localAddress()).awaitUninterruptibly().channel();
+    serverConnectedChannelLatch.await();
+    serverConnectedChannel = serverConnectedChannelRef.get();
 
-        serverConnectedChannel.writeAndFlush(new DefaultHttp2SettingsFrame(new Http2Settings()
-                .maxConcurrentStreams(10))).sync();
+    serverConnectedChannel
+        .writeAndFlush(new DefaultHttp2SettingsFrame(new Http2Settings().maxConcurrentStreams(10)))
+        .sync();
 
-        clientSettingsLatch.await();
+    clientSettingsLatch.await();
 
-        // We expect a timeout here because we want to asynchronously generate the SETTINGS ACK below.
-        assertFalse(serverAckOneLatch.await(300, MILLISECONDS));
+    // We expect a timeout here because we want to asynchronously generate the SETTINGS ACK below.
+    assertFalse(serverAckOneLatch.await(300, MILLISECONDS));
 
-        // We expect 2 settings frames, the initial settings frame during connection establishment and the setting frame
-        // written in this test. We should ack both of these settings frames.
-        clientChannel.writeAndFlush(Http2SettingsAckFrame.INSTANCE).sync();
-        clientChannel.writeAndFlush(Http2SettingsAckFrame.INSTANCE).sync();
+    // We expect 2 settings frames, the initial settings frame during connection establishment and
+    // the setting frame
+    // written in this test. We should ack both of these settings frames.
+    clientChannel.writeAndFlush(Http2SettingsAckFrame.INSTANCE).sync();
+    clientChannel.writeAndFlush(Http2SettingsAckFrame.INSTANCE).sync();
 
-        serverAckAllLatch.await();
-    }
+    serverAckAllLatch.await();
+  }
 
-    @ChannelHandler.Sharable
-    private static final class HttpInboundHandler extends ChannelInboundHandlerAdapter { }
+  @ChannelHandler.Sharable
+  private static final class HttpInboundHandler extends ChannelInboundHandlerAdapter {}
 }

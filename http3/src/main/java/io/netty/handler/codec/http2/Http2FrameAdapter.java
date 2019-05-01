@@ -19,72 +19,99 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.UnstableApi;
 
 /**
- * Convenience class that provides no-op implementations for all methods of {@link Http2FrameListener}.
+ * Convenience class that provides no-op implementations for all methods of {@link
+ * Http2FrameListener}.
  */
 @UnstableApi
 public class Http2FrameAdapter implements Http2FrameListener {
 
-    @Override
-    public int onDataRead(ChannelHandlerContext ctx, int streamId, ByteBuf data, int padding,
-            boolean endOfStream) throws Http2Exception {
-        return data.readableBytes() + padding;
-    }
+  @Override
+  public int onDataRead(
+      final ChannelHandlerContext ctx,
+      final int streamId,
+      final ByteBuf data,
+      final int padding,
+      final boolean endOfStream)
+      throws Http2Exception {
+    return data.readableBytes() + padding;
+  }
 
-    @Override
-    public void onHeadersRead(ChannelHandlerContext ctx, int streamId, Http2Headers headers,
-            int padding, boolean endStream) throws Http2Exception {
-    }
+  @Override
+  public void onHeadersRead(
+      final ChannelHandlerContext ctx,
+      final int streamId,
+      final Http2Headers headers,
+      final int padding,
+      final boolean endStream)
+      throws Http2Exception {}
 
-    @Override
-    public void onHeadersRead(ChannelHandlerContext ctx, int streamId, Http2Headers headers,
-            int streamDependency, short weight, boolean exclusive, int padding, boolean endStream)
-            throws Http2Exception {
-    }
+  @Override
+  public void onHeadersRead(
+      final ChannelHandlerContext ctx,
+      final int streamId,
+      final Http2Headers headers,
+      final int streamDependency,
+      final short weight,
+      final boolean exclusive,
+      final int padding,
+      final boolean endStream)
+      throws Http2Exception {}
 
-    @Override
-    public void onPriorityRead(ChannelHandlerContext ctx, int streamId, int streamDependency,
-            short weight, boolean exclusive) throws Http2Exception {
-    }
+  @Override
+  public void onPriorityRead(
+      final ChannelHandlerContext ctx,
+      final int streamId,
+      final int streamDependency,
+      final short weight,
+      final boolean exclusive)
+      throws Http2Exception {}
 
-    @Override
-    public void onRstStreamRead(ChannelHandlerContext ctx, int streamId, long errorCode)
-            throws Http2Exception {
-    }
+  @Override
+  public void onRstStreamRead(
+      final ChannelHandlerContext ctx, final int streamId, final long errorCode)
+      throws Http2Exception {}
 
-    @Override
-    public void onSettingsAckRead(ChannelHandlerContext ctx) throws Http2Exception {
-    }
+  @Override
+  public void onSettingsAckRead(final ChannelHandlerContext ctx) throws Http2Exception {}
 
-    @Override
-    public void onSettingsRead(ChannelHandlerContext ctx, Http2Settings settings)
-            throws Http2Exception {
-    }
+  @Override
+  public void onSettingsRead(final ChannelHandlerContext ctx, final Http2Settings settings)
+      throws Http2Exception {}
 
-    @Override
-    public void onPingRead(ChannelHandlerContext ctx, long data) throws Http2Exception {
-    }
+  @Override
+  public void onPingRead(final ChannelHandlerContext ctx, final long data) throws Http2Exception {}
 
-    @Override
-    public void onPingAckRead(ChannelHandlerContext ctx, long data) throws Http2Exception {
-    }
+  @Override
+  public void onPingAckRead(final ChannelHandlerContext ctx, final long data)
+      throws Http2Exception {}
 
-    @Override
-    public void onPushPromiseRead(ChannelHandlerContext ctx, int streamId, int promisedStreamId,
-            Http2Headers headers, int padding) throws Http2Exception {
-    }
+  @Override
+  public void onPushPromiseRead(
+      final ChannelHandlerContext ctx,
+      final int streamId,
+      final int promisedStreamId,
+      final Http2Headers headers,
+      final int padding)
+      throws Http2Exception {}
 
-    @Override
-    public void onGoAwayRead(ChannelHandlerContext ctx, int lastStreamId, long errorCode,
-            ByteBuf debugData) throws Http2Exception {
-    }
+  @Override
+  public void onGoAwayRead(
+      final ChannelHandlerContext ctx,
+      final int lastStreamId,
+      final long errorCode,
+      final ByteBuf debugData)
+      throws Http2Exception {}
 
-    @Override
-    public void onWindowUpdateRead(ChannelHandlerContext ctx, int streamId, int windowSizeIncrement)
-                    throws Http2Exception {
-    }
+  @Override
+  public void onWindowUpdateRead(
+      final ChannelHandlerContext ctx, final int streamId, final int windowSizeIncrement)
+      throws Http2Exception {}
 
-    @Override
-    public void onUnknownFrame(ChannelHandlerContext ctx, byte frameType, int streamId, Http2Flags flags,
-            ByteBuf payload) {
-    }
+  @Override
+  public void onUnknownFrame(
+      final ChannelHandlerContext ctx,
+      final byte frameType,
+      final int streamId,
+      final Http2Flags flags,
+      final ByteBuf payload) {}
 }

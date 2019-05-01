@@ -18,45 +18,34 @@ package io.netty.handler.codec.http2;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.UnstableApi;
-
 import java.io.Closeable;
 
 /**
- * Reads HTTP/2 frames from an input {@link ByteBuf} and notifies the specified
- * {@link Http2FrameListener} when frames are complete.
+ * Reads HTTP/2 frames from an input {@link ByteBuf} and notifies the specified {@link
+ * Http2FrameListener} when frames are complete.
  */
 @UnstableApi
 public interface Http2FrameReader extends Closeable {
-    /**
-     * Configuration specific to {@link Http2FrameReader}
-     */
-    interface Configuration {
-        /**
-         * Get the {@link Http2HeadersDecoder.Configuration} for this {@link Http2FrameReader}
-         */
-        Http2HeadersDecoder.Configuration headersConfiguration();
+  /** Configuration specific to {@link Http2FrameReader} */
+  interface Configuration {
+    /** Get the {@link Http2HeadersDecoder.Configuration} for this {@link Http2FrameReader} */
+    Http2HeadersDecoder.Configuration headersConfiguration();
 
-        /**
-         * Get the {@link Http2FrameSizePolicy} for this {@link Http2FrameReader}
-         */
-        Http2FrameSizePolicy frameSizePolicy();
-    }
+    /** Get the {@link Http2FrameSizePolicy} for this {@link Http2FrameReader} */
+    Http2FrameSizePolicy frameSizePolicy();
+  }
 
-    /**
-     * Attempts to read the next frame from the input buffer. If enough data is available to fully
-     * read the frame, notifies the listener of the read frame.
-     */
-    void readFrame(ChannelHandlerContext ctx, ByteBuf input, Http2FrameListener listener)
-            throws Http2Exception;
+  /**
+   * Attempts to read the next frame from the input buffer. If enough data is available to fully
+   * read the frame, notifies the listener of the read frame.
+   */
+  void readFrame(ChannelHandlerContext ctx, ByteBuf input, Http2FrameListener listener)
+      throws Http2Exception;
 
-    /**
-     * Get the configuration related elements for this {@link Http2FrameReader}
-     */
-    Configuration configuration();
+  /** Get the configuration related elements for this {@link Http2FrameReader} */
+  Configuration configuration();
 
-    /**
-     * Closes this reader and frees any allocated resources.
-     */
-    @Override
-    void close();
+  /** Closes this reader and frees any allocated resources. */
+  @Override
+  void close();
 }

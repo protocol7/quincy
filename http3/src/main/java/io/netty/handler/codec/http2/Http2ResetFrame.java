@@ -21,8 +21,6 @@ import io.netty.util.internal.UnstableApi;
 @UnstableApi
 public interface Http2ResetFrame extends Http2StreamFrame {
 
-    /**
-     * The reason for resetting the stream. Represented as an HTTP/2 error code.
-     */
-    long errorCode();
+  /** The reason for resetting the stream. Represented as an HTTP/2 error code. */
+  long errorCode();
 }

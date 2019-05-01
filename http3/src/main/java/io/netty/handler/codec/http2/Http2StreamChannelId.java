@@ -17,60 +17,58 @@ package io.netty.handler.codec.http2;
 
 import io.netty.channel.ChannelId;
 
-/**
- * ChannelId implementation which is used by our {@link Http2StreamChannel} implementation.
- */
+/** ChannelId implementation which is used by our {@link Http2StreamChannel} implementation. */
 final class Http2StreamChannelId implements ChannelId {
-    private static final long serialVersionUID = -6642338822166867585L;
+  private static final long serialVersionUID = -6642338822166867585L;
 
-    private final int id;
-    private final ChannelId parentId;
+  private final int id;
+  private final ChannelId parentId;
 
-    Http2StreamChannelId(final ChannelId parentId, final int id) {
-        this.parentId = parentId;
-        this.id = id;
+  Http2StreamChannelId(final ChannelId parentId, final int id) {
+    this.parentId = parentId;
+    this.id = id;
+  }
+
+  @Override
+  public String asShortText() {
+    return parentId.asShortText() + '/' + id;
+  }
+
+  @Override
+  public String asLongText() {
+    return parentId.asLongText() + '/' + id;
+  }
+
+  @Override
+  public int compareTo(final ChannelId o) {
+    if (o instanceof Http2StreamChannelId) {
+      final Http2StreamChannelId otherId = (Http2StreamChannelId) o;
+      final int res = parentId.compareTo(otherId.parentId);
+      if (res == 0) {
+        return id - otherId.id;
+      } else {
+        return res;
+      }
     }
+    return parentId.compareTo(o);
+  }
 
-    @Override
-    public String asShortText() {
-        return parentId.asShortText() + '/' + id;
-    }
+  @Override
+  public int hashCode() {
+    return id * 31 + parentId.hashCode();
+  }
 
-    @Override
-    public String asLongText() {
-        return parentId.asLongText() + '/' + id;
+  @Override
+  public boolean equals(final Object obj) {
+    if (!(obj instanceof Http2StreamChannelId)) {
+      return false;
     }
+    final Http2StreamChannelId otherId = (Http2StreamChannelId) obj;
+    return id == otherId.id && parentId.equals(otherId.parentId);
+  }
 
-    @Override
-    public int compareTo(final ChannelId o) {
-        if (o instanceof Http2StreamChannelId) {
-            final Http2StreamChannelId otherId = (Http2StreamChannelId) o;
-            final int res = parentId.compareTo(otherId.parentId);
-            if (res == 0) {
-                return id - otherId.id;
-            } else {
-                return res;
-            }
-        }
-        return parentId.compareTo(o);
-    }
-
-    @Override
-    public int hashCode() {
-        return id * 31 + parentId.hashCode();
-    }
-
-    @Override
-    public boolean equals(final Object obj) {
-        if (!(obj instanceof Http2StreamChannelId)) {
-            return false;
-        }
-        final Http2StreamChannelId otherId = (Http2StreamChannelId) obj;
-        return id == otherId.id && parentId.equals(otherId.parentId);
-    }
-
-    @Override
-    public String toString() {
-        return asShortText();
-    }
+  @Override
+  public String toString() {
+    return asShortText();
+  }
 }

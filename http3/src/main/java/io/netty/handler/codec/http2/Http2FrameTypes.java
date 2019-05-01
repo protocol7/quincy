@@ -17,22 +17,19 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * Registry of all standard frame types defined by the HTTP/2 specification.
- */
+/** Registry of all standard frame types defined by the HTTP/2 specification. */
 @UnstableApi
 public final class Http2FrameTypes {
-    public static final byte DATA = 0x0;
-    public static final byte HEADERS = 0x1;
-    public static final byte PRIORITY = 0x2;
-    public static final byte RST_STREAM = 0x3;
-    public static final byte SETTINGS = 0x4;
-    public static final byte PUSH_PROMISE = 0x5;
-    public static final byte PING = 0x6;
-    public static final byte GO_AWAY = 0x7;
-    public static final byte WINDOW_UPDATE = 0x8;
-    public static final byte CONTINUATION = 0x9;
+  public static final byte DATA = 0x0;
+  public static final byte HEADERS = 0x1;
+  public static final byte PRIORITY = 0x2;
+  public static final byte RST_STREAM = 0x3;
+  public static final byte SETTINGS = 0x4;
+  public static final byte PUSH_PROMISE = 0x5;
+  public static final byte PING = 0x6;
+  public static final byte GO_AWAY = 0x7;
+  public static final byte WINDOW_UPDATE = 0x8;
+  public static final byte CONTINUATION = 0x9;
 
-    private Http2FrameTypes() {
-    }
+  private Http2FrameTypes() {}
 }

@@ -44,207 +44,209 @@ import io.netty.handler.ssl.SslHandler;
 import io.netty.util.Attribute;
 import io.netty.util.AttributeKey;
 import io.netty.util.internal.UnstableApi;
-
 import java.util.List;
 
 /**
- * This handler converts from {@link Http2StreamFrame} to {@link HttpObject},
- * and back. It can be used as an adapter in conjunction with {@link
- * Http2MultiplexCodec} to make http/2 connections backward-compatible with
- * {@link ChannelHandler}s expecting {@link HttpObject}
+ * This handler converts from {@link Http2StreamFrame} to {@link HttpObject}, and back. It can be
+ * used as an adapter in conjunction with {@link Http2MultiplexCodec} to make http/2 connections
+ * backward-compatible with {@link ChannelHandler}s expecting {@link HttpObject}
  *
- * For simplicity, it converts to chunked encoding unless the entire stream
- * is a single header.
+ * <p>For simplicity, it converts to chunked encoding unless the entire stream is a single header.
  */
 @UnstableApi
 @Sharable
-public class Http2StreamFrameToHttpObjectCodec extends MessageToMessageCodec<Http2StreamFrame, HttpObject> {
+public class Http2StreamFrameToHttpObjectCodec
+    extends MessageToMessageCodec<Http2StreamFrame, HttpObject> {
 
-    private static final AttributeKey<HttpScheme> SCHEME_ATTR_KEY =
-        AttributeKey.valueOf(HttpScheme.class, "STREAMFRAMECODEC_SCHEME");
+  private static final AttributeKey<HttpScheme> SCHEME_ATTR_KEY =
+      AttributeKey.valueOf(HttpScheme.class, "STREAMFRAMECODEC_SCHEME");
 
-    private final boolean isServer;
-    private final boolean validateHeaders;
+  private final boolean isServer;
+  private final boolean validateHeaders;
 
-    public Http2StreamFrameToHttpObjectCodec(final boolean isServer,
-                                             final boolean validateHeaders) {
-        this.isServer = isServer;
-        this.validateHeaders = validateHeaders;
-    }
+  public Http2StreamFrameToHttpObjectCodec(final boolean isServer, final boolean validateHeaders) {
+    this.isServer = isServer;
+    this.validateHeaders = validateHeaders;
+  }
 
-    public Http2StreamFrameToHttpObjectCodec(final boolean isServer) {
-        this(isServer, true);
-    }
+  public Http2StreamFrameToHttpObjectCodec(final boolean isServer) {
+    this(isServer, true);
+  }
 
-    @Override
-    public boolean acceptInboundMessage(final Object msg) throws Exception {
-        return (msg instanceof Http2HeadersFrame) || (msg instanceof Http2DataFrame);
-    }
+  @Override
+  public boolean acceptInboundMessage(final Object msg) throws Exception {
+    return (msg instanceof Http2HeadersFrame) || (msg instanceof Http2DataFrame);
+  }
 
-    @Override
-    protected void decode(final ChannelHandlerContext ctx, final Http2StreamFrame frame, final List<Object> out) throws Exception {
-        if (frame instanceof Http2HeadersFrame) {
-            final Http2HeadersFrame headersFrame = (Http2HeadersFrame) frame;
-            final Http2Headers headers = headersFrame.headers();
-            final Http2FrameStream stream = headersFrame.stream();
-            final int id = stream == null ? 0 : stream.id();
+  @Override
+  protected void decode(
+      final ChannelHandlerContext ctx, final Http2StreamFrame frame, final List<Object> out)
+      throws Exception {
+    if (frame instanceof Http2HeadersFrame) {
+      final Http2HeadersFrame headersFrame = (Http2HeadersFrame) frame;
+      final Http2Headers headers = headersFrame.headers();
+      final Http2FrameStream stream = headersFrame.stream();
+      final int id = stream == null ? 0 : stream.id();
 
-            final CharSequence status = headers.status();
+      final CharSequence status = headers.status();
 
-            // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
-            // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
-            if (null != status && HttpResponseStatus.CONTINUE.codeAsText().contentEquals(status)) {
-                final FullHttpMessage fullMsg = newFullMessage(id, headers, ctx.alloc());
-                out.add(fullMsg);
-                return;
-            }
+      // 100-continue response is a special case where Http2HeadersFrame#isEndStream=false
+      // but we need to decode it as a FullHttpResponse to play nice with HttpObjectAggregator.
+      if (null != status && HttpResponseStatus.CONTINUE.codeAsText().contentEquals(status)) {
+        final FullHttpMessage fullMsg = newFullMessage(id, headers, ctx.alloc());
+        out.add(fullMsg);
+        return;
+      }
 
-            if (headersFrame.isEndStream()) {
-                if (headers.method() == null && status == null) {
-                    final LastHttpContent last = new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, validateHeaders);
-                    HttpConversionUtil.addHttp2ToHttpHeaders(id, headers, last.trailingHeaders(),
-                                                             HttpVersion.HTTP_1_1, true, true);
-                    out.add(last);
-                } else {
-                    final FullHttpMessage full = newFullMessage(id, headers, ctx.alloc());
-                    out.add(full);
-                }
-            } else {
-                final HttpMessage req = newMessage(id, headers);
-                if (!HttpUtil.isContentLengthSet(req)) {
-                    req.headers().add(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
-                }
-                out.add(req);
-            }
-        } else if (frame instanceof Http2DataFrame) {
-            final Http2DataFrame dataFrame = (Http2DataFrame) frame;
-            if (dataFrame.isEndStream()) {
-                out.add(new DefaultLastHttpContent(dataFrame.content().retain(), validateHeaders));
-            } else {
-                out.add(new DefaultHttpContent(dataFrame.content().retain()));
-            }
+      if (headersFrame.isEndStream()) {
+        if (headers.method() == null && status == null) {
+          final LastHttpContent last =
+              new DefaultLastHttpContent(Unpooled.EMPTY_BUFFER, validateHeaders);
+          HttpConversionUtil.addHttp2ToHttpHeaders(
+              id, headers, last.trailingHeaders(), HttpVersion.HTTP_1_1, true, true);
+          out.add(last);
+        } else {
+          final FullHttpMessage full = newFullMessage(id, headers, ctx.alloc());
+          out.add(full);
         }
-    }
-
-    private void encodeLastContent(final LastHttpContent last, final List<Object> out) {
-        final boolean needFiller = !(last instanceof FullHttpMessage) && last.trailingHeaders().isEmpty();
-        if (last.content().isReadable() || needFiller) {
-            out.add(new DefaultHttp2DataFrame(last.content().retain(), last.trailingHeaders().isEmpty()));
+      } else {
+        final HttpMessage req = newMessage(id, headers);
+        if (!HttpUtil.isContentLengthSet(req)) {
+          req.headers().add(HttpHeaderNames.TRANSFER_ENCODING, HttpHeaderValues.CHUNKED);
         }
-        if (!last.trailingHeaders().isEmpty()) {
-            final Http2Headers headers = HttpConversionUtil.toHttp2Headers(last.trailingHeaders(), validateHeaders);
-            out.add(new DefaultHttp2HeadersFrame(headers, true));
+        out.add(req);
+      }
+    } else if (frame instanceof Http2DataFrame) {
+      final Http2DataFrame dataFrame = (Http2DataFrame) frame;
+      if (dataFrame.isEndStream()) {
+        out.add(new DefaultLastHttpContent(dataFrame.content().retain(), validateHeaders));
+      } else {
+        out.add(new DefaultHttpContent(dataFrame.content().retain()));
+      }
+    }
+  }
+
+  private void encodeLastContent(final LastHttpContent last, final List<Object> out) {
+    final boolean needFiller =
+        !(last instanceof FullHttpMessage) && last.trailingHeaders().isEmpty();
+    if (last.content().isReadable() || needFiller) {
+      out.add(new DefaultHttp2DataFrame(last.content().retain(), last.trailingHeaders().isEmpty()));
+    }
+    if (!last.trailingHeaders().isEmpty()) {
+      final Http2Headers headers =
+          HttpConversionUtil.toHttp2Headers(last.trailingHeaders(), validateHeaders);
+      out.add(new DefaultHttp2HeadersFrame(headers, true));
+    }
+  }
+
+  /**
+   * Encode from an {@link HttpObject} to an {@link Http2StreamFrame}. This method will be called
+   * for each written message that can be handled by this encoder.
+   *
+   * <p>NOTE: 100-Continue responses that are NOT {@link FullHttpResponse} will be rejected.
+   *
+   * @param ctx the {@link ChannelHandlerContext} which this handler belongs to
+   * @param obj the {@link HttpObject} message to encode
+   * @param out the {@link List} into which the encoded msg should be added needs to do some kind of
+   *     aggregation
+   * @throws Exception is thrown if an error occurs
+   */
+  @Override
+  protected void encode(
+      final ChannelHandlerContext ctx, final HttpObject obj, final List<Object> out)
+      throws Exception {
+    // 100-continue is typically a FullHttpResponse, but the decoded
+    // Http2HeadersFrame should not be marked as endStream=true
+    if (obj instanceof HttpResponse) {
+      final HttpResponse res = (HttpResponse) obj;
+      if (res.status().equals(HttpResponseStatus.CONTINUE)) {
+        if (res instanceof FullHttpResponse) {
+          final Http2Headers headers = toHttp2Headers(ctx, res);
+          out.add(new DefaultHttp2HeadersFrame(headers, false));
+          return;
+        } else {
+          throw new EncoderException(
+              HttpResponseStatus.CONTINUE.toString() + " must be a FullHttpResponse");
         }
+      }
     }
 
-    /**
-     * Encode from an {@link HttpObject} to an {@link Http2StreamFrame}. This method will
-     * be called for each written message that can be handled by this encoder.
-     *
-     * NOTE: 100-Continue responses that are NOT {@link FullHttpResponse} will be rejected.
-     *
-     * @param ctx           the {@link ChannelHandlerContext} which this handler belongs to
-     * @param obj           the {@link HttpObject} message to encode
-     * @param out           the {@link List} into which the encoded msg should be added
-     *                      needs to do some kind of aggregation
-     * @throws Exception    is thrown if an error occurs
-     */
-    @Override
-    protected void encode(final ChannelHandlerContext ctx, final HttpObject obj, final List<Object> out) throws Exception {
-        // 100-continue is typically a FullHttpResponse, but the decoded
-        // Http2HeadersFrame should not be marked as endStream=true
-        if (obj instanceof HttpResponse) {
-            final HttpResponse res = (HttpResponse) obj;
-            if (res.status().equals(HttpResponseStatus.CONTINUE)) {
-                if (res instanceof FullHttpResponse) {
-                    final Http2Headers headers = toHttp2Headers(ctx, res);
-                    out.add(new DefaultHttp2HeadersFrame(headers, false));
-                    return;
-                } else {
-                    throw new EncoderException(
-                            HttpResponseStatus.CONTINUE.toString() + " must be a FullHttpResponse");
-                }
-            }
-        }
+    if (obj instanceof HttpMessage) {
+      final Http2Headers headers = toHttp2Headers(ctx, (HttpMessage) obj);
+      boolean noMoreFrames = false;
+      if (obj instanceof FullHttpMessage) {
+        final FullHttpMessage full = (FullHttpMessage) obj;
+        noMoreFrames = !full.content().isReadable() && full.trailingHeaders().isEmpty();
+      }
 
-        if (obj instanceof HttpMessage) {
-            final Http2Headers headers = toHttp2Headers(ctx, (HttpMessage) obj);
-            boolean noMoreFrames = false;
-            if (obj instanceof FullHttpMessage) {
-                final FullHttpMessage full = (FullHttpMessage) obj;
-                noMoreFrames = !full.content().isReadable() && full.trailingHeaders().isEmpty();
-            }
-
-            out.add(new DefaultHttp2HeadersFrame(headers, noMoreFrames));
-        }
-
-        if (obj instanceof LastHttpContent) {
-            final LastHttpContent last = (LastHttpContent) obj;
-            encodeLastContent(last, out);
-        } else if (obj instanceof HttpContent) {
-            final HttpContent cont = (HttpContent) obj;
-            out.add(new DefaultHttp2DataFrame(cont.content().retain(), false));
-        }
+      out.add(new DefaultHttp2HeadersFrame(headers, noMoreFrames));
     }
 
-    private Http2Headers toHttp2Headers(final ChannelHandlerContext ctx, final HttpMessage msg) {
-        if (msg instanceof HttpRequest) {
-            msg.headers().set(
-                    HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(),
-                    connectionScheme(ctx));
-        }
+    if (obj instanceof LastHttpContent) {
+      final LastHttpContent last = (LastHttpContent) obj;
+      encodeLastContent(last, out);
+    } else if (obj instanceof HttpContent) {
+      final HttpContent cont = (HttpContent) obj;
+      out.add(new DefaultHttp2DataFrame(cont.content().retain(), false));
+    }
+  }
 
-        return HttpConversionUtil.toHttp2Headers(msg, validateHeaders);
+  private Http2Headers toHttp2Headers(final ChannelHandlerContext ctx, final HttpMessage msg) {
+    if (msg instanceof HttpRequest) {
+      msg.headers()
+          .set(HttpConversionUtil.ExtensionHeaderNames.SCHEME.text(), connectionScheme(ctx));
     }
 
-    private HttpMessage newMessage(final int id,
-                                   final Http2Headers headers) throws Http2Exception {
-        return isServer ?
-                HttpConversionUtil.toHttpRequest(id, headers, validateHeaders) :
-                HttpConversionUtil.toHttpResponse(id, headers, validateHeaders);
-    }
+    return HttpConversionUtil.toHttp2Headers(msg, validateHeaders);
+  }
 
-    private FullHttpMessage newFullMessage(final int id,
-                                           final Http2Headers headers,
-                                           final ByteBufAllocator alloc) throws Http2Exception {
-        return isServer ?
-                HttpConversionUtil.toFullHttpRequest(id, headers, alloc, validateHeaders) :
-                HttpConversionUtil.toFullHttpResponse(id, headers, alloc, validateHeaders);
-    }
+  private HttpMessage newMessage(final int id, final Http2Headers headers) throws Http2Exception {
+    return isServer
+        ? HttpConversionUtil.toHttpRequest(id, headers, validateHeaders)
+        : HttpConversionUtil.toHttpResponse(id, headers, validateHeaders);
+  }
 
-    @Override
-    public void handlerAdded(final ChannelHandlerContext ctx) throws Exception {
-        super.handlerAdded(ctx);
+  private FullHttpMessage newFullMessage(
+      final int id, final Http2Headers headers, final ByteBufAllocator alloc)
+      throws Http2Exception {
+    return isServer
+        ? HttpConversionUtil.toFullHttpRequest(id, headers, alloc, validateHeaders)
+        : HttpConversionUtil.toFullHttpResponse(id, headers, alloc, validateHeaders);
+  }
 
-        // this handler is typically used on an Http2StreamChannel. At this
-        // stage, ssl handshake should've been established. checking for the
-        // presence of SslHandler in the parent's channel pipeline to
-        // determine the HTTP scheme should suffice, even for the case where
-        // SniHandler is used.
-        final Attribute<HttpScheme> schemeAttribute = connectionSchemeAttribute(ctx);
-        if (schemeAttribute.get() == null) {
-            final HttpScheme scheme = isSsl(ctx) ? HttpScheme.HTTPS : HttpScheme.HTTP;
-            schemeAttribute.set(scheme);
-        }
-    }
+  @Override
+  public void handlerAdded(final ChannelHandlerContext ctx) throws Exception {
+    super.handlerAdded(ctx);
 
-    protected boolean isSsl(final ChannelHandlerContext ctx) {
-        final Channel connChannel = connectionChannel(ctx);
-        return null != connChannel.pipeline().get(SslHandler.class);
+    // this handler is typically used on an Http2StreamChannel. At this
+    // stage, ssl handshake should've been established. checking for the
+    // presence of SslHandler in the parent's channel pipeline to
+    // determine the HTTP scheme should suffice, even for the case where
+    // SniHandler is used.
+    final Attribute<HttpScheme> schemeAttribute = connectionSchemeAttribute(ctx);
+    if (schemeAttribute.get() == null) {
+      final HttpScheme scheme = isSsl(ctx) ? HttpScheme.HTTPS : HttpScheme.HTTP;
+      schemeAttribute.set(scheme);
     }
+  }
 
-    private static HttpScheme connectionScheme(final ChannelHandlerContext ctx) {
-        final HttpScheme scheme = connectionSchemeAttribute(ctx).get();
-        return scheme == null ? HttpScheme.HTTP : scheme;
-    }
+  protected boolean isSsl(final ChannelHandlerContext ctx) {
+    final Channel connChannel = connectionChannel(ctx);
+    return null != connChannel.pipeline().get(SslHandler.class);
+  }
 
-    private static Attribute<HttpScheme> connectionSchemeAttribute(final ChannelHandlerContext ctx) {
-        final Channel ch = connectionChannel(ctx);
-        return ch.attr(SCHEME_ATTR_KEY);
-    }
+  private static HttpScheme connectionScheme(final ChannelHandlerContext ctx) {
+    final HttpScheme scheme = connectionSchemeAttribute(ctx).get();
+    return scheme == null ? HttpScheme.HTTP : scheme;
+  }
 
-    private static Channel connectionChannel(final ChannelHandlerContext ctx) {
-        final Channel ch = ctx.channel();
-        return ch instanceof Http2StreamChannel ? ch.parent() : ch;
-    }
+  private static Attribute<HttpScheme> connectionSchemeAttribute(final ChannelHandlerContext ctx) {
+    final Channel ch = connectionChannel(ctx);
+    return ch.attr(SCHEME_ATTR_KEY);
+  }
+
+  private static Channel connectionChannel(final ChannelHandlerContext ctx) {
+    final Channel ch = ctx.channel();
+    return ch instanceof Http2StreamChannel ? ch.parent() : ch;
+  }
 }

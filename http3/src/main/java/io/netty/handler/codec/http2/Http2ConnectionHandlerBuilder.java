@@ -19,92 +19,99 @@ package io.netty.handler.codec.http2;
 import io.netty.handler.codec.http2.Http2HeadersEncoder.SensitivityDetector;
 import io.netty.util.internal.UnstableApi;
 
-/**
- * Builder which builds {@link Http2ConnectionHandler} objects.
- */
+/** Builder which builds {@link Http2ConnectionHandler} objects. */
 @UnstableApi
 public final class Http2ConnectionHandlerBuilder
-        extends AbstractHttp2ConnectionHandlerBuilder<Http2ConnectionHandler, Http2ConnectionHandlerBuilder> {
+    extends AbstractHttp2ConnectionHandlerBuilder<
+        Http2ConnectionHandler, Http2ConnectionHandlerBuilder> {
 
-    @Override
-    public Http2ConnectionHandlerBuilder validateHeaders(final boolean validateHeaders) {
-        return super.validateHeaders(validateHeaders);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder validateHeaders(final boolean validateHeaders) {
+    return super.validateHeaders(validateHeaders);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder initialSettings(final Http2Settings settings) {
-        return super.initialSettings(settings);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder initialSettings(final Http2Settings settings) {
+    return super.initialSettings(settings);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder frameListener(final Http2FrameListener frameListener) {
-        return super.frameListener(frameListener);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder frameListener(final Http2FrameListener frameListener) {
+    return super.frameListener(frameListener);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder gracefulShutdownTimeoutMillis(final long gracefulShutdownTimeoutMillis) {
-        return super.gracefulShutdownTimeoutMillis(gracefulShutdownTimeoutMillis);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder gracefulShutdownTimeoutMillis(
+      final long gracefulShutdownTimeoutMillis) {
+    return super.gracefulShutdownTimeoutMillis(gracefulShutdownTimeoutMillis);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder server(final boolean isServer) {
-        return super.server(isServer);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder server(final boolean isServer) {
+    return super.server(isServer);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder connection(final Http2Connection connection) {
-        return super.connection(connection);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder connection(final Http2Connection connection) {
+    return super.connection(connection);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder maxReservedStreams(final int maxReservedStreams) {
-        return super.maxReservedStreams(maxReservedStreams);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder maxReservedStreams(final int maxReservedStreams) {
+    return super.maxReservedStreams(maxReservedStreams);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder codec(final Http2ConnectionDecoder decoder, final Http2ConnectionEncoder encoder) {
-        return super.codec(decoder, encoder);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder codec(
+      final Http2ConnectionDecoder decoder, final Http2ConnectionEncoder encoder) {
+    return super.codec(decoder, encoder);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder frameLogger(final Http2FrameLogger frameLogger) {
-        return super.frameLogger(frameLogger);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder frameLogger(final Http2FrameLogger frameLogger) {
+    return super.frameLogger(frameLogger);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder encoderEnforceMaxConcurrentStreams(
-            final boolean encoderEnforceMaxConcurrentStreams) {
-        return super.encoderEnforceMaxConcurrentStreams(encoderEnforceMaxConcurrentStreams);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder encoderEnforceMaxConcurrentStreams(
+      final boolean encoderEnforceMaxConcurrentStreams) {
+    return super.encoderEnforceMaxConcurrentStreams(encoderEnforceMaxConcurrentStreams);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder encoderIgnoreMaxHeaderListSize(final boolean encoderIgnoreMaxHeaderListSize) {
-        return super.encoderIgnoreMaxHeaderListSize(encoderIgnoreMaxHeaderListSize);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder encoderIgnoreMaxHeaderListSize(
+      final boolean encoderIgnoreMaxHeaderListSize) {
+    return super.encoderIgnoreMaxHeaderListSize(encoderIgnoreMaxHeaderListSize);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder headerSensitivityDetector(final SensitivityDetector headerSensitivityDetector) {
-        return super.headerSensitivityDetector(headerSensitivityDetector);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder headerSensitivityDetector(
+      final SensitivityDetector headerSensitivityDetector) {
+    return super.headerSensitivityDetector(headerSensitivityDetector);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder initialHuffmanDecodeCapacity(final int initialHuffmanDecodeCapacity) {
-        return super.initialHuffmanDecodeCapacity(initialHuffmanDecodeCapacity);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder initialHuffmanDecodeCapacity(
+      final int initialHuffmanDecodeCapacity) {
+    return super.initialHuffmanDecodeCapacity(initialHuffmanDecodeCapacity);
+  }
 
-    @Override
-    public Http2ConnectionHandlerBuilder decoupleCloseAndGoAway(final boolean decoupleCloseAndGoAway) {
-        return super.decoupleCloseAndGoAway(decoupleCloseAndGoAway);
-    }
+  @Override
+  public Http2ConnectionHandlerBuilder decoupleCloseAndGoAway(
+      final boolean decoupleCloseAndGoAway) {
+    return super.decoupleCloseAndGoAway(decoupleCloseAndGoAway);
+  }
 
-    @Override
-    public Http2ConnectionHandler build() {
-        return super.build();
-    }
+  @Override
+  public Http2ConnectionHandler build() {
+    return super.build();
+  }
 
-    @Override
-    protected Http2ConnectionHandler build(final Http2ConnectionDecoder decoder, final Http2ConnectionEncoder encoder,
-                                           final Http2Settings initialSettings) {
-        return new Http2ConnectionHandler(decoder, encoder, initialSettings, decoupleCloseAndGoAway());
-    }
+  @Override
+  protected Http2ConnectionHandler build(
+      final Http2ConnectionDecoder decoder,
+      final Http2ConnectionEncoder encoder,
+      final Http2Settings initialSettings) {
+    return new Http2ConnectionHandler(decoder, encoder, initialSettings, decoupleCloseAndGoAway());
+  }
 }

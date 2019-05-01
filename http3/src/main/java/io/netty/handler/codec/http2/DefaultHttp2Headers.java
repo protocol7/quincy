@@ -14,13 +14,6 @@
  */
 package io.netty.handler.codec.http2;
 
-import io.netty.handler.codec.CharSequenceValueConverter;
-import io.netty.handler.codec.DefaultHeaders;
-import io.netty.util.AsciiString;
-import io.netty.util.ByteProcessor;
-import io.netty.util.internal.PlatformDependent;
-import io.netty.util.internal.UnstableApi;
-
 import static io.netty.handler.codec.http2.Http2Error.PROTOCOL_ERROR;
 import static io.netty.handler.codec.http2.Http2Exception.connectionError;
 import static io.netty.handler.codec.http2.Http2Headers.PseudoHeaderName.hasPseudoHeaderFormat;
@@ -28,207 +21,232 @@ import static io.netty.util.AsciiString.CASE_INSENSITIVE_HASHER;
 import static io.netty.util.AsciiString.CASE_SENSITIVE_HASHER;
 import static io.netty.util.AsciiString.isUpperCase;
 
+import io.netty.handler.codec.CharSequenceValueConverter;
+import io.netty.handler.codec.DefaultHeaders;
+import io.netty.util.AsciiString;
+import io.netty.util.ByteProcessor;
+import io.netty.util.internal.PlatformDependent;
+import io.netty.util.internal.UnstableApi;
+
 @UnstableApi
-public class DefaultHttp2Headers
-        extends DefaultHeaders<CharSequence, CharSequence, Http2Headers> implements Http2Headers {
-    private static final ByteProcessor HTTP2_NAME_VALIDATOR_PROCESSOR = new ByteProcessor() {
+public class DefaultHttp2Headers extends DefaultHeaders<CharSequence, CharSequence, Http2Headers>
+    implements Http2Headers {
+  private static final ByteProcessor HTTP2_NAME_VALIDATOR_PROCESSOR =
+      new ByteProcessor() {
         @Override
         public boolean process(final byte value) {
-            return !isUpperCase(value);
+          return !isUpperCase(value);
         }
-    };
-    static final NameValidator<CharSequence> HTTP2_NAME_VALIDATOR = new NameValidator<CharSequence>() {
+      };
+  static final NameValidator<CharSequence> HTTP2_NAME_VALIDATOR =
+      new NameValidator<CharSequence>() {
         @Override
         public void validateName(final CharSequence name) {
-            if (name == null || name.length() == 0) {
-                PlatformDependent.throwException(connectionError(PROTOCOL_ERROR,
-                        "empty headers are not allowed [%s]", name));
+          if (name == null || name.length() == 0) {
+            PlatformDependent.throwException(
+                connectionError(PROTOCOL_ERROR, "empty headers are not allowed [%s]", name));
+          }
+          if (name instanceof AsciiString) {
+            final int index;
+            try {
+              index = ((AsciiString) name).forEachByte(HTTP2_NAME_VALIDATOR_PROCESSOR);
+            } catch (final Http2Exception e) {
+              PlatformDependent.throwException(e);
+              return;
+            } catch (final Throwable t) {
+              PlatformDependent.throwException(
+                  connectionError(
+                      PROTOCOL_ERROR, t, "unexpected error. invalid header name [%s]", name));
+              return;
             }
-            if (name instanceof AsciiString) {
-                final int index;
-                try {
-                    index = ((AsciiString) name).forEachByte(HTTP2_NAME_VALIDATOR_PROCESSOR);
-                } catch (final Http2Exception e) {
-                    PlatformDependent.throwException(e);
-                    return;
-                } catch (final Throwable t) {
-                    PlatformDependent.throwException(connectionError(PROTOCOL_ERROR, t,
-                            "unexpected error. invalid header name [%s]", name));
-                    return;
-                }
 
-                if (index != -1) {
-                    PlatformDependent.throwException(connectionError(PROTOCOL_ERROR,
-                            "invalid header name [%s]", name));
-                }
-            } else {
-                for (int i = 0; i < name.length(); ++i) {
-                    if (isUpperCase(name.charAt(i))) {
-                        PlatformDependent.throwException(connectionError(PROTOCOL_ERROR,
-                                "invalid header name [%s]", name));
-                    }
-                }
+            if (index != -1) {
+              PlatformDependent.throwException(
+                  connectionError(PROTOCOL_ERROR, "invalid header name [%s]", name));
             }
+          } else {
+            for (int i = 0; i < name.length(); ++i) {
+              if (isUpperCase(name.charAt(i))) {
+                PlatformDependent.throwException(
+                    connectionError(PROTOCOL_ERROR, "invalid header name [%s]", name));
+              }
+            }
+          }
         }
-    };
+      };
 
-    private HeaderEntry<CharSequence, CharSequence> firstNonPseudo = head;
+  private HeaderEntry<CharSequence, CharSequence> firstNonPseudo = head;
 
-    /**
-     * Create a new instance.
-     * <p>
-     * Header names will be validated according to
-     * <a href="https://tools.ietf.org/html/rfc7540">rfc7540</a>.
-     */
-    public DefaultHttp2Headers() {
-        this(true);
-    }
+  /**
+   * Create a new instance.
+   *
+   * <p>Header names will be validated according to <a
+   * href="https://tools.ietf.org/html/rfc7540">rfc7540</a>.
+   */
+  public DefaultHttp2Headers() {
+    this(true);
+  }
 
-    /**
-     * Create a new instance.
-     * @param validate {@code true} to validate header names according to
-     * <a href="https://tools.ietf.org/html/rfc7540">rfc7540</a>. {@code false} to not validate header names.
-     */
-    @SuppressWarnings("unchecked")
-    public DefaultHttp2Headers(final boolean validate) {
-        // Case sensitive compare is used because it is cheaper, and header validation can be used to catch invalid
-        // headers.
-        super(CASE_SENSITIVE_HASHER,
-              CharSequenceValueConverter.INSTANCE,
-              validate ? HTTP2_NAME_VALIDATOR : NameValidator.NOT_NULL);
-    }
+  /**
+   * Create a new instance.
+   *
+   * @param validate {@code true} to validate header names according to <a
+   *     href="https://tools.ietf.org/html/rfc7540">rfc7540</a>. {@code false} to not validate
+   *     header names.
+   */
+  @SuppressWarnings("unchecked")
+  public DefaultHttp2Headers(final boolean validate) {
+    // Case sensitive compare is used because it is cheaper, and header validation can be used to
+    // catch invalid
+    // headers.
+    super(
+        CASE_SENSITIVE_HASHER,
+        CharSequenceValueConverter.INSTANCE,
+        validate ? HTTP2_NAME_VALIDATOR : NameValidator.NOT_NULL);
+  }
 
-    /**
-     * Create a new instance.
-     * @param validate {@code true} to validate header names according to
-     * <a href="https://tools.ietf.org/html/rfc7540">rfc7540</a>. {@code false} to not validate header names.
-     * @param arraySizeHint A hint as to how large the hash data structure should be.
-     * The next positive power of two will be used. An upper bound may be enforced.
-     */
-    @SuppressWarnings("unchecked")
-    public DefaultHttp2Headers(final boolean validate, final int arraySizeHint) {
-        // Case sensitive compare is used because it is cheaper, and header validation can be used to catch invalid
-        // headers.
-        super(CASE_SENSITIVE_HASHER,
-              CharSequenceValueConverter.INSTANCE,
-              validate ? HTTP2_NAME_VALIDATOR : NameValidator.NOT_NULL,
-              arraySizeHint);
-    }
+  /**
+   * Create a new instance.
+   *
+   * @param validate {@code true} to validate header names according to <a
+   *     href="https://tools.ietf.org/html/rfc7540">rfc7540</a>. {@code false} to not validate
+   *     header names.
+   * @param arraySizeHint A hint as to how large the hash data structure should be. The next
+   *     positive power of two will be used. An upper bound may be enforced.
+   */
+  @SuppressWarnings("unchecked")
+  public DefaultHttp2Headers(final boolean validate, final int arraySizeHint) {
+    // Case sensitive compare is used because it is cheaper, and header validation can be used to
+    // catch invalid
+    // headers.
+    super(
+        CASE_SENSITIVE_HASHER,
+        CharSequenceValueConverter.INSTANCE,
+        validate ? HTTP2_NAME_VALIDATOR : NameValidator.NOT_NULL,
+        arraySizeHint);
+  }
 
-    @Override
-    public Http2Headers clear() {
-        this.firstNonPseudo = head;
-        return super.clear();
-    }
+  @Override
+  public Http2Headers clear() {
+    this.firstNonPseudo = head;
+    return super.clear();
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        return o instanceof Http2Headers && equals((Http2Headers) o, CASE_SENSITIVE_HASHER);
-    }
+  @Override
+  public boolean equals(final Object o) {
+    return o instanceof Http2Headers && equals((Http2Headers) o, CASE_SENSITIVE_HASHER);
+  }
 
-    @Override
-    public int hashCode() {
-        return hashCode(CASE_SENSITIVE_HASHER);
-    }
+  @Override
+  public int hashCode() {
+    return hashCode(CASE_SENSITIVE_HASHER);
+  }
 
-    @Override
-    public Http2Headers method(final CharSequence value) {
-        set(PseudoHeaderName.METHOD.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers method(final CharSequence value) {
+    set(PseudoHeaderName.METHOD.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers scheme(final CharSequence value) {
-        set(PseudoHeaderName.SCHEME.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers scheme(final CharSequence value) {
+    set(PseudoHeaderName.SCHEME.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers authority(final CharSequence value) {
-        set(PseudoHeaderName.AUTHORITY.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers authority(final CharSequence value) {
+    set(PseudoHeaderName.AUTHORITY.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers path(final CharSequence value) {
-        set(PseudoHeaderName.PATH.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers path(final CharSequence value) {
+    set(PseudoHeaderName.PATH.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers status(final CharSequence value) {
-        set(PseudoHeaderName.STATUS.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers status(final CharSequence value) {
+    set(PseudoHeaderName.STATUS.value(), value);
+    return this;
+  }
 
-    @Override
-    public CharSequence method() {
-        return get(PseudoHeaderName.METHOD.value());
-    }
+  @Override
+  public CharSequence method() {
+    return get(PseudoHeaderName.METHOD.value());
+  }
 
-    @Override
-    public CharSequence scheme() {
-        return get(PseudoHeaderName.SCHEME.value());
-    }
+  @Override
+  public CharSequence scheme() {
+    return get(PseudoHeaderName.SCHEME.value());
+  }
 
-    @Override
-    public CharSequence authority() {
-        return get(PseudoHeaderName.AUTHORITY.value());
-    }
+  @Override
+  public CharSequence authority() {
+    return get(PseudoHeaderName.AUTHORITY.value());
+  }
 
-    @Override
-    public CharSequence path() {
-        return get(PseudoHeaderName.PATH.value());
-    }
+  @Override
+  public CharSequence path() {
+    return get(PseudoHeaderName.PATH.value());
+  }
 
-    @Override
-    public CharSequence status() {
-        return get(PseudoHeaderName.STATUS.value());
-    }
+  @Override
+  public CharSequence status() {
+    return get(PseudoHeaderName.STATUS.value());
+  }
 
-    @Override
-    public boolean contains(final CharSequence name, final CharSequence value) {
-        return contains(name, value, false);
-    }
+  @Override
+  public boolean contains(final CharSequence name, final CharSequence value) {
+    return contains(name, value, false);
+  }
 
-    @Override
-    public boolean contains(final CharSequence name, final CharSequence value, final boolean caseInsensitive) {
-        return contains(name, value, caseInsensitive ? CASE_INSENSITIVE_HASHER : CASE_SENSITIVE_HASHER);
-    }
+  @Override
+  public boolean contains(
+      final CharSequence name, final CharSequence value, final boolean caseInsensitive) {
+    return contains(name, value, caseInsensitive ? CASE_INSENSITIVE_HASHER : CASE_SENSITIVE_HASHER);
+  }
 
-    @Override
-    protected final HeaderEntry<CharSequence, CharSequence> newHeaderEntry(final int h, final CharSequence name, final CharSequence value,
-                                                                           final HeaderEntry<CharSequence, CharSequence> next) {
-        return new Http2HeaderEntry(h, name, value, next);
-    }
+  @Override
+  protected final HeaderEntry<CharSequence, CharSequence> newHeaderEntry(
+      final int h,
+      final CharSequence name,
+      final CharSequence value,
+      final HeaderEntry<CharSequence, CharSequence> next) {
+    return new Http2HeaderEntry(h, name, value, next);
+  }
 
-    private final class Http2HeaderEntry extends HeaderEntry<CharSequence, CharSequence> {
-        protected Http2HeaderEntry(final int hash, final CharSequence key, final CharSequence value,
-                                   final HeaderEntry<CharSequence, CharSequence> next) {
-            super(hash, key);
-            this.value = value;
-            this.next = next;
+  private final class Http2HeaderEntry extends HeaderEntry<CharSequence, CharSequence> {
+    protected Http2HeaderEntry(
+        final int hash,
+        final CharSequence key,
+        final CharSequence value,
+        final HeaderEntry<CharSequence, CharSequence> next) {
+      super(hash, key);
+      this.value = value;
+      this.next = next;
 
-            // Make sure the pseudo headers fields are first in iteration order
-            if (hasPseudoHeaderFormat(key)) {
-                after = firstNonPseudo;
-                before = firstNonPseudo.before();
-            } else {
-                after = head;
-                before = head.before();
-                if (firstNonPseudo == head) {
-                    firstNonPseudo = this;
-                }
-            }
-            pointNeighborsToThis();
+      // Make sure the pseudo headers fields are first in iteration order
+      if (hasPseudoHeaderFormat(key)) {
+        after = firstNonPseudo;
+        before = firstNonPseudo.before();
+      } else {
+        after = head;
+        before = head.before();
+        if (firstNonPseudo == head) {
+          firstNonPseudo = this;
         }
-
-        @Override
-        protected void remove() {
-            if (this == firstNonPseudo) {
-                firstNonPseudo = firstNonPseudo.after();
-            }
-            super.remove();
-        }
+      }
+      pointNeighborsToThis();
     }
+
+    @Override
+    protected void remove() {
+      if (this == firstNonPseudo) {
+        firstNonPseudo = firstNonPseudo.after();
+      }
+      super.remove();
+    }
+  }
 }

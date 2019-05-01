@@ -13,9 +13,7 @@
  * the License.
  */
 
-/**
- * Handlers for sending and receiving HTTP/2 frames.
- */
+/** Handlers for sending and receiving HTTP/2 frames. */
 @UnstableApi
 package io.netty.handler.codec.http2;
 

@@ -16,16 +16,15 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * A visitor that allows iteration over a collection of streams.
- */
+/** A visitor that allows iteration over a collection of streams. */
 @UnstableApi
 public interface Http2StreamVisitor {
-    /**
-     * @return <ul>
-     *         <li>{@code true} if the visitor wants to continue the loop and handle the entry.</li>
-     *         <li>{@code false} if the visitor wants to stop handling headers and abort the loop.</li>
-     *         </ul>
-     */
-    boolean visit(Http2Stream stream) throws Http2Exception;
+  /**
+   * @return
+   *     <ul>
+   *       <li>{@code true} if the visitor wants to continue the loop and handle the entry.
+   *       <li>{@code false} if the visitor wants to stop handling headers and abort the loop.
+   *     </ul>
+   */
+  boolean visit(Http2Stream stream) throws Http2Exception;
 }

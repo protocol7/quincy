@@ -16,89 +16,88 @@
 
 package io.netty.handler.codec.http2;
 
-import io.netty.handler.codec.CharSequenceValueConverter;
-import io.netty.handler.codec.DefaultHeaders;
-
 import static io.netty.util.AsciiString.CASE_INSENSITIVE_HASHER;
 import static io.netty.util.AsciiString.CASE_SENSITIVE_HASHER;
 
-/**
- * Http2Headers implementation that preserves headers insertion order.
- */
-public class InOrderHttp2Headers
-        extends DefaultHeaders<CharSequence, CharSequence, Http2Headers> implements Http2Headers {
+import io.netty.handler.codec.CharSequenceValueConverter;
+import io.netty.handler.codec.DefaultHeaders;
 
-    InOrderHttp2Headers() {
-        super(CharSequenceValueConverter.INSTANCE);
-    }
+/** Http2Headers implementation that preserves headers insertion order. */
+public class InOrderHttp2Headers extends DefaultHeaders<CharSequence, CharSequence, Http2Headers>
+    implements Http2Headers {
 
-    @Override
-    public boolean equals(Object o) {
-        return o instanceof Http2Headers && equals((Http2Headers) o, CASE_SENSITIVE_HASHER);
-    }
+  InOrderHttp2Headers() {
+    super(CharSequenceValueConverter.INSTANCE);
+  }
 
-    @Override
-    public int hashCode() {
-        return hashCode(CASE_SENSITIVE_HASHER);
-    }
+  @Override
+  public boolean equals(final Object o) {
+    return o instanceof Http2Headers && equals((Http2Headers) o, CASE_SENSITIVE_HASHER);
+  }
 
-    @Override
-    public Http2Headers method(CharSequence value) {
-        set(PseudoHeaderName.METHOD.value(), value);
-        return this;
-    }
+  @Override
+  public int hashCode() {
+    return hashCode(CASE_SENSITIVE_HASHER);
+  }
 
-    @Override
-    public Http2Headers scheme(CharSequence value) {
-        set(PseudoHeaderName.SCHEME.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers method(final CharSequence value) {
+    set(PseudoHeaderName.METHOD.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers authority(CharSequence value) {
-        set(PseudoHeaderName.AUTHORITY.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers scheme(final CharSequence value) {
+    set(PseudoHeaderName.SCHEME.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers path(CharSequence value) {
-        set(PseudoHeaderName.PATH.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers authority(final CharSequence value) {
+    set(PseudoHeaderName.AUTHORITY.value(), value);
+    return this;
+  }
 
-    @Override
-    public Http2Headers status(CharSequence value) {
-        set(PseudoHeaderName.STATUS.value(), value);
-        return this;
-    }
+  @Override
+  public Http2Headers path(final CharSequence value) {
+    set(PseudoHeaderName.PATH.value(), value);
+    return this;
+  }
 
-    @Override
-    public CharSequence method() {
-        return get(PseudoHeaderName.METHOD.value());
-    }
+  @Override
+  public Http2Headers status(final CharSequence value) {
+    set(PseudoHeaderName.STATUS.value(), value);
+    return this;
+  }
 
-    @Override
-    public CharSequence scheme() {
-        return get(PseudoHeaderName.SCHEME.value());
-    }
+  @Override
+  public CharSequence method() {
+    return get(PseudoHeaderName.METHOD.value());
+  }
 
-    @Override
-    public CharSequence authority() {
-        return get(PseudoHeaderName.AUTHORITY.value());
-    }
+  @Override
+  public CharSequence scheme() {
+    return get(PseudoHeaderName.SCHEME.value());
+  }
 
-    @Override
-    public CharSequence path() {
-        return get(PseudoHeaderName.PATH.value());
-    }
+  @Override
+  public CharSequence authority() {
+    return get(PseudoHeaderName.AUTHORITY.value());
+  }
 
-    @Override
-    public CharSequence status() {
-        return get(PseudoHeaderName.STATUS.value());
-    }
+  @Override
+  public CharSequence path() {
+    return get(PseudoHeaderName.PATH.value());
+  }
 
-    @Override
-    public boolean contains(CharSequence name, CharSequence value, boolean caseInsensitive) {
-        return contains(name, value, caseInsensitive ? CASE_INSENSITIVE_HASHER : CASE_SENSITIVE_HASHER);
-    }
+  @Override
+  public CharSequence status() {
+    return get(PseudoHeaderName.STATUS.value());
+  }
+
+  @Override
+  public boolean contains(
+      final CharSequence name, final CharSequence value, final boolean caseInsensitive) {
+    return contains(name, value, caseInsensitive ? CASE_INSENSITIVE_HASHER : CASE_SENSITIVE_HASHER);
+  }
 }

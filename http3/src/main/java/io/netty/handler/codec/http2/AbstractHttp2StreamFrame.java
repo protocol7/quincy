@@ -17,43 +17,39 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * Abstract implementation of {@link Http2StreamFrame}.
- */
+/** Abstract implementation of {@link Http2StreamFrame}. */
 @UnstableApi
 public abstract class AbstractHttp2StreamFrame implements Http2StreamFrame {
 
-    private Http2FrameStream stream;
+  private Http2FrameStream stream;
 
-    @Override
-    public AbstractHttp2StreamFrame stream(Http2FrameStream stream) {
-        this.stream = stream;
-        return this;
-    }
+  @Override
+  public AbstractHttp2StreamFrame stream(final Http2FrameStream stream) {
+    this.stream = stream;
+    return this;
+  }
 
-    @Override
-    public Http2FrameStream stream() {
-        return stream;
-    }
+  @Override
+  public Http2FrameStream stream() {
+    return stream;
+  }
 
-    /**
-     * Returns {@code true} if {@code o} has equal {@code stream} to this object.
-     */
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof Http2StreamFrame)) {
-            return false;
-        }
-        Http2StreamFrame other = (Http2StreamFrame) o;
-        return stream == other.stream() || (stream != null && stream.equals(other.stream()));
+  /** Returns {@code true} if {@code o} has equal {@code stream} to this object. */
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof Http2StreamFrame)) {
+      return false;
     }
+    final Http2StreamFrame other = (Http2StreamFrame) o;
+    return stream == other.stream() || (stream != null && stream.equals(other.stream()));
+  }
 
-    @Override
-    public int hashCode() {
-        Http2FrameStream stream = this.stream;
-        if (stream == null) {
-            return super.hashCode();
-        }
-        return stream.hashCode();
+  @Override
+  public int hashCode() {
+    final Http2FrameStream stream = this.stream;
+    if (stream == null) {
+      return super.hashCode();
     }
+    return stream.hashCode();
+  }
 }

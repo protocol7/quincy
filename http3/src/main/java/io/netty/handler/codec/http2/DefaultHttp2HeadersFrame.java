@@ -15,102 +15,112 @@
  */
 package io.netty.handler.codec.http2;
 
-import io.netty.util.internal.StringUtil;
-import io.netty.util.internal.UnstableApi;
-
 import static io.netty.handler.codec.http2.Http2CodecUtil.verifyPadding;
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
-/**
- * The default {@link Http2HeadersFrame} implementation.
- */
+import io.netty.util.internal.StringUtil;
+import io.netty.util.internal.UnstableApi;
+
+/** The default {@link Http2HeadersFrame} implementation. */
 @UnstableApi
-public final class DefaultHttp2HeadersFrame extends AbstractHttp2StreamFrame implements Http2HeadersFrame {
-    private final Http2Headers headers;
-    private final boolean endStream;
-    private final int padding;
+public final class DefaultHttp2HeadersFrame extends AbstractHttp2StreamFrame
+    implements Http2HeadersFrame {
+  private final Http2Headers headers;
+  private final boolean endStream;
+  private final int padding;
 
-    /**
-     * Equivalent to {@code new DefaultHttp2HeadersFrame(headers, false)}.
-     *
-     * @param headers the non-{@code null} headers to send
-     */
-    public DefaultHttp2HeadersFrame(final Http2Headers headers) {
-        this(headers, false);
-    }
+  /**
+   * Equivalent to {@code new DefaultHttp2HeadersFrame(headers, false)}.
+   *
+   * @param headers the non-{@code null} headers to send
+   */
+  public DefaultHttp2HeadersFrame(final Http2Headers headers) {
+    this(headers, false);
+  }
 
-    /**
-     * Equivalent to {@code new DefaultHttp2HeadersFrame(headers, endStream, 0)}.
-     *
-     * @param headers the non-{@code null} headers to send
-     */
-    public DefaultHttp2HeadersFrame(final Http2Headers headers, final boolean endStream) {
-        this(headers, endStream, 0);
-    }
+  /**
+   * Equivalent to {@code new DefaultHttp2HeadersFrame(headers, endStream, 0)}.
+   *
+   * @param headers the non-{@code null} headers to send
+   */
+  public DefaultHttp2HeadersFrame(final Http2Headers headers, final boolean endStream) {
+    this(headers, endStream, 0);
+  }
 
-    /**
-     * Construct a new headers message.
-     *
-     * @param headers the non-{@code null} headers to send
-     * @param endStream whether these headers should terminate the stream
-     * @param padding additional bytes that should be added to obscure the true content size. Must be between 0 and
-     *                256 (inclusive).
-     */
-    public DefaultHttp2HeadersFrame(final Http2Headers headers, final boolean endStream, final int padding) {
-        this.headers = checkNotNull(headers, "headers");
-        this.endStream = endStream;
-        verifyPadding(padding);
-        this.padding = padding;
-    }
+  /**
+   * Construct a new headers message.
+   *
+   * @param headers the non-{@code null} headers to send
+   * @param endStream whether these headers should terminate the stream
+   * @param padding additional bytes that should be added to obscure the true content size. Must be
+   *     between 0 and 256 (inclusive).
+   */
+  public DefaultHttp2HeadersFrame(
+      final Http2Headers headers, final boolean endStream, final int padding) {
+    this.headers = checkNotNull(headers, "headers");
+    this.endStream = endStream;
+    verifyPadding(padding);
+    this.padding = padding;
+  }
 
-    @Override
-    public DefaultHttp2HeadersFrame stream(final Http2FrameStream stream) {
-        super.stream(stream);
-        return this;
-    }
+  @Override
+  public DefaultHttp2HeadersFrame stream(final Http2FrameStream stream) {
+    super.stream(stream);
+    return this;
+  }
 
-    @Override
-    public String name() {
-        return "HEADERS";
-    }
+  @Override
+  public String name() {
+    return "HEADERS";
+  }
 
-    @Override
-    public Http2Headers headers() {
-        return headers;
-    }
+  @Override
+  public Http2Headers headers() {
+    return headers;
+  }
 
-    @Override
-    public boolean isEndStream() {
-        return endStream;
-    }
+  @Override
+  public boolean isEndStream() {
+    return endStream;
+  }
 
-    @Override
-    public int padding() {
-        return padding;
-    }
+  @Override
+  public int padding() {
+    return padding;
+  }
 
-    @Override
-    public String toString() {
-        return StringUtil.simpleClassName(this) + "(stream=" + stream() + ", headers=" + headers
-               + ", endStream=" + endStream + ", padding=" + padding + ')';
-    }
+  @Override
+  public String toString() {
+    return StringUtil.simpleClassName(this)
+        + "(stream="
+        + stream()
+        + ", headers="
+        + headers
+        + ", endStream="
+        + endStream
+        + ", padding="
+        + padding
+        + ')';
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof DefaultHttp2HeadersFrame)) {
-            return false;
-        }
-        final DefaultHttp2HeadersFrame other = (DefaultHttp2HeadersFrame) o;
-        return super.equals(other) && headers.equals(other.headers)
-                && endStream == other.endStream && padding == other.padding;
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof DefaultHttp2HeadersFrame)) {
+      return false;
     }
+    final DefaultHttp2HeadersFrame other = (DefaultHttp2HeadersFrame) o;
+    return super.equals(other)
+        && headers.equals(other.headers)
+        && endStream == other.endStream
+        && padding == other.padding;
+  }
 
-    @Override
-    public int hashCode() {
-        int hash = super.hashCode();
-        hash = hash * 31 + headers.hashCode();
-        hash = hash * 31 + (endStream ? 0 : 1);
-        hash = hash * 31 + padding;
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = super.hashCode();
+    hash = hash * 31 + headers.hashCode();
+    hash = hash * 31 + (endStream ? 0 : 1);
+    hash = hash * 31 + padding;
+    return hash;
+  }
 }

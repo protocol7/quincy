@@ -19,65 +19,65 @@ import io.netty.handler.codec.EmptyHeaders;
 import io.netty.util.internal.UnstableApi;
 
 @UnstableApi
-public final class EmptyHttp2Headers
-        extends EmptyHeaders<CharSequence, CharSequence, Http2Headers> implements Http2Headers {
-    public static final EmptyHttp2Headers INSTANCE = new EmptyHttp2Headers();
+public final class EmptyHttp2Headers extends EmptyHeaders<CharSequence, CharSequence, Http2Headers>
+    implements Http2Headers {
+  public static final EmptyHttp2Headers INSTANCE = new EmptyHttp2Headers();
 
-    private EmptyHttp2Headers() {
-    }
+  private EmptyHttp2Headers() {}
 
-    @Override
-    public EmptyHttp2Headers method(final CharSequence method) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public EmptyHttp2Headers method(final CharSequence method) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public EmptyHttp2Headers scheme(final CharSequence status) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public EmptyHttp2Headers scheme(final CharSequence status) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public EmptyHttp2Headers authority(final CharSequence authority) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public EmptyHttp2Headers authority(final CharSequence authority) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public EmptyHttp2Headers path(final CharSequence path) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public EmptyHttp2Headers path(final CharSequence path) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public EmptyHttp2Headers status(final CharSequence status) {
-        throw new UnsupportedOperationException();
-    }
+  @Override
+  public EmptyHttp2Headers status(final CharSequence status) {
+    throw new UnsupportedOperationException();
+  }
 
-    @Override
-    public CharSequence method() {
-        return get(PseudoHeaderName.METHOD.value());
-    }
+  @Override
+  public CharSequence method() {
+    return get(PseudoHeaderName.METHOD.value());
+  }
 
-    @Override
-    public CharSequence scheme() {
-        return get(PseudoHeaderName.SCHEME.value());
-    }
+  @Override
+  public CharSequence scheme() {
+    return get(PseudoHeaderName.SCHEME.value());
+  }
 
-    @Override
-    public CharSequence authority() {
-        return get(PseudoHeaderName.AUTHORITY.value());
-    }
+  @Override
+  public CharSequence authority() {
+    return get(PseudoHeaderName.AUTHORITY.value());
+  }
 
-    @Override
-    public CharSequence path() {
-        return get(PseudoHeaderName.PATH.value());
-    }
+  @Override
+  public CharSequence path() {
+    return get(PseudoHeaderName.PATH.value());
+  }
 
-    @Override
-    public CharSequence status() {
-        return get(PseudoHeaderName.STATUS.value());
-    }
+  @Override
+  public CharSequence status() {
+    return get(PseudoHeaderName.STATUS.value());
+  }
 
-    @Override
-    public boolean contains(final CharSequence name, final CharSequence value, final boolean caseInsensitive) {
-        return false;
-    }
+  @Override
+  public boolean contains(
+      final CharSequence name, final CharSequence value, final boolean caseInsensitive) {
+    return false;
+  }
 }

@@ -16,50 +16,53 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * Builds an {@link InboundHttp2ToHttpAdapter}.
- */
+/** Builds an {@link InboundHttp2ToHttpAdapter}. */
 @UnstableApi
 public final class InboundHttp2ToHttpAdapterBuilder
-        extends AbstractInboundHttp2ToHttpAdapterBuilder<InboundHttp2ToHttpAdapter, InboundHttp2ToHttpAdapterBuilder> {
+    extends AbstractInboundHttp2ToHttpAdapterBuilder<
+        InboundHttp2ToHttpAdapter, InboundHttp2ToHttpAdapterBuilder> {
 
-    /**
-     * Creates a new {@link InboundHttp2ToHttpAdapter} builder for the specified {@link Http2Connection}.
-     *
-     * @param connection the object which will provide connection notification events
-     *                   for the current connection
-     */
-    public InboundHttp2ToHttpAdapterBuilder(final Http2Connection connection) {
-        super(connection);
-    }
+  /**
+   * Creates a new {@link InboundHttp2ToHttpAdapter} builder for the specified {@link
+   * Http2Connection}.
+   *
+   * @param connection the object which will provide connection notification events for the current
+   *     connection
+   */
+  public InboundHttp2ToHttpAdapterBuilder(final Http2Connection connection) {
+    super(connection);
+  }
 
-    @Override
-    public InboundHttp2ToHttpAdapterBuilder maxContentLength(final int maxContentLength) {
-        return super.maxContentLength(maxContentLength);
-    }
+  @Override
+  public InboundHttp2ToHttpAdapterBuilder maxContentLength(final int maxContentLength) {
+    return super.maxContentLength(maxContentLength);
+  }
 
-    @Override
-    public InboundHttp2ToHttpAdapterBuilder validateHttpHeaders(final boolean validate) {
-        return super.validateHttpHeaders(validate);
-    }
+  @Override
+  public InboundHttp2ToHttpAdapterBuilder validateHttpHeaders(final boolean validate) {
+    return super.validateHttpHeaders(validate);
+  }
 
-    @Override
-    public InboundHttp2ToHttpAdapterBuilder propagateSettings(final boolean propagate) {
-        return super.propagateSettings(propagate);
-    }
+  @Override
+  public InboundHttp2ToHttpAdapterBuilder propagateSettings(final boolean propagate) {
+    return super.propagateSettings(propagate);
+  }
 
-    @Override
-    public InboundHttp2ToHttpAdapter build() {
-        return super.build();
-    }
+  @Override
+  public InboundHttp2ToHttpAdapter build() {
+    return super.build();
+  }
 
-    @Override
-    protected InboundHttp2ToHttpAdapter build(final Http2Connection connection,
-                                              final int maxContentLength,
-                                              final boolean validateHttpHeaders,
-                                              final boolean propagateSettings) throws Exception {
+  @Override
+  protected InboundHttp2ToHttpAdapter build(
+      final Http2Connection connection,
+      final int maxContentLength,
+      final boolean validateHttpHeaders,
+      final boolean propagateSettings)
+      throws Exception {
 
-        return new InboundHttp2ToHttpAdapter(connection, maxContentLength,
-                                             validateHttpHeaders, propagateSettings);
-    }
+    return new InboundHttp2ToHttpAdapter(
+        connection, maxContentLength,
+        validateHttpHeaders, propagateSettings);
+  }
 }

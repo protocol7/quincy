@@ -14,12 +14,8 @@
  */
 package io.netty.handler.codec.http2;
 
-/**
- * Provides a Consumer like interface to consume remote settings received but not yet ACKed.
- */
+/** Provides a Consumer like interface to consume remote settings received but not yet ACKed. */
 public interface Http2SettingsReceivedConsumer {
-    /**
-     * Consume the most recently received but not yet ACKed settings.
-     */
-    void consumeReceivedSettings(Http2Settings settings);
+  /** Consume the most recently received but not yet ACKed settings. */
+  void consumeReceivedSettings(Http2Settings settings);
 }

@@ -17,14 +17,10 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * HTTP/2 WINDOW_UPDATE frame.
- */
+/** HTTP/2 WINDOW_UPDATE frame. */
 @UnstableApi
 public interface Http2WindowUpdateFrame extends Http2StreamFrame {
 
-    /**
-     * Number of bytes to increment the HTTP/2 stream's or connection's flow control window.
-     */
-    int windowSizeIncrement();
+  /** Number of bytes to increment the HTTP/2 stream's or connection's flow control window. */
+  int windowSizeIncrement();
 }

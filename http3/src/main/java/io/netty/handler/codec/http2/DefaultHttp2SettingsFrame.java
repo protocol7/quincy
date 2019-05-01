@@ -20,44 +20,42 @@ import io.netty.util.internal.ObjectUtil;
 import io.netty.util.internal.StringUtil;
 import io.netty.util.internal.UnstableApi;
 
-/**
- * The default {@link Http2SettingsFrame} implementation.
- */
+/** The default {@link Http2SettingsFrame} implementation. */
 @UnstableApi
 public class DefaultHttp2SettingsFrame implements Http2SettingsFrame {
 
-    private final Http2Settings settings;
+  private final Http2Settings settings;
 
-    public DefaultHttp2SettingsFrame(final Http2Settings settings) {
-        this.settings = ObjectUtil.checkNotNull(settings, "settings");
-    }
+  public DefaultHttp2SettingsFrame(final Http2Settings settings) {
+    this.settings = ObjectUtil.checkNotNull(settings, "settings");
+  }
 
-    @Override
-    public Http2Settings settings() {
-        return settings;
-    }
+  @Override
+  public Http2Settings settings() {
+    return settings;
+  }
 
-    @Override
-    public String name() {
-        return "SETTINGS";
-    }
+  @Override
+  public String name() {
+    return "SETTINGS";
+  }
 
-    @Override
-    public boolean equals(final Object o) {
-        if (!(o instanceof Http2SettingsFrame)) {
-            return false;
-        }
-        final Http2SettingsFrame other = (Http2SettingsFrame) o;
-        return settings.equals(other.settings());
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof Http2SettingsFrame)) {
+      return false;
     }
+    final Http2SettingsFrame other = (Http2SettingsFrame) o;
+    return settings.equals(other.settings());
+  }
 
-    @Override
-    public int hashCode() {
-        return settings.hashCode();
-    }
+  @Override
+  public int hashCode() {
+    return settings.hashCode();
+  }
 
-    @Override
-    public String toString() {
-        return StringUtil.simpleClassName(this) + "(settings=" + settings + ')';
-    }
+  @Override
+  public String toString() {
+    return StringUtil.simpleClassName(this) + "(settings=" + settings + ')';
+  }
 }

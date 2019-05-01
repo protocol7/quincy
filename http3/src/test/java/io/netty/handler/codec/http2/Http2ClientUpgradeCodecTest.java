@@ -14,57 +14,60 @@
  */
 package io.netty.handler.codec.http2;
 
-import io.netty.channel.Channel;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import io.netty.channel.ChannelInitializer;
 import io.netty.channel.embedded.EmbeddedChannel;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
 import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpVersion;
-
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-
 import org.junit.Test;
 
 public class Http2ClientUpgradeCodecTest {
 
-    @Test
-    public void testUpgradeToHttp2ConnectionHandler() throws Exception {
-        testUpgrade(new Http2ConnectionHandlerBuilder().server(false).frameListener(new Http2FrameAdapter()).build());
-    }
+  @Test
+  public void testUpgradeToHttp2ConnectionHandler() throws Exception {
+    testUpgrade(
+        new Http2ConnectionHandlerBuilder()
+            .server(false)
+            .frameListener(new Http2FrameAdapter())
+            .build());
+  }
 
-    @Test
-    public void testUpgradeToHttp2FrameCodec() throws Exception {
-        testUpgrade(Http2FrameCodecBuilder.forClient().build());
-    }
+  @Test
+  public void testUpgradeToHttp2FrameCodec() throws Exception {
+    testUpgrade(Http2FrameCodecBuilder.forClient().build());
+  }
 
-    @Test
-    public void testUpgradeToHttp2MultiplexCodec() throws Exception {
-        testUpgrade(Http2MultiplexCodecBuilder.forClient(new HttpInboundHandler())
-            .withUpgradeStreamHandler(new ChannelInboundHandlerAdapter()).build());
-    }
+  @Test
+  public void testUpgradeToHttp2MultiplexCodec() throws Exception {
+    testUpgrade(
+        Http2MultiplexCodecBuilder.forClient(new HttpInboundHandler())
+            .withUpgradeStreamHandler(new ChannelInboundHandlerAdapter())
+            .build());
+  }
 
-    private static void testUpgrade(Http2ConnectionHandler handler) throws Exception {
-        FullHttpRequest request = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "*");
+  private static void testUpgrade(final Http2ConnectionHandler handler) throws Exception {
+    final FullHttpRequest request =
+        new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, HttpMethod.OPTIONS, "*");
 
-        EmbeddedChannel channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
-        ChannelHandlerContext ctx = channel.pipeline().firstContext();
-        Http2ClientUpgradeCodec codec = new Http2ClientUpgradeCodec("connectionHandler", handler);
-        codec.setUpgradeHeaders(ctx, request);
-        // Flush the channel to ensure we write out all buffered data
-        channel.flush();
+    final EmbeddedChannel channel = new EmbeddedChannel(new ChannelInboundHandlerAdapter());
+    final ChannelHandlerContext ctx = channel.pipeline().firstContext();
+    final Http2ClientUpgradeCodec codec = new Http2ClientUpgradeCodec("connectionHandler", handler);
+    codec.setUpgradeHeaders(ctx, request);
+    // Flush the channel to ensure we write out all buffered data
+    channel.flush();
 
-        codec.upgradeTo(ctx, null);
-        assertNotNull(channel.pipeline().get("connectionHandler"));
+    codec.upgradeTo(ctx, null);
+    assertNotNull(channel.pipeline().get("connectionHandler"));
 
-        assertTrue(channel.finishAndReleaseAll());
-    }
+    assertTrue(channel.finishAndReleaseAll());
+  }
 
-    @ChannelHandler.Sharable
-    private static final class HttpInboundHandler extends ChannelInboundHandlerAdapter { }
+  @ChannelHandler.Sharable
+  private static final class HttpInboundHandler extends ChannelInboundHandlerAdapter {}
 }

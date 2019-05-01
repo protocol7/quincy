@@ -15,34 +15,38 @@
  */
 package io.netty.handler.codec.http2;
 
+import static io.netty.util.AsciiString.CASE_INSENSITIVE_HASHER;
+import static io.netty.util.AsciiString.CASE_SENSITIVE_HASHER;
+
 import io.netty.handler.codec.DefaultHeaders;
 import io.netty.handler.codec.UnsupportedValueConverter;
 import io.netty.handler.codec.ValueConverter;
 import io.netty.util.internal.UnstableApi;
 
-import static io.netty.util.AsciiString.CASE_INSENSITIVE_HASHER;
-import static io.netty.util.AsciiString.CASE_SENSITIVE_HASHER;
-
-/**
- * Internal use only!
- */
+/** Internal use only! */
 @UnstableApi
 public final class CharSequenceMap<V> extends DefaultHeaders<CharSequence, V, CharSequenceMap<V>> {
-    public CharSequenceMap() {
-        this(true);
-    }
+  public CharSequenceMap() {
+    this(true);
+  }
 
-    public CharSequenceMap(final boolean caseSensitive) {
-        this(caseSensitive, UnsupportedValueConverter.<V>instance());
-    }
+  public CharSequenceMap(final boolean caseSensitive) {
+    this(caseSensitive, UnsupportedValueConverter.<V>instance());
+  }
 
-    public CharSequenceMap(final boolean caseSensitive, final ValueConverter<V> valueConverter) {
-        super(caseSensitive ? CASE_SENSITIVE_HASHER : CASE_INSENSITIVE_HASHER, valueConverter);
-    }
+  public CharSequenceMap(final boolean caseSensitive, final ValueConverter<V> valueConverter) {
+    super(caseSensitive ? CASE_SENSITIVE_HASHER : CASE_INSENSITIVE_HASHER, valueConverter);
+  }
 
-    @SuppressWarnings("unchecked")
-    public CharSequenceMap(final boolean caseSensitive, final ValueConverter<V> valueConverter, final int arraySizeHint) {
-        super(caseSensitive ? CASE_SENSITIVE_HASHER : CASE_INSENSITIVE_HASHER, valueConverter,
-                NameValidator.NOT_NULL, arraySizeHint);
-    }
+  @SuppressWarnings("unchecked")
+  public CharSequenceMap(
+      final boolean caseSensitive,
+      final ValueConverter<V> valueConverter,
+      final int arraySizeHint) {
+    super(
+        caseSensitive ? CASE_SENSITIVE_HASHER : CASE_INSENSITIVE_HASHER,
+        valueConverter,
+        NameValidator.NOT_NULL,
+        arraySizeHint);
+  }
 }

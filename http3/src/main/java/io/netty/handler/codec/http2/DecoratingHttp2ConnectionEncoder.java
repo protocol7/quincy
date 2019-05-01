@@ -14,59 +14,57 @@
  */
 package io.netty.handler.codec.http2;
 
-import io.netty.util.internal.UnstableApi;
-
 import static io.netty.util.internal.ObjectUtil.checkNotNull;
 
-/**
- * A decorator around another {@link Http2ConnectionEncoder} instance.
- */
+import io.netty.util.internal.UnstableApi;
+
+/** A decorator around another {@link Http2ConnectionEncoder} instance. */
 @UnstableApi
-public class DecoratingHttp2ConnectionEncoder extends DecoratingHttp2FrameWriter implements Http2ConnectionEncoder,
-        Http2SettingsReceivedConsumer {
-    private final Http2ConnectionEncoder delegate;
+public class DecoratingHttp2ConnectionEncoder extends DecoratingHttp2FrameWriter
+    implements Http2ConnectionEncoder, Http2SettingsReceivedConsumer {
+  private final Http2ConnectionEncoder delegate;
 
-    public DecoratingHttp2ConnectionEncoder(final Http2ConnectionEncoder delegate) {
-        super(delegate);
-        this.delegate = checkNotNull(delegate, "delegate");
-    }
+  public DecoratingHttp2ConnectionEncoder(final Http2ConnectionEncoder delegate) {
+    super(delegate);
+    this.delegate = checkNotNull(delegate, "delegate");
+  }
 
-    @Override
-    public void lifecycleManager(final Http2LifecycleManager lifecycleManager) {
-        delegate.lifecycleManager(lifecycleManager);
-    }
+  @Override
+  public void lifecycleManager(final Http2LifecycleManager lifecycleManager) {
+    delegate.lifecycleManager(lifecycleManager);
+  }
 
-    @Override
-    public Http2Connection connection() {
-        return delegate.connection();
-    }
+  @Override
+  public Http2Connection connection() {
+    return delegate.connection();
+  }
 
-    @Override
-    public Http2RemoteFlowController flowController() {
-        return delegate.flowController();
-    }
+  @Override
+  public Http2RemoteFlowController flowController() {
+    return delegate.flowController();
+  }
 
-    @Override
-    public Http2FrameWriter frameWriter() {
-        return delegate.frameWriter();
-    }
+  @Override
+  public Http2FrameWriter frameWriter() {
+    return delegate.frameWriter();
+  }
 
-    @Override
-    public Http2Settings pollSentSettings() {
-        return delegate.pollSentSettings();
-    }
+  @Override
+  public Http2Settings pollSentSettings() {
+    return delegate.pollSentSettings();
+  }
 
-    @Override
-    public void remoteSettings(final Http2Settings settings) throws Http2Exception {
-        delegate.remoteSettings(settings);
-    }
+  @Override
+  public void remoteSettings(final Http2Settings settings) throws Http2Exception {
+    delegate.remoteSettings(settings);
+  }
 
-    @Override
-    public void consumeReceivedSettings(final Http2Settings settings) {
-        if (delegate instanceof Http2SettingsReceivedConsumer) {
-            ((Http2SettingsReceivedConsumer) delegate).consumeReceivedSettings(settings);
-        }
-        throw new IllegalStateException("delegate " + delegate + " is not an instance of " +
-                Http2SettingsReceivedConsumer.class);
+  @Override
+  public void consumeReceivedSettings(final Http2Settings settings) {
+    if (delegate instanceof Http2SettingsReceivedConsumer) {
+      ((Http2SettingsReceivedConsumer) delegate).consumeReceivedSettings(settings);
     }
+    throw new IllegalStateException(
+        "delegate " + delegate + " is not an instance of " + Http2SettingsReceivedConsumer.class);
+  }
 }

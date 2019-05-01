@@ -14,23 +14,23 @@
  */
 package io.netty.handler.codec.http2;
 
-import io.netty.util.internal.UnstableApi;
-
 import static io.netty.handler.codec.http2.Http2Error.PROTOCOL_ERROR;
+
+import io.netty.util.internal.UnstableApi;
 
 /**
  * This exception is thrown when there are no more stream IDs available for the current connection
  */
 @UnstableApi
 public class Http2NoMoreStreamIdsException extends Http2Exception {
-    private static final long serialVersionUID = -7756236161274851110L;
-    private static final String ERROR_MESSAGE = "No more streams can be created on this connection";
+  private static final long serialVersionUID = -7756236161274851110L;
+  private static final String ERROR_MESSAGE = "No more streams can be created on this connection";
 
-    public Http2NoMoreStreamIdsException() {
-        super(PROTOCOL_ERROR, ERROR_MESSAGE, ShutdownHint.GRACEFUL_SHUTDOWN);
-    }
+  public Http2NoMoreStreamIdsException() {
+    super(PROTOCOL_ERROR, ERROR_MESSAGE, ShutdownHint.GRACEFUL_SHUTDOWN);
+  }
 
-    public Http2NoMoreStreamIdsException(final Throwable cause) {
-        super(PROTOCOL_ERROR, ERROR_MESSAGE, cause, ShutdownHint.GRACEFUL_SHUTDOWN);
-    }
+  public Http2NoMoreStreamIdsException(final Throwable cause) {
+    super(PROTOCOL_ERROR, ERROR_MESSAGE, cause, ShutdownHint.GRACEFUL_SHUTDOWN);
+  }
 }

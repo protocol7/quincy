@@ -17,31 +17,30 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * The default {@link Http2WindowUpdateFrame} implementation.
- */
+/** The default {@link Http2WindowUpdateFrame} implementation. */
 @UnstableApi
-public class DefaultHttp2WindowUpdateFrame extends AbstractHttp2StreamFrame implements Http2WindowUpdateFrame {
+public class DefaultHttp2WindowUpdateFrame extends AbstractHttp2StreamFrame
+    implements Http2WindowUpdateFrame {
 
-    private final int windowUpdateIncrement;
+  private final int windowUpdateIncrement;
 
-    public DefaultHttp2WindowUpdateFrame(int windowUpdateIncrement) {
-        this.windowUpdateIncrement = windowUpdateIncrement;
-    }
+  public DefaultHttp2WindowUpdateFrame(final int windowUpdateIncrement) {
+    this.windowUpdateIncrement = windowUpdateIncrement;
+  }
 
-    @Override
-    public DefaultHttp2WindowUpdateFrame stream(Http2FrameStream stream) {
-        super.stream(stream);
-        return this;
-    }
+  @Override
+  public DefaultHttp2WindowUpdateFrame stream(final Http2FrameStream stream) {
+    super.stream(stream);
+    return this;
+  }
 
-    @Override
-    public String name() {
-        return "WINDOW_UPDATE";
-    }
+  @Override
+  public String name() {
+    return "WINDOW_UPDATE";
+  }
 
-    @Override
-    public int windowSizeIncrement() {
-        return windowUpdateIncrement;
-    }
+  @Override
+  public int windowSizeIncrement() {
+    return windowUpdateIncrement;
+  }
 }

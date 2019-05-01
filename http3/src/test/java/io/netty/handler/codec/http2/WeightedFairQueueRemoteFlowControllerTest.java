@@ -14,9 +14,10 @@
  */
 package io.netty.handler.codec.http2;
 
-public class WeightedFairQueueRemoteFlowControllerTest extends DefaultHttp2RemoteFlowControllerTest {
-    @Override
-    protected StreamByteDistributor newDistributor(final Http2Connection connection) {
-        return new WeightedFairQueueByteDistributor(connection);
-    }
+public class WeightedFairQueueRemoteFlowControllerTest
+    extends DefaultHttp2RemoteFlowControllerTest {
+  @Override
+  protected StreamByteDistributor newDistributor(final Http2Connection connection) {
+    return new WeightedFairQueueByteDistributor(connection);
+  }
 }

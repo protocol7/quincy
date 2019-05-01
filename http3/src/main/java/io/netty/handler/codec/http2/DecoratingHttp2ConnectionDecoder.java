@@ -19,62 +19,60 @@ import static io.netty.util.internal.ObjectUtil.checkNotNull;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.UnstableApi;
-
 import java.util.List;
 
-/**
- * Decorator around another {@link Http2ConnectionDecoder} instance.
- */
+/** Decorator around another {@link Http2ConnectionDecoder} instance. */
 @UnstableApi
 public class DecoratingHttp2ConnectionDecoder implements Http2ConnectionDecoder {
-    private final Http2ConnectionDecoder delegate;
+  private final Http2ConnectionDecoder delegate;
 
-    public DecoratingHttp2ConnectionDecoder(Http2ConnectionDecoder delegate) {
-        this.delegate = checkNotNull(delegate, "delegate");
-    }
+  public DecoratingHttp2ConnectionDecoder(final Http2ConnectionDecoder delegate) {
+    this.delegate = checkNotNull(delegate, "delegate");
+  }
 
-    @Override
-    public void lifecycleManager(Http2LifecycleManager lifecycleManager) {
-        delegate.lifecycleManager(lifecycleManager);
-    }
+  @Override
+  public void lifecycleManager(final Http2LifecycleManager lifecycleManager) {
+    delegate.lifecycleManager(lifecycleManager);
+  }
 
-    @Override
-    public Http2Connection connection() {
-        return delegate.connection();
-    }
+  @Override
+  public Http2Connection connection() {
+    return delegate.connection();
+  }
 
-    @Override
-    public Http2LocalFlowController flowController() {
-        return delegate.flowController();
-    }
+  @Override
+  public Http2LocalFlowController flowController() {
+    return delegate.flowController();
+  }
 
-    @Override
-    public void frameListener(Http2FrameListener listener) {
-        delegate.frameListener(listener);
-    }
+  @Override
+  public void frameListener(final Http2FrameListener listener) {
+    delegate.frameListener(listener);
+  }
 
-    @Override
-    public Http2FrameListener frameListener() {
-        return delegate.frameListener();
-    }
+  @Override
+  public Http2FrameListener frameListener() {
+    return delegate.frameListener();
+  }
 
-    @Override
-    public void decodeFrame(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Http2Exception {
-        delegate.decodeFrame(ctx, in, out);
-    }
+  @Override
+  public void decodeFrame(final ChannelHandlerContext ctx, final ByteBuf in, final List<Object> out)
+      throws Http2Exception {
+    delegate.decodeFrame(ctx, in, out);
+  }
 
-    @Override
-    public Http2Settings localSettings() {
-        return delegate.localSettings();
-    }
+  @Override
+  public Http2Settings localSettings() {
+    return delegate.localSettings();
+  }
 
-    @Override
-    public boolean prefaceReceived() {
-        return delegate.prefaceReceived();
-    }
+  @Override
+  public boolean prefaceReceived() {
+    return delegate.prefaceReceived();
+  }
 
-    @Override
-    public void close() {
-        delegate.close();
-    }
+  @Override
+  public void close() {
+    delegate.close();
+  }
 }

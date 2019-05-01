@@ -19,55 +19,47 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.ByteBufHolder;
 import io.netty.util.internal.UnstableApi;
 
-/**
- * HTTP/2 DATA frame.
- */
+/** HTTP/2 DATA frame. */
 @UnstableApi
 public interface Http2DataFrame extends Http2StreamFrame, ByteBufHolder {
 
-    /**
-     * Frame padding to use. Will be non-negative and less than 256.
-     */
-    int padding();
+  /** Frame padding to use. Will be non-negative and less than 256. */
+  int padding();
 
-    /**
-     * Payload of DATA frame. Will not be {@code null}.
-     */
-    @Override
-    ByteBuf content();
+  /** Payload of DATA frame. Will not be {@code null}. */
+  @Override
+  ByteBuf content();
 
-    /**
-     * Returns the number of bytes that are flow-controlled initially, so even if the {@link #content()} is consumed
-     * this will not change.
-     */
-    int initialFlowControlledBytes();
+  /**
+   * Returns the number of bytes that are flow-controlled initially, so even if the {@link
+   * #content()} is consumed this will not change.
+   */
+  int initialFlowControlledBytes();
 
-    /**
-     * Returns {@code true} if the END_STREAM flag ist set.
-     */
-    boolean isEndStream();
+  /** Returns {@code true} if the END_STREAM flag ist set. */
+  boolean isEndStream();
 
-    @Override
-    Http2DataFrame copy();
+  @Override
+  Http2DataFrame copy();
 
-    @Override
-    Http2DataFrame duplicate();
+  @Override
+  Http2DataFrame duplicate();
 
-    @Override
-    Http2DataFrame retainedDuplicate();
+  @Override
+  Http2DataFrame retainedDuplicate();
 
-    @Override
-    Http2DataFrame replace(ByteBuf content);
+  @Override
+  Http2DataFrame replace(ByteBuf content);
 
-    @Override
-    Http2DataFrame retain();
+  @Override
+  Http2DataFrame retain();
 
-    @Override
-    Http2DataFrame retain(int increment);
+  @Override
+  Http2DataFrame retain(int increment);
 
-    @Override
-    Http2DataFrame touch();
+  @Override
+  Http2DataFrame touch();
 
-    @Override
-    Http2DataFrame touch(Object hint);
+  @Override
+  Http2DataFrame touch(Object hint);
 }

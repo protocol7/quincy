@@ -16,13 +16,11 @@
 
 package io.netty.handler.codec.http2;
 
-/**
- * HTTP/2 SETTINGS frame.
- */
+/** HTTP/2 SETTINGS frame. */
 public interface Http2SettingsFrame extends Http2Frame {
 
-    Http2Settings settings();
+  Http2Settings settings();
 
-    @Override
-    String name();
+  @Override
+  String name();
 }

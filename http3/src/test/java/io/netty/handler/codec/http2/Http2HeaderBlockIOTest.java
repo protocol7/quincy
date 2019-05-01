@@ -15,6 +15,9 @@
 
 package io.netty.handler.codec.http2;
 
+import static io.netty.handler.codec.http2.Http2TestUtil.randomString;
+import static org.junit.Assert.assertEquals;
+
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.AsciiString;
@@ -22,80 +25,90 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import static io.netty.handler.codec.http2.Http2TestUtil.randomString;
-import static org.junit.Assert.assertEquals;
-
-/**
- * Tests for encoding/decoding HTTP2 header blocks.
- */
+/** Tests for encoding/decoding HTTP2 header blocks. */
 public class Http2HeaderBlockIOTest {
 
-    private DefaultHttp2HeadersDecoder decoder;
-    private DefaultHttp2HeadersEncoder encoder;
-    private ByteBuf buffer;
+  private DefaultHttp2HeadersDecoder decoder;
+  private DefaultHttp2HeadersEncoder encoder;
+  private ByteBuf buffer;
 
-    @Before
-    public void setup() {
-        encoder = new DefaultHttp2HeadersEncoder();
-        decoder = new DefaultHttp2HeadersDecoder(false);
-        buffer = Unpooled.buffer();
-    }
+  @Before
+  public void setup() {
+    encoder = new DefaultHttp2HeadersEncoder();
+    decoder = new DefaultHttp2HeadersDecoder(false);
+    buffer = Unpooled.buffer();
+  }
 
-    @After
-    public void teardown() {
-        buffer.release();
-    }
+  @After
+  public void teardown() {
+    buffer.release();
+  }
 
-    @Test
-    public void roundtripShouldBeSuccessful() throws Http2Exception {
-        Http2Headers in = headers();
-        assertRoundtripSuccessful(in);
-    }
+  @Test
+  public void roundtripShouldBeSuccessful() throws Http2Exception {
+    final Http2Headers in = headers();
+    assertRoundtripSuccessful(in);
+  }
 
-    @Test
-    public void successiveCallsShouldSucceed() throws Http2Exception {
-        Http2Headers in = new DefaultHttp2Headers().method(new AsciiString("GET")).scheme(new AsciiString("https"))
-                        .authority(new AsciiString("example.org")).path(new AsciiString("/some/path"))
-                        .add(new AsciiString("accept"), new AsciiString("*/*"));
-        assertRoundtripSuccessful(in);
+  @Test
+  public void successiveCallsShouldSucceed() throws Http2Exception {
+    Http2Headers in =
+        new DefaultHttp2Headers()
+            .method(new AsciiString("GET"))
+            .scheme(new AsciiString("https"))
+            .authority(new AsciiString("example.org"))
+            .path(new AsciiString("/some/path"))
+            .add(new AsciiString("accept"), new AsciiString("*/*"));
+    assertRoundtripSuccessful(in);
 
-        in = new DefaultHttp2Headers().method(new AsciiString("GET")).scheme(new AsciiString("https"))
-                        .authority(new AsciiString("example.org")).path(new AsciiString("/some/path/resource1"))
-                        .add(new AsciiString("accept"), new AsciiString("image/jpeg"))
-                        .add(new AsciiString("cache-control"), new AsciiString("no-cache"));
-        assertRoundtripSuccessful(in);
+    in =
+        new DefaultHttp2Headers()
+            .method(new AsciiString("GET"))
+            .scheme(new AsciiString("https"))
+            .authority(new AsciiString("example.org"))
+            .path(new AsciiString("/some/path/resource1"))
+            .add(new AsciiString("accept"), new AsciiString("image/jpeg"))
+            .add(new AsciiString("cache-control"), new AsciiString("no-cache"));
+    assertRoundtripSuccessful(in);
 
-        in = new DefaultHttp2Headers().method(new AsciiString("GET")).scheme(new AsciiString("https"))
-                        .authority(new AsciiString("example.org")).path(new AsciiString("/some/path/resource2"))
-                        .add(new AsciiString("accept"), new AsciiString("image/png"))
-                        .add(new AsciiString("cache-control"), new AsciiString("no-cache"));
-        assertRoundtripSuccessful(in);
-    }
+    in =
+        new DefaultHttp2Headers()
+            .method(new AsciiString("GET"))
+            .scheme(new AsciiString("https"))
+            .authority(new AsciiString("example.org"))
+            .path(new AsciiString("/some/path/resource2"))
+            .add(new AsciiString("accept"), new AsciiString("image/png"))
+            .add(new AsciiString("cache-control"), new AsciiString("no-cache"));
+    assertRoundtripSuccessful(in);
+  }
 
-    @Test
-    public void setMaxHeaderSizeShouldBeSuccessful() throws Http2Exception {
-        encoder.maxHeaderTableSize(10);
-        Http2Headers in = headers();
-        assertRoundtripSuccessful(in);
-        assertEquals(10, decoder.maxHeaderTableSize());
-    }
+  @Test
+  public void setMaxHeaderSizeShouldBeSuccessful() throws Http2Exception {
+    encoder.maxHeaderTableSize(10);
+    final Http2Headers in = headers();
+    assertRoundtripSuccessful(in);
+    assertEquals(10, decoder.maxHeaderTableSize());
+  }
 
-    private void assertRoundtripSuccessful(Http2Headers in) throws Http2Exception {
-        encoder.encodeHeaders(3 /* randomly chosen */, in, buffer);
+  private void assertRoundtripSuccessful(final Http2Headers in) throws Http2Exception {
+    encoder.encodeHeaders(3 /* randomly chosen */, in, buffer);
 
-        Http2Headers out = decoder.decodeHeaders(0, buffer);
-        assertEquals(in, out);
-    }
+    final Http2Headers out = decoder.decodeHeaders(0, buffer);
+    assertEquals(in, out);
+  }
 
-    private static Http2Headers headers() {
-        return new DefaultHttp2Headers(false).method(new AsciiString("GET")).scheme(new AsciiString("https"))
-        .authority(new AsciiString("example.org")).path(new AsciiString("/some/path/resource2"))
-                .add(new AsciiString("accept"), new AsciiString("image/png"))
-                .add(new AsciiString("cache-control"), new AsciiString("no-cache"))
-                .add(new AsciiString("custom"), new AsciiString("value1"))
-                .add(new AsciiString("custom"), new AsciiString("value2"))
-                .add(new AsciiString("custom"), new AsciiString("value3"))
-                .add(new AsciiString("custom"), new AsciiString("custom4"))
-                .add(randomString(), randomString());
-    }
+  private static Http2Headers headers() {
+    return new DefaultHttp2Headers(false)
+        .method(new AsciiString("GET"))
+        .scheme(new AsciiString("https"))
+        .authority(new AsciiString("example.org"))
+        .path(new AsciiString("/some/path/resource2"))
+        .add(new AsciiString("accept"), new AsciiString("image/png"))
+        .add(new AsciiString("cache-control"), new AsciiString("no-cache"))
+        .add(new AsciiString("custom"), new AsciiString("value1"))
+        .add(new AsciiString("custom"), new AsciiString("value2"))
+        .add(new AsciiString("custom"), new AsciiString("value3"))
+        .add(new AsciiString("custom"), new AsciiString("custom4"))
+        .add(randomString(), randomString());
+  }
 }

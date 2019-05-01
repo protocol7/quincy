@@ -14,9 +14,10 @@
  */
 package io.netty.handler.codec.http2;
 
-public class UniformStreamByteDistributorFlowControllerTest extends DefaultHttp2RemoteFlowControllerTest {
-    @Override
-    protected StreamByteDistributor newDistributor(Http2Connection connection) {
-        return new UniformStreamByteDistributor(connection);
-    }
+public class UniformStreamByteDistributorFlowControllerTest
+    extends DefaultHttp2RemoteFlowControllerTest {
+  @Override
+  protected StreamByteDistributor newDistributor(final Http2Connection connection) {
+    return new UniformStreamByteDistributor(connection);
+  }
 }

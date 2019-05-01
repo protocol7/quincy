@@ -17,17 +17,15 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.StringUtil;
 
-/**
- * The default {@link Http2SettingsAckFrame} implementation.
- */
+/** The default {@link Http2SettingsAckFrame} implementation. */
 final class DefaultHttp2SettingsAckFrame implements Http2SettingsAckFrame {
-    @Override
-    public String name() {
-        return "SETTINGS(ACK)";
-    }
+  @Override
+  public String name() {
+    return "SETTINGS(ACK)";
+  }
 
-    @Override
-    public String toString() {
-        return StringUtil.simpleClassName(this);
-    }
+  @Override
+  public String toString() {
+    return StringUtil.simpleClassName(this);
+  }
 }

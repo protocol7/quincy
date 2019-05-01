@@ -18,19 +18,13 @@ package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.UnstableApi;
 
-/**
- * HTTP/2 PING Frame.
- */
+/** HTTP/2 PING Frame. */
 @UnstableApi
 public interface Http2PingFrame extends Http2Frame {
 
-    /**
-     * When {@code true}, indicates that this ping is a ping response.
-     */
-    boolean ack();
+  /** When {@code true}, indicates that this ping is a ping response. */
+  boolean ack();
 
-    /**
-     * Returns the eight byte opaque data.
-     */
-    long content();
+  /** Returns the eight byte opaque data. */
+  long content();
 }

@@ -35,15 +35,15 @@ import java.util.List;
 
 final class TestHeaderListener extends DefaultHttp2Headers {
 
-    private final List<HpackHeaderField> headers;
+  private final List<HpackHeaderField> headers;
 
-    TestHeaderListener(List<HpackHeaderField> headers) {
-        this.headers = headers;
-    }
+  TestHeaderListener(final List<HpackHeaderField> headers) {
+    this.headers = headers;
+  }
 
-    @Override
-    public TestHeaderListener add(CharSequence name, CharSequence value) {
-        headers.add(new HpackHeaderField(name, value));
-        return this;
-    }
+  @Override
+  public TestHeaderListener add(final CharSequence name, final CharSequence value) {
+    headers.add(new HpackHeaderField(name, value));
+    return this;
+  }
 }

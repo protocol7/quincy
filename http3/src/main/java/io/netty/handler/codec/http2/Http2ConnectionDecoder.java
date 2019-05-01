@@ -17,7 +17,6 @@ package io.netty.handler.codec.http2;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.util.internal.UnstableApi;
-
 import java.io.Closeable;
 import java.util.List;
 
@@ -30,48 +29,42 @@ import java.util.List;
 @UnstableApi
 public interface Http2ConnectionDecoder extends Closeable {
 
-    /**
-     * Sets the lifecycle manager. Must be called as part of initialization before the decoder is used.
-     */
-    void lifecycleManager(Http2LifecycleManager lifecycleManager);
+  /**
+   * Sets the lifecycle manager. Must be called as part of initialization before the decoder is
+   * used.
+   */
+  void lifecycleManager(Http2LifecycleManager lifecycleManager);
 
-    /**
-     * Provides direct access to the underlying connection.
-     */
-    Http2Connection connection();
+  /** Provides direct access to the underlying connection. */
+  Http2Connection connection();
 
-    /**
-     * Provides the local flow controller for managing inbound traffic.
-     */
-    Http2LocalFlowController flowController();
+  /** Provides the local flow controller for managing inbound traffic. */
+  Http2LocalFlowController flowController();
 
-    /**
-     * Set the {@link Http2FrameListener} which will be notified when frames are decoded.
-     * <p>
-     * This <strong>must</strong> be set before frames are decoded.
-     */
-    void frameListener(Http2FrameListener listener);
+  /**
+   * Set the {@link Http2FrameListener} which will be notified when frames are decoded.
+   *
+   * <p>This <strong>must</strong> be set before frames are decoded.
+   */
+  void frameListener(Http2FrameListener listener);
 
-    /**
-     * Get the {@link Http2FrameListener} which will be notified when frames are decoded.
-     */
-    Http2FrameListener frameListener();
+  /** Get the {@link Http2FrameListener} which will be notified when frames are decoded. */
+  Http2FrameListener frameListener();
 
-    /**
-     * Called by the {@link Http2ConnectionHandler} to decode the next frame from the input buffer.
-     */
-    void decodeFrame(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Http2Exception;
+  /**
+   * Called by the {@link Http2ConnectionHandler} to decode the next frame from the input buffer.
+   */
+  void decodeFrame(ChannelHandlerContext ctx, ByteBuf in, List<Object> out) throws Http2Exception;
 
-    /**
-     * Gets the local settings for this endpoint of the HTTP/2 connection.
-     */
-    Http2Settings localSettings();
+  /** Gets the local settings for this endpoint of the HTTP/2 connection. */
+  Http2Settings localSettings();
 
-    /**
-     * Indicates whether or not the first initial {@code SETTINGS} frame was received from the remote endpoint.
-     */
-    boolean prefaceReceived();
+  /**
+   * Indicates whether or not the first initial {@code SETTINGS} frame was received from the remote
+   * endpoint.
+   */
+  boolean prefaceReceived();
 
-    @Override
-    void close();
+  @Override
+  void close();
 }

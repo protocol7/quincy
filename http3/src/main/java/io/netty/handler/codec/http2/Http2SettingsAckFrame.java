@@ -17,13 +17,14 @@ package io.netty.handler.codec.http2;
 
 /**
  * An ack for a previously received {@link Http2SettingsFrame}.
- * <p>
- * The <a href="https://tools.ietf.org/html/rfc7540#section-6.5">HTTP/2 protocol</a> enforces that ACKs are applied in
- * order, so this ACK will apply to the earliest received and not yet ACKed {@link Http2SettingsFrame} frame.
+ *
+ * <p>The <a href="https://tools.ietf.org/html/rfc7540#section-6.5">HTTP/2 protocol</a> enforces
+ * that ACKs are applied in order, so this ACK will apply to the earliest received and not yet ACKed
+ * {@link Http2SettingsFrame} frame.
  */
 public interface Http2SettingsAckFrame extends Http2Frame {
-    Http2SettingsAckFrame INSTANCE = new DefaultHttp2SettingsAckFrame();
+  Http2SettingsAckFrame INSTANCE = new DefaultHttp2SettingsAckFrame();
 
-    @Override
-    String name();
+  @Override
+  String name();
 }

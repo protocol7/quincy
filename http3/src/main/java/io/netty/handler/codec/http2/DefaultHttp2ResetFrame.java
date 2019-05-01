@@ -15,71 +15,75 @@
  */
 package io.netty.handler.codec.http2;
 
+import static io.netty.util.internal.ObjectUtil.checkNotNull;
+
 import io.netty.util.internal.StringUtil;
 import io.netty.util.internal.UnstableApi;
 
-import static io.netty.util.internal.ObjectUtil.checkNotNull;
-
-/**
- * The default {@link Http2ResetFrame} implementation.
- */
+/** The default {@link Http2ResetFrame} implementation. */
 @UnstableApi
-public final class DefaultHttp2ResetFrame extends AbstractHttp2StreamFrame implements Http2ResetFrame {
+public final class DefaultHttp2ResetFrame extends AbstractHttp2StreamFrame
+    implements Http2ResetFrame {
 
-    private final long errorCode;
+  private final long errorCode;
 
-    /**
-     * Construct a reset message.
-     *
-     * @param error the non-{@code null} reason for reset
-     */
-    public DefaultHttp2ResetFrame(Http2Error error) {
-        errorCode = checkNotNull(error, "error").code();
+  /**
+   * Construct a reset message.
+   *
+   * @param error the non-{@code null} reason for reset
+   */
+  public DefaultHttp2ResetFrame(final Http2Error error) {
+    errorCode = checkNotNull(error, "error").code();
+  }
+
+  /**
+   * Construct a reset message.
+   *
+   * @param errorCode the reason for reset
+   */
+  public DefaultHttp2ResetFrame(final long errorCode) {
+    this.errorCode = errorCode;
+  }
+
+  @Override
+  public DefaultHttp2ResetFrame stream(final Http2FrameStream stream) {
+    super.stream(stream);
+    return this;
+  }
+
+  @Override
+  public String name() {
+    return "RST_STREAM";
+  }
+
+  @Override
+  public long errorCode() {
+    return errorCode;
+  }
+
+  @Override
+  public String toString() {
+    return StringUtil.simpleClassName(this)
+        + "(stream="
+        + stream()
+        + ", errorCode="
+        + errorCode
+        + ')';
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (!(o instanceof DefaultHttp2ResetFrame)) {
+      return false;
     }
+    final DefaultHttp2ResetFrame other = (DefaultHttp2ResetFrame) o;
+    return super.equals(o) && errorCode == other.errorCode;
+  }
 
-    /**
-     * Construct a reset message.
-     *
-     * @param errorCode the reason for reset
-     */
-    public DefaultHttp2ResetFrame(long errorCode) {
-        this.errorCode = errorCode;
-    }
-
-    @Override
-    public DefaultHttp2ResetFrame stream(Http2FrameStream stream) {
-        super.stream(stream);
-        return this;
-    }
-
-    @Override
-    public String name() {
-        return "RST_STREAM";
-    }
-
-    @Override
-    public long errorCode() {
-        return errorCode;
-    }
-
-    @Override
-    public String toString() {
-        return StringUtil.simpleClassName(this) + "(stream=" + stream() + ", errorCode=" + errorCode + ')';
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (!(o instanceof DefaultHttp2ResetFrame)) {
-            return false;
-        }
-        DefaultHttp2ResetFrame other = (DefaultHttp2ResetFrame) o;
-        return super.equals(o) && errorCode == other.errorCode;
-    }
-
-    @Override
-    public int hashCode() {
-        int hash = super.hashCode();
-        hash = hash * 31 + (int) (errorCode ^ (errorCode >>> 32));
-        return hash;
-    }
+  @Override
+  public int hashCode() {
+    int hash = super.hashCode();
+    hash = hash * 31 + (int) (errorCode ^ (errorCode >>> 32));
+    return hash;
+  }
 }

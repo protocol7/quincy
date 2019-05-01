@@ -32,47 +32,46 @@
 package io.netty.handler.codec.http2;
 
 import io.netty.util.internal.ResourcesUtil;
+import java.io.File;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Collection;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
 import org.junit.runners.Parameterized.Parameters;
 
-import java.io.File;
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.Collection;
-
 @RunWith(Parameterized.class)
 public class HpackTest {
 
-    private static final String TEST_DIR = '/' + HpackTest.class.getPackage().getName().replaceAll("\\.", "/")
-            + "/testdata/";
+  private static final String TEST_DIR =
+      '/' + HpackTest.class.getPackage().getName().replaceAll("\\.", "/") + "/testdata/";
 
-    private final String fileName;
+  private final String fileName;
 
-    public HpackTest(String fileName) {
-        this.fileName = fileName;
+  public HpackTest(final String fileName) {
+    this.fileName = fileName;
+  }
+
+  @Parameters(name = "{0}")
+  public static Collection<Object[]> data() {
+    final File[] files = ResourcesUtil.getFile(HpackTest.class, TEST_DIR).listFiles();
+    if (files == null) {
+      throw new NullPointerException("files");
     }
 
-    @Parameters(name = "{0}")
-    public static Collection<Object[]> data() {
-        File[] files = ResourcesUtil.getFile(HpackTest.class, TEST_DIR).listFiles();
-        if (files == null) {
-            throw new NullPointerException("files");
-        }
-
-        ArrayList<Object[]> data = new ArrayList<Object[]>();
-        for (File file : files) {
-            data.add(new Object[]{file.getName()});
-        }
-        return data;
+    final ArrayList<Object[]> data = new ArrayList<Object[]>();
+    for (final File file : files) {
+      data.add(new Object[] {file.getName()});
     }
+    return data;
+  }
 
-    @Test
-    public void test() throws Exception {
-        InputStream is = HpackTest.class.getResourceAsStream(TEST_DIR + fileName);
-        HpackTestCase hpackTestCase = HpackTestCase.load(is);
-        hpackTestCase.testCompress();
-        hpackTestCase.testDecompress();
-    }
+  @Test
+  public void test() throws Exception {
+    final InputStream is = HpackTest.class.getResourceAsStream(TEST_DIR + fileName);
+    final HpackTestCase hpackTestCase = HpackTestCase.load(is);
+    hpackTestCase.testCompress();
+    hpackTestCase.testDecompress();
+  }
 }
