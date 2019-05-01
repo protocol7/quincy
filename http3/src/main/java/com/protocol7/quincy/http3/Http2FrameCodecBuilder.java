@@ -1,0 +1,194 @@
+/*
+ * Copyright 2017 The Netty Project
+ *
+ * The Netty Project licenses this file to you under the Apache License,
+ * version 2.0 (the "License"); you may not use this file except in compliance
+ * with the License. You may obtain a copy of the License at:
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+ * WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+ * License for the specific language governing permissions and limitations
+ * under the License.
+ */
+
+package com.protocol7.quincy.http3;
+
+import static io.netty.util.internal.ObjectUtil.checkNotNull;
+
+import io.netty.util.internal.UnstableApi;
+
+/** Builder for the {@link Http2FrameCodec}. */
+@UnstableApi
+public class Http2FrameCodecBuilder
+    extends AbstractHttp2ConnectionHandlerBuilder<Http2FrameCodec, Http2FrameCodecBuilder> {
+
+  private Http2FrameWriter frameWriter;
+
+  Http2FrameCodecBuilder(final boolean server) {
+    server(server);
+    // For backwards compatibility we should disable to timeout by default at this layer.
+    gracefulShutdownTimeoutMillis(0);
+  }
+
+  /** Creates a builder for a HTTP/2 client. */
+  public static Http2FrameCodecBuilder forClient() {
+    return new Http2FrameCodecBuilder(false);
+  }
+
+  /** Creates a builder for a HTTP/2 server. */
+  public static Http2FrameCodecBuilder forServer() {
+    return new Http2FrameCodecBuilder(true);
+  }
+
+  // For testing only.
+  Http2FrameCodecBuilder frameWriter(final Http2FrameWriter frameWriter) {
+    this.frameWriter = checkNotNull(frameWriter, "frameWriter");
+    return this;
+  }
+
+  @Override
+  public Http2Settings initialSettings() {
+    return super.initialSettings();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder initialSettings(final Http2Settings settings) {
+    return super.initialSettings(settings);
+  }
+
+  @Override
+  public long gracefulShutdownTimeoutMillis() {
+    return super.gracefulShutdownTimeoutMillis();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder gracefulShutdownTimeoutMillis(
+      final long gracefulShutdownTimeoutMillis) {
+    return super.gracefulShutdownTimeoutMillis(gracefulShutdownTimeoutMillis);
+  }
+
+  @Override
+  public boolean isServer() {
+    return super.isServer();
+  }
+
+  @Override
+  public int maxReservedStreams() {
+    return super.maxReservedStreams();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder maxReservedStreams(final int maxReservedStreams) {
+    return super.maxReservedStreams(maxReservedStreams);
+  }
+
+  @Override
+  public boolean isValidateHeaders() {
+    return super.isValidateHeaders();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder validateHeaders(final boolean validateHeaders) {
+    return super.validateHeaders(validateHeaders);
+  }
+
+  @Override
+  public Http2FrameLogger frameLogger() {
+    return super.frameLogger();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder frameLogger(final Http2FrameLogger frameLogger) {
+    return super.frameLogger(frameLogger);
+  }
+
+  @Override
+  public boolean encoderEnforceMaxConcurrentStreams() {
+    return super.encoderEnforceMaxConcurrentStreams();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder encoderEnforceMaxConcurrentStreams(
+      final boolean encoderEnforceMaxConcurrentStreams) {
+    return super.encoderEnforceMaxConcurrentStreams(encoderEnforceMaxConcurrentStreams);
+  }
+
+  @Override
+  public Http2HeadersEncoder.SensitivityDetector headerSensitivityDetector() {
+    return super.headerSensitivityDetector();
+  }
+
+  @Override
+  public Http2FrameCodecBuilder headerSensitivityDetector(
+      final Http2HeadersEncoder.SensitivityDetector headerSensitivityDetector) {
+    return super.headerSensitivityDetector(headerSensitivityDetector);
+  }
+
+  @Override
+  public Http2FrameCodecBuilder encoderIgnoreMaxHeaderListSize(
+      final boolean ignoreMaxHeaderListSize) {
+    return super.encoderIgnoreMaxHeaderListSize(ignoreMaxHeaderListSize);
+  }
+
+  @Override
+  public Http2FrameCodecBuilder initialHuffmanDecodeCapacity(
+      final int initialHuffmanDecodeCapacity) {
+    return super.initialHuffmanDecodeCapacity(initialHuffmanDecodeCapacity);
+  }
+
+  @Override
+  public Http2FrameCodecBuilder decoupleCloseAndGoAway(final boolean decoupleCloseAndGoAway) {
+    return super.decoupleCloseAndGoAway(decoupleCloseAndGoAway);
+  }
+
+  /** Build a {@link Http2FrameCodec} object. */
+  @Override
+  public Http2FrameCodec build() {
+    Http2FrameWriter frameWriter = this.frameWriter;
+    if (frameWriter != null) {
+      // This is to support our tests and will never be executed by the user as frameWriter(...)
+      // is package-private.
+      final DefaultHttp2Connection connection =
+          new DefaultHttp2Connection(isServer(), maxReservedStreams());
+      final Long maxHeaderListSize = initialSettings().maxHeaderListSize();
+      Http2FrameReader frameReader =
+          new DefaultHttp2FrameReader(
+              maxHeaderListSize == null
+                  ? new DefaultHttp2HeadersDecoder(true)
+                  : new DefaultHttp2HeadersDecoder(true, maxHeaderListSize));
+
+      if (frameLogger() != null) {
+        frameWriter = new Http2OutboundFrameLogger(frameWriter, frameLogger());
+        frameReader = new Http2InboundFrameLogger(frameReader, frameLogger());
+      }
+      Http2ConnectionEncoder encoder = new DefaultHttp2ConnectionEncoder(connection, frameWriter);
+      if (encoderEnforceMaxConcurrentStreams()) {
+        encoder = new StreamBufferingEncoder(encoder);
+      }
+      final Http2ConnectionDecoder decoder =
+          new DefaultHttp2ConnectionDecoder(
+              connection,
+              encoder,
+              frameReader,
+              promisedRequestVerifier(),
+              isAutoAckSettingsFrame());
+
+      return build(decoder, encoder, initialSettings());
+    }
+    return super.build();
+  }
+
+  @Override
+  protected Http2FrameCodec build(
+      final Http2ConnectionDecoder decoder,
+      final Http2ConnectionEncoder encoder,
+      final Http2Settings initialSettings) {
+    final Http2FrameCodec codec =
+        new Http2FrameCodec(encoder, decoder, initialSettings, decoupleCloseAndGoAway());
+    codec.gracefulShutdownTimeoutMillis(gracefulShutdownTimeoutMillis());
+    return codec;
+  }
+}
