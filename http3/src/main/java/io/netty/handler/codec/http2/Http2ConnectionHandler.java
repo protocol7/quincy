@@ -503,7 +503,10 @@ public class Http2ConnectionHandler extends ByteToMessageDecoder
   }
 
   @Override
-  public void close(final ChannelHandlerContext ctx, ChannelPromise promise) throws Exception {
+  public void close(
+      final ChannelHandlerContext ctx,
+      @SuppressWarnings("checkstyle:finalparameters") ChannelPromise promise)
+      throws Exception {
     if (decoupleCloseAndGoAway) {
       ctx.close(promise);
       return;

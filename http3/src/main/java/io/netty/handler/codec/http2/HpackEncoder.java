@@ -350,7 +350,7 @@ final class HpackEncoder {
   }
 
   /** Return the header field at the given index. Exposed for testing. */
-  HpackHeaderField getHeaderField(int index) {
+  HpackHeaderField getHeaderField(@SuppressWarnings("checkstyle:finalparameters") int index) {
     HeaderEntry entry = head;
     while (index-- >= 0) {
       entry = entry.before;

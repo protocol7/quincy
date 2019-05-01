@@ -95,7 +95,9 @@ public final class UniformStreamByteDistributor implements StreamByteDistributor
   }
 
   @Override
-  public boolean distribute(int maxBytes, final Writer writer) throws Http2Exception {
+  public boolean distribute(
+      @SuppressWarnings("checkstyle:finalparameters") int maxBytes, final Writer writer)
+      throws Http2Exception {
     final int size = queue.size();
     if (size == 0) {
       return totalStreamableBytes > 0;

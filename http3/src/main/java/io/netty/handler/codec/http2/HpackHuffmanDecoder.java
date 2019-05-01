@@ -115,7 +115,11 @@ final class HpackHuffmanDecoder {
     return root;
   }
 
-  private static void insert(final Node root, final int symbol, final int code, byte length) {
+  private static void insert(
+      final Node root,
+      final int symbol,
+      final int code,
+      @SuppressWarnings("checkstyle:finalparameters") byte length) {
     // traverse tree using the most significant bytes of code
     Node current = root;
     while (length > 8) {

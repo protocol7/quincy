@@ -188,7 +188,7 @@ public class DefaultHttp2ConnectionEncoder
       final boolean exclusive,
       final int padding,
       final boolean endOfStream,
-      ChannelPromise promise) {
+      @SuppressWarnings("checkstyle:finalparameters") ChannelPromise promise) {
     try {
       Http2Stream stream = connection.stream(streamId);
       if (stream == null) {

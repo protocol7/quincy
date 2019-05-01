@@ -93,7 +93,7 @@ public class CompressorHttp2ConnectionEncoder extends DecoratingHttp2ConnectionE
       final ChannelHandlerContext ctx,
       final int streamId,
       final ByteBuf data,
-      int padding,
+      @SuppressWarnings("checkstyle:finalparameters") int padding,
       final boolean endOfStream,
       final ChannelPromise promise) {
     final Http2Stream stream = connection().stream(streamId);

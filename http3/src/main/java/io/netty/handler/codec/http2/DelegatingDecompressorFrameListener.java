@@ -77,7 +77,7 @@ public class DelegatingDecompressorFrameListener extends Http2FrameListenerDecor
       final ChannelHandlerContext ctx,
       final int streamId,
       final ByteBuf data,
-      int padding,
+      @SuppressWarnings("checkstyle:finalparameters") int padding,
       final boolean endOfStream)
       throws Http2Exception {
     final Http2Stream stream = connection.stream(streamId);
@@ -382,7 +382,9 @@ public class DelegatingDecompressorFrameListener extends Http2FrameListenerDecor
     }
 
     @Override
-    public boolean consumeBytes(final Http2Stream stream, int numBytes) throws Http2Exception {
+    public boolean consumeBytes(
+        final Http2Stream stream, @SuppressWarnings("checkstyle:finalparameters") int numBytes)
+        throws Http2Exception {
       final Http2Decompressor decompressor = decompressor(stream);
       if (decompressor != null) {
         // Convert the decompressed bytes to compressed (on the wire) bytes.

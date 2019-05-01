@@ -342,7 +342,7 @@ public class DefaultHttp2RemoteFlowController implements Http2RemoteFlowControll
      *
      * @return the number of bytes written for a stream or {@code -1} if no write occurred.
      */
-    int writeAllocatedBytes(int allocated) {
+    int writeAllocatedBytes(@SuppressWarnings("checkstyle:finalparameters") int allocated) {
       final int initialAllocated = allocated;
       final int writtenBytes;
       // In case an exception is thrown we want to remember it and pass it to cancel(Throwable).

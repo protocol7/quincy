@@ -137,8 +137,8 @@ public class DefaultHttp2FrameWriter
   public ChannelFuture writeData(
       final ChannelHandlerContext ctx,
       final int streamId,
-      ByteBuf data,
-      int padding,
+      @SuppressWarnings("checkstyle:finalparameters") ByteBuf data,
+      @SuppressWarnings("checkstyle:finalparameters") int padding,
       final boolean endStream,
       final ChannelPromise promise) {
     final SimpleChannelPromiseAggregator promiseAggregator =

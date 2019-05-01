@@ -521,7 +521,9 @@ final class HpackDecoder {
    *
    * <p>Visible for testing only!
    */
-  static long decodeULE128(final ByteBuf in, long result) throws Http2Exception {
+  static long decodeULE128(
+      final ByteBuf in, @SuppressWarnings("checkstyle:finalparameters") long result)
+      throws Http2Exception {
     assert result <= 0x7f && result >= 0;
     final boolean resultStartedAtZero = result == 0;
     final int writerIndex = in.writerIndex();

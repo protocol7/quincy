@@ -175,7 +175,8 @@ public final class Http2CodecUtil {
    * Iteratively looks through the causality chain for the given exception and returns the first
    * {@link Http2Exception} or {@code null} if none.
    */
-  public static Http2Exception getEmbeddedHttp2Exception(Throwable cause) {
+  public static Http2Exception getEmbeddedHttp2Exception(
+      @SuppressWarnings("checkstyle:finalparameters") Throwable cause) {
     while (cause != null) {
       if (cause instanceof Http2Exception) {
         return (Http2Exception) cause;

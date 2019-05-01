@@ -287,7 +287,9 @@ public final class WeightedFairQueueByteDistributor implements StreamByteDistrib
   }
 
   @Override
-  public boolean distribute(int maxBytes, final Writer writer) throws Http2Exception {
+  public boolean distribute(
+      @SuppressWarnings("checkstyle:finalparameters") int maxBytes, final Writer writer)
+      throws Http2Exception {
     // As long as there is some active frame we should write at least 1 time.
     if (connectionState.activeCountForTree == 0) {
       return false;
@@ -641,7 +643,8 @@ public final class WeightedFairQueueByteDistributor implements StreamByteDistrib
      * @return The map of children prior to this operation, excluding {@code streamToRetain} if
      *     present.
      */
-    private IntObjectMap<State> removeAllChildrenExcept(State stateToRetain) {
+    private IntObjectMap<State> removeAllChildrenExcept(
+        @SuppressWarnings("checkstyle:finalparameters") State stateToRetain) {
       stateToRetain = children.remove(stateToRetain.streamId);
       final IntObjectMap<State> prevChildren = children;
       // This map should be re-initialized in anticipation for the 1 exclusive child which will be

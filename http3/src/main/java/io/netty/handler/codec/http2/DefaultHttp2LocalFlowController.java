@@ -398,7 +398,8 @@ public class DefaultHttp2LocalFlowController implements Http2LocalFlowController
     }
 
     @Override
-    public void incrementInitialStreamWindow(int delta) {
+    public void incrementInitialStreamWindow(
+        @SuppressWarnings("checkstyle:finalparameters") int delta) {
       // Clip the delta so that the resulting initialStreamWindowSize falls within the allowed
       // range.
       final int newValue =
