@@ -67,6 +67,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         };
 
     timer.newTimeout(task, RESEND_DELAY, MILLISECONDS);
+
+    // TODO cancel timeout when connection closes
   }
 
   public void resend() {

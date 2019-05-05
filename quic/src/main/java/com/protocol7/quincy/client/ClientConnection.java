@@ -38,6 +38,7 @@ import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Ticker;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Optional;
@@ -113,9 +114,9 @@ public class ClientConnection implements InternalConnection {
     tlsManager.resetTlsSession(remoteConnectionId);
   }
 
-  public Future<Void> handshake() {
+  public void handshake(final Promise promise) {
     MDC.put("actor", "client");
-    return tlsManager.handshake(getState(), this, stateMachine::setState);
+    tlsManager.handshake(getState(), this, stateMachine::setState, promise);
   }
 
   public Packet sendPacket(final Packet p) {

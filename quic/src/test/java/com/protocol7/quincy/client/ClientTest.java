@@ -85,7 +85,9 @@ public class ClientTest {
   @Test
   public void handshake() {
     // start handshake
-    final Future<Void> handshakeFuture = connection.handshake();
+    final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+
+    connection.handshake(handshakeFuture);
 
     // validate first packet sent
     final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
@@ -292,8 +294,10 @@ public class ClientTest {
 
   @Test
   public void versionNegotiation() {
+    final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+
     // start handshake
-    final Future<Void> handshakeFuture = connection.handshake();
+    connection.handshake(handshakeFuture);
 
     // validate first packet sent
     final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);

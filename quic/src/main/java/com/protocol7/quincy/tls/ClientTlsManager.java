@@ -18,17 +18,14 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
-import io.netty.util.concurrent.DefaultPromise;
-import io.netty.util.concurrent.Future;
-import io.netty.util.concurrent.GlobalEventExecutor;
+import io.netty.util.concurrent.Promise;
 import java.util.Optional;
 import java.util.function.Consumer;
 
 public class ClientTlsManager implements InboundHandler {
 
   private ClientTlsSession tlsSession;
-  private final DefaultPromise<Void> handshakeFuture =
-      new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
+  private Promise promise;
   private final TransportParameters transportParameters;
   private final CertificateValidator certificateValidator;
 
@@ -50,8 +47,13 @@ public class ClientTlsManager implements InboundHandler {
             certificateValidator);
   }
 
-  public Future<Void> handshake(
-      final State state, final FrameSender sender, final Consumer<State> stateSetter) {
+  public void handshake(
+      final State state,
+      final FrameSender sender,
+      final Consumer<State> stateSetter,
+      final Promise<Void> promise) {
+    this.promise = promise;
+
     // send initial packet
     if (state == State.Started) {
       sendInitialPacket(sender);
@@ -59,7 +61,6 @@ public class ClientTlsManager implements InboundHandler {
     } else {
       throw new IllegalStateException("Can't handshake in state " + state);
     }
-    return handshakeFuture;
   }
 
   @Override
@@ -122,9 +123,9 @@ public class ClientTlsManager implements InboundHandler {
 
           tlsSession.setOneRttAead(result.get().getOneRttAead());
 
-          tlsSession.unsetHandshakeAead();
+          // tlsSession.unsetHandshakeAead(); TODO
           ctx.setState(State.Ready);
-          handshakeFuture.setSuccess(null);
+          promise.setSuccess(null);
         }
       }
     }
@@ -135,7 +136,6 @@ public class ClientTlsManager implements InboundHandler {
 
     final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake());
     len -= clientHello.calculateLength();
-
     frameSender.send(clientHello, new PaddingFrame(len));
   }
 

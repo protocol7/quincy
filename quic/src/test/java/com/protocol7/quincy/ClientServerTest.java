@@ -26,7 +26,9 @@ import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import io.netty.util.concurrent.SucceededFuture;
 import java.security.PrivateKey;
 import java.util.List;
@@ -113,7 +115,10 @@ public class ClientServerTest {
 
   @Test
   public void handshake() {
-    clientConnection.handshake().awaitUninterruptibly();
+    final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
+
+    clientConnection.handshake(handshakeFuture);
+    handshakeFuture.awaitUninterruptibly();
 
     sleep();
 

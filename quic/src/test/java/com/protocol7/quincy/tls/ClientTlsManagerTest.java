@@ -21,6 +21,8 @@ import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+import io.netty.util.concurrent.DefaultPromise;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.util.function.Consumer;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,10 +47,11 @@ public class ClientTlsManagerTest {
   @Test
   public void handshake() {
     // start handshake
+    final DefaultPromise<Void> handshakeFuture = new DefaultPromise(GlobalEventExecutor.INSTANCE);
     final PipelineContext ctx = mock(PipelineContext.class);
     final FrameSender sender = mock(FrameSender.class);
     final Consumer<State> stateSetter = mock(Consumer.class);
-    manager.handshake(State.Started, sender, stateSetter);
+    manager.handshake(State.Started, sender, stateSetter, handshakeFuture);
 
     final ArgumentCaptor<CryptoFrame> chFrame = ArgumentCaptor.forClass(CryptoFrame.class);
 

@@ -14,7 +14,9 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import java.net.InetSocketAddress;
 
 public class QuicClient {
@@ -55,8 +57,12 @@ public class QuicClient {
     final Future<ClientConnection> f =
         Futures.thenAsync(
             conn,
-            clientConnection ->
-                Futures.thenSync(clientConnection.handshake(), aVoid -> clientConnection));
+            clientConnection -> {
+              final DefaultPromise<Void> handshakeFuture =
+                  new DefaultPromise(GlobalEventExecutor.INSTANCE); // TODO use what event executor?
+              clientConnection.handshake(handshakeFuture);
+              return Futures.thenSync(handshakeFuture, aVoid -> clientConnection);
+            });
 
     return Futures.thenSync(f, v -> new QuicClient(group, v));
   }
