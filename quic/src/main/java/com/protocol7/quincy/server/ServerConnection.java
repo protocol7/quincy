@@ -43,7 +43,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ServerConnection implements InternalConnection {
 
   private Optional<ConnectionId> remoteConnectionId = Optional.empty();
-  private Optional<ConnectionId> localConnectionId;
+  private final Optional<ConnectionId> localConnectionId;
   private final PacketSender packetSender;
   private final Version version;
   private final AtomicReference<PacketNumber> sendPacketNumber =
