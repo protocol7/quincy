@@ -7,7 +7,6 @@ import java.util.Objects;
 public class ServerName implements Extension {
 
   public static ServerName parse(final ByteBuf bb) {
-    bb.readShort(); // length
     // TODO handle multiple names
     bb.readShort(); // first item length
     final byte nameType = bb.readByte();
@@ -40,7 +39,6 @@ public class ServerName implements Extension {
   public void write(final ByteBuf bb, final boolean ignored) {
     final byte[] b = serverName.getBytes(StandardCharsets.US_ASCII);
 
-    bb.writeShort(b.length + 5);
     bb.writeShort(b.length + 3);
     bb.writeByte(0); // name type
     bb.writeShort(b.length);
