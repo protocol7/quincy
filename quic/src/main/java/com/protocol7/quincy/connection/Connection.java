@@ -8,6 +8,7 @@ import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.util.concurrent.Future;
@@ -31,6 +32,8 @@ public interface Connection extends FrameSender {
   Future<Void> close(TransportError error, FrameType frameType, String msg);
 
   InetSocketAddress getPeerAddress();
+
+  Stream openStream();
 
   State getState();
 }

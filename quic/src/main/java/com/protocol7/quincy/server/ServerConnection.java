@@ -23,6 +23,7 @@ import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.reliability.AckDelay;
 import com.protocol7.quincy.reliability.PacketBufferManager;
 import com.protocol7.quincy.streams.DefaultStreamManager;
+import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.streams.StreamManager;
 import com.protocol7.quincy.termination.TerminationManager;
@@ -53,6 +54,7 @@ public class ServerConnection implements InternalConnection {
   private final ServerTLSManager tlsManager;
   private final Pipeline pipeline;
   private final InetSocketAddress peerAddress;
+  private final StreamManager streamManager;
 
   public ServerConnection(
       final Configuration configuration,
@@ -69,7 +71,7 @@ public class ServerConnection implements InternalConnection {
     this.peerAddress = peerAddress;
     final TransportParameters transportParameters = configuration.toTransportParameters();
 
-    final StreamManager streamManager = new DefaultStreamManager(this, streamListener);
+    this.streamManager = new DefaultStreamManager(this, streamListener);
 
     final Ticker ticker = Ticker.systemTicker();
 
@@ -183,6 +185,10 @@ public class ServerConnection implements InternalConnection {
     stateMachine.closeImmediate(new ConnectionCloseFrame(error.getValue(), frameType, msg));
 
     return packetSender.destroy();
+  }
+
+  public Stream openStream() {
+    return streamManager.openStream(false, true);
   }
 
   @Override
