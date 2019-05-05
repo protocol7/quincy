@@ -100,7 +100,7 @@ public class ServerTlsSession {
     final byte[] helloHash = Hash.sha256(clientHello, serverHello);
 
     // create handshake AEAD
-    final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, true);
+    final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, false);
 
     final byte[] serverHandshakeTrafficSecret =
         HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);

@@ -29,16 +29,16 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ServerTlsManagerTest {
 
-  private ConnectionId connectionId = ConnectionId.random();
-  private TransportParameters tps = Configuration.defaults().toTransportParameters();
-  private ServerTLSManager manager =
+  private final ConnectionId connectionId = ConnectionId.random();
+  private final TransportParameters tps = Configuration.defaults().toTransportParameters();
+  private final ServerTLSManager manager =
       new ServerTLSManager(
           connectionId,
           tps,
           KeyUtil.getPrivateKey("src/test/resources/server.der"),
           KeyUtil.getCertsFromCrt("src/test/resources/server.crt"));
 
-  private ClientTlsSession clientTlsSession =
+  private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(connectionId.asBytes(), true), tps, new NoopCertificateValidator());
 
