@@ -63,6 +63,7 @@ public class ClientConnection implements InternalConnection {
   private final ClientTlsManager tlsManager;
   private final Pipeline pipeline;
   private final InetSocketAddress peerAddress;
+  private final Timer timer;
 
   public ClientConnection(
       final Configuration configuration,
@@ -105,6 +106,7 @@ public class ClientConnection implements InternalConnection {
             List.of(packetBuffer, logger));
 
     this.stateMachine = new ClientStateMachine(this);
+    this.timer = timer;
   }
 
   private void resetTlsSession() {
@@ -252,6 +254,8 @@ public class ClientConnection implements InternalConnection {
   }
 
   private Future<Void> closeInternal() {
+    timer.stop();
+
     return packetSender.destroy();
   }
 
