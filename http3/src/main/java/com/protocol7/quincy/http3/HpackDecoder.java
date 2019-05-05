@@ -170,6 +170,7 @@ final class HpackDecoder {
     while (in.isReadable()) {
       switch (state) {
         case READ_HEADER_REPRESENTATION:
+          @SuppressWarnings("checkstyle:finalparameters")
           byte b = in.readByte();
           if (maxDynamicTableSizeChangeRequired && (b & 0xE0) != 0x20) {
             // HpackEncoder MUST signal maximum dynamic table size change
