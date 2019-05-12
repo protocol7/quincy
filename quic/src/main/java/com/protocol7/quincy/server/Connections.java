@@ -43,7 +43,7 @@ public class Connections {
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
 
-    final ConnectionId connId = connIdOpt.orElse(ConnectionId.random());
+    final ConnectionId connId = connIdOpt.get();
 
     ServerConnection conn = connections.get(connId);
     if (conn == null) {

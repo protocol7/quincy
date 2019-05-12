@@ -12,11 +12,11 @@ import java.util.Optional;
 public class ConnectionId {
 
   private static final int MIN_LENGTH = 4;
-  private static final int MIN_LENGTH_RANDOM = 8;
+  public static final int LENGTH = 18;
   private static final int MAX_LENGTH = 18;
 
   public static ConnectionId random() {
-    final byte[] id = new byte[Rnd.rndInt(MIN_LENGTH_RANDOM, MAX_LENGTH)];
+    final byte[] id = new byte[LENGTH];
     Rnd.rndBytes(id);
     return new ConnectionId(id);
   }

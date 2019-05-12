@@ -46,7 +46,7 @@ public class PacketRouter {
       final ByteBuf bb, final PacketSender sender, final InetSocketAddress peerAddress) {
 
     while (bb.isReadable()) {
-      final HalfParsedPacket<?> halfParsed = Packet.parse(bb, -1);
+      final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
       final ServerConnection conn =
           connections.get(
