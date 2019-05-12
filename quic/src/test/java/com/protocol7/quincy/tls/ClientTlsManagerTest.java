@@ -7,10 +7,10 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
@@ -33,7 +33,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ClientTlsManagerTest {
 
   private ConnectionId connectionId = ConnectionId.random();
-  private TransportParameters tps = Configuration.defaults().toTransportParameters();
+  private TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
   private ClientTlsManager manager =
       new ClientTlsManager(connectionId, tps, new NoopCertificateValidator());
 

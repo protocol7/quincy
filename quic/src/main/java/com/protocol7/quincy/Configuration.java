@@ -5,105 +5,6 @@ import com.protocol7.quincy.tls.extensions.TransportParameters;
 
 public class Configuration {
 
-  public static class Builder {
-    private Version version = Version.DRAFT_18;
-    private int initialMaxStreamDataBidiLocal = 32768;
-    private int initialMaxData = 49152;
-    private int initialMaxBidiStreams = 100;
-    private int idleTimeout = 30;
-    private int maxPacketSize = 1452;
-    private int ackDelayExponent = 3;
-    private int initialMaxUniStreams = 100;
-    private boolean disableMigration = true;
-    private int initialMaxStreamDataBidiRemote = 32768;
-    private int initialMaxStreamDataUni = 32768;
-    private int maxAckDelay = 100; // TODO verify
-
-    public Builder withVersion(final Version version) {
-      this.version = version;
-      return this;
-    }
-
-    public Builder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
-      this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
-      return this;
-    }
-
-    public Builder withInitialMaxData(final int initialMaxData) {
-      this.initialMaxData = initialMaxData;
-      return this;
-    }
-
-    public Builder withInitialMaxBidiStreams(final int initialMaxBidiStreams) {
-      this.initialMaxBidiStreams = initialMaxBidiStreams;
-      return this;
-    }
-
-    public Builder withIdleTimeout(final int idleTimeout) {
-      this.idleTimeout = idleTimeout;
-      return this;
-    }
-
-    public Builder withMaxPacketSize(final int maxPacketSize) {
-      this.maxPacketSize = maxPacketSize;
-      return this;
-    }
-
-    public Builder withAckDelayExponent(final int ackDelayExponent) {
-      this.ackDelayExponent = ackDelayExponent;
-      return this;
-    }
-
-    public Builder withInitialMaxUniStreams(final int initialMaxUniStreams) {
-      this.initialMaxUniStreams = initialMaxUniStreams;
-      return this;
-    }
-
-    public Builder withDisableMigration(final boolean disableMigration) {
-      this.disableMigration = disableMigration;
-      return this;
-    }
-
-    public Builder withInitialMaxStreamDataBidiRemote(final int initialMaxStreamDataBidiRemote) {
-      this.initialMaxStreamDataBidiRemote = initialMaxStreamDataBidiRemote;
-      return this;
-    }
-
-    public Builder withInitialMaxStreamDataUni(final int initialMaxStreamDataUni) {
-      this.initialMaxStreamDataUni = initialMaxStreamDataUni;
-      return this;
-    }
-
-    public Builder withMaxAckDelay(final int maxAckDelay) {
-      this.maxAckDelay = maxAckDelay;
-      return this;
-    }
-
-    public Configuration build() {
-      return new Configuration(
-          version,
-          initialMaxStreamDataBidiLocal,
-          initialMaxData,
-          initialMaxBidiStreams,
-          idleTimeout,
-          maxPacketSize,
-          ackDelayExponent,
-          initialMaxUniStreams,
-          disableMigration,
-          initialMaxStreamDataBidiRemote,
-          initialMaxStreamDataUni,
-          maxAckDelay);
-    }
-  }
-
-  public static Builder newBuilder() {
-    return new Builder();
-  }
-
-  public static Configuration defaults() {
-    return new Builder().build();
-  }
-
   private final Version version;
   private final int initialMaxStreamDataBidiLocal;
   private final int initialMaxData;
@@ -117,7 +18,7 @@ public class Configuration {
   private final int initialMaxStreamDataUni;
   private final int maxAckDelay;
 
-  private Configuration(
+  public Configuration(
       final Version version,
       final int initialMaxStreamDataBidiLocal,
       final int initialMaxData,

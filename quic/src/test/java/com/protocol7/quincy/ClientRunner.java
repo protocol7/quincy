@@ -1,6 +1,7 @@
 package com.protocol7.quincy;
 
 import com.protocol7.quincy.client.QuicClient;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import java.net.InetSocketAddress;
@@ -17,7 +18,7 @@ public class ClientRunner {
 
     final QuicClient client =
         QuicClient.connect(
-                Configuration.defaults(),
+                new QuicBuilder().configuration(),
                 server,
                 new StreamListener() {
                   @Override

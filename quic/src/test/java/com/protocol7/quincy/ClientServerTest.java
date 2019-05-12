@@ -15,6 +15,7 @@ import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.server.ServerConnection;
@@ -85,7 +86,7 @@ public class ClientServerTest {
   public void setUp() {
     clientConnection =
         new ClientConnection(
-            Configuration.defaults(),
+            new QuicBuilder().configuration(),
             destConnectionId,
             clientListener,
             clientSender,
@@ -99,7 +100,7 @@ public class ClientServerTest {
 
     serverConnection =
         new ServerConnection(
-            Configuration.defaults(),
+            new QuicBuilder().configuration(),
             srcConnectionId,
             serverListener,
             serverSender,

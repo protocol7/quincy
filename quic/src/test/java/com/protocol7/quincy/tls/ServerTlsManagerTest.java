@@ -8,9 +8,9 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
@@ -30,7 +30,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ServerTlsManagerTest {
 
   private final ConnectionId connectionId = ConnectionId.random();
-  private final TransportParameters tps = Configuration.defaults().toTransportParameters();
+  private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
   private final ServerTLSManager manager =
       new ServerTLSManager(
           connectionId,

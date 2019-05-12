@@ -1,6 +1,6 @@
 package com.protocol7.quincy.it;
 
-import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.server.QuicServer;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
@@ -19,7 +19,7 @@ public class QuiclyClientTest {
     try {
       server =
           QuicServer.bind(
-                  Configuration.defaults(),
+                  new QuicBuilder().configuration(),
                   new InetSocketAddress("0.0.0.0", 4444),
                   new StreamListener() {
                     @Override

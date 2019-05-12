@@ -4,8 +4,8 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.client.QuicClient;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
@@ -31,7 +31,7 @@ public class QuiclyTest {
     try {
       client =
           QuicClient.connect(
-                  Configuration.defaults(),
+                  new QuicBuilder().configuration(),
                   quicly.getAddress(),
                   new StreamListener() {
                     @Override

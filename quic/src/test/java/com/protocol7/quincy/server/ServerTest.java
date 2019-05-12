@@ -6,12 +6,12 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
@@ -49,7 +49,7 @@ public class ServerTest {
   private ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
-          Configuration.defaults().toTransportParameters(),
+          new QuicBuilder().configuration().toTransportParameters(),
           new NoopCertificateValidator());
 
   @Mock private PacketSender packetSender;
@@ -67,7 +67,7 @@ public class ServerTest {
 
     connection =
         new ServerConnection(
-            Configuration.defaults(),
+            new QuicBuilder().configuration(),
             srcConnectionId,
             streamListener,
             packetSender,

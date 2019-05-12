@@ -4,12 +4,12 @@ import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.flowcontrol.MockFlowControlHandler;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
@@ -62,7 +62,7 @@ public class ClientTest {
 
     connection =
         new ClientConnection(
-            Configuration.defaults(),
+            new QuicBuilder().configuration(),
             destConnectionId,
             streamListener,
             packetSender,
@@ -77,7 +77,7 @@ public class ClientTest {
     serverTlsSession =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
-            Configuration.defaults().toTransportParameters(),
+            new QuicBuilder().configuration().toTransportParameters(),
             serverCert,
             privateKey);
   }

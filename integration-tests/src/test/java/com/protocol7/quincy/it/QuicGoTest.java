@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.client.QuicClient;
+import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
@@ -20,7 +21,7 @@ public class QuicGoTest {
 
   @Test
   public void test() throws ExecutionException, InterruptedException {
-    final Configuration config = Configuration.newBuilder().withVersion(Version.QUIC_GO).build();
+    final Configuration config = new QuicBuilder().withVersion(Version.QUIC_GO).configuration();
 
     QuicClient client = null;
     try {

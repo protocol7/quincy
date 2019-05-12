@@ -56,7 +56,6 @@ public class PacketRouter {
               peerAddress); // TODO fix for when connId is omitted
 
       if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
-
         final Packet packet = halfParsed.complete(conn::getAEAD);
 
         MDC.put("actor", "server");
