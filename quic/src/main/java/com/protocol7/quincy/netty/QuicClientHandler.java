@@ -34,7 +34,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
   private final StreamListener streamListener =
       new StreamListener() {
         @Override
-        public void onData(final Stream stream, final byte[] data) {
+        public void onData(final Stream stream, final byte[] data, final boolean finished) {
           System.out.println("onData " + new String(data));
 
           ctx.fireChannelRead(
@@ -43,17 +43,6 @@ public class QuicClientHandler extends ChannelDuplexHandler {
                   stream.getId().getValue(),
                   Unpooled.wrappedBuffer(data),
                   remoteAddress()));
-        }
-
-        @Override
-        public void onFinished() {
-          System.out.println("onFinished ");
-        }
-
-        @Override
-        public void onReset(
-            final Stream stream, final int applicationErrorCode, final long offset) {
-          System.out.println("onReset ");
         }
       };
 

@@ -17,6 +17,10 @@ public class ReceivedDataBuffer {
     }
   }
 
+  public boolean hasMore() {
+    return buffer.get(readOffset) != null;
+  }
+
   public Optional<byte[]> read() {
     final byte[] b = buffer.get(readOffset);
 

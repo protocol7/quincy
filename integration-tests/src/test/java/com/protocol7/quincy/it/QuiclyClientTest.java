@@ -2,8 +2,6 @@ package com.protocol7.quincy.it;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.server.QuicServer;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.testcontainers.quicly.QuiclyClientContainer;
 import java.io.IOException;
 import java.net.InetSocketAddress;
@@ -21,19 +19,7 @@ public class QuiclyClientTest {
           QuicServer.bind(
                   new QuicBuilder().configuration(),
                   new InetSocketAddress("0.0.0.0", 4444),
-                  new StreamListener() {
-                    @Override
-                    public void onData(final Stream stream, final byte[] data) {
-                      System.out.println(new String(data));
-                    }
-
-                    @Override
-                    public void onFinished() {}
-
-                    @Override
-                    public void onReset(
-                        final Stream stream, final int applicationErrorCode, final long offset) {}
-                  },
+                  (stream, data, finished) -> System.out.println(new String(data)),
                   KeyUtil.getCertsFromCrt("src/test/resources/server.crt"),
                   KeyUtil.getPrivateKey("src/test/resources/server.der"))
               .get();

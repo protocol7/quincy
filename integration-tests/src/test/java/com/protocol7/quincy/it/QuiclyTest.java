@@ -6,8 +6,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
 import com.protocol7.testcontainers.quicly.QuiclyServerContainer;
 import java.nio.charset.StandardCharsets;
@@ -33,19 +31,7 @@ public class QuiclyTest {
           QuicClient.connect(
                   new QuicBuilder().configuration(),
                   quicly.getAddress(),
-                  new StreamListener() {
-                    @Override
-                    public void onData(final Stream stream, final byte[] data) {
-                      capturedData.add(data);
-                    }
-
-                    @Override
-                    public void onFinished() {}
-
-                    @Override
-                    public void onReset(
-                        final Stream stream, final int applicationErrorCode, final long offset) {}
-                  })
+                  (stream, data, finished) -> capturedData.add(data))
               .get();
 
       client.openStream().write("Hello world".getBytes(), true);

@@ -2,8 +2,6 @@ package com.protocol7.quincy;
 
 import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
 import java.net.InetSocketAddress;
 import java.util.concurrent.ExecutionException;
 
@@ -20,19 +18,7 @@ public class ClientRunner {
         QuicClient.connect(
                 new QuicBuilder().configuration(),
                 server,
-                new StreamListener() {
-                  @Override
-                  public void onData(final Stream stream, final byte[] data) {
-                    System.out.println(new String(data));
-                  }
-
-                  @Override
-                  public void onFinished() {}
-
-                  @Override
-                  public void onReset(
-                      final Stream stream, final int applicationErrorCode, final long offset) {}
-                })
+                (stream, data, finished) -> System.out.println(new String(data)))
             .get();
 
     client.openStream().write("Hello world".getBytes(), true);

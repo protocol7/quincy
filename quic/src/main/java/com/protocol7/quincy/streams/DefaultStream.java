@@ -8,6 +8,7 @@ import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultStream implements Stream {
@@ -20,6 +21,7 @@ public class DefaultStream implements Stream {
   private final SendStateMachine sendStateMachine = new SendStateMachine();
   private final ReceiveStateMachine receiveStateMachine = new ReceiveStateMachine();
   private final ReceivedDataBuffer receivedDataBuffer = new ReceivedDataBuffer();
+  private final AtomicBoolean seenFinish = new AtomicBoolean(false);
 
   public DefaultStream(
       final StreamId id,
@@ -73,25 +75,23 @@ public class DefaultStream implements Stream {
   }
 
   public void onData(final long offset, final boolean finish, final byte[] b) {
+    if (finish) {
+      seenFinish.set(true);
+    }
+
     receivedDataBuffer.onData(b, offset, finish);
 
-    Optional<byte[]> data = receivedDataBuffer.read();
-    while (data.isPresent()) {
-      listener.onData(this, data.get());
-      data = receivedDataBuffer.read();
+    while (receivedDataBuffer.hasMore()) {
+      final Optional<byte[]> data = receivedDataBuffer.read();
+
+      listener.onData(this, data.get(), receivedDataBuffer.isDone() && seenFinish.get());
     }
 
     receiveStateMachine.onStream(finish);
-
-    // TODO review use of state machine, canReceive seems broken in casse of out of order packets
-    if (!receiveStateMachine.canReceive() && receivedDataBuffer.isDone()) {
-      listener.onFinished();
-    }
   }
 
   public void onReset(final int applicationErrorCode, final long offset) {
     receiveStateMachine.onReset();
-    listener.onReset(this, applicationErrorCode, offset);
     receiveStateMachine.onAppReadReset();
   }
 

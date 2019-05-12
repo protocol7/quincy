@@ -13,7 +13,6 @@ import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
-import com.protocol7.quincy.streams.DefaultStream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
@@ -183,7 +182,7 @@ public class ClientTest {
     connection.onPacket(packet(new StreamFrame(streamId, 0, true, DATA)));
 
     final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
-    verify(streamListener).onData(any(), dataCaptor.capture());
+    verify(streamListener).onData(any(), dataCaptor.capture(), eq(true));
 
     assertArrayEquals(DATA, dataCaptor.getValue());
 
@@ -198,14 +197,8 @@ public class ClientTest {
     connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
     connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
 
-    final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
-    verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
-
-    final List<byte[]> datas = dataCaptor.getAllValues();
-
-    assertEquals(2, datas.size());
-    assertArrayEquals(DATA, datas.get(0));
-    assertArrayEquals(DATA2, datas.get(1));
+    verify(streamListener).onData(any(), eq(DATA), eq(false));
+    verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify ack
     assertAck(4, 3, 3, 3);
@@ -220,14 +213,8 @@ public class ClientTest {
     connection.onPacket(packet(new StreamFrame(streamId, DATA.length, true, DATA2)));
     connection.onPacket(packet(new StreamFrame(streamId, 0, false, DATA)));
 
-    final ArgumentCaptor<byte[]> dataCaptor = ArgumentCaptor.forClass(byte[].class);
-    verify(streamListener, times(2)).onData(any(), dataCaptor.capture());
-
-    final List<byte[]> datas = dataCaptor.getAllValues();
-
-    assertEquals(2, datas.size());
-    assertArrayEquals(DATA, datas.get(0));
-    assertArrayEquals(DATA2, datas.get(1));
+    verify(streamListener).onData(any(), eq(DATA), eq(false));
+    verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify acks
     assertAck(4, 3, 3, 3);
@@ -239,8 +226,6 @@ public class ClientTest {
     handshake();
 
     connection.onPacket(packet(new ResetStreamFrame(streamId, 123, 0)));
-
-    verify(streamListener).onReset(any(DefaultStream.class), eq(123), eq(0L));
 
     // verify ack
     assertAck(4, 3, 3, 3);

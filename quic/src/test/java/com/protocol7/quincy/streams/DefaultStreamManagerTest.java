@@ -90,8 +90,7 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, true, DATA1)), ctx);
-    verify(listener).onData(stream, DATA1);
-    verify(listener).onFinished();
+    verify(listener).onData(stream, DATA1, true);
 
     assertTrue(stream.isFinished());
   }
@@ -101,12 +100,11 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
-    verify(listener).onData(stream, DATA1);
+    verify(listener).onData(stream, DATA1, false);
     verifyNoMoreInteractions(listener);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)), ctx);
-    verify(listener).onData(stream, DATA2);
-    verify(listener).onFinished();
+    verify(listener).onData(stream, DATA2, true);
 
     assertTrue(stream.isFinished());
   }
@@ -119,9 +117,8 @@ public class DefaultStreamManagerTest {
     verifyNoMoreInteractions(listener);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
-    verify(listener).onData(stream, DATA1);
-    verify(listener).onData(stream, DATA2);
-    verify(listener).onFinished();
+    verify(listener).onData(stream, DATA1, false);
+    verify(listener).onData(stream, DATA2, true);
 
     assertTrue(stream.isFinished());
   }
@@ -131,11 +128,10 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     manager.onReceivePacket(p(new StreamFrame(stream.getId(), 0, false, DATA1)), ctx);
-    verify(listener).onData(stream, DATA1);
+    verify(listener).onData(stream, DATA1, false);
     verifyNoMoreInteractions(listener);
 
     manager.onReceivePacket(p(new ResetStreamFrame(stream.getId(), 123, DATA1.length)), ctx);
-    verify(listener).onReset(stream, 123, DATA1.length);
     verifyNoMoreInteractions(listener);
 
     assertTrue(stream.isFinished());

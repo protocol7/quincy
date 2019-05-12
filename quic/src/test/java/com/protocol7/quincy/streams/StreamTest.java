@@ -104,15 +104,13 @@ public class StreamTest {
     final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
     stream.onData(0, true, DATA);
 
-    verify(listener).onData(stream, DATA);
+    verify(listener).onData(stream, DATA, true);
   }
 
   @Test
   public void onReset() {
     final DefaultStream stream = new DefaultStream(streamId, ctx, listener, Bidirectional);
     stream.onReset(123, 456);
-
-    verify(listener).onReset(stream, 123, 456);
 
     assertTrue(stream.isFinished());
   }

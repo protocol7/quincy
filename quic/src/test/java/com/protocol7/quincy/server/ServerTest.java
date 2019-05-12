@@ -128,7 +128,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, new StreamFrame(streamId, 0, false, DATA)));
 
-    verify(streamListener).onData(any(), eq(DATA));
+    verify(streamListener).onData(any(), eq(DATA), eq(false));
   }
 
   @Test
@@ -136,8 +136,6 @@ public class ServerTest {
     handshake();
 
     connection.onPacket(packet(destConnectionId2, new ResetStreamFrame(streamId, 123, 456)));
-
-    verify(streamListener).onReset(any(), eq(123), eq(456L));
   }
 
   @Test

@@ -139,7 +139,7 @@ public class ClientServerTest {
               return null;
             })
         .when(serverListener)
-        .onData(any(), eq(PING));
+        .onData(any(), eq(PING), eq(true));
 
     // send ping
     final Stream stream = clientConnection.openStream();
@@ -148,7 +148,7 @@ public class ClientServerTest {
     sleep();
 
     // verify we got pong
-    verify(clientListener).onData(any(), eq(PONG));
+    verify(clientListener).onData(any(), eq(PONG), eq(true));
   }
 
   @Test
@@ -169,7 +169,8 @@ public class ClientServerTest {
     ArgumentCaptor<byte[]> captor = null;
     for (int i = 0; i < 10; i++) {
       captor = ArgumentCaptor.forClass(byte[].class);
-      verify(serverListener, atLeast(0)).onData(any(Stream.class), captor.capture());
+      verify(serverListener, atLeast(0))
+          .onData(any(Stream.class), captor.capture(), any(Boolean.class));
 
       if (captor.getAllValues().size() >= 100) {
         break;

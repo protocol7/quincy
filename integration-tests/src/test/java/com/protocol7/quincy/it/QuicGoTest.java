@@ -6,8 +6,6 @@ import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.testcontainers.quicgo.QuicGoContainer;
 import com.protocol7.testcontainers.quicgo.QuicGoPacket;
 import java.util.List;
@@ -29,19 +27,7 @@ public class QuicGoTest {
           QuicClient.connect(
                   config,
                   quicGo.getAddress(),
-                  new StreamListener() {
-                    @Override
-                    public void onData(final Stream stream, final byte[] data) {
-                      System.out.println(new String(data));
-                    }
-
-                    @Override
-                    public void onFinished() {}
-
-                    @Override
-                    public void onReset(
-                        final Stream stream, final int applicationErrorCode, final long offset) {}
-                  })
+                  (stream, data, finished) -> System.out.println(new String(data)))
               .get();
 
       client.openStream().write("Hello world".getBytes(), true);

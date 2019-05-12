@@ -40,6 +40,7 @@ public class DefaultStreamManager implements StreamManager {
           final StreamFrame sf = (StreamFrame) frame;
 
           final DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
+
           stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
         } else if (frame instanceof ResetStreamFrame) {
           final ResetStreamFrame rsf = (ResetStreamFrame) frame;

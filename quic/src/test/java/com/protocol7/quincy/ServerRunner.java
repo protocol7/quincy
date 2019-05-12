@@ -18,16 +18,10 @@ public class ServerRunner {
                 new InetSocketAddress("0.0.0.0", 4444),
                 new StreamListener() {
                   @Override
-                  public void onData(final Stream stream, final byte[] data) {
+                  public void onData(
+                      final Stream stream, final byte[] data, final boolean finished) {
                     System.out.println(new String(data));
                   }
-
-                  @Override
-                  public void onFinished() {}
-
-                  @Override
-                  public void onReset(
-                      final Stream stream, final int applicationErrorCode, final long offset) {}
                 },
                 KeyUtil.getCertsFromCrt("quic/src/test/resources/server.crt"),
                 KeyUtil.getPrivateKey("quic/src/test/resources/server.der"))
