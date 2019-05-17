@@ -47,8 +47,7 @@ public class ServerConnection implements InternalConnection {
   private final Optional<ConnectionId> localConnectionId;
   private final PacketSender packetSender;
   private final Version version;
-  private final AtomicReference<PacketNumber> sendPacketNumber =
-      new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(PacketNumber.MIN);
   private final ServerStateMachine stateMachine;
 
   private final ServerTLSManager tlsManager;
@@ -168,8 +167,8 @@ public class ServerConnection implements InternalConnection {
     return tlsManager.getAEAD(level);
   }
 
-  private PacketNumber nextSendPacketNumber() {
-    return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
+  private long nextSendPacketNumber() {
+    return sendPacketNumber.updateAndGet(packetNumber -> PacketNumber.next(packetNumber));
   }
 
   public State getState() {

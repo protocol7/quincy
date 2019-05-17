@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
@@ -58,12 +57,7 @@ public class PacketRouterTest {
   public void route() {
     final InitialPacket packet =
         InitialPacket.create(
-            of(destConnId),
-            empty(),
-            new PacketNumber(2),
-            Version.DRAFT_18,
-            empty(),
-            new PaddingFrame(1));
+            of(destConnId), empty(), 2, Version.DRAFT_18, empty(), new PaddingFrame(1));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
@@ -84,12 +78,7 @@ public class PacketRouterTest {
   public void versionMismatch() {
     final InitialPacket packet =
         InitialPacket.create(
-            of(destConnId),
-            empty(),
-            new PacketNumber(2),
-            Version.FINAL,
-            empty(),
-            new PaddingFrame(1));
+            of(destConnId), empty(), 2, Version.FINAL, empty(), new PaddingFrame(1));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);

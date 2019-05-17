@@ -44,8 +44,8 @@ public class HandshakePacketTest {
     final ByteBuf bb = Unpooled.buffer();
 
     // write two packets to the same buffer
-    p(new PacketNumber(1)).write(bb, aead);
-    p(new PacketNumber(2)).write(bb, aead);
+    p(1).write(bb, aead);
+    p(2).write(bb, aead);
 
     // parse both packet
     final HandshakePacket parsed1 = HandshakePacket.parse(bb).complete(l -> aead);
@@ -54,12 +54,12 @@ public class HandshakePacketTest {
     assertEquals(parsed1.getDestinationConnectionId(), parsed2.getDestinationConnectionId());
     assertEquals(parsed1.getSourceConnectionId(), parsed2.getSourceConnectionId());
     assertEquals(parsed1.getVersion(), parsed2.getVersion());
-    assertEquals(new PacketNumber(1), parsed1.getPacketNumber());
-    assertEquals(new PacketNumber(2), parsed2.getPacketNumber());
+    assertEquals(1, parsed1.getPacketNumber());
+    assertEquals(2, parsed2.getPacketNumber());
     assertEquals(parsed1.getPayload(), parsed2.getPayload());
   }
 
-  private HandshakePacket p(final PacketNumber pn) {
+  private HandshakePacket p(final long pn) {
     return HandshakePacket.create(
         Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, new PaddingFrame(1));
   }

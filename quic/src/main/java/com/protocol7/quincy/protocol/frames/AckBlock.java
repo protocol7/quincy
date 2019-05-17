@@ -3,32 +3,25 @@ package com.protocol7.quincy.protocol.frames;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.protocol7.quincy.protocol.PacketNumber;
+import java.util.Objects;
 
 public class AckBlock {
 
-  public static AckBlock fromLongs(final long smallest, final long largest) {
-    return new AckBlock(new PacketNumber(smallest), new PacketNumber(largest));
+  private final long smallest;
+  private final long largest;
+
+  public AckBlock(final long smallest, final long largest) {
+    checkArgument(largest >= smallest);
+
+    this.smallest = PacketNumber.validate(smallest);
+    this.largest = PacketNumber.validate(largest);
   }
 
-  private final PacketNumber smallest;
-  private final PacketNumber largest;
-
-  public AckBlock(final PacketNumber smallest, final PacketNumber largest) {
-    checkArgument(largest.compareTo(smallest) >= 0);
-
-    this.smallest = smallest;
-    this.largest = largest;
-  }
-
-  public AckBlock(final int smallest, final int largest) {
-    this(new PacketNumber(smallest), new PacketNumber(largest));
-  }
-
-  public PacketNumber getSmallest() {
+  public long getSmallest() {
     return smallest;
   }
 
-  public PacketNumber getLargest() {
+  public long getLargest() {
     return largest;
   }
 
@@ -36,19 +29,13 @@ public class AckBlock {
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-
     final AckBlock ackBlock = (AckBlock) o;
-
-    if (smallest != null ? !smallest.equals(ackBlock.smallest) : ackBlock.smallest != null)
-      return false;
-    return largest != null ? largest.equals(ackBlock.largest) : ackBlock.largest == null;
+    return smallest == ackBlock.smallest && largest == ackBlock.largest;
   }
 
   @Override
   public int hashCode() {
-    int result = smallest != null ? smallest.hashCode() : 0;
-    result = 31 * result + (largest != null ? largest.hashCode() : 0);
-    return result;
+    return Objects.hash(smallest, largest);
   }
 
   @Override

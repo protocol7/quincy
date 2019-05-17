@@ -4,7 +4,6 @@ import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.frames.PingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
@@ -17,7 +16,7 @@ import org.junit.Test;
 public class ShortPacketTest {
 
   private ConnectionId dest = ConnectionId.random();
-  private PacketNumber pn = new PacketNumber(650000);
+  private long pn = 650000;
 
   private AEAD aead = TestAEAD.create();
 

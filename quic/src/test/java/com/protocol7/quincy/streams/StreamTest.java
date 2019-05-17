@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
@@ -30,7 +29,7 @@ public class StreamTest {
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
-    when(packet.getPacketNumber()).thenReturn(new PacketNumber(123));
+    when(packet.getPacketNumber()).thenReturn(123L);
     when(ctx.send(any(Frame.class))).thenReturn(packet);
   }
 

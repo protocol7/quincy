@@ -96,7 +96,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
 
         MDC.put("actor", "client");
         if (packet instanceof FullPacket) {
-          MDC.put("packetnumber", ((FullPacket) packet).getPacketNumber().toString());
+          MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
         }
         packet
             .getDestinationConnectionId()

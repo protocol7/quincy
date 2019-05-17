@@ -13,42 +13,41 @@ public class PacketNumberTest {
 
   @Test
   public void validateBounds() {
-    new PacketNumber(0);
-    new PacketNumber(123);
-    new PacketNumber(4611686018427387903L);
+    PacketNumber.validate(0);
+    PacketNumber.validate(123);
+    PacketNumber.validate(4611686018427387903L);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooSmall() {
-    new PacketNumber(-1);
+    PacketNumber.validate(-1);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooLarge() {
-    new PacketNumber(4611686018427387904L);
+    PacketNumber.validate(4611686018427387904L);
   }
 
   @Test
   public void write() {
-    final byte[] b = new PacketNumber(123).write(4);
+    final byte[] b = PacketNumber.write(123, 4);
     TestUtil.assertHex("0000007b", b);
   }
 
   @Test
   public void next() {
-    final PacketNumber pn = new PacketNumber(123);
+    final long pn = 123;
 
-    assertEquals(new PacketNumber(124), pn.next());
-    assertEquals(new PacketNumber(124), pn.next()); // doesn't mutate the original value
+    assertEquals(124, PacketNumber.next(pn));
   }
 
   @Test
   public void roundtrip() {
-    final PacketNumber pn = new PacketNumber(123);
+    final long pn = 123;
 
-    final byte[] b = pn.write(pn.getLength());
+    final byte[] b = PacketNumber.write(pn, PacketNumber.getLength(pn));
 
-    final PacketNumber parsed = PacketNumber.parse(b);
+    final long parsed = PacketNumber.parse(b);
 
     assertEquals(pn, parsed);
   }
@@ -70,14 +69,13 @@ public class PacketNumberTest {
   }
 
   private void assertRead(final int expected, final String h) {
-    final PacketNumber pn = PacketNumber.parse(Hex.dehex(h));
-    assertEquals(expected, pn.asLong());
+    final long pn = PacketNumber.parse(Hex.dehex(h));
+    assertEquals(expected, pn);
   }
 
   private void assertWrite(final int pn, final String expected) {
     final ByteBuf bb = Unpooled.buffer();
-    final PacketNumber p = new PacketNumber(pn);
-    bb.writeBytes(p.write(p.getLength()));
+    bb.writeBytes(PacketNumber.write(pn, PacketNumber.getLength(pn)));
 
     final byte[] b = Bytes.drainToArray(bb);
 

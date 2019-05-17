@@ -18,7 +18,7 @@ public class PacketTest {
 
   private final AEAD aead = TestAEAD.create();
   private final ConnectionId connId = ConnectionId.random();
-  private final PacketNumber pn = new PacketNumber(123);
+  private final long pn = 123;
 
   @Test
   public void parseInitialPacket() {

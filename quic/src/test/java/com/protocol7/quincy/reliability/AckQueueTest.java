@@ -4,7 +4,6 @@ import static com.protocol7.quincy.tls.EncryptionLevel.OneRtt;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.when;
 
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.reliability.AckQueue.Entry;
 import java.util.List;
@@ -19,10 +18,10 @@ public class AckQueueTest {
 
   @Mock private ShortPacket packet1;
   @Mock private ShortPacket packet2;
-  private PacketNumber pn1 = new PacketNumber(1);
-  private PacketNumber pn2 = new PacketNumber(2);
+  private final long pn1 = 1;
+  private final long pn2 = 2;
 
-  private AckQueue queue = new AckQueue();
+  private final AckQueue queue = new AckQueue();
 
   @Before
   public void setUp() {

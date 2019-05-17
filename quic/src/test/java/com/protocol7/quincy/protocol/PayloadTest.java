@@ -14,7 +14,7 @@ import org.junit.Test;
 public class PayloadTest {
 
   private final AEAD aead = TestAEAD.create();
-  private final PacketNumber pn = new PacketNumber(1);
+  private final long pn = 1;
   private final byte[] aad = new byte[12];
 
   @Test

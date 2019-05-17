@@ -15,17 +15,13 @@ import java.util.List;
 public class Payload {
 
   public static Payload parse(
-      final ByteBuf bb,
-      final int length,
-      final AEAD aead,
-      final PacketNumber pn,
-      final byte[] aad) {
+      final ByteBuf bb, final int length, final AEAD aead, final long pn, final byte[] aad) {
     final byte[] cipherText = new byte[length];
     bb.readBytes(cipherText);
 
     final byte[] raw;
     try {
-      raw = aead.open(cipherText, pn.asLong(), aad);
+      raw = aead.open(cipherText, pn, aad);
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);
     }
@@ -67,7 +63,7 @@ public class Payload {
     return frames.stream().mapToInt(f -> f.calculateLength()).sum() + AEAD.OVERHEAD;
   }
 
-  public void write(final ByteBuf bb, final AEAD aead, final PacketNumber pn, final byte[] aad) {
+  public void write(final ByteBuf bb, final AEAD aead, final long pn, final byte[] aad) {
     final ByteBuf raw = Unpooled.buffer();
     for (final Frame frame : frames) {
       frame.write(raw);
@@ -75,7 +71,7 @@ public class Payload {
     final byte[] b = Bytes.drainToArray(raw);
 
     try {
-      final byte[] sealed = aead.seal(b, pn.asLong(), aad);
+      final byte[] sealed = aead.seal(b, pn, aad);
       bb.writeBytes(sealed);
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);

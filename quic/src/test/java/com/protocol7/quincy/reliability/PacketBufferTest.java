@@ -5,7 +5,6 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.MaxDataFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
@@ -80,7 +79,7 @@ public class PacketBufferTest {
   }
 
   private FullPacket p(final long pn) {
-    return ShortPacket.create(false, Optional.empty(), new PacketNumber(pn), f(pn));
+    return ShortPacket.create(false, Optional.empty(), pn, f(pn));
   }
 
   private Frame f(final long i) {

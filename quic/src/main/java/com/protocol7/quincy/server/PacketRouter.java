@@ -60,7 +60,7 @@ public class PacketRouter {
 
         MDC.put("actor", "server");
         if (packet instanceof FullPacket) {
-          MDC.put("packetnumber", ((FullPacket) packet).getPacketNumber().toString());
+          MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
         }
         if (packet.getDestinationConnectionId().isPresent()) {
           MDC.put("connectionid", packet.getDestinationConnectionId().get().toString());

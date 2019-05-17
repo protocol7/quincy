@@ -43,7 +43,7 @@ public class ClientTest {
 
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
-  private PacketNumber packetNumber = new PacketNumber(0);
+  private long packetNumber = 0;
   private final long streamId = StreamId.random(true, true);
 
   private final FlowControlHandler flowControlHandler = new MockFlowControlHandler();
@@ -90,7 +90,7 @@ public class ClientTest {
 
     // validate first packet sent
     final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
-    assertEquals(1, initialPacket.getPacketNumber().asLong());
+    assertEquals(1, initialPacket.getPacketNumber());
     assertEquals(destConnectionId, initialPacket.getDestinationConnectionId().get());
     assertTrue(initialPacket.getSourceConnectionId().isPresent());
 
@@ -118,7 +118,7 @@ public class ClientTest {
 
     // validate new initial packet sent
     final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
-    assertEquals(1, initialPacket2.getPacketNumber().asLong());
+    assertEquals(1, initialPacket2.getPacketNumber());
     final ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
     assertEquals(srcConnectionId, newDestConnId);
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
@@ -165,7 +165,7 @@ public class ClientTest {
 
     // validate client fin handshake packet
     final HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
-    assertEquals(2, hp.getPacketNumber().asLong());
+    assertEquals(2, hp.getPacketNumber());
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertEquals(srcConnectionId, hp.getDestinationConnectionId().get());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
@@ -305,7 +305,7 @@ public class ClientTest {
   private void assertAck(
       final int number, final int packetNumber, final int smallest, final int largest) {
     final ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
-    assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
+    assertEquals(packetNumber, ackPacket.getPacketNumber());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
 
     final List<AckBlock> actual =
@@ -339,8 +339,8 @@ public class ClientTest {
         new Payload(frames));
   }
 
-  private PacketNumber nextPacketNumber() {
-    packetNumber = packetNumber.next();
+  private long nextPacketNumber() {
+    packetNumber = PacketNumber.next(packetNumber);
     return packetNumber;
   }
 }

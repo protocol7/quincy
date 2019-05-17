@@ -2,7 +2,6 @@ package com.protocol7.quincy.streams;
 
 import static com.protocol7.quincy.streams.SendStateMachine.SendStreamState.*;
 
-import com.protocol7.quincy.protocol.PacketNumber;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.Set;
@@ -24,11 +23,11 @@ public class SendStateMachine {
   }
 
   private SendStreamState state = Open;
-  private final Set<PacketNumber> outstandingStreamPackets =
+  private final Set<Long> outstandingStreamPackets =
       Collections.newSetFromMap(new ConcurrentHashMap<>());
-  private Optional<PacketNumber> outstandingResetPacket = Optional.empty();
+  private Optional<Long> outstandingResetPacket = Optional.empty();
 
-  public void onStream(final PacketNumber pn, final boolean fin) {
+  public void onStream(final long pn, final boolean fin) {
     if (state == Open || state == Send) {
       if (fin) {
         state = DataSent;
@@ -40,7 +39,7 @@ public class SendStateMachine {
     }
   }
 
-  public void onReset(final PacketNumber pn) {
+  public void onReset(final long pn) {
     if (state == Open || state == Send || state == DataSent) {
       state = ResetSent;
       outstandingResetPacket = Optional.of(pn);
@@ -49,7 +48,7 @@ public class SendStateMachine {
     }
   }
 
-  public void onAck(final PacketNumber pn) {
+  public void onAck(final long pn) {
     outstandingStreamPackets.remove(pn);
 
     if (state == DataSent && outstandingStreamPackets.isEmpty()) {

@@ -38,7 +38,7 @@ public abstract class LongHeaderPacket implements FullPacket {
   private final Optional<ConnectionId> destinationConnectionId;
   private final Optional<ConnectionId> sourceConnectionId;
   private final Version version;
-  private final PacketNumber packetNumber;
+  private final long packetNumber;
   private final Payload payload;
 
   public LongHeaderPacket(
@@ -46,13 +46,13 @@ public abstract class LongHeaderPacket implements FullPacket {
       final Optional<ConnectionId> destinationConnectionId,
       final Optional<ConnectionId> sourceConnectionId,
       final Version version,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Payload payload) {
     this.packetType = packetType;
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
     this.version = version;
-    this.packetNumber = packetNumber;
+    this.packetNumber = PacketNumber.validate(packetNumber);
     this.payload = payload;
   }
 
@@ -76,7 +76,7 @@ public abstract class LongHeaderPacket implements FullPacket {
   }
 
   @Override
-  public PacketNumber getPacketNumber() {
+  public long getPacketNumber() {
     return packetNumber;
   }
 
@@ -92,7 +92,7 @@ public abstract class LongHeaderPacket implements FullPacket {
     int b = (PACKET_TYPE_MASK | packetType.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
 
-    final int pnLen = packetNumber.getLength();
+    final int pnLen = PacketNumber.getLength(packetNumber);
     b = (byte) (b | (pnLen - 1)); // pn length
     bb.writeByte(b);
 
@@ -102,7 +102,7 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     tokenWriter.accept(bb);
 
-    final byte[] pn = packetNumber.write(packetNumber.getLength());
+    final byte[] pn = PacketNumber.write(packetNumber, PacketNumber.getLength(packetNumber));
 
     Varint.write(payload.calculateLength() + pn.length, bb);
 

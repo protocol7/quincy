@@ -43,7 +43,7 @@ public class ServerTest {
   private final ConnectionId destConnectionId2 = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private ServerConnection connection;
-  private PacketNumber packetNumber = new PacketNumber(0);
+  private long packetNumber = 0;
   private final long streamId = StreamId.random(true, true);
 
   private final ClientTlsSession clientTlsSession =
@@ -101,7 +101,7 @@ public class ServerTest {
 
     final ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId().get();
 
-    assertEquals(1, serverHello.getPacketNumber().asLong());
+    assertEquals(1, serverHello.getPacketNumber());
     assertFalse(serverHello.getToken().isPresent());
     assertEquals(1, serverHello.getPayload().getFrames().size());
     final CryptoFrame cf = (CryptoFrame) serverHello.getPayload().getFrames().get(0);
@@ -111,7 +111,7 @@ public class ServerTest {
     final HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
     assertEquals(srcConnectionId, handshake.getDestinationConnectionId().get());
     assertEquals(newSourceConnectionId, handshake.getSourceConnectionId().get());
-    assertEquals(2, handshake.getPacketNumber().asLong());
+    assertEquals(2, handshake.getPacketNumber());
     assertEquals(1, handshake.getPayload().getFrames().size());
     final CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
 
@@ -150,7 +150,7 @@ public class ServerTest {
   private void assertAck(
       final int number, final int packetNumber, final int smallest, final int largest) {
     final ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
-    assertEquals(packetNumber, ackPacket.getPacketNumber().asLong());
+    assertEquals(packetNumber, ackPacket.getPacketNumber());
     assertTrue(ackPacket.getDestinationConnectionId().isPresent());
 
     final List<AckBlock> actual =
@@ -186,8 +186,8 @@ public class ServerTest {
         of(destConnId), of(srcConnectionId), nextPacketNumber(), Version.DRAFT_18, frames);
   }
 
-  private PacketNumber nextPacketNumber() {
-    packetNumber = packetNumber.next();
+  private long nextPacketNumber() {
+    packetNumber = PacketNumber.next(packetNumber);
     return packetNumber;
   }
 

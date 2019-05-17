@@ -26,8 +26,7 @@ public class PacketBuffer {
 
   public void put(final FullPacket packet) {
     requireNonNull(packet);
-    buffer.put(
-        packet.getPacketNumber().asLong(), of(packet.getPayload().getFrames(), ticker.nanoTime()));
+    buffer.put(packet.getPacketNumber(), of(packet.getPayload().getFrames(), ticker.nanoTime()));
   }
 
   public void clear() {

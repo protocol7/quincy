@@ -37,7 +37,7 @@ public class InitialPacketTest {
 
   @Test
   public void roundtrip() {
-    final InitialPacket packet = p(new PacketNumber(123), Optional.of(token));
+    final InitialPacket packet = p(123, Optional.of(token));
 
     final ByteBuf bb = Unpooled.buffer();
 
@@ -58,23 +58,23 @@ public class InitialPacketTest {
   public void roundtripMultiple() {
     final ByteBuf bb = Unpooled.buffer();
 
-    p(new PacketNumber(1), Optional.of(token)).write(bb, aead);
-    p(new PacketNumber(2), Optional.of(token)).write(bb, aead);
+    p(1, Optional.of(token)).write(bb, aead);
+    p(2, Optional.of(token)).write(bb, aead);
 
     final InitialPacket parsed1 = InitialPacket.parse(bb).complete(l -> aead);
     final InitialPacket parsed2 = InitialPacket.parse(bb).complete(l -> aead);
 
     assertEquals(parsed1.getDestinationConnectionId(), parsed2.getDestinationConnectionId());
     assertEquals(parsed1.getSourceConnectionId(), parsed2.getSourceConnectionId());
-    assertEquals(new PacketNumber(1), parsed1.getPacketNumber());
-    assertEquals(new PacketNumber(2), parsed2.getPacketNumber());
+    assertEquals(1, parsed1.getPacketNumber());
+    assertEquals(2, parsed2.getPacketNumber());
     assertEquals(parsed1.getVersion(), parsed2.getVersion());
     assertEquals(parsed1.getPayload(), parsed2.getPayload());
   }
 
   @Test
   public void roundtripNoToken() {
-    final InitialPacket packet = p(new PacketNumber(123), empty());
+    final InitialPacket packet = p(123, empty());
 
     final ByteBuf bb = Unpooled.buffer();
 
@@ -128,7 +128,7 @@ public class InitialPacketTest {
     }
   }
 
-  private InitialPacket p(final PacketNumber pn, final Optional<byte[]> token) {
+  private InitialPacket p(final long pn, final Optional<byte[]> token) {
     return InitialPacket.create(
         Optional.of(destConnId),
         Optional.of(srcConnId),

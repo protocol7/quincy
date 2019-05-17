@@ -26,7 +26,7 @@ public class AckFrame extends Frame {
     final long firstBlock = Varint.readAsLong(bb);
     long smallest = largestAcknowledged - firstBlock;
 
-    blocks.add(AckBlock.fromLongs(smallest, largestAcknowledged));
+    blocks.add(new AckBlock(smallest, largestAcknowledged));
 
     long largest = largestAcknowledged;
     for (int i = 0; i < blockCount; i++) {
@@ -37,7 +37,7 @@ public class AckFrame extends Frame {
       } else {
         final long ackBlock = Varint.readAsLong(bb);
         smallest = largest - ackBlock;
-        blocks.add(AckBlock.fromLongs(smallest, largest));
+        blocks.add(new AckBlock(smallest, largest));
       }
     }
 
@@ -68,7 +68,7 @@ public class AckFrame extends Frame {
     }
 
     final List<AckBlock> sorted = new ArrayList<>(blocks);
-    sorted.sort((b1, b2) -> b2.getLargest().compareTo(b1.getLargest()));
+    sorted.sort((b1, b2) -> Long.compare(b2.getLargest(), b1.getLargest()));
 
     // TODO check overlaps
 
@@ -89,22 +89,22 @@ public class AckFrame extends Frame {
 
     final AckBlock firstBlock = blocks.get(0);
 
-    Varint.write(firstBlock.getLargest().asLong(), bb);
+    Varint.write(firstBlock.getLargest(), bb);
     Varint.write(ackDelay, bb);
     Varint.write((blocks.size() - 1) * 2, bb);
 
-    final long largest = firstBlock.getLargest().asLong();
-    long smallest = firstBlock.getSmallest().asLong();
+    final long largest = firstBlock.getLargest();
+    long smallest = firstBlock.getSmallest();
     Varint.write(largest - smallest, bb);
 
     for (int i = 1; i < blocks.size(); i++) {
       final AckBlock block = blocks.get(i);
 
-      final long gap = smallest - block.getLargest().asLong() - 1;
+      final long gap = smallest - block.getLargest() - 1;
       Varint.write(gap, bb);
 
-      final long nextBlock = block.getLargest().asLong() - block.getSmallest().asLong();
-      smallest = block.getSmallest().asLong();
+      final long nextBlock = block.getLargest() - block.getSmallest();
+      smallest = block.getSmallest();
       Varint.write(nextBlock, bb);
     }
   }

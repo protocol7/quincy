@@ -1,7 +1,6 @@
 package com.protocol7.quincy.streams;
 
 import com.protocol7.quincy.FrameSender;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
@@ -95,7 +94,7 @@ public class DefaultStream implements Stream {
     receiveStateMachine.onAppReadReset();
   }
 
-  public void onAck(final PacketNumber pn) {
+  public void onAck(final long pn) {
     sendStateMachine.onAck(pn);
   }
 

@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.frames.AckBlock;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -58,10 +57,10 @@ public class DefaultStreamManager implements StreamManager {
 
   private void handleAcks(final AckBlock block) {
     // TODO optimize
-    final long smallest = block.getSmallest().asLong();
-    final long largest = block.getLargest().asLong();
+    final long smallest = block.getSmallest();
+    final long largest = block.getLargest();
     for (long i = smallest; i <= largest; i++) {
-      streams.onAck(new PacketNumber(i));
+      streams.onAck(i);
     }
   }
 

@@ -19,7 +19,7 @@ public class HandshakePacket extends LongHeaderPacket {
   public static HandshakePacket create(
       final Optional<ConnectionId> destConnectionId,
       final Optional<ConnectionId> srcConnectionId,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Version version,
       final Frame... frames) {
     return create(destConnectionId, srcConnectionId, packetNumber, version, Arrays.asList(frames));
@@ -28,7 +28,7 @@ public class HandshakePacket extends LongHeaderPacket {
   public static HandshakePacket create(
       final Optional<ConnectionId> destConnectionId,
       final Optional<ConnectionId> srcConnectionId,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Version version,
       final List<Frame> frames) {
     final Payload payload = new Payload(frames);
@@ -93,7 +93,7 @@ public class HandshakePacket extends LongHeaderPacket {
 
           final byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
 
-          final PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+          final long packetNumber = PacketNumber.parse(pnBytes);
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
@@ -122,7 +122,7 @@ public class HandshakePacket extends LongHeaderPacket {
       final Optional<ConnectionId> destinationConnectionId,
       final Optional<ConnectionId> sourceConnectionId,
       final Version version,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Payload payload) {
     super(
         PacketType.Handshake,

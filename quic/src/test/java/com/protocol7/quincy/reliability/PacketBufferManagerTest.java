@@ -9,7 +9,6 @@ import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.AckBlock;
@@ -67,7 +66,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void dontAckOnlyAcks() {
-    final Packet ackPacket = packet(1, new AckFrame(123, AckBlock.fromLongs(7, 8)));
+    final Packet ackPacket = packet(1, new AckFrame(123, new AckBlock(7, 8)));
 
     buffer.onReceivePacket(ackPacket, ctx);
 
@@ -81,7 +80,7 @@ public class PacketBufferManagerTest {
 
     final AckFrame actual = (AckFrame) verifySent();
 
-    assertEquals(AckBlock.fromLongs(1, 2), actual.getBlocks().get(0));
+    assertEquals(new AckBlock(1, 2), actual.getBlocks().get(0));
   }
 
   @Test
@@ -92,7 +91,7 @@ public class PacketBufferManagerTest {
 
     final AckFrame actual = (AckFrame) verifySent();
     assertEquals(67, actual.getAckDelay());
-    assertEquals(AckBlock.fromLongs(2, 2), actual.getBlocks().get(0));
+    assertEquals(new AckBlock(2, 2), actual.getBlocks().get(0));
   }
 
   @Test
@@ -211,22 +210,16 @@ public class PacketBufferManagerTest {
   }
 
   private Packet packet(final long pn, final Frame... frames) {
-    return new ShortPacket(false, of(random()), new PacketNumber(pn), new Payload(frames));
+    return new ShortPacket(false, of(random()), pn, new Payload(frames));
   }
 
   private Packet ip(final long pn, final Frame... frames) {
     return InitialPacket.create(
-        of(random()),
-        of(random()),
-        new PacketNumber(pn),
-        Version.DRAFT_18,
-        Optional.empty(),
-        frames);
+        of(random()), of(random()), pn, Version.DRAFT_18, Optional.empty(), frames);
   }
 
   private Packet hp(final long pn, final Frame... frames) {
-    return HandshakePacket.create(
-        of(random()), of(random()), new PacketNumber(pn), Version.DRAFT_18, frames);
+    return HandshakePacket.create(of(random()), of(random()), pn, Version.DRAFT_18, frames);
   }
 
   private Packet verifyNext() {

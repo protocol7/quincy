@@ -14,7 +14,7 @@ public class AckFrameTest {
   @Test
   public void roundtrip() {
     final List<AckBlock> blocks =
-        List.of(AckBlock.fromLongs(1, 5), AckBlock.fromLongs(7, 8), AckBlock.fromLongs(12, 100));
+        List.of(new AckBlock(1, 5), new AckBlock(7, 8), new AckBlock(12, 100));
     final AckFrame frame = new AckFrame(1234, blocks);
 
     final ByteBuf bb = Unpooled.buffer();
@@ -28,7 +28,7 @@ public class AckFrameTest {
 
   @Test
   public void roundtripSinglePacket() {
-    final List<AckBlock> blocks = List.of(AckBlock.fromLongs(100, 100));
+    final List<AckBlock> blocks = List.of(new AckBlock(100, 100));
     final AckFrame frame = new AckFrame(1234, blocks);
 
     final ByteBuf bb = Unpooled.buffer();
@@ -42,7 +42,7 @@ public class AckFrameTest {
 
   @Test
   public void writeSinglePacket() {
-    final List<AckBlock> blocks = List.of(AckBlock.fromLongs(100, 100));
+    final List<AckBlock> blocks = List.of(new AckBlock(100, 100));
     final AckFrame frame = new AckFrame(1234, blocks);
 
     final ByteBuf bb = Unpooled.buffer();

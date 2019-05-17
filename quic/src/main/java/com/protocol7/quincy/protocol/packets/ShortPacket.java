@@ -73,7 +73,7 @@ public class ShortPacket implements FullPacket {
 
           final byte[] pnBytes = Arrays.copyOfRange(decryptedHeader, 1, 1 + pnLen);
 
-          final PacketNumber packetNumber = PacketNumber.parse(pnBytes);
+          final long packetNumber = PacketNumber.parse(pnBytes);
 
           // move reader ahead by what the PN length actually was
           bb.readerIndex(bb.readerIndex() + pnLen);
@@ -100,24 +100,24 @@ public class ShortPacket implements FullPacket {
   public static ShortPacket create(
       final boolean keyPhase,
       final Optional<ConnectionId> connectionId,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Frame... frames) {
     return new ShortPacket(keyPhase, connectionId, packetNumber, new Payload(frames));
   }
 
   private final boolean keyPhase;
   private final Optional<ConnectionId> connectionId;
-  private final PacketNumber packetNumber;
+  private final long packetNumber;
   private final Payload payload;
 
   public ShortPacket(
       final boolean keyPhase,
       final Optional<ConnectionId> connectionId,
-      final PacketNumber packetNumber,
+      final long packetNumber,
       final Payload payload) {
     this.keyPhase = keyPhase;
     this.connectionId = connectionId;
-    this.packetNumber = packetNumber;
+    this.packetNumber = PacketNumber.validate(packetNumber);
     this.payload = payload;
   }
 
@@ -143,7 +143,7 @@ public class ShortPacket implements FullPacket {
     // TODO spin bit
     // TODO reserved bits
 
-    final int pnLen = packetNumber.getLength();
+    final int pnLen = PacketNumber.getLength(packetNumber);
 
     b = (byte) (b | (pnLen - 1)); // pn length
 
@@ -154,7 +154,7 @@ public class ShortPacket implements FullPacket {
     final int pnOffset = bb.writerIndex();
     final int sampleOffset = pnOffset + 4;
 
-    final byte[] pn = packetNumber.write(pnLen);
+    final byte[] pn = PacketNumber.write(packetNumber, pnLen);
     bb.writeBytes(pn);
 
     final byte[] aad = new byte[bb.writerIndex() - bbOffset];
@@ -177,7 +177,7 @@ public class ShortPacket implements FullPacket {
   }
 
   @Override
-  public PacketNumber getPacketNumber() {
+  public long getPacketNumber() {
     return packetNumber;
   }
 

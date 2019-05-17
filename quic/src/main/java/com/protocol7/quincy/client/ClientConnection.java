@@ -54,8 +54,7 @@ public class ClientConnection implements InternalConnection {
   private final PacketSender packetSender;
 
   private final Version version;
-  private final AtomicReference<PacketNumber> sendPacketNumber =
-      new AtomicReference<>(new PacketNumber(0));
+  private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(0L);
   private final PacketBufferManager packetBuffer;
   private final ClientStateMachine stateMachine;
   private Optional<byte[]> token = Optional.empty();
@@ -220,12 +219,12 @@ public class ClientConnection implements InternalConnection {
     return version;
   }
 
-  private PacketNumber nextSendPacketNumber() {
-    return sendPacketNumber.updateAndGet(packetNumber -> packetNumber.next());
+  private long nextSendPacketNumber() {
+    return sendPacketNumber.updateAndGet(packetNumber -> PacketNumber.next(packetNumber));
   }
 
   public void resetSendPacketNumber() {
-    sendPacketNumber.set(new PacketNumber(0));
+    sendPacketNumber.set(0L);
   }
 
   public Stream openStream() {

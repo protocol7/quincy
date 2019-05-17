@@ -40,7 +40,7 @@ public class DefaultStreamManagerTest {
   public void setUp() {
     when(ctx.send(any(Frame.class))).thenReturn(packet);
     when(ctx.getState()).thenReturn(State.Ready);
-    when(packet.getPacketNumber()).thenReturn(new PacketNumber(456));
+    when(packet.getPacketNumber()).thenReturn(456L);
 
     manager = new DefaultStreamManager(ctx, listener);
   }

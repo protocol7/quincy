@@ -1,7 +1,6 @@
 package com.protocol7.quincy.streams;
 
 import com.protocol7.quincy.FrameSender;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.StreamId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -40,7 +39,7 @@ public class Streams {
     return stream;
   }
 
-  public void onAck(final PacketNumber pn) {
+  public void onAck(final long pn) {
     for (final DefaultStream stream : streams.values()) {
       stream.onAck(pn);
     }

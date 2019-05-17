@@ -170,8 +170,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   private void handleAcks(final AckBlock block, final EncryptionLevel level) {
     // TODO optimize
-    final long smallest = block.getSmallest().asLong();
-    final long largest = block.getLargest().asLong();
+    final long smallest = block.getSmallest();
+    final long largest = block.getLargest();
     for (long pn = smallest; pn <= largest; pn++) {
       if (ack(pn, level)) {
         log.debug("Acked packet {} at level {}", pn, level);
@@ -224,7 +224,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         upper = pn;
       } else {
         if (pn > upper + 1) {
-          blocks.add(AckBlock.fromLongs(lower, upper));
+          blocks.add(new AckBlock(lower, upper));
           lower = pn;
           upper = pn;
         } else {
@@ -232,7 +232,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         }
       }
     }
-    blocks.add(AckBlock.fromLongs(lower, upper));
+    blocks.add(new AckBlock(lower, upper));
 
     return Pair.of(blocks, ackDelay.delay(largestPnQueueTime));
   }
