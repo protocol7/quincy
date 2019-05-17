@@ -22,7 +22,7 @@ public class QuicPacket
   private final ConnectionId localConnectionId;
   private final long streamId;
 
-  public QuicPacket(
+  private QuicPacket(
       final ConnectionId localConnectionId,
       final long streamId,
       final ByteBuf message,

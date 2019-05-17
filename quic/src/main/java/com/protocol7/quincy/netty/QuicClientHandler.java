@@ -13,7 +13,6 @@ import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -35,14 +34,12 @@ public class QuicClientHandler extends ChannelDuplexHandler {
       new StreamListener() {
         @Override
         public void onData(final Stream stream, final byte[] data, final boolean finished) {
-          System.out.println("onData " + new String(data));
-
           ctx.fireChannelRead(
-              new QuicPacket(
+              QuicPacket.of(
                   connection.getLocalConnectionId().get(),
                   stream.getId().getValue(),
-                  Unpooled.wrappedBuffer(data),
-                  remoteAddress()));
+                  data,
+                  connection.getPeerAddress()));
         }
       };
 

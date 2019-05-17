@@ -2,7 +2,6 @@ package com.protocol7.quincy.netty;
 
 import com.protocol7.quincy.tls.KeyUtil;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
@@ -33,10 +32,10 @@ public class NettyServerRunner {
                       final QuicPacket qp = (QuicPacket) msg;
 
                       ctx.write(
-                          new QuicPacket(
+                          QuicPacket.of(
                               qp.getLocalConnectionId(),
                               qp.getStreamId(),
-                              Unpooled.wrappedBuffer("PONG".getBytes()),
+                              "PONG".getBytes(),
                               qp.sender()));
 
                       ctx.close();

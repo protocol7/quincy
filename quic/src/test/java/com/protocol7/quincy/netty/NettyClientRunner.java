@@ -1,7 +1,6 @@
 package com.protocol7.quincy.netty;
 
 import io.netty.bootstrap.Bootstrap;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -31,10 +30,7 @@ public class NettyClientRunner {
                     public void channelActive(final ChannelHandlerContext ctx) {
                       System.out.println("############# sending hello world");
 
-                      ctx.channel()
-                          .write(
-                              new QuicPacket(
-                                  null, 0, Unpooled.wrappedBuffer("PING".getBytes()), peer));
+                      ctx.channel().write(QuicPacket.of(null, 0, "PING".getBytes(), peer));
 
                       ctx.fireChannelActive();
                     }
