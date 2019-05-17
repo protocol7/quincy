@@ -6,7 +6,6 @@ import static org.junit.Assert.*;
 
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
-import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.AckBlock;
 import com.protocol7.quincy.protocol.frames.AckFrame;
@@ -102,7 +101,7 @@ public class InitialPacketTest {
 
     assertFrameNotAllowed(PingFrame.INSTANCE);
     assertFrameNotAllowed(new MaxDataFrame(123));
-    assertFrameNotAllowed(new StreamFrame(new StreamId(123), 0, false, new byte[0]));
+    assertFrameNotAllowed(new StreamFrame(123, 0, false, new byte[0]));
   }
 
   private void assertFrameAllowed(final Frame frame) {

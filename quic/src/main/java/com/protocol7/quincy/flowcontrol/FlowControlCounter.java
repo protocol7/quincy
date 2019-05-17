@@ -3,7 +3,6 @@ package com.protocol7.quincy.flowcontrol;
 import static com.google.common.base.Preconditions.checkArgument;
 import static java.lang.Math.max;
 
-import com.protocol7.quincy.protocol.StreamId;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -23,7 +22,7 @@ public class FlowControlCounter {
 
   // TODO this will grow forever. Consider how we can garbage collect finished streams while not
   // recreating them on out-of-order packets
-  private final Map<StreamId, StreamCounter> streams = new ConcurrentHashMap<>();
+  private final Map<Long, StreamCounter> streams = new ConcurrentHashMap<>();
 
   public FlowControlCounter(final long connectionMaxBytes, final long streamMaxBytes) {
     this.connectionMaxBytes = new AtomicLong(connectionMaxBytes);
@@ -35,7 +34,7 @@ public class FlowControlCounter {
   }
 
   // remove need to syncronize
-  public synchronized TryConsumeResult tryConsume(final StreamId sid, final long offset) {
+  public synchronized TryConsumeResult tryConsume(final long sid, final long offset) {
     checkArgument(offset > 0);
 
     // first check if we can successfully consume
@@ -72,7 +71,7 @@ public class FlowControlCounter {
         success, resultingConnOffset, connectionMaxBytes.get(), resultingStreamOffset, streamMax);
   }
 
-  public void resetStream(final StreamId sid, final long finalOffset) {
+  public void resetStream(final long sid, final long finalOffset) {
     final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());
     stream.offset.updateAndGet(current -> max(current, finalOffset));
     stream.finished = true;
@@ -84,7 +83,7 @@ public class FlowControlCounter {
     this.connectionMaxBytes.updateAndGet(current -> max(connectionMaxBytes, current));
   }
 
-  public long increaseStreamMax(final StreamId sid) {
+  public long increaseStreamMax(final long sid) {
     final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());
     final AtomicLong streamMax = stream.maxOffset;
 
@@ -97,7 +96,7 @@ public class FlowControlCounter {
     return connectionMaxBytes.addAndGet(connectionMaxBytes.get());
   }
 
-  public void setStreamMaxBytes(final StreamId sid, final long streamMaxBytes) {
+  public void setStreamMaxBytes(final long sid, final long streamMaxBytes) {
     checkArgument(streamMaxBytes > 0);
 
     final StreamCounter stream = streams.computeIfAbsent(sid, ignored -> new StreamCounter());

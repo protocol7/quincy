@@ -2,7 +2,6 @@ package com.protocol7.quincy.flowcontrol;
 
 import static org.junit.Assert.*;
 
-import com.protocol7.quincy.protocol.StreamId;
 import org.junit.Test;
 
 public class FlowControlCounterTest {
@@ -10,9 +9,9 @@ public class FlowControlCounterTest {
   private final long maxConn = 15;
   private final long maxStream = 10;
 
-  private FlowControlCounter fcm = new FlowControlCounter(maxConn, maxStream);
-  private StreamId sid = new StreamId(123);
-  private StreamId sid2 = new StreamId(456);
+  private final FlowControlCounter fcm = new FlowControlCounter(maxConn, maxStream);
+  private final long sid = 123;
+  private final long sid2 = 456;
 
   @Test
   public void tryConsumeConnection() {

@@ -32,7 +32,7 @@ public class StreamFrameTest {
 
     assertFalse(frame.isFin());
     assertEquals(0, frame.getOffset());
-    assertEquals(new StreamId(467722447824726350L), frame.getStreamId());
+    assertEquals(467722447824726350L, frame.getStreamId());
     assertArrayEquals(DATA, frame.getData());
   }
 
@@ -44,7 +44,7 @@ public class StreamFrameTest {
 
     assertFalse(frame.isFin());
     assertEquals(123, frame.getOffset());
-    assertEquals(new StreamId(210490071094968184L), frame.getStreamId());
+    assertEquals(210490071094968184L, frame.getStreamId());
     assertArrayEquals(DATA, frame.getData());
   }
 
@@ -56,19 +56,19 @@ public class StreamFrameTest {
 
     assertTrue(frame.isFin());
     assertEquals(0, frame.getOffset());
-    assertEquals(new StreamId(4158820520164861892L), frame.getStreamId());
+    assertEquals(4158820520164861892L, frame.getStreamId());
     assertArrayEquals(DATA, frame.getData());
   }
 
   @Test
   public void lengthWithoutOffset() {
-    final StreamFrame frame = new StreamFrame(new StreamId(123), 0, false, DATA);
+    final StreamFrame frame = new StreamFrame(123, 0, false, DATA);
     assertEquals(9, frame.calculateLength());
   }
 
   @Test
   public void lengthWithOffset() {
-    final StreamFrame frame = new StreamFrame(new StreamId(123), 123, false, DATA);
+    final StreamFrame frame = new StreamFrame(123, 123, false, DATA);
     assertEquals(11, frame.calculateLength());
   }
 }

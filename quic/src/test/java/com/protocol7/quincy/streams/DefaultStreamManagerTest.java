@@ -13,7 +13,6 @@ import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Payload;
-import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
@@ -140,7 +139,7 @@ public class DefaultStreamManagerTest {
   @Test(expected = IllegalStateException.class)
   public void receiveInInvalidState() {
     when(ctx.getState()).thenReturn(State.BeforeReady);
-    manager.onReceivePacket(p(new StreamFrame(new StreamId(0), 0, false, DATA1)), ctx);
+    manager.onReceivePacket(p(new StreamFrame(0, 0, false, DATA1)), ctx);
   }
 
   private FullPacket p(final Frame... frames) {

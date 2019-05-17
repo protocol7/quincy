@@ -24,7 +24,7 @@ public class StreamTest {
   @Mock private PipelineContext ctx;
   @Mock private StreamListener listener;
   @Mock private FullPacket packet;
-  private final StreamId streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.random(true, true);
 
   @Before
   public void setUp() {

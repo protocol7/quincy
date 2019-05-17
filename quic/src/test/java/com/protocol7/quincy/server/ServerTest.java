@@ -44,9 +44,9 @@ public class ServerTest {
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private ServerConnection connection;
   private PacketNumber packetNumber = new PacketNumber(0);
-  private StreamId streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.random(true, true);
 
-  private ClientTlsSession clientTlsSession =
+  private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
           new QuicBuilder().configuration().toTransportParameters(),
@@ -55,7 +55,7 @@ public class ServerTest {
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;
   @Mock private Timer scheduler;
-  private FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
+  private final FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 
   @Before
   public void setUp() {

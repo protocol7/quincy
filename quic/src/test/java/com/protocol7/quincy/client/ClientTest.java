@@ -44,9 +44,9 @@ public class ClientTest {
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private PacketNumber packetNumber = new PacketNumber(0);
-  private StreamId streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.random(true, true);
 
-  private FlowControlHandler flowControlHandler = new MockFlowControlHandler();
+  private final FlowControlHandler flowControlHandler = new MockFlowControlHandler();
 
   @Mock private PacketSender packetSender;
   @Mock private StreamListener streamListener;

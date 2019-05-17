@@ -6,15 +6,11 @@ import static com.protocol7.quincy.utils.Bits.unset;
 import com.google.common.base.Preconditions;
 import com.protocol7.quincy.Varint;
 import io.netty.buffer.ByteBuf;
-import java.util.Objects;
 
 public class StreamId {
 
-  public static StreamId random(final boolean client, final boolean bidirectional) {
-    long id = Varint.random(4);
-    id = encodeType(client, bidirectional, id);
-
-    return new StreamId(id);
+  public static long random(final boolean client, final boolean bidirectional) {
+    return encodeType(client, bidirectional, Varint.random(4));
   }
 
   private static long encodeType(final boolean client, final boolean bidirectional, final long id) {
@@ -32,65 +28,39 @@ public class StreamId {
     return res;
   }
 
-  public static StreamId next(
-      final StreamId prev, final boolean client, final boolean bidirectional) {
-    long v = prev.getValue();
-
-    v = encodeType(client, bidirectional, v);
+  public static long next(final long prev, final boolean client, final boolean bidirectional) {
+    long v = encodeType(client, bidirectional, prev);
 
     long tmp = v;
-    while (v <= prev.getValue()) {
+    while (v <= prev) {
       tmp++;
       v = encodeType(client, bidirectional, tmp);
     }
 
-    return new StreamId(v);
+    return v;
   }
 
-  public static StreamId parse(final ByteBuf bb) {
-    return new StreamId(Varint.readAsLong(bb));
+  public static long parse(final ByteBuf bb) {
+    return Varint.readAsLong(bb);
   }
 
-  private final long id;
-
-  public StreamId(final long id) {
+  public static long validate(final long id) {
     Preconditions.checkArgument(id >= 0);
     Preconditions.checkArgument(id <= Varint.MAX);
-
-    this.id = id;
+    return id;
   }
 
-  public boolean isClient() {
+  public static boolean isClient(final long id) {
     return (id & 1) == 0;
   }
 
-  public boolean isBidirectional() {
+  public static boolean isBidirectional(final long id) {
     return (id & 0b10) == 0;
   }
 
-  public void write(final ByteBuf bb) {
+  public static void write(final ByteBuf bb, final long id) {
     Varint.write(id, bb);
   }
 
-  @Override
-  public boolean equals(final Object o) {
-    if (this == o) return true;
-    if (o == null || getClass() != o.getClass()) return false;
-    final StreamId streamId = (StreamId) o;
-    return id == streamId.id;
-  }
-
-  @Override
-  public int hashCode() {
-    return Objects.hash(id);
-  }
-
-  @Override
-  public String toString() {
-    return "StreamId{" + id + '}';
-  }
-
-  public long getValue() {
-    return id;
-  }
+  private StreamId() {}
 }

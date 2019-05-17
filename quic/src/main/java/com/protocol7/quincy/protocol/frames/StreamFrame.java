@@ -14,7 +14,7 @@ public class StreamFrame extends Frame {
     final boolean len = (firstByte & 0x02) == 0x02;
     final boolean fin = (firstByte & 0x01) == 0x01;
 
-    final StreamId streamId = StreamId.parse(bb);
+    final long streamId = StreamId.parse(bb);
     final long offset;
     if (off) {
       offset = Varint.readAsLong(bb);
@@ -35,21 +35,20 @@ public class StreamFrame extends Frame {
     return new StreamFrame(streamId, offset, fin, data);
   }
 
-  private final StreamId streamId;
+  private final long streamId;
   private final long offset;
   private final boolean fin;
   private final byte[] data;
 
-  public StreamFrame(
-      final StreamId streamId, final long offset, final boolean fin, final byte[] data) {
+  public StreamFrame(final long streamId, final long offset, final boolean fin, final byte[] data) {
     super(FrameType.STREAM);
-    this.streamId = streamId;
+    this.streamId = StreamId.validate(streamId);
     this.offset = offset;
     this.fin = fin;
     this.data = data;
   }
 
-  public StreamId getStreamId() {
+  public long getStreamId() {
     return streamId;
   }
 
@@ -78,7 +77,7 @@ public class StreamFrame extends Frame {
     type = (byte) (type | 0x02);
 
     bb.writeByte(type);
-    streamId.write(bb);
+    StreamId.write(bb, streamId);
     if (offset > 0) {
       Varint.write(offset, bb);
     }
@@ -97,13 +96,13 @@ public class StreamFrame extends Frame {
 
     if (offset != that.offset) return false;
     if (fin != that.fin) return false;
-    if (!streamId.equals(that.streamId)) return false;
+    if (streamId != that.streamId) return false;
     return Arrays.equals(data, that.data);
   }
 
   @Override
   public int hashCode() {
-    int result = streamId.hashCode();
+    int result = Long.hashCode(streamId);
     result = 31 * result + (int) (offset ^ (offset >>> 32));
     result = 31 * result + (fin ? 1 : 0);
     result = 31 * result + Arrays.hashCode(data);

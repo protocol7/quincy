@@ -15,25 +15,25 @@ public class StreamDataBlockedFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final StreamId streamId = StreamId.parse(bb);
+    final long streamId = StreamId.parse(bb);
     final long streamDataLimit = Varint.readAsLong(bb);
 
     return new StreamDataBlockedFrame(streamId, streamDataLimit);
   }
 
-  private final StreamId streamId;
+  private final long streamId;
   private final long streamDataLimit;
 
-  public StreamDataBlockedFrame(final StreamId streamId, final long streamDataLimit) {
+  public StreamDataBlockedFrame(final long streamId, final long streamDataLimit) {
     super(FrameType.STREAM_DATA_BLOCKED);
 
     requireNonNull(streamId);
 
-    this.streamId = streamId;
+    this.streamId = StreamId.validate(streamId);
     this.streamDataLimit = streamDataLimit;
   }
 
-  public StreamId getStreamId() {
+  public long getStreamId() {
     return streamId;
   }
 
@@ -45,7 +45,7 @@ public class StreamDataBlockedFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
 
-    streamId.write(bb);
+    StreamId.write(bb, streamId);
     Varint.write(streamDataLimit, bb);
   }
 

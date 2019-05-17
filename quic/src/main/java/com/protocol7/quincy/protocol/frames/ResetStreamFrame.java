@@ -15,25 +15,24 @@ public class ResetStreamFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final StreamId streamId = StreamId.parse(bb);
+    final long streamId = StreamId.parse(bb);
     final int applicationErrorCode = bb.readUnsignedShort();
     final long offset = Varint.readAsLong(bb);
 
     return new ResetStreamFrame(streamId, applicationErrorCode, offset);
   }
 
-  private final StreamId streamId;
+  private final long streamId;
   private final int applicationErrorCode;
   private final long offset;
 
-  public ResetStreamFrame(
-      final StreamId streamId, final int applicationErrorCode, final long offset) {
+  public ResetStreamFrame(final long streamId, final int applicationErrorCode, final long offset) {
     super(FrameType.RESET_STREAM);
 
     requireNonNull(streamId);
     validateApplicationErrorCode(applicationErrorCode);
 
-    this.streamId = streamId;
+    this.streamId = StreamId.validate(streamId);
     this.applicationErrorCode = applicationErrorCode;
     this.offset = offset;
   }
@@ -43,7 +42,7 @@ public class ResetStreamFrame extends Frame {
     checkArgument(code <= 0xFFFF);
   }
 
-  public StreamId getStreamId() {
+  public long getStreamId() {
     return streamId;
   }
 
@@ -59,7 +58,7 @@ public class ResetStreamFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
 
-    streamId.write(bb);
+    StreamId.write(bb, streamId);
     bb.writeShort(applicationErrorCode);
     Varint.write(offset, bb);
   }
@@ -73,12 +72,12 @@ public class ResetStreamFrame extends Frame {
 
     if (applicationErrorCode != that.applicationErrorCode) return false;
     if (offset != that.offset) return false;
-    return streamId.equals(that.streamId);
+    return streamId == that.streamId;
   }
 
   @Override
   public int hashCode() {
-    int result = streamId.hashCode();
+    int result = Long.hashCode(streamId);
     result = 31 * result + applicationErrorCode;
     result = 31 * result + (int) (offset ^ (offset >>> 32));
     return result;

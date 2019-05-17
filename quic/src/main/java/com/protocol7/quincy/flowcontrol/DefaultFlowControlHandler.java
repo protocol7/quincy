@@ -2,7 +2,6 @@ package com.protocol7.quincy.flowcontrol;
 
 import com.google.common.annotations.VisibleForTesting;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.DataBlockedFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -24,7 +23,7 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
   private final FlowControlCounter receiveCounter;
   private final FlowControlCounter sendCounter;
   private final AtomicBoolean connectionBlocked = new AtomicBoolean(false);
-  private final Set<StreamId> blockedStreams = new HashSet<>();
+  private final Set<Long> blockedStreams = new HashSet<>();
 
   public DefaultFlowControlHandler(final long connectionMaxBytes, final long streamMaxBytes) {
     receiveCounter = new FlowControlCounter(connectionMaxBytes, streamMaxBytes);
@@ -50,7 +49,7 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
   }
 
   @VisibleForTesting
-  protected boolean tryConsume(final StreamId sid, final long offset, final PipelineContext ctx) {
+  protected boolean tryConsume(final long sid, final long offset, final PipelineContext ctx) {
     final TryConsumeResult result = sendCounter.tryConsume(sid, offset);
 
     if (result.isSuccess()) {
@@ -87,7 +86,7 @@ public class DefaultFlowControlHandler implements FlowControlHandler {
           connectionBlocked.set(false);
         } else if (frame.getType() == FrameType.STREAM) {
           final StreamFrame sf = (StreamFrame) frame;
-          final StreamId sid = sf.getStreamId();
+          final long sid = sf.getStreamId();
           final TryConsumeResult result =
               receiveCounter.tryConsume(sid, sf.getOffset() + sf.getData().length);
 

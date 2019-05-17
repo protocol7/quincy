@@ -10,80 +10,80 @@ public class StreamIdTest {
 
   @Test
   public void validateBounds() {
-    new StreamId(0);
-    new StreamId(123);
-    new StreamId(4611686018427387903L);
+    StreamId.validate(0);
+    StreamId.validate(123);
+    StreamId.validate(4611686018427387903L);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooSmall() {
-    new StreamId(-1);
+    StreamId.validate(-1);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void validateBoundsTooLarge() {
-    new StreamId(4611686018427387904L);
+    StreamId.validate(4611686018427387904L);
   }
 
   @Test
   public void randomBounds() {
     for (int i = 0; i < 1000_000; i++) {
-      final StreamId v = StreamId.random(true, true);
-      assertTrue(v.toString(), v.getValue() > 1 && v.getValue() < 4611686018427387903L);
+      final long v = StreamId.random(true, true);
+      assertTrue(Long.toString(v), v > 1 && v < 4611686018427387903L);
     }
   }
 
   @Test
   public void randomClient() {
     for (int i = 0; i < 1000; i++) {
-      final StreamId id = StreamId.random(true, true);
-      assertTrue((id.getValue() & 1) == 0);
-      assertTrue(id.isClient());
+      final long id = StreamId.random(true, true);
+      assertTrue((id & 1) == 0);
+      assertTrue(StreamId.isClient(id));
     }
   }
 
   @Test
   public void randomServer() {
     for (int i = 0; i < 1000; i++) {
-      final StreamId id = StreamId.random(false, true);
-      assertTrue((id.getValue() & 1) == 1);
-      assertFalse(id.isClient());
+      final long id = StreamId.random(false, true);
+      assertTrue((id & 1) == 1);
+      assertFalse(StreamId.isClient(id));
     }
   }
 
   @Test
   public void randomBidirectional() {
     for (int i = 0; i < 1000; i++) {
-      final StreamId id = StreamId.random(true, true);
-      assertTrue((id.getValue() & 0b10) == 0);
-      assertTrue(id.isBidirectional());
+      final long id = StreamId.random(true, true);
+      assertTrue((id & 0b10) == 0);
+      assertTrue(StreamId.isBidirectional(id));
     }
   }
 
   @Test
   public void randomUnidirectional() {
     for (int i = 0; i < 1000; i++) {
-      final StreamId id = StreamId.random(true, false);
-      assertTrue((id.getValue() & 0b10) == 0b10);
-      assertFalse(id.isBidirectional());
+      final long id = StreamId.random(true, false);
+      assertTrue((id & 0b10) == 0b10);
+      assertFalse(StreamId.isBidirectional(id));
     }
   }
 
   @Test
   public void next() {
-    assertEquals(new StreamId(3), StreamId.next(new StreamId(0), false, false));
-    assertEquals(new StreamId(1), StreamId.next(new StreamId(0), false, true));
-    assertEquals(new StreamId(4), StreamId.next(new StreamId(0), true, true));
+    assertEquals(3, StreamId.next(0, false, false));
+    assertEquals(1, StreamId.next(0, false, true));
+    assertEquals(4, StreamId.next(0, true, true));
   }
 
   @Test
   public void roundtrip() {
-    final StreamId streamId = StreamId.random(true, true);
+    final long streamId = StreamId.random(true, true);
 
     final ByteBuf bb = Unpooled.buffer();
-    streamId.write(bb);
+    StreamId.write(bb, streamId);
 
-    final StreamId parsed = StreamId.parse(bb);
+    final long parsed = StreamId.parse(bb);
 
     assertEquals(streamId, parsed);
   }

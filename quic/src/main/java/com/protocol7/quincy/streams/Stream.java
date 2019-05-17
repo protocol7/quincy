@@ -1,10 +1,8 @@
 package com.protocol7.quincy.streams;
 
-import com.protocol7.quincy.protocol.StreamId;
-
 public interface Stream {
 
-  StreamId getId();
+  long getId();
 
   StreamType getStreamType();
 

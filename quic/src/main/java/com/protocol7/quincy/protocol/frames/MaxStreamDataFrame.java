@@ -15,25 +15,25 @@ public class MaxStreamDataFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final StreamId streamId = StreamId.parse(bb);
+    final long streamId = StreamId.parse(bb);
     final long maxStreamData = Varint.readAsLong(bb);
 
     return new MaxStreamDataFrame(streamId, maxStreamData);
   }
 
-  private final StreamId streamId;
+  private final long streamId;
   private final long maxStreamData;
 
-  public MaxStreamDataFrame(final StreamId streamId, final long maxStreamData) {
+  public MaxStreamDataFrame(final long streamId, final long maxStreamData) {
     super(FrameType.MAX_STREAM_DATA);
 
     requireNonNull(streamId);
 
-    this.streamId = streamId;
+    this.streamId = StreamId.validate(streamId);
     this.maxStreamData = maxStreamData;
   }
 
-  public StreamId getStreamId() {
+  public long getStreamId() {
     return streamId;
   }
 
@@ -45,7 +45,7 @@ public class MaxStreamDataFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
 
-    streamId.write(bb);
+    StreamId.write(bb, streamId);
     Varint.write(maxStreamData, bb);
   }
 

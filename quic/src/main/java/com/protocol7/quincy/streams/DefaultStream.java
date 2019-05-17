@@ -13,7 +13,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 public class DefaultStream implements Stream {
 
-  private final StreamId id;
+  private final long id;
   private final FrameSender sender;
   private final StreamListener listener;
   private final AtomicLong offset = new AtomicLong(0);
@@ -24,17 +24,17 @@ public class DefaultStream implements Stream {
   private final AtomicBoolean seenFinish = new AtomicBoolean(false);
 
   public DefaultStream(
-      final StreamId id,
+      final long id,
       final FrameSender sender,
       final StreamListener listener,
       final StreamType streamType) {
-    this.id = id;
+    this.id = StreamId.validate(id);
     this.sender = sender;
     this.listener = listener;
     this.streamType = streamType;
   }
 
-  public StreamId getId() {
+  public long getId() {
     return id;
   }
 

@@ -13,7 +13,6 @@ import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Payload;
-import com.protocol7.quincy.protocol.StreamId;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.DataBlockedFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -29,10 +28,10 @@ import org.junit.Test;
 
 public class DefaultFlowControlHandlerTest {
 
-  private DefaultFlowControlHandler handler = new DefaultFlowControlHandler(15, 10);
-  private PipelineContext ctx = mock(PipelineContext.class);
-  private StreamId sid = new StreamId(123);
-  private StreamId sid2 = new StreamId(456);
+  private final DefaultFlowControlHandler handler = new DefaultFlowControlHandler(15, 10);
+  private final PipelineContext ctx = mock(PipelineContext.class);
+  private final long sid = 123;
+  private final long sid2 = 456;
 
   @Test
   public void tryConsume() {

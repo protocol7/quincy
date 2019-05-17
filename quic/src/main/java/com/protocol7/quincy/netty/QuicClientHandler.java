@@ -37,7 +37,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
           ctx.fireChannelRead(
               QuicPacket.of(
                   connection.getLocalConnectionId().get(),
-                  stream.getId().getValue(),
+                  stream.getId(),
                   data,
                   connection.getPeerAddress()));
         }

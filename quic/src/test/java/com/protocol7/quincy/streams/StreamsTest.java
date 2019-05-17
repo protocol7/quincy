@@ -26,12 +26,12 @@ public class StreamsTest {
   @Test
   public void openStream() {
     final Stream stream = streams.openStream(false, false, listener);
-    assertEquals(new StreamId(3), stream.getId());
+    assertEquals(3, stream.getId());
   }
 
   @Test
   public void createAndThenGet() {
-    final StreamId streamId = StreamId.random(true, true);
+    final long streamId = StreamId.random(true, true);
     final DefaultStream stream1 = streams.getOrCreate(streamId, listener);
     final DefaultStream stream2 = streams.getOrCreate(streamId, listener);
 

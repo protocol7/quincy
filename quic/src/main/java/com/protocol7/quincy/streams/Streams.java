@@ -9,8 +9,8 @@ import java.util.concurrent.ConcurrentHashMap;
 public class Streams {
 
   private final FrameSender frameSender;
-  private final Map<StreamId, DefaultStream> streams = new ConcurrentHashMap<>();
-  private StreamId maxId = new StreamId(0);
+  private final Map<Long, DefaultStream> streams = new ConcurrentHashMap<>();
+  private long maxId = 0;
 
   public Streams(final FrameSender frameSender) {
     this.frameSender = frameSender;
@@ -19,14 +19,14 @@ public class Streams {
   public Stream openStream(
       final boolean client, final boolean bidirectional, final StreamListener handler) {
     final StreamType type = bidirectional ? StreamType.Bidirectional : StreamType.Sending;
-    final StreamId streamId = StreamId.next(maxId, client, bidirectional);
+    final long streamId = StreamId.next(maxId, client, bidirectional);
     this.maxId = streamId;
     final DefaultStream stream = new DefaultStream(streamId, frameSender, handler, type);
     streams.put(streamId, stream);
     return stream;
   }
 
-  public DefaultStream getOrCreate(final StreamId streamId, final StreamListener handler) {
+  public DefaultStream getOrCreate(final long streamId, final StreamListener handler) {
     DefaultStream stream = streams.get(streamId);
     if (stream == null) {
       stream =

@@ -9,9 +9,9 @@ import org.junit.Test;
 
 public class ResetStreamFrameTest {
 
-  @Test(expected = NullPointerException.class)
-  public void nullStreamId() {
-    new ResetStreamFrame(null, 123, 456);
+  @Test(expected = IllegalArgumentException.class)
+  public void invalidStreamId() {
+    new ResetStreamFrame(-1, 123, 456);
   }
 
   @Test
@@ -33,7 +33,7 @@ public class ResetStreamFrameTest {
 
   @Test
   public void rountrip() {
-    final StreamId streamId = StreamId.random(true, true);
+    final long streamId = StreamId.random(true, true);
     final ResetStreamFrame frame = new ResetStreamFrame(streamId, 123, 456);
 
     final ByteBuf bb = Unpooled.buffer();

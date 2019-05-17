@@ -2,7 +2,6 @@ package com.protocol7.quincy.protocol.frames;
 
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.quincy.protocol.StreamId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -27,7 +26,7 @@ public class FrameTest {
 
   @Test
   public void streamFrame() {
-    assertFrame(new StreamFrame(new StreamId(123), 124, true, "hello".getBytes()));
+    assertFrame(new StreamFrame(123, 124, true, "hello".getBytes()));
   }
 
   @Test
@@ -42,7 +41,7 @@ public class FrameTest {
 
   @Test
   public void resetStreamFrame() {
-    assertFrame(new ResetStreamFrame(new StreamId(123), 124, 125));
+    assertFrame(new ResetStreamFrame(123, 124, 125));
   }
 
   @Test
@@ -59,7 +58,7 @@ public class FrameTest {
 
   @Test
   public void maxStreamDataFrame() {
-    assertFrame(new MaxStreamDataFrame(new StreamId(123), 456));
+    assertFrame(new MaxStreamDataFrame(123, 456));
   }
 
   @Test
@@ -79,7 +78,7 @@ public class FrameTest {
 
   @Test
   public void streamDataBlockedFrame() {
-    assertFrame(new StreamDataBlockedFrame(new StreamId(123), 456));
+    assertFrame(new StreamDataBlockedFrame(123, 456));
   }
 
   @Test
