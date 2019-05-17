@@ -1,28 +1,41 @@
 package com.protocol7.quincy.it;
 
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.server.QuicServer;
 import com.protocol7.testcontainers.quicly.QuiclyClientContainer;
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.ChannelOption;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import org.junit.Test;
 
 public class QuiclyClientTest {
 
   @Test
-  public void quiclyClient() throws ExecutionException, InterruptedException, IOException {
+  public void quiclyClient() throws InterruptedException {
 
-    QuicServer server = null;
+    final EventLoopGroup workerGroup = new NioEventLoopGroup();
+
     try {
-      server =
-          QuicServer.bind(
-                  new QuicBuilder().configuration(),
-                  new InetSocketAddress("0.0.0.0", 4444),
-                  (stream, data, finished) -> System.out.println(new String(data)),
-                  KeyUtil.getCertsFromCrt("src/test/resources/server.crt"),
-                  KeyUtil.getPrivateKey("src/test/resources/server.der"))
-              .get();
+      final Bootstrap b = new Bootstrap();
+      b.group(workerGroup);
+      b.channel(NioDatagramChannel.class);
+      b.option(ChannelOption.SO_BROADCAST, true);
+      b.handler(
+          new QuicBuilder()
+              .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
+              .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
+              .serverChannelInitializer(
+                  new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+                      System.out.println("server got message " + msg);
+                    }
+                  }));
+
+      b.bind("0.0.0.0", 4444).awaitUninterruptibly();
 
       Thread.sleep(1000);
 
@@ -42,8 +55,8 @@ public class QuiclyClientTest {
         }
       }
     } finally {
-      if (server != null) {
-        server.close();
+      if (workerGroup != null) {
+        workerGroup.shutdownGracefully();
       }
     }
   }

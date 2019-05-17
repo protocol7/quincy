@@ -2,14 +2,19 @@ package com.protocol7.quincy.it;
 
 import static org.junit.Assert.assertEquals;
 
-import com.protocol7.quincy.Configuration;
-import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.testcontainers.quicgo.QuicGoContainer;
 import com.protocol7.testcontainers.quicgo.QuicGoPacket;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -18,22 +23,38 @@ public class QuicGoTest {
   @Rule public QuicGoContainer quicGo = new QuicGoContainer();
 
   @Test
-  public void test() throws ExecutionException, InterruptedException {
-    final Configuration config = new QuicBuilder().withVersion(Version.QUIC_GO).configuration();
+  public void test() throws InterruptedException {
+    final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    QuicClient client = null;
     try {
-      client =
-          QuicClient.connect(
-                  config,
-                  quicGo.getAddress(),
-                  (stream, data, finished) -> System.out.println(new String(data)))
-              .get();
+      final Bootstrap b = new Bootstrap();
+      b.group(workerGroup);
+      b.channel(NioDatagramChannel.class);
+      b.remoteAddress(quicGo.getAddress());
+      b.handler(
+          new QuicBuilder()
+              .withVersion(Version.QUIC_GO)
+              .clientChannelInitializer(
+                  new ChannelDuplexHandler() {
+                    @Override
+                    public void channelActive(final ChannelHandlerContext ctx) {
+                      ctx.channel()
+                          .write(
+                              QuicPacket.of(
+                                  0,
+                                  "Hello world".getBytes(),
+                                  (InetSocketAddress) ctx.channel().remoteAddress()));
 
-      client.openStream().write("Hello world".getBytes(), true);
+                      ctx.fireChannelActive();
+                    }
+                  }));
+
+      b.connect().awaitUninterruptibly();
+
+      Thread.sleep(2000);
     } finally {
-      if (client != null) {
-        client.close();
+      if (workerGroup != null) {
+        workerGroup.shutdownGracefully();
       }
     }
 

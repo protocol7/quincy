@@ -19,6 +19,12 @@ public class QuicPacket
     return new QuicPacket(localConnectionId, streamId, bb, recipient);
   }
 
+  public static QuicPacket of(
+      final long streamId, final byte[] message, final InetSocketAddress recipient) {
+    final ByteBuf bb = Unpooled.wrappedBuffer(message);
+    return new QuicPacket(null, streamId, bb, recipient); // TODO fix null
+  }
+
   private final ConnectionId localConnectionId;
   private final long streamId;
 

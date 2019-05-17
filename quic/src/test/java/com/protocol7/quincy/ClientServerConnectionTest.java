@@ -41,7 +41,7 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClientServerTest {
+public class ClientServerConnectionTest {
 
   private static final byte[] PING = "ping".getBytes();
   private static final byte[] PONG = "pong".getBytes();

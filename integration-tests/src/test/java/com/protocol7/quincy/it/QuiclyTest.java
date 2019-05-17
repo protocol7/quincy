@@ -4,15 +4,22 @@ import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
 import com.protocol7.testcontainers.quicly.QuiclyServerContainer;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.ChannelDuplexHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.ExecutionException;
 import org.junit.Rule;
 import org.junit.Test;
 
@@ -21,30 +28,47 @@ public class QuiclyTest {
   @Rule public QuiclyServerContainer quicly = new QuiclyServerContainer();
 
   @Test
-  public void quiclyServer() throws ExecutionException, InterruptedException {
+  public void quiclyServer() throws InterruptedException {
 
     final BlockingQueue<byte[]> capturedData = new ArrayBlockingQueue<>(10);
 
-    QuicClient client = null;
+    final EventLoopGroup workerGroup = new NioEventLoopGroup();
+
     try {
-      client =
-          QuicClient.connect(
-                  new QuicBuilder().configuration(),
-                  quicly.getAddress(),
-                  (stream, data, finished) -> capturedData.add(data))
-              .get();
+      final Bootstrap b = new Bootstrap();
+      b.group(workerGroup);
+      b.channel(NioDatagramChannel.class);
+      b.remoteAddress(quicly.getAddress());
+      b.handler(
+          new QuicBuilder()
+              .clientChannelInitializer(
+                  new ChannelDuplexHandler() {
+                    @Override
+                    public void channelActive(final ChannelHandlerContext ctx) {
+                      ctx.channel()
+                          .write(
+                              QuicPacket.of(
+                                  0,
+                                  "Hello world".getBytes(),
+                                  (InetSocketAddress) ctx.channel().remoteAddress()));
 
-      client.openStream().write("Hello world".getBytes(), true);
+                      ctx.fireChannelActive();
+                    }
 
+                    @Override
+                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+                      final QuicPacket packet = (QuicPacket) msg;
+                      capturedData.add(Bytes.drainToArray(packet.content()));
+                    }
+                  }));
+
+      b.connect().awaitUninterruptibly();
       final String actual =
           new String(capturedData.poll(10000, MILLISECONDS), StandardCharsets.US_ASCII);
 
       // checking that the error message is correct. Shows that we've been able to perform the
       // handshake and opening a stream
       assertTrue(actual.startsWith("HTTP/1.1 500 OK"));
-
-      // TODO fix waiting for closing packets
-      Thread.sleep(1000);
 
       final List<QuiclyPacket> packets = quicly.getPackets();
 
@@ -60,11 +84,8 @@ public class QuiclyTest {
       // handshake ack
       assertTrue(packets.get(3).isInbound());
     } finally {
-      if (client != null) {
-        try {
-          client.close();
-        } catch (final IllegalStateException ignored) {
-        }
+      if (workerGroup != null) {
+        workerGroup.shutdownGracefully();
       }
     }
   }

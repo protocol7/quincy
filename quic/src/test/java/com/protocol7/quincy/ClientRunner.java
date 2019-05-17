@@ -1,28 +1,57 @@
 package com.protocol7.quincy;
 
-import com.protocol7.quincy.client.QuicClient;
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.netty.QuicPacket;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.EventLoopGroup;
+import io.netty.channel.nio.NioEventLoopGroup;
+import io.netty.channel.socket.nio.NioDatagramChannel;
 import java.net.InetSocketAddress;
-import java.util.concurrent.ExecutionException;
 
 public class ClientRunner {
 
-  public static void main(final String[] args) throws ExecutionException, InterruptedException {
+  public static void main(final String[] args) throws InterruptedException {
+    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 4444);
 
-    final InetSocketAddress server1 = new InetSocketAddress("127.0.0.1", 6121);
-    final InetSocketAddress server2 = new InetSocketAddress("127.0.0.1", 4433);
+    final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
-    final InetSocketAddress server = server2;
+    try {
+      final Bootstrap b = new Bootstrap();
+      b.group(workerGroup);
+      b.channel(NioDatagramChannel.class);
+      b.remoteAddress(peer);
+      b.handler(
+          new QuicBuilder()
+              .clientChannelInitializer(
+                  new ChannelInboundHandlerAdapter() {
+                    @Override
+                    public void channelActive(final ChannelHandlerContext ctx) {
+                      System.out.println("############# sending hello world");
 
-    final QuicClient client =
-        QuicClient.connect(
-                new QuicBuilder().configuration(),
-                server,
-                (stream, data, finished) -> System.out.println(new String(data)))
-            .get();
+                      ctx.channel().write(QuicPacket.of(null, 0, "PING".getBytes(), peer));
 
-    client.openStream().write("Hello world".getBytes(), true);
+                      ctx.fireChannelActive();
+                    }
 
-    client.close();
+                    @Override
+                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
+                      System.out.println("############# got message " + msg);
+
+                      ctx.close();
+                      ctx.disconnect();
+                    }
+                  }));
+
+      final Channel channel = b.connect().syncUninterruptibly().channel();
+      System.out.println("Connected");
+
+      Thread.sleep(1000);
+
+    } finally {
+      workerGroup.shutdownGracefully();
+    }
   }
 }
