@@ -11,7 +11,7 @@ public class ConnectionCloseFrameTest {
 
   @Test
   public void parseKnown() {
-    final byte[] b = Hex.dehex("1c0019001b4e6f20726563656e74206e6574776f726b2061637469766974792e");
+    final byte[] b = Hex.dehex("1c19001b4e6f20726563656e74206e6574776f726b2061637469766974792e");
     final ByteBuf bb = Unpooled.wrappedBuffer(b);
 
     final ConnectionCloseFrame ccf = ConnectionCloseFrame.parse(bb);

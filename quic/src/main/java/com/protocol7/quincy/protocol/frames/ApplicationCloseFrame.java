@@ -12,7 +12,7 @@ public class ApplicationCloseFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final int errorCode = bb.readShort();
+    final int errorCode = Varint.readAsInt(bb);
 
     final int reasonPhraseLength = Varint.readAsInt(bb);
 
@@ -44,7 +44,7 @@ public class ApplicationCloseFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(0x1d);
 
-    bb.writeShort(errorCode);
+    Varint.write(errorCode, bb);
 
     final byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
 

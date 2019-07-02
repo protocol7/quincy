@@ -25,7 +25,7 @@ public class ConnectionCloseFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final int errorCode = bb.readShort();
+    final int errorCode = Varint.readAsInt(bb);
     final FrameType frameType = FrameType.fromByte(Varint.readAsByte(bb));
 
     final int reasonPhraseLength = Varint.readAsInt(bb);
@@ -65,7 +65,7 @@ public class ConnectionCloseFrame extends Frame {
   public void write(final ByteBuf bb) {
     bb.writeByte(0x1c);
 
-    bb.writeShort(errorCode);
+    Varint.write(errorCode, bb);
     Varint.write(frameType.getType(), bb);
 
     final byte[] reasonPhraseBytes = reasonPhrase.getBytes(StandardCharsets.UTF_8);
