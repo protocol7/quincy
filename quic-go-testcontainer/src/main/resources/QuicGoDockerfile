@@ -1,6 +1,6 @@
 FROM golang:1.12
 
-ARG hash=979ab75b3b2ccc9e0ba685fca8b605709be929e2
+ARG hash=3dcbaee8
 
 WORKDIR /root/src/github.com/lucas-clemente/quic-go
 

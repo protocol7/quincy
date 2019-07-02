@@ -16,7 +16,7 @@ public class ResetStreamFrame extends Frame {
     }
 
     final long streamId = StreamId.parse(bb);
-    final int applicationErrorCode = bb.readUnsignedShort();
+    final int applicationErrorCode = Varint.readAsInt(bb);
     final long offset = Varint.readAsLong(bb);
 
     return new ResetStreamFrame(streamId, applicationErrorCode, offset);
@@ -59,7 +59,7 @@ public class ResetStreamFrame extends Frame {
     bb.writeByte(getType().getType());
 
     StreamId.write(bb, streamId);
-    bb.writeShort(applicationErrorCode);
+    Varint.write(applicationErrorCode, bb);
     Varint.write(offset, bb);
   }
 
