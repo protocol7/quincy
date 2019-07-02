@@ -6,19 +6,14 @@ import static org.junit.Assert.assertEquals;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.List;
 import org.junit.Test;
 
 public class TransportParametersTest {
 
-  private final byte[] version = dehex("51474fff");
-  private final byte[] version15 = dehex("ff00000f");
-  private final byte[] version17 = dehex("ff000011");
-
   @Test
   public void roundtrip() {
     final TransportParameters tps =
-        TransportParameters.newBuilder(version)
+        TransportParameters.newBuilder()
             .withAckDelayExponent(130)
             .withDisableMigration(true)
             .withIdleTimeout(234)
@@ -38,10 +33,8 @@ public class TransportParametersTest {
 
     tps.write(bb, true);
 
-    final TransportParameters parsed = TransportParameters.parse(bb, false);
+    final TransportParameters parsed = TransportParameters.parse(bb);
 
-    assertArrayEquals(tps.getVersion(), parsed.getVersion());
-    assertEquals(tps.getSupportedVersions(), parsed.getSupportedVersions());
     assertEquals(tps.getAckDelayExponent(), parsed.getAckDelayExponent());
     assertEquals(tps.isDisableMigration(), parsed.isDisableMigration());
     assertEquals(tps.getIdleTimeout(), parsed.getIdleTimeout());
@@ -59,43 +52,13 @@ public class TransportParametersTest {
   }
 
   @Test
-  public void roundtripSupportedVersionsServerToClient() {
-    final List<byte[]> supportedVersions = List.of(version15, version17);
-
-    final TransportParameters tps =
-        TransportParameters.newBuilder(version).withSupportedVersions(supportedVersions).build();
-    final ByteBuf bb = Unpooled.buffer();
-
-    tps.write(bb, false);
-
-    final TransportParameters parsed = TransportParameters.parse(bb, true);
-    assertEquals(tps.getSupportedVersions().size(), parsed.getSupportedVersions().size());
-    for (int i = 0; i < tps.getSupportedVersions().size(); i++) {
-      final byte[] a = tps.getSupportedVersions().get(i);
-      final byte[] e = parsed.getSupportedVersions().get(i);
-      assertArrayEquals(a, e);
-    }
-  }
-
-  @Test(expected = IllegalStateException.class)
-  public void roundtripSupportedVersionsClientToServer() {
-    final List<byte[]> supportedVersions = List.of(version15, version17);
-
-    final TransportParameters tps =
-        TransportParameters.newBuilder(version).withSupportedVersions(supportedVersions).build();
-    final ByteBuf bb = Unpooled.buffer();
-
-    tps.write(bb, true);
-  }
-
-  @Test
   public void parseKnown() {
     final byte[] data =
         dehex(
-            "51474fff087a7a8a0a51474fff006400050004800800000006000480080000000700048008000000040004800c0000000800024064000900024064000100011e0003000245ac000c0000000200102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a00000011ad9380222fa9c6e4b90085703882f5f4bd");
+            "006400050004800800000006000480080000000700048008000000040004800c0000000800024064000900024064000100011e0003000245ac000c0000000200102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a00000011ad9380222fa9c6e4b90085703882f5f4bd");
     final ByteBuf bb = Unpooled.wrappedBuffer(data);
 
-    final TransportParameters parsed = TransportParameters.parse(bb, true);
+    final TransportParameters parsed = TransportParameters.parse(bb);
 
     assertEquals(-1, parsed.getAckDelayExponent());
     assertEquals(true, parsed.isDisableMigration());

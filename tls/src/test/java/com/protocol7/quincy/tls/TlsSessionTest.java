@@ -1,6 +1,5 @@
 package com.protocol7.quincy.tls;
 
-import static com.protocol7.quincy.utils.Hex.dehex;
 
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
@@ -17,13 +16,11 @@ import org.junit.Test;
 
 public class TlsSessionTest {
 
-  private final byte[] version = dehex("51474fff");
-
   private PrivateKey privateKey;
   private final ClientTlsSession client =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
-          TestUtil.tps(version),
+          TestUtil.tps(),
           new NoopCertificateValidator());
   private ServerTlsSession server;
 
@@ -35,7 +32,7 @@ public class TlsSessionTest {
     server =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
-            TestUtil.tps(version),
+            TestUtil.tps(),
             List.of(serverCert),
             privateKey);
   }

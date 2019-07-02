@@ -22,8 +22,6 @@ import org.junit.Test;
 
 public class ClientHelloTest {
 
-  private final byte[] version = dehex("51474fff");
-
   @Test
   public void inverseRoundtrip() {
     final byte[] ch =
@@ -61,7 +59,7 @@ public class ClientHelloTest {
   @Test
   public void defaults() {
     final KeyExchange kek = KeyExchange.generate(Group.X25519);
-    final ClientHello ch = ClientHello.defaults(kek, TestUtil.tps(version));
+    final ClientHello ch = ClientHello.defaults(kek, TestUtil.tps());
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);
@@ -81,6 +79,6 @@ public class ClientHelloTest {
 
     final TransportParameters transportParameters =
         (TransportParameters) ch.getExtension(ExtensionType.QUIC).get();
-    assertEquals(TestUtil.tps(version), transportParameters);
+    assertEquals(TestUtil.tps(), transportParameters);
   }
 }

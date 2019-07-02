@@ -14,20 +14,14 @@ import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_PAC
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.ORIGINAL_CONNECTION_ID;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.STATELESS_RESET_TOKEN;
 
-import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.Varint;
-import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 
 public class TransportParameters implements Extension {
 
   public static class Builder {
-    private final byte[] version;
-    private List<byte[]> supportedVersions = Collections.emptyList();
     private int initialMaxStreamDataBidiLocal = -1;
     private int initialMaxData = -1;
     private int initialMaxBidiStreams = -1;
@@ -42,15 +36,6 @@ public class TransportParameters implements Extension {
     private int initialMaxStreamDataUni = -1;
     private int maxAckDelay = -1;
     private byte[] originalConnectionId = new byte[0];
-
-    public Builder(final byte[] version) {
-      this.version = version;
-    }
-
-    public Builder withSupportedVersions(final List<byte[]> supportedVersions) {
-      this.supportedVersions = supportedVersions;
-      return this;
-    }
 
     public Builder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
       this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
@@ -119,8 +104,6 @@ public class TransportParameters implements Extension {
 
     public TransportParameters build() {
       return new TransportParameters(
-          version,
-          supportedVersions,
           initialMaxStreamDataBidiLocal,
           initialMaxData,
           initialMaxBidiStreams,
@@ -137,31 +120,15 @@ public class TransportParameters implements Extension {
     }
   }
 
-  public static Builder newBuilder(final byte[] version) {
-    return new Builder(version);
+  public static Builder newBuilder() {
+    return new Builder();
   }
 
-  public static TransportParameters parse(final ByteBuf bb, final boolean isClient) {
-    final byte[] version = new byte[4];
-    bb.readBytes(version);
-    final ImmutableList.Builder<byte[]> supportedVersions = ImmutableList.builder();
-
-    if (isClient) {
-      final int supportVerLen = bb.readByte() / 4;
-
-      for (int i = 0; i < supportVerLen; i++) {
-        final byte[] b = new byte[4];
-        bb.readBytes(b);
-        supportedVersions.add(b);
-      }
-    }
-
+  public static TransportParameters parse(final ByteBuf bb) {
     final int bufLen = bb.readShort();
     final ByteBuf tpBB = bb.readBytes(bufLen);
-
     try {
-      final Builder builder = new Builder(version);
-      builder.withSupportedVersions(supportedVersions.build());
+      final Builder builder = new Builder();
 
       while (tpBB.isReadable()) {
         final byte[] type = new byte[2];
@@ -234,8 +201,6 @@ public class TransportParameters implements Extension {
     return Varint.readAsInt(data);
   }
 
-  private final byte[] version;
-  private final List<byte[]> supportedVersions;
   private final int initialMaxStreamDataBidiLocal;
   private final int initialMaxData;
   private final int initialMaxBidiStreams;
@@ -252,8 +217,6 @@ public class TransportParameters implements Extension {
   private final byte[] originalConnectionId;
 
   private TransportParameters(
-      final byte[] version,
-      final List<byte[]> supportedVersions,
       final int initialMaxStreamDataBidiLocal,
       final int initialMaxData,
       final int initialMaxBidiStreams,
@@ -267,8 +230,6 @@ public class TransportParameters implements Extension {
       final int initialMaxStreamDataUni,
       final int maxAckDelay,
       final byte[] originalConnectionId) {
-    this.version = version;
-    this.supportedVersions = supportedVersions;
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
     this.initialMaxBidiStreams = initialMaxBidiStreams;
@@ -287,14 +248,6 @@ public class TransportParameters implements Extension {
   @Override
   public ExtensionType getType() {
     return ExtensionType.QUIC;
-  }
-
-  public byte[] getVersion() {
-    return version;
-  }
-
-  public List<byte[]> getSupportedVersions() {
-    return supportedVersions;
   }
 
   public int getInitialMaxStreamDataBidiLocal() {
@@ -365,8 +318,6 @@ public class TransportParameters implements Extension {
         && initialMaxStreamDataBidiRemote == that.initialMaxStreamDataBidiRemote
         && initialMaxStreamDataUni == that.initialMaxStreamDataUni
         && maxAckDelay == that.maxAckDelay
-        && Arrays.equals(version, that.version)
-        && Objects.equals(supportedVersions, that.supportedVersions)
         && Arrays.equals(statelessResetToken, that.statelessResetToken)
         && Arrays.equals(originalConnectionId, that.originalConnectionId);
   }
@@ -375,7 +326,6 @@ public class TransportParameters implements Extension {
   public int hashCode() {
     int result =
         Objects.hash(
-            supportedVersions,
             initialMaxStreamDataBidiLocal,
             initialMaxData,
             initialMaxBidiStreams,
@@ -387,7 +337,6 @@ public class TransportParameters implements Extension {
             initialMaxStreamDataBidiRemote,
             initialMaxStreamDataUni,
             maxAckDelay);
-    result = 31 * result + Arrays.hashCode(version);
     result = 31 * result + Arrays.hashCode(statelessResetToken);
     result = 31 * result + Arrays.hashCode(originalConnectionId);
     return result;
@@ -396,10 +345,6 @@ public class TransportParameters implements Extension {
   @Override
   public String toString() {
     return "TransportParameters{"
-        + "version="
-        + Hex.hex(version)
-        + "suppoerdVersions="
-        + supportedVersions
         + "initialMaxStreamDataBidiLocal="
         + initialMaxStreamDataBidiLocal
         + ", initialMaxData="
@@ -430,19 +375,6 @@ public class TransportParameters implements Extension {
   }
 
   public void write(final ByteBuf bb, final boolean isClient) {
-    bb.writeBytes(version);
-
-    if (!isClient) {
-      bb.writeByte(supportedVersions.size() * 4);
-      for (final byte[] supportedVersion : supportedVersions) {
-        bb.writeBytes(supportedVersion);
-      }
-    } else {
-      if (!supportedVersions.isEmpty()) {
-        throw new IllegalStateException("Supported version can not be set for clients");
-      }
-    }
-
     final int lenPos = bb.writerIndex();
     bb.writeShort(0);
 

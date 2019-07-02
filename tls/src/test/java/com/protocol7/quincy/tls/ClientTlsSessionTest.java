@@ -28,17 +28,15 @@ import org.junit.Test;
 
 public class ClientTlsSessionTest {
 
-  private final byte[] version = dehex("51474fff");
-
   private final ClientTlsSession engine =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
-          TestUtil.tps(version),
+          TestUtil.tps(),
           new NoopCertificateValidator());
   private final ClientTlsSession started =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
-          TestUtil.tps(version),
+          TestUtil.tps(),
           new NoopCertificateValidator());
 
   @Before
@@ -72,7 +70,7 @@ public class ClientTlsSessionTest {
 
     final TransportParameters tps =
         (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
-    assertEquals(TestUtil.tps(version), tps);
+    assertEquals(TestUtil.tps(), tps);
   }
 
   private KeyShare keyshare() {
@@ -81,7 +79,7 @@ public class ClientTlsSessionTest {
 
   @Test
   public void serverHello() {
-    final List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps(version));
+    final List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps());
 
     final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
@@ -117,18 +115,14 @@ public class ClientTlsSessionTest {
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoKeyShare() {
     final byte[] b =
-        sh(
-            new byte[32],
-            TLS_AES_128_GCM_SHA256,
-            ext(SupportedVersions.TLS13, TestUtil.tps(version)));
+        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(SupportedVersions.TLS13, TestUtil.tps()));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
-    final byte[] b =
-        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps(version)));
+    final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps()));
 
     started.handleServerHello(b);
   }

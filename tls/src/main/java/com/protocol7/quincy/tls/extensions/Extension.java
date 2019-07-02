@@ -26,7 +26,7 @@ public interface Extension {
     final ByteBuf b = bb.readBytes(len);
     try {
       if (type == ExtensionType.QUIC) {
-        return TransportParameters.parse(b, isClient);
+        return TransportParameters.parse(b);
       } else if (type == ExtensionType.KEY_SHARE) {
         return KeyShare.parse(b, isClient);
       } else if (type == ExtensionType.SUPPORTED_VERSIONS) {

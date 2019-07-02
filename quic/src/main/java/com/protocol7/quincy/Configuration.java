@@ -94,7 +94,7 @@ public class Configuration {
   }
 
   public TransportParameters toTransportParameters() {
-    return TransportParameters.newBuilder(version.asBytes())
+    return TransportParameters.newBuilder()
         .withInitialMaxStreamDataBidiLocal(initialMaxStreamDataBidiLocal)
         .withInitialMaxData(initialMaxData)
         .withInitialMaxBidiStreams(initialMaxBidiStreams)

@@ -22,8 +22,8 @@ public class TestUtil {
     assertEquals(hex(expected), hex(actual));
   }
 
-  public static TransportParameters tps(final byte[] version) {
-    return TransportParameters.newBuilder(version)
+  public static TransportParameters tps() {
+    return TransportParameters.newBuilder()
         .withInitialMaxStreamDataBidiLocal(32768)
         .withInitialMaxData(49152)
         .withInitialMaxBidiStreams(100)
