@@ -7,6 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.tls.CipherSuite;
 import com.protocol7.quincy.tls.Group;
 import com.protocol7.quincy.tls.KeyExchange;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
@@ -36,7 +37,8 @@ public class ClientHello {
                 SignatureAlgorithms.defaults(),
                 new SupportedGroups(Group.X25519),
                 SupportedVersions.TLS13,
-                PskKeyExchangeModes.defaults())
+                PskKeyExchangeModes.defaults(),
+                new ALPN(List.of("h3-20")))
             .add(exts)
             .build();
 
