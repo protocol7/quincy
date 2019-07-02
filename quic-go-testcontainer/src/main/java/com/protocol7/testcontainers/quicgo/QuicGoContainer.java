@@ -17,14 +17,14 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class QuicGoContainer extends GenericContainer {
 
-  private Logger log = LoggerFactory.getLogger("quic-go");
+  private final Logger log = LoggerFactory.getLogger("quic-go");
 
   private static ImageFromDockerfile image() {
     return new ImageFromDockerfile("quic-go", false)
         .withFileFromClasspath("Dockerfile", "QuicGoDockerfile");
   }
 
-  private List<String> logStatements = new ArrayList<>();
+  private final List<String> logStatements = new ArrayList<>();
 
   public QuicGoContainer() {
     super(image());

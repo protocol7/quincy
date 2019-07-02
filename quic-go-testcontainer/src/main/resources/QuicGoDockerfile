@@ -1,15 +1,15 @@
-FROM golang:latest
+FROM golang:1.12
 
-ARG hash=c7ab6f4e
+ARG hash=3dcbaee8
 
-RUN go get -v github.com/lucas-clemente/quic-go/...
+WORKDIR /root/src/github.com/lucas-clemente/quic-go
 
-WORKDIR src/github.com/lucas-clemente/quic-go
+RUN git clone https://github.com/lucas-clemente/quic-go.git . && git checkout $hash
+
+RUN GO111MODULE=on go get -d -v ./...
 
 RUN mkdir -p /var/www
 RUN touch /var/www/index.html
-
-RUN git checkout $hash
 
 EXPOSE 6121/udp
 
