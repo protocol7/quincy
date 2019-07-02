@@ -2,6 +2,7 @@ package com.protocol7.quincy.protocol.frames;
 
 import static org.junit.Assert.assertTrue;
 
+import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -94,6 +95,11 @@ public class FrameTest {
   @Test
   public void streamsBlockedFrameUni() {
     assertFrame(new StreamsBlockedFrame(456, false));
+  }
+
+  @Test
+  public void newTokenFrame() {
+    assertFrame(new NewToken(Rnd.rndBytes(20)));
   }
 
   private void assertFrame(final Frame frame) {

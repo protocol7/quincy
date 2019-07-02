@@ -40,6 +40,8 @@ public abstract class Frame implements Writeable {
       return DataBlockedFrame.parse(bb);
     } else if (type == FrameType.STREAMS_BLOCKED) {
       return StreamsBlockedFrame.parse(bb);
+    } else if (type == FrameType.NEW_TOKEN) {
+      return NewToken.parse(bb);
     } else {
       throw new RuntimeException("Unknown frame type " + type);
     }
