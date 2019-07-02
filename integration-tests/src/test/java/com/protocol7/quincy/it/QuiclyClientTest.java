@@ -1,6 +1,7 @@
 package com.protocol7.quincy.it;
 
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.protocol.Version;
 import com.protocol7.testcontainers.quicly.QuiclyClientContainer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -25,6 +26,7 @@ public class QuiclyClientTest {
       b.option(ChannelOption.SO_BROADCAST, true);
       b.handler(
           new QuicBuilder()
+              .withVersion(Version.DRAFT_20)
               .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
               .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
               .serverChannelInitializer(

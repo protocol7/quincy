@@ -6,6 +6,7 @@ import static org.junit.Assert.assertTrue;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
 import com.protocol7.testcontainers.quicly.QuiclyServerContainer;
@@ -41,6 +42,7 @@ public class QuiclyTest {
       b.remoteAddress(quicly.getAddress());
       b.handler(
           new QuicBuilder()
+              .withVersion(Version.DRAFT_20)
               .clientChannelInitializer(
                   new ChannelDuplexHandler() {
                     @Override

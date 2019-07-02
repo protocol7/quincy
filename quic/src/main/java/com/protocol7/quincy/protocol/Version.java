@@ -12,6 +12,7 @@ public enum Version {
   DRAFT_15(dehex("ff00000f")),
   DRAFT_17(dehex("ff000011")),
   DRAFT_18(dehex("ff000012")),
+  DRAFT_20(dehex("ff000014")),
   UNKNOWN(new byte[0]);
 
   public static Version read(final ByteBuf bb) {
@@ -30,6 +31,8 @@ public enum Version {
       return DRAFT_17;
     } else if (Arrays.equals(l, DRAFT_18.version)) {
       return DRAFT_18;
+    } else if (Arrays.equals(l, DRAFT_20.version)) {
+      return DRAFT_20;
     } else {
       return UNKNOWN;
     }
