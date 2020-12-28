@@ -12,7 +12,7 @@ import com.protocol7.quincy.utils.Hex;
 public class InitialAEAD {
 
   private static final byte[] QUIC_VERSION_1_SALT =
-      Hex.dehex("ef4fb0abb47470c41befcf8031334fae485e09a0");
+      Hex.dehex("afbfec289993d24c9e9786f19c6111e04390a899");
 
   public static AEAD create(final byte[] keyMaterial, final boolean isClient) {
     final byte[] initialSecret = HKDF.extract(QUIC_VERSION_1_SALT, keyMaterial);
