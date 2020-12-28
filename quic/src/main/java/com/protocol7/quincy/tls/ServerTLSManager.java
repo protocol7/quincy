@@ -11,6 +11,7 @@ import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -33,30 +34,30 @@ public class ServerTLSManager implements InboundHandler {
 
   @Override
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
+
     // TODO check version
     final State state = ctx.getState();
     if (state == State.Started) {
       if (packet instanceof InitialPacket) {
         final InitialPacket initialPacket = (InitialPacket) packet;
 
-        if (initialPacket.getToken().isPresent()) {
-          final CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
+        final CryptoFrame cf = (CryptoFrame) initialPacket.getPayload().getFrames().get(0);
 
-          final ServerTlsSession.ServerHelloAndHandshake shah =
-              tlsSession.handleClientHello(cf.getCryptoData());
+        final ServerTlsSession.ServerHelloAndHandshake shah =
+            tlsSession.handleClientHello(cf.getCryptoData());
 
-          // sent as initial packet
-          ctx.send(new CryptoFrame(0, shah.getServerHello()));
+        // sent as initial packet
+        // TODO ack?
+        ctx.send(new CryptoFrame(0, shah.getServerHello()));
 
-          tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
+        tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
 
-          // sent as handshake packet
-          ctx.send(new CryptoFrame(0, shah.getServerHandshake()));
+        // sent as handshake packet
+        ctx.send(new CryptoFrame(0, shah.getServerHandshake()));
 
-          tlsSession.setOneRttAead(shah.getOneRttAEAD());
+        tlsSession.setOneRttAead(shah.getOneRttAEAD());
 
-          ctx.setState(State.BeforeReady);
-        }
+        ctx.setState(State.BeforeReady);
       } else {
         throw new IllegalStateException("Unexpected packet in BeforeInitial: " + packet);
       }
