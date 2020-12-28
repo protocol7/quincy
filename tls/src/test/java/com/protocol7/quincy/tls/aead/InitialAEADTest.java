@@ -19,4 +19,18 @@ public class InitialAEADTest {
     Assert.assertEquals("0edd982a6ac527f2eddcbb7348dea5d7", Hex.hex(aead.getMyPnKey()));
     Assert.assertEquals("94b9452d2b3c7c7f6da7fdd8593537fd", Hex.hex(aead.getOtherPnKey()));
   }
+
+  @Test
+  public void testSpecExample() {
+    final byte[] connId = Hex.dehex("8394c8f03e515708"); // from RFC
+
+    final AEAD aead = InitialAEAD.create(connId, true);
+
+    Assert.assertEquals("1f369613dd76d5467730efcbe3b1a22d", Hex.hex(aead.getMyKey()));
+    Assert.assertEquals("cf3a5331653c364c88f0f379b6067e37", Hex.hex(aead.getOtherKey()));
+    Assert.assertEquals("fa044b2f42a3fd3b46fb255c", Hex.hex(aead.getMyIV()));
+    Assert.assertEquals("0ac1493ca1905853b0bba03e", Hex.hex(aead.getOtherIV()));
+    Assert.assertEquals("9f50449e04a0e810283a1e9933adedd2", Hex.hex(aead.getMyPnKey()));
+    Assert.assertEquals("c206b8d9b9f0f37644430b490eeaa314", Hex.hex(aead.getOtherPnKey()));
+  }
 }
