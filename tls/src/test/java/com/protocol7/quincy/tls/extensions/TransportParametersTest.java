@@ -4,6 +4,8 @@ import static com.protocol7.quincy.utils.Hex.dehex;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.protocol7.quincy.utils.Bytes;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -15,18 +17,18 @@ public class TransportParametersTest {
     final TransportParameters tps =
         TransportParameters.newBuilder()
             .withAckDelayExponent(130)
-            .withDisableMigration(true)
-            .withIdleTimeout(234)
-            .withInitialMaxBidiStreams(345)
+            .withDisableActiveMigration(true)
+            .withMaxIdleTimeout(234)
+            .withInitialMaxStreamsBidi(345)
             .withInitialMaxData(456)
             .withInitialMaxStreamDataBidiLocal(567)
             .withInitialMaxStreamDataBidiRemote(678)
             .withInitialMaxStreamDataUni(789)
-            .withInitialMaxUniStreams(890)
+            .withInitialMaxStreamsUni(890)
             .withMaxAckDelay(129)
-            .withMaxPacketSize(432)
+            .withMaxUDPPacketSize(432)
             .withStatelessResetToken("srt".getBytes())
-            .withOriginalConnectionId("oci".getBytes())
+            .withOriginalDestinationConnectionId("oci".getBytes())
             .build();
 
     final ByteBuf bb = Unpooled.buffer();
@@ -55,23 +57,27 @@ public class TransportParametersTest {
   public void parseKnown() {
     final byte[] data =
         dehex(
-            "006400050004800800000006000480080000000700048008000000040004800c0000000800024064000900024064000100011e0003000245ac000c0000000200102a2a2a2a2a2a2a2a2a2a2a2a2a2a2a2a00000011ad9380222fa9c6e4b90085703882f5f4bd");
+            "010480007530030245460404809896800504800f42400604800f42400704800f424008024064090240640a01030b01190c000f147fc05a41792c01e47504c96118383516818f8f8e");
     final ByteBuf bb = Unpooled.wrappedBuffer(data);
 
     final TransportParameters parsed = TransportParameters.parse(bb);
 
-    assertEquals(-1, parsed.getAckDelayExponent());
+    assertEquals(3, parsed.getAckDelayExponent());
     assertEquals(true, parsed.isDisableMigration());
-    assertEquals(30, parsed.getIdleTimeout());
+    assertEquals(30000, parsed.getIdleTimeout());
     assertEquals(100, parsed.getInitialMaxBidiStreams());
-    assertEquals(786432, parsed.getInitialMaxData());
-    assertEquals(524288, parsed.getInitialMaxStreamDataBidiLocal());
-    assertEquals(524288, parsed.getInitialMaxStreamDataBidiRemote());
-    assertEquals(524288, parsed.getInitialMaxStreamDataUni());
     assertEquals(100, parsed.getInitialMaxUniStreams());
-    assertEquals(-1, parsed.getMaxAckDelay());
-    assertEquals(1452, parsed.getMaxPacketSize());
-    assertEquals(16, parsed.getStatelessResetToken().length);
-    assertEquals(17, parsed.getOriginalConnectionId().length);
+    assertEquals(10000000, parsed.getInitialMaxData());
+    assertEquals(1000000, parsed.getInitialMaxStreamDataBidiLocal());
+    assertEquals(1000000, parsed.getInitialMaxStreamDataBidiRemote());
+    assertEquals(1000000, parsed.getInitialMaxStreamDataUni());
+    assertEquals(100, parsed.getInitialMaxUniStreams());
+    assertEquals(25, parsed.getMaxAckDelay());
+    assertEquals(1350, parsed.getMaxPacketSize());
+    assertEquals(-1, parsed.getActiveConnectionIdLimit());
+    assertEquals(0, parsed.getStatelessResetToken().length);
+    assertEquals(0, parsed.getOriginalConnectionId().length);
+    assertEquals(20, parsed.getInitialSourceConnectionId().length);
+    assertEquals(0, parsed.getRetrySourceConnectionId().length);
   }
 }

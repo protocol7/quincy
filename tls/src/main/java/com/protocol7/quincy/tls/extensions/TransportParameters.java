@@ -1,41 +1,48 @@
 package com.protocol7.quincy.tls.extensions;
 
+import com.protocol7.quincy.Varint;
+import io.netty.buffer.ByteBuf;
+
+import java.util.Arrays;
+import java.util.Objects;
+
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.ACK_DELAY_EXPONENT;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.DISABLE_MIGRATION;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.IDLE_TIMEOUT;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_BIDI_STREAMS;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.ACTIVE_CONNECTION_ID_LIMIT;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.DISABLE_ACTIVE_MIGRATION;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_DATA;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_STREAMS_BIDI;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_STREAMS_UNI;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_STREAM_DATA_BIDI_LOCAL;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_STREAM_DATA_BIDI_REMOTE;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_STREAM_DATA_UNI;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_MAX_UNI_STREAMS;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.INITIAL_SOURCE_CONNECTION_ID;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_ACK_DELAY;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_PACKET_SIZE;
-import static com.protocol7.quincy.tls.extensions.TransportParameterType.ORIGINAL_CONNECTION_ID;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_IDLE_TIMEOUT;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_UDP_PACKET_SIZE;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.ORIGINAL_DESTINATION_CONNECTION_ID;
+import static com.protocol7.quincy.tls.extensions.TransportParameterType.RETRY_SOURCE_CONNECTION_ID;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.STATELESS_RESET_TOKEN;
-
-import com.protocol7.quincy.Varint;
-import io.netty.buffer.ByteBuf;
-import java.util.Arrays;
-import java.util.Objects;
 
 public class TransportParameters implements Extension {
 
   public static class Builder {
     private int initialMaxStreamDataBidiLocal = -1;
     private int initialMaxData = -1;
-    private int initialMaxBidiStreams = -1;
+    private int initialMaxStreamsBidi = -1;
     private int idleTimeout = -1;
     // TODO PREFERRED_ADDRESS(4),
-    private int maxPacketSize = -1;
+    private int maxUDPPacketSize = -1;
     private byte[] statelessResetToken = new byte[0];
     private int ackDelayExponent = -1;
-    private int initialMaxUniStreams = -1;
-    private boolean disableMigration = false;
+    private int initialMaxStreamsUni = -1;
+    private boolean disableActiveMigration = false;
     private int initialMaxStreamDataBidiRemote = -1;
     private int initialMaxStreamDataUni = -1;
     private int maxAckDelay = -1;
-    private byte[] originalConnectionId = new byte[0];
+    private byte[] originalDestinationConnectionId = new byte[0];
+    private int activeConnectionIdLimit = -1;
+    private byte[] initialSourceConnectionId = new byte[0];
+    private byte[] retrySourceConnectionId = new byte[0];
 
     public Builder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
       this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
@@ -47,18 +54,18 @@ public class TransportParameters implements Extension {
       return this;
     }
 
-    public Builder withInitialMaxBidiStreams(final int initialMaxBidiStreams) {
-      this.initialMaxBidiStreams = initialMaxBidiStreams;
+    public Builder withInitialMaxStreamsBidi(final int initialMaxStreamsBidi) {
+      this.initialMaxStreamsBidi = initialMaxStreamsBidi;
       return this;
     }
 
-    public Builder withIdleTimeout(final int idleTimeout) {
+    public Builder withMaxIdleTimeout(final int idleTimeout) {
       this.idleTimeout = idleTimeout;
       return this;
     }
 
-    public Builder withMaxPacketSize(final int maxPacketSize) {
-      this.maxPacketSize = maxPacketSize;
+    public Builder withMaxUDPPacketSize(final int maxUDPPacketSize) {
+      this.maxUDPPacketSize = maxUDPPacketSize;
       return this;
     }
 
@@ -72,13 +79,13 @@ public class TransportParameters implements Extension {
       return this;
     }
 
-    public Builder withInitialMaxUniStreams(final int initialMaxUniStreams) {
-      this.initialMaxUniStreams = initialMaxUniStreams;
+    public Builder withInitialMaxStreamsUni(final int initialMaxStreamsUni) {
+      this.initialMaxStreamsUni = initialMaxStreamsUni;
       return this;
     }
 
-    public Builder withDisableMigration(final boolean disableMigration) {
-      this.disableMigration = disableMigration;
+    public Builder withDisableActiveMigration(final boolean disableActiveMigration) {
+      this.disableActiveMigration = disableActiveMigration;
       return this;
     }
 
@@ -97,8 +104,26 @@ public class TransportParameters implements Extension {
       return this;
     }
 
-    public Builder withOriginalConnectionId(final byte[] originalConnectionId) {
-      this.originalConnectionId = originalConnectionId;
+    public Builder withOriginalDestinationConnectionId(
+        final byte[] originalDestinationConnectionId) {
+      this.originalDestinationConnectionId = originalDestinationConnectionId;
+      return this;
+    }
+
+    public Builder withActiveConnectionIdLimit(final int activeConnectionIdLimit) {
+      this.activeConnectionIdLimit = activeConnectionIdLimit;
+      return this;
+    }
+
+    public Builder withInitialSourceConnectionId(
+        final byte[] initialSourceConnectionId) {
+      this.initialSourceConnectionId = initialSourceConnectionId;
+      return this;
+    }
+
+    public Builder withRetrySourceConnectionId(
+        final byte[] retrySourceConnectionId) {
+      this.retrySourceConnectionId = retrySourceConnectionId;
       return this;
     }
 
@@ -106,17 +131,20 @@ public class TransportParameters implements Extension {
       return new TransportParameters(
           initialMaxStreamDataBidiLocal,
           initialMaxData,
-          initialMaxBidiStreams,
+          initialMaxStreamsBidi,
           idleTimeout,
-          maxPacketSize,
+          maxUDPPacketSize,
           statelessResetToken,
           ackDelayExponent,
-          initialMaxUniStreams,
-          disableMigration,
+          initialMaxStreamsUni,
+          disableActiveMigration,
           initialMaxStreamDataBidiRemote,
           initialMaxStreamDataUni,
           maxAckDelay,
-          originalConnectionId);
+          originalDestinationConnectionId,
+          activeConnectionIdLimit,
+          initialSourceConnectionId,
+          retrySourceConnectionId);
     }
   }
 
@@ -125,68 +153,70 @@ public class TransportParameters implements Extension {
   }
 
   public static TransportParameters parse(final ByteBuf bb) {
-    final int bufLen = bb.readShort();
-    final ByteBuf tpBB = bb.readBytes(bufLen);
-    try {
-      final Builder builder = new Builder();
 
-      while (tpBB.isReadable()) {
-        final byte[] type = new byte[2];
-        tpBB.readBytes(type);
+    final Builder builder = new Builder();
 
-        final int len = tpBB.readShort();
+    while (bb.isReadable()) {
+      final int type = Varint.readAsInt(bb);
+      final int len = Varint.readAsInt(bb);
 
-        final byte[] data = new byte[len];
-        tpBB.readBytes(data);
+      final byte[] data = new byte[len];
+      bb.readBytes(data);
 
-        final TransportParameterType tp = TransportParameterType.fromValue(type);
+      final TransportParameterType tp = TransportParameterType.fromValue(type);
 
-        switch (tp) {
-          case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
-            builder.withInitialMaxStreamDataBidiLocal(dataToInt(data));
-            break;
-          case INITIAL_MAX_DATA:
-            builder.withInitialMaxData(dataToInt(data));
-            break;
-          case INITIAL_MAX_BIDI_STREAMS:
-            builder.withInitialMaxBidiStreams(dataToShort(data));
-            break;
-          case IDLE_TIMEOUT:
-            builder.withIdleTimeout(dataToShort(data));
-            break;
-          case MAX_PACKET_SIZE:
-            builder.withMaxPacketSize(dataToShort(data));
-            break;
-          case STATELESS_RESET_TOKEN:
-            builder.withStatelessResetToken(data);
-            break;
-          case ACK_DELAY_EXPONENT:
-            builder.withAckDelayExponent(dataToByte(data));
-            break;
-          case INITIAL_MAX_UNI_STREAMS:
-            builder.withInitialMaxUniStreams(dataToShort(data));
-            break;
-          case DISABLE_MIGRATION:
-            builder.withDisableMigration(true);
-            break;
-          case INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
-            builder.withInitialMaxStreamDataBidiRemote(dataToInt(data));
-            break;
-          case INITIAL_MAX_STREAM_DATA_UNI:
-            builder.withInitialMaxStreamDataUni(dataToInt(data));
-            break;
-          case MAX_ACK_DELAY:
-            builder.withMaxAckDelay(dataToByte(data));
-            break;
-          case ORIGINAL_CONNECTION_ID:
-            builder.withOriginalConnectionId(data);
-            break;
-        }
+      switch (tp) {
+        case INITIAL_MAX_STREAM_DATA_BIDI_LOCAL:
+          builder.withInitialMaxStreamDataBidiLocal(dataToInt(data));
+          break;
+        case INITIAL_MAX_DATA:
+          builder.withInitialMaxData(dataToInt(data));
+          break;
+        case INITIAL_MAX_STREAMS_BIDI:
+          builder.withInitialMaxStreamsBidi(dataToShort(data));
+          break;
+        case MAX_IDLE_TIMEOUT:
+          builder.withMaxIdleTimeout(dataToShort(data));
+          break;
+        case MAX_UDP_PACKET_SIZE:
+          builder.withMaxUDPPacketSize(dataToShort(data));
+          break;
+        case STATELESS_RESET_TOKEN:
+          builder.withStatelessResetToken(data);
+          break;
+        case ACK_DELAY_EXPONENT:
+          builder.withAckDelayExponent(dataToByte(data));
+          break;
+        case INITIAL_MAX_STREAMS_UNI:
+          builder.withInitialMaxStreamsUni(dataToShort(data));
+          break;
+        case DISABLE_ACTIVE_MIGRATION:
+          builder.withDisableActiveMigration(true);
+          break;
+        case INITIAL_MAX_STREAM_DATA_BIDI_REMOTE:
+          builder.withInitialMaxStreamDataBidiRemote(dataToInt(data));
+          break;
+        case INITIAL_MAX_STREAM_DATA_UNI:
+          builder.withInitialMaxStreamDataUni(dataToInt(data));
+          break;
+        case MAX_ACK_DELAY:
+          builder.withMaxAckDelay(dataToByte(data));
+          break;
+        case ORIGINAL_DESTINATION_CONNECTION_ID:
+          builder.withOriginalDestinationConnectionId(data);
+          break;
+        case ACTIVE_CONNECTION_ID_LIMIT:
+          builder.withActiveConnectionIdLimit(dataToInt(data));
+          break;
+        case INITIAL_SOURCE_CONNECTION_ID:
+          builder.withInitialSourceConnectionId(data);
+          break;
+        case RETRY_SOURCE_CONNECTION_ID:
+          builder.withRetrySourceConnectionId(data);
+          break;
       }
-      return builder.build();
-    } finally {
-      tpBB.release();
     }
+    return builder.build();
   }
 
   private static int dataToInt(final byte[] data) {
@@ -215,6 +245,9 @@ public class TransportParameters implements Extension {
   private final int initialMaxStreamDataUni;
   private final int maxAckDelay;
   private final byte[] originalConnectionId;
+  private final int activeConnectionIdLimit;
+  private final byte[] initialSourceConnectionId;
+  private final byte[] retrySourceConnectionId;
 
   private TransportParameters(
       final int initialMaxStreamDataBidiLocal,
@@ -229,7 +262,11 @@ public class TransportParameters implements Extension {
       final int initialMaxStreamDataBidiRemote,
       final int initialMaxStreamDataUni,
       final int maxAckDelay,
-      final byte[] originalConnectionId) {
+      final byte[] originalConnectionId,
+      final int activeConnectionIdLimit,
+      final byte[] initialSourceConnectionId,
+      final byte[] retrySourceConnectionId
+  ) {
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
     this.initialMaxBidiStreams = initialMaxBidiStreams;
@@ -243,6 +280,10 @@ public class TransportParameters implements Extension {
     this.initialMaxStreamDataUni = initialMaxStreamDataUni;
     this.maxAckDelay = maxAckDelay;
     this.originalConnectionId = originalConnectionId;
+    this.activeConnectionIdLimit = activeConnectionIdLimit;
+    this.initialSourceConnectionId = initialSourceConnectionId;
+    this.retrySourceConnectionId = retrySourceConnectionId;
+
   }
 
   @Override
@@ -302,6 +343,18 @@ public class TransportParameters implements Extension {
     return originalConnectionId;
   }
 
+  public int getActiveConnectionIdLimit() {
+    return activeConnectionIdLimit;
+  }
+
+  public byte[] getInitialSourceConnectionId() {
+    return initialSourceConnectionId;
+  }
+
+  public byte[] getRetrySourceConnectionId() {
+    return retrySourceConnectionId;
+  }
+
   @Override
   public boolean equals(final Object o) {
     if (this == o) return true;
@@ -319,7 +372,10 @@ public class TransportParameters implements Extension {
         && initialMaxStreamDataUni == that.initialMaxStreamDataUni
         && maxAckDelay == that.maxAckDelay
         && Arrays.equals(statelessResetToken, that.statelessResetToken)
-        && Arrays.equals(originalConnectionId, that.originalConnectionId);
+        && Arrays.equals(originalConnectionId, that.originalConnectionId)
+        && activeConnectionIdLimit == that.activeConnectionIdLimit
+        && Arrays.equals(initialSourceConnectionId, that.initialSourceConnectionId)
+        && Arrays.equals(retrySourceConnectionId, that.retrySourceConnectionId);
   }
 
   @Override
@@ -336,9 +392,12 @@ public class TransportParameters implements Extension {
             disableMigration,
             initialMaxStreamDataBidiRemote,
             initialMaxStreamDataUni,
-            maxAckDelay);
+            maxAckDelay,
+            activeConnectionIdLimit);
     result = 31 * result + Arrays.hashCode(statelessResetToken);
     result = 31 * result + Arrays.hashCode(originalConnectionId);
+    result = 31 * result + Arrays.hashCode(initialSourceConnectionId);
+    result = 31 * result + Arrays.hashCode(retrySourceConnectionId);
     return result;
   }
 
@@ -371,74 +430,77 @@ public class TransportParameters implements Extension {
         + maxAckDelay
         + ", originalConnectionId="
         + Arrays.toString(originalConnectionId)
+        + ", activeConnectionIdLimit="
+        + activeConnectionIdLimit
+        + ", initialSourceConnectionId="
+        + Arrays.toString(initialSourceConnectionId)
+        + ", retrySourceConnectionId="
+        + Arrays.toString(retrySourceConnectionId)
         + '}';
   }
 
   public void write(final ByteBuf bb, final boolean isClient) {
-    final int lenPos = bb.writerIndex();
-    bb.writeShort(0);
 
     if (initialMaxStreamDataBidiLocal > -1) {
-      bb.writeBytes(INITIAL_MAX_STREAM_DATA_BIDI_LOCAL.asBytes());
-      writeVarint(bb, initialMaxStreamDataBidiLocal);
+      writeVarint(INITIAL_MAX_STREAM_DATA_BIDI_LOCAL, bb, initialMaxStreamDataBidiLocal);
     }
     if (initialMaxData > -1) {
-      bb.writeBytes(INITIAL_MAX_DATA.asBytes());
-      writeVarint(bb, initialMaxData);
+      writeVarint(INITIAL_MAX_DATA, bb, initialMaxData);
     }
     if (initialMaxBidiStreams > -1) {
-      bb.writeBytes(INITIAL_MAX_BIDI_STREAMS.asBytes());
-      writeVarint(bb, initialMaxBidiStreams);
+      writeVarint(INITIAL_MAX_STREAMS_BIDI, bb, initialMaxBidiStreams);
     }
     if (idleTimeout > -1) {
-      bb.writeBytes(IDLE_TIMEOUT.asBytes());
-      writeVarint(bb, idleTimeout);
+      writeVarint(MAX_IDLE_TIMEOUT, bb, idleTimeout);
     }
     if (maxPacketSize > -1) {
-      bb.writeBytes(MAX_PACKET_SIZE.asBytes());
-      writeVarint(bb, maxPacketSize);
+      writeVarint(MAX_UDP_PACKET_SIZE, bb, maxPacketSize);
     }
     if (statelessResetToken.length > 0) {
-      bb.writeBytes(STATELESS_RESET_TOKEN.asBytes());
-      bb.writeShort(statelessResetToken.length);
-      bb.writeBytes(statelessResetToken);
+      writeBytes(STATELESS_RESET_TOKEN, bb, statelessResetToken);
     }
     if (ackDelayExponent > -1) {
-      bb.writeBytes(ACK_DELAY_EXPONENT.asBytes());
-      writeVarint(bb, ackDelayExponent);
+      writeVarint(ACK_DELAY_EXPONENT, bb, ackDelayExponent);
     }
     if (initialMaxUniStreams > -1) {
-      bb.writeBytes(INITIAL_MAX_UNI_STREAMS.asBytes());
-      writeVarint(bb, initialMaxUniStreams);
+      writeVarint(INITIAL_MAX_STREAMS_UNI, bb, initialMaxUniStreams);
     }
     if (disableMigration) {
-      bb.writeBytes(DISABLE_MIGRATION.asBytes());
-      bb.writeShort(0);
+      writeVarint(DISABLE_ACTIVE_MIGRATION,  bb,0);
     }
     if (initialMaxStreamDataBidiRemote > -1) {
-      bb.writeBytes(INITIAL_MAX_STREAM_DATA_BIDI_REMOTE.asBytes());
-      writeVarint(bb, initialMaxStreamDataBidiRemote);
+      writeVarint(INITIAL_MAX_STREAM_DATA_BIDI_REMOTE, bb, initialMaxStreamDataBidiRemote);
     }
     if (initialMaxStreamDataUni > -1) {
-      bb.writeBytes(INITIAL_MAX_STREAM_DATA_UNI.asBytes());
-      writeVarint(bb, initialMaxStreamDataUni);
+      writeVarint(INITIAL_MAX_STREAM_DATA_UNI, bb, initialMaxStreamDataUni);
     }
     if (maxAckDelay > -1) {
-      bb.writeBytes(MAX_ACK_DELAY.asBytes());
-      writeVarint(bb, maxAckDelay);
+      writeVarint(MAX_ACK_DELAY, bb, maxAckDelay);
     }
     if (originalConnectionId.length > 0) {
-      bb.writeBytes(ORIGINAL_CONNECTION_ID.asBytes());
-      bb.writeShort(originalConnectionId.length);
-      bb.writeBytes(originalConnectionId);
+      writeBytes(ORIGINAL_DESTINATION_CONNECTION_ID, bb, originalConnectionId);
     }
-
-    bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
+    if (activeConnectionIdLimit > -1) {
+      writeVarint(ACTIVE_CONNECTION_ID_LIMIT, bb, activeConnectionIdLimit);
+    }
+    if (initialSourceConnectionId.length > 0) {
+      writeBytes(INITIAL_SOURCE_CONNECTION_ID, bb, initialSourceConnectionId);
+    }
+    if (retrySourceConnectionId.length > 0) {
+      writeBytes(RETRY_SOURCE_CONNECTION_ID, bb, retrySourceConnectionId);
+    }
   }
 
-  private void writeVarint(final ByteBuf bb, final int value) {
+  private void writeBytes(final TransportParameterType type, final ByteBuf bb, final byte[] b) {
+    Varint.write(type.getValue(), bb);
+    Varint.write(b.length, bb);
+    bb.writeBytes(b);
+  }
+
+  private void writeVarint(final TransportParameterType type, final ByteBuf bb, final int value) {
+    Varint.write(type.getValue(), bb);
     final byte[] b = Varint.write(value);
-    bb.writeShort(b.length);
+    Varint.write(b.length, bb);
     bb.writeBytes(b);
   }
 }
