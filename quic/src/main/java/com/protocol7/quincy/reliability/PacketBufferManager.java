@@ -127,7 +127,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
       final FullPacket fp = (FullPacket) packet;
       ackQueue.add(fp, ackDelay.time());
-      log.debug("Acked packet {}", fp.getPacketNumber());
+      log.debug("Packet queued for acking {}", fp.getPacketNumber());
 
       handleAcks(packet);
 
