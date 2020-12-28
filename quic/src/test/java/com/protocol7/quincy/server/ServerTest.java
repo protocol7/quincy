@@ -172,7 +172,7 @@ public class ServerTest {
         of(destConnId),
         of(srcConnectionId),
         nextPacketNumber(),
-        Version.DRAFT_18,
+        Version.DRAFT_29,
         token,
         List.of(frames));
   }
@@ -183,7 +183,7 @@ public class ServerTest {
 
   private Packet hp(final ConnectionId destConnId, final Frame... frames) {
     return HandshakePacket.create(
-        of(destConnId), of(srcConnectionId), nextPacketNumber(), Version.DRAFT_18, frames);
+        of(destConnId), of(srcConnectionId), nextPacketNumber(), Version.DRAFT_29, frames);
   }
 
   private long nextPacketNumber() {

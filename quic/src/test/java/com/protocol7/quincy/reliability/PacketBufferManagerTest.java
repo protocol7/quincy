@@ -215,11 +215,11 @@ public class PacketBufferManagerTest {
 
   private Packet ip(final long pn, final Frame... frames) {
     return InitialPacket.create(
-        of(random()), of(random()), pn, Version.DRAFT_18, Optional.empty(), frames);
+        of(random()), of(random()), pn, Version.DRAFT_29, Optional.empty(), frames);
   }
 
   private Packet hp(final long pn, final Frame... frames) {
-    return HandshakePacket.create(of(random()), of(random()), pn, Version.DRAFT_18, frames);
+    return HandshakePacket.create(of(random()), of(random()), pn, Version.DRAFT_29, frames);
   }
 
   private Packet verifyNext() {

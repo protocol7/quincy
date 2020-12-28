@@ -13,27 +13,15 @@ public class VersionTest {
   @Test
   public void write() {
     final ByteBuf bb = Unpooled.buffer();
-    Version.DRAFT_15.write(bb);
+    Version.DRAFT_29.write(bb);
 
-    TestUtil.assertBuffer("ff00000f", bb);
-    TestUtil.assertBufferExhusted(bb);
-  }
-
-  @Test
-  public void writeQuicGo() {
-    final ByteBuf bb = Unpooled.buffer();
-    Version.QUIC_GO.write(bb);
-
-    TestUtil.assertBuffer("51474fff", bb);
+    TestUtil.assertBuffer("ff00001d", bb);
     TestUtil.assertBufferExhusted(bb);
   }
 
   @Test
   public void read() {
-    assertEquals(Version.QUIC_GO, Version.read(b("51474fff")));
-    assertEquals(Version.DRAFT_17, Version.read(b("ff000011")));
-    assertEquals(Version.DRAFT_18, Version.read(b("ff000012")));
-    assertEquals(Version.DRAFT_20, Version.read(b("ff000014")));
+    assertEquals(Version.DRAFT_29, Version.read(b("ff00001d")));
     assertEquals(Version.FINAL, Version.read(b("00000001")));
     assertEquals(Version.VERSION_NEGOTIATION, Version.read(b("00000000")));
     assertEquals(Version.UNKNOWN, Version.read(b("abcdabcd")));
@@ -48,10 +36,10 @@ public class VersionTest {
   @Test
   public void roundtrip() {
     final ByteBuf bb = Unpooled.buffer();
-    Version.DRAFT_15.write(bb);
+    Version.DRAFT_29.write(bb);
 
     final Version parsed = Version.read(bb);
 
-    assertEquals(Version.DRAFT_15, parsed);
+    assertEquals(Version.DRAFT_29, parsed);
   }
 }

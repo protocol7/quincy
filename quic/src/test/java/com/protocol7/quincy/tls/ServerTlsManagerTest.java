@@ -79,13 +79,13 @@ public class ServerTlsManagerTest {
         empty(),
         empty(),
         PacketNumber.MIN,
-        Version.DRAFT_18,
+        Version.DRAFT_29,
         of("some token".getBytes()),
         new CryptoFrame(0, b));
   }
 
   private HandshakePacket hp(final byte[] b) {
     return HandshakePacket.create(
-        empty(), empty(), PacketNumber.MIN, Version.DRAFT_18, new CryptoFrame(0, b));
+        empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
   }
 }

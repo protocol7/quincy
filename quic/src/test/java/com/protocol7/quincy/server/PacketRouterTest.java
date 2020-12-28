@@ -45,7 +45,7 @@ public class PacketRouterTest {
 
   @Before
   public void setUp() {
-    router = new PacketRouter(Version.DRAFT_18, connections, listener);
+    router = new PacketRouter(Version.DRAFT_29, connections, listener);
 
     when(connections.get(any(), any(), any(), any())).thenReturn(connection);
 
@@ -57,7 +57,7 @@ public class PacketRouterTest {
   public void route() {
     final InitialPacket packet =
         InitialPacket.create(
-            of(destConnId), empty(), 2, Version.DRAFT_18, empty(), new PaddingFrame(1));
+            of(destConnId), empty(), 2, Version.DRAFT_29, empty(), new PaddingFrame(1));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
@@ -93,6 +93,6 @@ public class PacketRouterTest {
 
     assertEquals(destConnId, verNeg.getDestinationConnectionId().get());
     assertEquals(srcConnId, verNeg.getSourceConnectionId().get());
-    assertEquals(List.of(Version.DRAFT_18), verNeg.getSupportedVersions());
+    assertEquals(List.of(Version.DRAFT_29), verNeg.getSupportedVersions());
   }
 }

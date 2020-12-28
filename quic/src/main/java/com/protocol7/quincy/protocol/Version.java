@@ -8,11 +8,7 @@ import java.util.Arrays;
 public enum Version {
   VERSION_NEGOTIATION(dehex("00000000")),
   FINAL(dehex("00000001")),
-  QUIC_GO(dehex("51474fff")),
-  DRAFT_15(dehex("ff00000f")),
-  DRAFT_17(dehex("ff000011")),
-  DRAFT_18(dehex("ff000012")),
-  DRAFT_20(dehex("ff000014")),
+  DRAFT_29(dehex("ff00001d")),
   UNKNOWN(new byte[0]);
 
   public static Version read(final ByteBuf bb) {
@@ -23,16 +19,8 @@ public enum Version {
       return VERSION_NEGOTIATION;
     } else if (Arrays.equals(l, FINAL.version)) {
       return FINAL;
-    } else if (Arrays.equals(l, QUIC_GO.version)) {
-      return QUIC_GO;
-    } else if (Arrays.equals(l, DRAFT_15.version)) {
-      return DRAFT_15;
-    } else if (Arrays.equals(l, DRAFT_17.version)) {
-      return DRAFT_17;
-    } else if (Arrays.equals(l, DRAFT_18.version)) {
-      return DRAFT_18;
-    } else if (Arrays.equals(l, DRAFT_20.version)) {
-      return DRAFT_20;
+    } else if (Arrays.equals(l, DRAFT_29.version)) {
+      return DRAFT_29;
     } else {
       return UNKNOWN;
     }

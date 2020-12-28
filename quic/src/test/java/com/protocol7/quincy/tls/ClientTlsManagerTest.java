@@ -85,11 +85,11 @@ public class ClientTlsManagerTest {
 
   private InitialPacket ip(final byte[] b) {
     return InitialPacket.create(
-        empty(), empty(), PacketNumber.MIN, Version.DRAFT_18, empty(), new CryptoFrame(0, b));
+        empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, empty(), new CryptoFrame(0, b));
   }
 
   private HandshakePacket hp(final byte[] b) {
     return HandshakePacket.create(
-        empty(), empty(), PacketNumber.MIN, Version.DRAFT_18, new CryptoFrame(0, b));
+        empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
   }
 }

@@ -12,7 +12,7 @@ import java.util.List;
 
 public class QuicBuilder {
 
-  private Version version = Version.DRAFT_18;
+  private Version version = Version.DRAFT_29;
   private int initialMaxStreamDataBidiLocal = 32768;
   private int initialMaxData = 49152;
   private int initialMaxBidiStreams = 100;

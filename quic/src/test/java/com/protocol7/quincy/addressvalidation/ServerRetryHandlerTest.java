@@ -41,7 +41,7 @@ public class ServerRetryHandlerTest {
 
   @Before
   public void setUp() {
-    when(ctx.getVersion()).thenReturn(Version.DRAFT_18);
+    when(ctx.getVersion()).thenReturn(Version.DRAFT_29);
     when(ctx.getPeerAddress()).thenReturn(TestUtil.getTestAddress());
     when(ctx.getState()).thenReturn(State.Started);
   }
@@ -111,7 +111,7 @@ public class ServerRetryHandlerTest {
         of(ConnectionId.random()),
         of(ConnectionId.random()),
         PacketNumber.MIN,
-        Version.DRAFT_18,
+        Version.DRAFT_29,
         token,
         new PaddingFrame(1));
   }

@@ -61,6 +61,6 @@ public class HandshakePacketTest {
 
   private HandshakePacket p(final long pn) {
     return HandshakePacket.create(
-        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_18, new PaddingFrame(1));
+        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_29, new PaddingFrame(1));
   }
 }

@@ -19,7 +19,7 @@ public class RetryPacketTest {
   private ConnectionId src = ConnectionId.random();
   private ConnectionId org = ConnectionId.random();
   private byte[] token = Rnd.rndBytes(18);
-  private RetryPacket packet = new RetryPacket(Version.DRAFT_15, of(dest), of(src), org, token);
+  private RetryPacket packet = new RetryPacket(Version.DRAFT_29, of(dest), of(src), org, token);
 
   private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 

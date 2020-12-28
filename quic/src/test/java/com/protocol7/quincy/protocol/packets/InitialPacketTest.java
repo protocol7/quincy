@@ -109,7 +109,7 @@ public class InitialPacketTest {
         Optional.of(destConnId),
         Optional.of(srcConnId),
         PacketNumber.MIN,
-        Version.DRAFT_18,
+        Version.DRAFT_29,
         empty(),
         frame);
   }
@@ -120,7 +120,7 @@ public class InitialPacketTest {
           Optional.of(destConnId),
           Optional.of(srcConnId),
           PacketNumber.MIN,
-          Version.DRAFT_18,
+          Version.DRAFT_29,
           empty(),
           frame);
       fail();
@@ -133,7 +133,7 @@ public class InitialPacketTest {
         Optional.of(destConnId),
         Optional.of(srcConnId),
         pn,
-        Version.DRAFT_18,
+        Version.DRAFT_29,
         token,
         List.of(new PaddingFrame(1)));
   }

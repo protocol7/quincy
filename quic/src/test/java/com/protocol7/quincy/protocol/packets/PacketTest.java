@@ -27,7 +27,7 @@ public class PacketTest {
             Optional.ofNullable(connId),
             empty(),
             pn,
-            Version.DRAFT_18,
+            Version.DRAFT_29,
             empty(),
             new PaddingFrame(1));
     final ByteBuf bb = Unpooled.buffer();
@@ -40,7 +40,7 @@ public class PacketTest {
   @Test
   public void parseVerNegPacket() {
     final VersionNegotiationPacket packet =
-        new VersionNegotiationPacket(empty(), empty(), Version.DRAFT_15);
+        new VersionNegotiationPacket(empty(), empty(), Version.DRAFT_29);
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -58,7 +58,7 @@ public class PacketTest {
     bb.writeByte(b);
     Version.VERSION_NEGOTIATION.write(bb);
     bb.writeByte(0);
-    Version.DRAFT_15.write(bb);
+    Version.DRAFT_29.write(bb);
 
     final Packet parsed = Packet.parse(bb, connId.getLength()).complete(l -> aead);
     assertTrue(parsed instanceof VersionNegotiationPacket);
@@ -68,7 +68,7 @@ public class PacketTest {
   public void parseHandshakePacket() {
     final HandshakePacket packet =
         HandshakePacket.create(
-            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_18, new PaddingFrame(1));
+            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_29, new PaddingFrame(1));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -80,7 +80,7 @@ public class PacketTest {
   public void parseRetryPacket() {
     final RetryPacket packet =
         new RetryPacket(
-            Version.DRAFT_18, Optional.ofNullable(connId), empty(), connId, Rnd.rndBytes(11));
+            Version.DRAFT_29, Optional.ofNullable(connId), empty(), connId, Rnd.rndBytes(11));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

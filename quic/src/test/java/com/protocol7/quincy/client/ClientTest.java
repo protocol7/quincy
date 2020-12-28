@@ -97,7 +97,7 @@ public class ClientTest {
     final ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
 
     assertFalse(initialPacket.getToken().isPresent());
-    assertEquals(Version.DRAFT_18, initialPacket.getVersion());
+    assertEquals(Version.DRAFT_29, initialPacket.getVersion());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
     assertTrue(initialPacket.getPayload().calculateLength() >= 1200);
 
@@ -110,7 +110,7 @@ public class ClientTest {
     // first packet did not contain token, server sends retry
     connection.onPacket(
         new RetryPacket(
-            Version.DRAFT_18,
+            Version.DRAFT_29,
             Optional.empty(),
             Optional.of(srcConnectionId),
             destConnectionId,
@@ -123,7 +123,7 @@ public class ClientTest {
     assertEquals(srcConnectionId, newDestConnId);
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertArrayEquals(retryToken, initialPacket2.getToken().get());
-    assertEquals(Version.DRAFT_18, initialPacket2.getVersion());
+    assertEquals(Version.DRAFT_29, initialPacket2.getVersion());
 
     final CryptoFrame cf = (CryptoFrame) initialPacket2.getPayload().getFrames().get(0);
 
@@ -143,7 +143,7 @@ public class ClientTest {
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
-            Version.DRAFT_18,
+            Version.DRAFT_29,
             Optional.empty(),
             new CryptoFrame(0, shah.getServerHello())));
 
@@ -160,7 +160,7 @@ public class ClientTest {
             Optional.of(newDestConnId),
             Optional.of(srcConnectionId),
             nextPacketNumber(),
-            Version.DRAFT_18,
+            Version.DRAFT_29,
             new CryptoFrame(0, shah.getServerHandshake())));
 
     // validate client fin handshake packet

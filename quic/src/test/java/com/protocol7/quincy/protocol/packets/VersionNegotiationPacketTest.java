@@ -17,7 +17,7 @@ public class VersionNegotiationPacketTest {
 
   private ConnectionId dest = ConnectionId.random();
   private ConnectionId src = ConnectionId.random();
-  private List<Version> supported = List.of(Version.DRAFT_15, Version.FINAL);
+  private List<Version> supported = List.of(Version.DRAFT_29, Version.FINAL);
   private VersionNegotiationPacket packet =
       new VersionNegotiationPacket(of(dest), of(src), supported);
 
