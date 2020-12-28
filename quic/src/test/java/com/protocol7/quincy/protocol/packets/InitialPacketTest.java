@@ -98,8 +98,8 @@ public class InitialPacketTest {
     assertFrameAllowed(new PaddingFrame(1));
     assertFrameAllowed(new ConnectionCloseFrame(1, FrameType.CRYPTO, ""));
     assertFrameAllowed(new ApplicationCloseFrame(1, ""));
+    assertFrameAllowed(PingFrame.INSTANCE);
 
-    assertFrameNotAllowed(PingFrame.INSTANCE);
     assertFrameNotAllowed(new MaxDataFrame(123));
     assertFrameNotAllowed(new StreamFrame(123, 0, false, new byte[0]));
   }

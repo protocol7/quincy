@@ -8,6 +8,7 @@ import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
+import com.protocol7.quincy.protocol.frames.PingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -23,12 +24,13 @@ public abstract class LongHeaderPacket implements FullPacket {
     for (final Frame frame : payload.getFrames()) {
       if (frame instanceof CryptoFrame
           || frame instanceof AckFrame
+          || frame instanceof PingFrame
           || frame instanceof PaddingFrame
           || frame instanceof ConnectionCloseFrame
           || frame instanceof ApplicationCloseFrame) {
         // ok
       } else {
-        throw new IllegalArgumentException("Illegal frame type for packet type");
+        throw new IllegalArgumentException("Illegal frame type for packet type: " + frame);
       }
     }
     return payload;
