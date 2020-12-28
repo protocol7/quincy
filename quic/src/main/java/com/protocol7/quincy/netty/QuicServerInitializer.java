@@ -5,6 +5,8 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.DatagramChannel;
+import io.netty.handler.logging.LoggingHandler;
+
 import java.security.PrivateKey;
 import java.util.List;
 
@@ -29,6 +31,7 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
   @Override
   protected void initChannel(final DatagramChannel ch) {
     final ChannelPipeline pipeline = ch.pipeline();
+    pipeline.addLast(new LoggingHandler());
     pipeline.addLast(new QuicServerHandler(configuration, certificates, privateKey));
     pipeline.addLast(handler);
   }
