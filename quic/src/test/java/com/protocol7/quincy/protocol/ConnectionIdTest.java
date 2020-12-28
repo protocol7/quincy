@@ -19,7 +19,7 @@ public class ConnectionIdTest {
     for (int i = 0; i < 1000; i++) {
       final ConnectionId connId = ConnectionId.random();
       assertTrue(connId.getLength() >= 8);
-      assertTrue(connId.getLength() <= 18);
+      assertTrue(connId.getLength() <= 20);
     }
   }
 
@@ -36,7 +36,7 @@ public class ConnectionIdTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void cstrLengthsTooLong() {
-    new ConnectionId(new byte[19]);
+    new ConnectionId(new byte[21]);
   }
 
   @Test
@@ -63,11 +63,13 @@ public class ConnectionIdTest {
 
     final ByteBuf bb = Unpooled.buffer();
     ConnectionId.write(of(id16), of(id18), bb);
-    assertEquals(0xdf, bb.readByte() & 0xFF);
 
+    assertEquals(b16.length, bb.readByte() & 0xFF);
     final byte[] a16 = new byte[16];
     bb.readBytes(a16);
     assertArrayEquals(b16, a16);
+
+    assertEquals(b18.length, bb.readByte() & 0xFF);
     final byte[] a18 = new byte[18];
     bb.readBytes(a18);
     assertArrayEquals(b18, a18);
@@ -76,11 +78,12 @@ public class ConnectionIdTest {
   @Test
   public void readPair() {
     final ByteBuf bb = Unpooled.buffer();
-    bb.writeByte(0xdf);
     final byte[] b16 = new byte[16];
+    bb.writeByte(b16.length);
     bb.writeBytes(b16);
     final byte[] b18 = new byte[18];
     Arrays.fill(b18, (byte) 1);
+    bb.writeByte(b18.length);
     bb.writeBytes(b18);
 
     final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);

@@ -13,7 +13,7 @@ public class ConnectionId {
 
   private static final int MIN_LENGTH = 4;
   public static final int LENGTH = 18;
-  private static final int MAX_LENGTH = 18;
+  private static final int MAX_LENGTH = 20;
 
   public static ConnectionId random() {
     final byte[] id = new byte[LENGTH];
@@ -36,11 +36,12 @@ public class ConnectionId {
   }
 
   public static Pair<Optional<ConnectionId>, Optional<ConnectionId>> readPair(final ByteBuf bb) {
-    final int cil = bb.readByte() & 0xFF;
-    final int dcil = firstLength(cil);
-    final int scil = lastLength(cil);
+    final int dcil = bb.readByte() & 0xFF;
+    final Optional<ConnectionId> did = readOptional(dcil, bb);
+    final int scil = bb.readByte() & 0xFF;
+    final Optional<ConnectionId> sid = readOptional(scil, bb);
 
-    return Pair.of(readOptional(dcil, bb), readOptional(scil, bb));
+    return Pair.of(did, sid);
   }
 
   private static int firstLength(final int cil) {
@@ -63,21 +64,26 @@ public class ConnectionId {
 
   public static void write(
       final Optional<ConnectionId> first, final Optional<ConnectionId> second, final ByteBuf bb) {
-    final int dcil = first.map(id -> id.getLength() - 3).orElse(0);
-    final int scil = second.map(id -> id.getLength() - 3).orElse(0);
-    final int cil = (dcil << 4 | scil) & 0xFF;
 
-    bb.writeByte(cil);
-
-    first.ifPresent(c -> c.write(bb));
-    second.ifPresent(c -> c.write(bb));
+    if (first.isPresent()) {
+      bb.writeByte(first.get().getLength());
+      first.get().write(bb);
+    } else {
+      bb.writeByte(0);
+    }
+    if (second.isPresent()) {
+      bb.writeByte(second.get().getLength());
+      second.get().write(bb);
+    } else {
+      bb.writeByte(0);
+    }
   }
 
   private final byte[] id;
 
   public ConnectionId(final byte[] id) {
-    checkArgument(id.length >= MIN_LENGTH);
-    checkArgument(id.length <= MAX_LENGTH);
+    checkArgument(id.length >= MIN_LENGTH, "Connection ID too short: "+ id.length);
+    checkArgument(id.length <= MAX_LENGTH, "Connection ID too long: "+ id.length);
 
     this.id = id;
   }
