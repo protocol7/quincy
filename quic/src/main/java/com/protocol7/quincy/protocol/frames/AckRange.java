@@ -5,12 +5,12 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.protocol7.quincy.protocol.PacketNumber;
 import java.util.Objects;
 
-public class AckBlock {
+public class AckRange {
 
   private final long smallest;
   private final long largest;
 
-  public AckBlock(final long smallest, final long largest) {
+  public AckRange(final long smallest, final long largest) {
     checkArgument(largest >= smallest);
 
     this.smallest = PacketNumber.validate(smallest);
@@ -29,8 +29,8 @@ public class AckBlock {
   public boolean equals(final Object o) {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
-    final AckBlock ackBlock = (AckBlock) o;
-    return smallest == ackBlock.smallest && largest == ackBlock.largest;
+    final AckRange ackRange = (AckRange) o;
+    return smallest == ackRange.smallest && largest == ackRange.largest;
   }
 
   @Override
@@ -40,6 +40,6 @@ public class AckBlock {
 
   @Override
   public String toString() {
-    return "AckBlock[" + smallest + ".." + largest + ']';
+    return "AckRange[" + smallest + ".." + largest + ']';
   }
 }

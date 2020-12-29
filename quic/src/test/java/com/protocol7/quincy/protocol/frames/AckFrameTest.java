@@ -13,9 +13,9 @@ public class AckFrameTest {
 
   @Test
   public void roundtrip() {
-    final List<AckBlock> blocks =
-        List.of(new AckBlock(1, 5), new AckBlock(7, 8), new AckBlock(12, 100));
-    final AckFrame frame = new AckFrame(1234, blocks);
+    final List<AckRange> ranges =
+        List.of(new AckRange(1, 5), new AckRange(7, 8), new AckRange(12, 100));
+    final AckFrame frame = new AckFrame(1234, ranges);
 
     final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
@@ -23,13 +23,13 @@ public class AckFrameTest {
     final AckFrame parsed = AckFrame.parse(bb);
 
     assertEquals(frame.getAckDelay(), parsed.getAckDelay());
-    assertEquals(frame.getBlocks(), parsed.getBlocks());
+    assertEquals(frame.getRanges(), parsed.getRanges());
   }
 
   @Test
   public void roundtripSinglePacket() {
-    final List<AckBlock> blocks = List.of(new AckBlock(100, 100));
-    final AckFrame frame = new AckFrame(1234, blocks);
+    final List<AckRange> ranges = List.of(new AckRange(100, 100));
+    final AckFrame frame = new AckFrame(1234, ranges);
 
     final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);
@@ -37,13 +37,13 @@ public class AckFrameTest {
     final AckFrame parsed = AckFrame.parse(bb);
 
     assertEquals(frame.getAckDelay(), parsed.getAckDelay());
-    assertEquals(frame.getBlocks(), parsed.getBlocks());
+    assertEquals(frame.getRanges(), parsed.getRanges());
   }
 
   @Test
   public void writeSinglePacket() {
-    final List<AckBlock> blocks = List.of(new AckBlock(100, 100));
-    final AckFrame frame = new AckFrame(1234, blocks);
+    final List<AckRange> ranges = List.of(new AckRange(100, 100));
+    final AckFrame frame = new AckFrame(1234, ranges);
 
     final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);

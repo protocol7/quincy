@@ -11,7 +11,7 @@ import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.protocol.frames.AckBlock;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
@@ -66,7 +66,7 @@ public class PacketBufferManagerTest {
 
   @Test
   public void dontAckOnlyAcks() {
-    final Packet ackPacket = packet(1, new AckFrame(123, new AckBlock(7, 8)));
+    final Packet ackPacket = packet(1, new AckFrame(123, new AckRange(7, 8)));
 
     buffer.onReceivePacket(ackPacket, ctx);
 
@@ -80,7 +80,7 @@ public class PacketBufferManagerTest {
 
     final AckFrame actual = (AckFrame) verifySent();
 
-    assertEquals(new AckBlock(1, 2), actual.getBlocks().get(0));
+    assertEquals(new AckRange(1, 2), actual.getRanges().get(0));
   }
 
   @Test
@@ -91,7 +91,7 @@ public class PacketBufferManagerTest {
 
     final AckFrame actual = (AckFrame) verifySent();
     assertEquals(67, actual.getAckDelay());
-    assertEquals(new AckBlock(2, 2), actual.getBlocks().get(0));
+    assertEquals(new AckRange(2, 2), actual.getRanges().get(0));
   }
 
   @Test
@@ -102,7 +102,7 @@ public class PacketBufferManagerTest {
     assertTrue(buffer.getHandshakeBuffer().isEmpty());
     assertFalse(buffer.getInitialBuffer().isEmpty());
 
-    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     assertTrue(buffer.getInitialBuffer().isEmpty());
   }
@@ -121,7 +121,7 @@ public class PacketBufferManagerTest {
   public void ackInitialWithInvalidPacketType() {
     buffer.beforeSendPacket(ip(2, new PaddingFrame(1)), ctx);
 
-    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     // must not be acked
     assertFalse(buffer.getInitialBuffer().isEmpty());
@@ -135,7 +135,7 @@ public class PacketBufferManagerTest {
     assertFalse(buffer.getHandshakeBuffer().isEmpty());
     assertTrue(buffer.getInitialBuffer().isEmpty());
 
-    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     assertTrue(buffer.getHandshakeBuffer().isEmpty());
   }
@@ -153,7 +153,7 @@ public class PacketBufferManagerTest {
   public void ackHandshakeWithInvalidPacketType() {
     buffer.beforeSendPacket(hp(2, new PaddingFrame(1)), ctx);
 
-    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(ip(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     // must not be acked
     assertFalse(buffer.getHandshakeBuffer().isEmpty());
@@ -167,7 +167,7 @@ public class PacketBufferManagerTest {
     assertTrue(buffer.getHandshakeBuffer().isEmpty());
     assertTrue(buffer.getInitialBuffer().isEmpty());
 
-    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(packet(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     assertTrue(buffer.getBuffer().isEmpty());
   }
@@ -176,7 +176,7 @@ public class PacketBufferManagerTest {
   public void ackPacketWithInvalidPacketType() {
     buffer.beforeSendPacket(packet(2, PingFrame.INSTANCE), ctx);
 
-    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckBlock(2, 2))), ctx);
+    buffer.onReceivePacket(hp(3, new AckFrame(123, new AckRange(2, 2))), ctx);
 
     // must not be acked
     assertFalse(buffer.getBuffer().isEmpty());

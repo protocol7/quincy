@@ -5,7 +5,7 @@ import static java.util.Objects.requireNonNull;
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
-import com.protocol7.quincy.protocol.frames.AckBlock;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
@@ -47,7 +47,7 @@ public class DefaultStreamManager implements StreamManager {
           stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
         } else if (frame instanceof AckFrame) {
           final AckFrame af = (AckFrame) frame;
-          af.getBlocks().stream().forEach(this::handleAcks);
+          af.getRanges().stream().forEach(this::handleAcks);
         }
       }
     }
@@ -55,7 +55,7 @@ public class DefaultStreamManager implements StreamManager {
     ctx.next(packet);
   }
 
-  private void handleAcks(final AckBlock block) {
+  private void handleAcks(final AckRange block) {
     // TODO optimize
     final long smallest = block.getSmallest();
     final long largest = block.getLargest();

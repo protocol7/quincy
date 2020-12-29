@@ -152,9 +152,9 @@ public class ServerTest {
     assertEquals(packetNumber, ackPacket.getPacketNumber());
     assertTrue(ackPacket.getDestinationConnectionId().isPresent());
 
-    final List<AckBlock> actual =
-        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
-    assertEquals(List.of(new AckBlock(smallest, largest)), actual);
+    final List<AckRange> actual =
+        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getRanges();
+    assertEquals(List.of(new AckRange(smallest, largest)), actual);
   }
 
   @Test(expected = IllegalStateException.class)

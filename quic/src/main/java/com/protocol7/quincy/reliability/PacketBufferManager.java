@@ -10,7 +10,7 @@ import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.OutboundHandler;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.frames.AckBlock;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.packets.*;
@@ -85,8 +85,8 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
       FullPacket fp = (FullPacket) packet;
       buffer(fp);
 
-      final Pair<List<AckBlock>, Long> drained = drainAcks(getEncryptionLevel(fp));
-      final List<AckBlock> ackBlocks = drained.getFirst();
+      final Pair<List<AckRange>, Long> drained = drainAcks(getEncryptionLevel(fp));
+      final List<AckRange> ackBlocks = drained.getFirst();
       if (!ackBlocks.isEmpty()) {
         // add to packet
         final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
@@ -165,13 +165,13 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private void handleAcks(final AckFrame frame, final EncryptionLevel level) {
-    frame.getBlocks().forEach(b -> handleAcks(b, level));
+    frame.getRanges().forEach(b -> handleAcks(b, level));
   }
 
-  private void handleAcks(final AckBlock block, final EncryptionLevel level) {
+  private void handleAcks(final AckRange range, final EncryptionLevel level) {
     // TODO optimize
-    final long smallest = block.getSmallest();
-    final long largest = block.getLargest();
+    final long smallest = range.getSmallest();
+    final long largest = range.getLargest();
     for (long pn = smallest; pn <= largest; pn++) {
       if (ack(pn, level)) {
         log.debug("Acked packet {} at level {}", pn, level);
@@ -191,19 +191,19 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private void flushAcks(final EncryptionLevel level, final FrameSender sender) {
-    final Pair<List<AckBlock>, Long> drained = drainAcks(level);
-    final List<AckBlock> blocks = drained.getFirst();
-    if (!blocks.isEmpty()) {
+    final Pair<List<AckRange>, Long> drained = drainAcks(level);
+    final List<AckRange> ranges = drained.getFirst();
+    if (!ranges.isEmpty()) {
       final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
-      final AckFrame ackFrame = new AckFrame(delay, blocks);
+      final AckFrame ackFrame = new AckFrame(delay, ranges);
       sender.send(ackFrame);
 
-      log.debug("Flushed acks {}", blocks);
+      log.debug("Flushed acks {}", ranges);
     }
   }
 
   // TODO break out and test directly
-  private Pair<List<AckBlock>, Long> drainAcks(final EncryptionLevel level) {
+  private Pair<List<AckRange>, Long> drainAcks(final EncryptionLevel level) {
     final Collection<Entry> pns = ackQueue.drain(level);
     if (pns.isEmpty()) {
       return Pair.of(Collections.emptyList(), 0L);
@@ -215,7 +215,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
     final List<Long> pnsLong =
         pns.stream().map(Entry::getPacketNumber).sorted().collect(Collectors.toList());
 
-    final List<AckBlock> blocks = new ArrayList<>();
+    final List<AckRange> ranges = new ArrayList<>();
     long lower = -1;
     long upper = -1;
     for (final long pn : pnsLong) {
@@ -224,7 +224,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         upper = pn;
       } else {
         if (pn > upper + 1) {
-          blocks.add(new AckBlock(lower, upper));
+          ranges.add(new AckRange(lower, upper));
           lower = pn;
           upper = pn;
         } else {
@@ -232,9 +232,9 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         }
       }
     }
-    blocks.add(new AckBlock(lower, upper));
+    ranges.add(new AckRange(lower, upper));
 
-    return Pair.of(blocks, ackDelay.delay(largestPnQueueTime));
+    return Pair.of(ranges, ackDelay.delay(largestPnQueueTime));
   }
 
   private static boolean acksOnly(final FullPacket packet) {

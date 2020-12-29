@@ -309,9 +309,9 @@ public class ClientTest {
     assertEquals(packetNumber, ackPacket.getPacketNumber());
     assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
 
-    final List<AckBlock> actual =
-        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getBlocks();
-    assertEquals(List.of(new AckBlock(smallest, largest)), actual);
+    final List<AckRange> actual =
+        ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getRanges();
+    assertEquals(List.of(new AckRange(smallest, largest)), actual);
   }
 
   @Test

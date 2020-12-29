@@ -10,7 +10,7 @@ import static org.junit.Assert.fail;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.protocol.frames.AckBlock;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.ApplicationCloseFrame;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
@@ -124,7 +124,7 @@ public class InitialPacketTest {
   @Test
   public void allowedFrames() {
     assertFrameAllowed(new CryptoFrame(0, new byte[0]));
-    assertFrameAllowed(new AckFrame(0, new AckBlock(0, 0)));
+    assertFrameAllowed(new AckFrame(0, new AckRange(0, 0)));
     assertFrameAllowed(new PaddingFrame(1));
     assertFrameAllowed(new ConnectionCloseFrame(1, FrameType.CRYPTO, ""));
     assertFrameAllowed(new ApplicationCloseFrame(1, ""));

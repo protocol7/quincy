@@ -22,7 +22,7 @@ public class FrameTest {
 
   @Test
   public void ackFrame() {
-    assertFrame(new AckFrame(123, new AckBlock(12, 13)));
+    assertFrame(new AckFrame(123, new AckRange(12, 13)));
   }
 
   @Test
