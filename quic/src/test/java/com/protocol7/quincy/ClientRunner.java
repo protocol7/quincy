@@ -14,7 +14,7 @@ import java.net.InetSocketAddress;
 public class ClientRunner {
 
   public static void main(final String[] args) throws InterruptedException {
-    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 4444);
+    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 4433);
 
     final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
