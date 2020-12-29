@@ -35,6 +35,6 @@ public class VerifyData {
 
     final byte[] actual = create(handshakeTrafficSecret, finishedHash);
 
-    return CryptoEquals.isEqual(verifyData, actual);
+    return ConstantTimeEquals.isEqual(verifyData, actual);
   }
 }

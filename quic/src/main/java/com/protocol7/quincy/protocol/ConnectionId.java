@@ -44,40 +44,22 @@ public class ConnectionId {
     return Pair.of(did, sid);
   }
 
-  private static int firstLength(final int cil) {
-    final int l = ((cil & 0b11110000) >> 4);
-    if (l > 0) {
-      return l + 3;
-    } else {
-      return 0;
-    }
-  }
-
-  public static int lastLength(final int cil) {
-    final int l = ((cil & 0b00001111));
-    if (l > 0) {
-      return l + 3;
-    } else {
-      return 0;
-    }
-  }
-
   public static void write(
       final Optional<ConnectionId> first, final Optional<ConnectionId> second, final ByteBuf bb) {
+    write(first, bb);
+    write(second, bb);
+  }
 
-    if (first.isPresent()) {
-      bb.writeByte(first.get().getLength());
-      first.get().write(bb);
-    } else {
-      bb.writeByte(0);
-    }
-    if (second.isPresent()) {
-      bb.writeByte(second.get().getLength());
-      second.get().write(bb);
+  public static void write(final Optional<ConnectionId> connectionId, final ByteBuf bb) {
+
+    if (connectionId.isPresent()) {
+      bb.writeByte(connectionId.get().getLength());
+      connectionId.get().write(bb);
     } else {
       bb.writeByte(0);
     }
   }
+
 
   private final byte[] id;
 

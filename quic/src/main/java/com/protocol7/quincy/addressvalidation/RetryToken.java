@@ -3,7 +3,7 @@ package com.protocol7.quincy.addressvalidation;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Varint;
-import com.protocol7.quincy.tls.CryptoEquals;
+import com.protocol7.quincy.tls.ConstantTimeEquals;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
@@ -63,7 +63,7 @@ public class RetryToken {
       final byte[] addressBytes = new byte[addressLen];
       bb.readBytes(addressBytes);
 
-      if (!CryptoEquals.isEqual(addressBytes, address.getAddress())) {
+      if (!ConstantTimeEquals.isEqual(addressBytes, address.getAddress())) {
         success = false;
       }
 
@@ -78,7 +78,7 @@ public class RetryToken {
       final byte[] actualHmac = Bytes.drainToArray(bb);
       final byte[] expectedHmac = hmac(data);
 
-      if (!CryptoEquals.isEqual(expectedHmac, actualHmac)) {
+      if (!ConstantTimeEquals.isEqual(expectedHmac, actualHmac)) {
         success = false;
       }
 

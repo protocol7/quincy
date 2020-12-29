@@ -57,7 +57,7 @@ public class PacketTest {
     final int b = (0b10000000 | PacketType.Initial.getType() << 4) & 0xFF;
     bb.writeByte(b);
     Version.VERSION_NEGOTIATION.write(bb);
-    bb.writeByte(0);
+    ConnectionId.write(empty(), empty(), bb);
     Version.DRAFT_29.write(bb);
 
     final Packet parsed = Packet.parse(bb, connId.getLength()).complete(l -> aead);
@@ -80,7 +80,7 @@ public class PacketTest {
   public void parseRetryPacket() {
     final RetryPacket packet =
         new RetryPacket(
-            Version.DRAFT_29, Optional.ofNullable(connId), empty(), connId, Rnd.rndBytes(11));
+            Version.DRAFT_29, Optional.ofNullable(connId), empty(), Optional.of(connId), Rnd.rndBytes(11), null);
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

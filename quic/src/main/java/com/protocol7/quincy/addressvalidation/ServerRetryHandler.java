@@ -68,8 +68,9 @@ public class ServerRetryHandler implements InboundHandler {
             ctx.getVersion(),
             initialPacket.getSourceConnectionId(),
             Optional.of(newLocalConnectionId),
-            initialPacket.getDestinationConnectionId().get(),
-            retryToken));
+            initialPacket.getDestinationConnectionId(),
+            retryToken,
+                null));
   }
 
   private long now() {

@@ -88,7 +88,6 @@ public class ServerTest {
     final RetryPacket retry = (RetryPacket) captureSentPacket(1);
     assertTrue(retry.getDestinationConnectionId().isPresent());
     assertEquals(srcConnectionId, retry.getDestinationConnectionId().get());
-    assertEquals(destConnectionId, retry.getOriginalConnectionId());
     assertTrue(retry.getRetryToken().length > 0);
     final byte[] token = retry.getRetryToken();
 
