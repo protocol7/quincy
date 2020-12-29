@@ -19,7 +19,7 @@ public class StreamsBlockedFrameTest {
 
     final StreamsBlockedFrame parsed = StreamsBlockedFrame.parse(bb);
 
-    assertEquals(frame.getStreamsLimit(), parsed.getStreamsLimit());
+    assertEquals(frame.getMaxStreams(), parsed.getMaxStreams());
     assertEquals(frame.isBidi(), parsed.isBidi());
   }
 
@@ -34,7 +34,7 @@ public class StreamsBlockedFrameTest {
 
     final StreamsBlockedFrame parsed = StreamsBlockedFrame.parse(bb);
 
-    assertEquals(frame.getStreamsLimit(), parsed.getStreamsLimit());
+    assertEquals(frame.getMaxStreams(), parsed.getMaxStreams());
     assertEquals(frame.isBidi(), parsed.isBidi());
   }
 }

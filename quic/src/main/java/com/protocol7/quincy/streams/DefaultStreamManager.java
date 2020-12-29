@@ -44,7 +44,7 @@ public class DefaultStreamManager implements StreamManager {
         } else if (frame instanceof ResetStreamFrame) {
           final ResetStreamFrame rsf = (ResetStreamFrame) frame;
           final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
-          stream.onReset(rsf.getApplicationErrorCode(), rsf.getOffset());
+          stream.onReset(rsf.getApplicationErrorCode(), rsf.getFinalSize());
         } else if (frame instanceof AckFrame) {
           final AckFrame af = (AckFrame) frame;
           af.getRanges().stream().forEach(this::handleAcks);

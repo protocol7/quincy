@@ -16,29 +16,29 @@ public class StreamDataBlockedFrame extends Frame {
     }
 
     final long streamId = StreamId.parse(bb);
-    final long streamDataLimit = Varint.readAsLong(bb);
+    final long maxStreamData = Varint.readAsLong(bb);
 
-    return new StreamDataBlockedFrame(streamId, streamDataLimit);
+    return new StreamDataBlockedFrame(streamId, maxStreamData);
   }
 
   private final long streamId;
-  private final long streamDataLimit;
+  private final long maxStreamData;
 
-  public StreamDataBlockedFrame(final long streamId, final long streamDataLimit) {
+  public StreamDataBlockedFrame(final long streamId, final long maxStreamData) {
     super(FrameType.STREAM_DATA_BLOCKED);
 
     requireNonNull(streamId);
 
     this.streamId = StreamId.validate(streamId);
-    this.streamDataLimit = streamDataLimit;
+    this.maxStreamData = maxStreamData;
   }
 
   public long getStreamId() {
     return streamId;
   }
 
-  public long getStreamDataLimit() {
-    return streamDataLimit;
+  public long getMaxStreamData() {
+    return maxStreamData;
   }
 
   @Override
@@ -46,7 +46,7 @@ public class StreamDataBlockedFrame extends Frame {
     bb.writeByte(getType().getType());
 
     StreamId.write(bb, streamId);
-    Varint.write(streamDataLimit, bb);
+    Varint.write(maxStreamData, bb);
   }
 
   @Override
@@ -54,11 +54,11 @@ public class StreamDataBlockedFrame extends Frame {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     final StreamDataBlockedFrame that = (StreamDataBlockedFrame) o;
-    return streamDataLimit == that.streamDataLimit && Objects.equals(streamId, that.streamId);
+    return maxStreamData == that.maxStreamData && Objects.equals(streamId, that.streamId);
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(streamId, streamDataLimit);
+    return Objects.hash(streamId, maxStreamData);
   }
 }

@@ -29,16 +29,16 @@ public class ClientRunner {
                   new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
-                      System.out.println("############# sending hello world");
+                      System.out.println("sending GET");
 
-                      ctx.channel().write(QuicPacket.of(null, 0, "PING".getBytes(), peer));
+                      ctx.channel().write(QuicPacket.of(null, 0, "GET /\n".getBytes(), peer));
 
                       ctx.fireChannelActive();
                     }
 
                     @Override
                     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-                      System.out.println("############# got message " + msg);
+                      System.out.println("got message " + msg);
 
                       ctx.close();
                       ctx.disconnect();

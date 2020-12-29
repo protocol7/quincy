@@ -17,6 +17,6 @@ public class DataBlockedFrameTest {
 
     final DataBlockedFrame parsed = DataBlockedFrame.parse(bb);
 
-    assertEquals(frame.getDataLimit(), parsed.getDataLimit());
+    assertEquals(frame.getMaxData(), parsed.getMaxData());
   }
 }

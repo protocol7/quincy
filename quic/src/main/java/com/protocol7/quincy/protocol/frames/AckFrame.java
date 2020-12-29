@@ -19,7 +19,7 @@ public class AckFrame extends Frame {
 
     final long largestAcknowledged = Varint.readAsLong(bb);
     final long ackDelay = Varint.readAsLong(bb);
-    final long blockCount = Varint.readAsLong(bb);
+    final long rangeCount = Varint.readAsLong(bb);
 
     final List<AckRange> ranges = new ArrayList<>();
 
@@ -29,7 +29,7 @@ public class AckFrame extends Frame {
     ranges.add(new AckRange(smallest, largestAcknowledged));
 
     long largest = largestAcknowledged;
-    for (int i = 0; i < blockCount; i++) {
+    for (int i = 0; i < rangeCount; i++) {
       if (i % 2 == 0) {
         // reading gap
         final long gap = Varint.readAsLong(bb);

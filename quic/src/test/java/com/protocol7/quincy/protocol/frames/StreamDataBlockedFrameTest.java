@@ -18,6 +18,6 @@ public class StreamDataBlockedFrameTest {
     final StreamDataBlockedFrame parsed = StreamDataBlockedFrame.parse(bb);
 
     assertEquals(frame.getStreamId(), parsed.getStreamId());
-    assertEquals(frame.getStreamDataLimit(), parsed.getStreamDataLimit());
+    assertEquals(frame.getMaxStreamData(), parsed.getMaxStreamData());
   }
 }

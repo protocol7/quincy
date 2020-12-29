@@ -15,23 +15,23 @@ public class StreamsBlockedFrame extends Frame {
     }
 
     final boolean bidi = type == BIDI_TYPE;
-    final long streamLimit = Varint.readAsLong(bb);
+    final long maxStreams = Varint.readAsLong(bb);
 
-    return new StreamsBlockedFrame(streamLimit, bidi);
+    return new StreamsBlockedFrame(maxStreams, bidi);
   }
 
-  private final long streamsLimit;
+  private final long maxStreams;
   private final boolean bidi;
 
-  public StreamsBlockedFrame(final long streamsLimit, final boolean bidi) {
+  public StreamsBlockedFrame(final long maxStreams, final boolean bidi) {
     super(FrameType.STREAMS_BLOCKED);
 
-    this.streamsLimit = streamsLimit;
+    this.maxStreams = maxStreams;
     this.bidi = bidi;
   }
 
-  public long getStreamsLimit() {
-    return streamsLimit;
+  public long getMaxStreams() {
+    return maxStreams;
   }
 
   public boolean isBidi() {
@@ -46,6 +46,6 @@ public class StreamsBlockedFrame extends Frame {
       bb.writeByte(UNI_TYPE);
     }
 
-    Varint.write(streamsLimit, bb);
+    Varint.write(maxStreams, bb);
   }
 }

@@ -23,7 +23,8 @@ public enum FrameType {
   PATH_CHALLENGE(0x1a),
   PATH_RESPONSE(0x1b),
   CONNECTION_CLOSE(0x1c),
-  APPLICATION_CLOSE(0x1d);
+  APPLICATION_CLOSE(0x1d),
+  HANDSHAKE_DONE(0x1e);
 
   public static FrameType fromByte(final byte b) {
     if (b == PADDING.type) {
@@ -66,6 +67,8 @@ public enum FrameType {
       return STREAM;
     } else if (b == CRYPTO.type) {
       return CRYPTO;
+    } else if (b == HANDSHAKE_DONE.type) {
+      return HANDSHAKE_DONE;
     } else {
       throw new RuntimeException("Unknown frame type " + Hex.hex(b));
     }

@@ -17,16 +17,16 @@ public class ResetStreamFrame extends Frame {
 
     final long streamId = StreamId.parse(bb);
     final int applicationErrorCode = Varint.readAsInt(bb);
-    final long offset = Varint.readAsLong(bb);
+    final long finalSize = Varint.readAsLong(bb);
 
-    return new ResetStreamFrame(streamId, applicationErrorCode, offset);
+    return new ResetStreamFrame(streamId, applicationErrorCode, finalSize);
   }
 
   private final long streamId;
   private final int applicationErrorCode;
-  private final long offset;
+  private final long finalSize;
 
-  public ResetStreamFrame(final long streamId, final int applicationErrorCode, final long offset) {
+  public ResetStreamFrame(final long streamId, final int applicationErrorCode, final long finalSize) {
     super(FrameType.RESET_STREAM);
 
     requireNonNull(streamId);
@@ -34,7 +34,7 @@ public class ResetStreamFrame extends Frame {
 
     this.streamId = StreamId.validate(streamId);
     this.applicationErrorCode = applicationErrorCode;
-    this.offset = offset;
+    this.finalSize = finalSize;
   }
 
   private void validateApplicationErrorCode(final int code) {
@@ -50,8 +50,8 @@ public class ResetStreamFrame extends Frame {
     return applicationErrorCode;
   }
 
-  public long getOffset() {
-    return offset;
+  public long getFinalSize() {
+    return finalSize;
   }
 
   @Override
@@ -60,7 +60,7 @@ public class ResetStreamFrame extends Frame {
 
     StreamId.write(bb, streamId);
     Varint.write(applicationErrorCode, bb);
-    Varint.write(offset, bb);
+    Varint.write(finalSize, bb);
   }
 
   @Override
@@ -71,7 +71,7 @@ public class ResetStreamFrame extends Frame {
     final ResetStreamFrame that = (ResetStreamFrame) o;
 
     if (applicationErrorCode != that.applicationErrorCode) return false;
-    if (offset != that.offset) return false;
+    if (finalSize != that.finalSize) return false;
     return streamId == that.streamId;
   }
 
@@ -79,7 +79,7 @@ public class ResetStreamFrame extends Frame {
   public int hashCode() {
     int result = Long.hashCode(streamId);
     result = 31 * result + applicationErrorCode;
-    result = 31 * result + (int) (offset ^ (offset >>> 32));
+    result = 31 * result + (int) (finalSize ^ (finalSize >>> 32));
     return result;
   }
 }

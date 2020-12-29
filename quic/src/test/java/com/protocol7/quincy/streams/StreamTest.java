@@ -73,7 +73,7 @@ public class StreamTest {
 
     assertEquals(streamId, frame2.getStreamId());
     assertEquals(123, frame2.getApplicationErrorCode());
-    assertEquals(DATA.length, frame2.getOffset());
+    assertEquals(DATA.length, frame2.getFinalSize());
   }
 
   @Test(expected = IllegalStateException.class)

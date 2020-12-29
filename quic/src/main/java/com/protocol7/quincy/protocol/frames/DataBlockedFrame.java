@@ -12,28 +12,28 @@ public class DataBlockedFrame extends Frame {
       throw new IllegalArgumentException("Illegal frame type");
     }
 
-    final long dataLimit = Varint.readAsLong(bb);
+    final long maxData = Varint.readAsLong(bb);
 
-    return new DataBlockedFrame(dataLimit);
+    return new DataBlockedFrame(maxData);
   }
 
-  private final long dataLimit;
+  private final long maxData;
 
-  public DataBlockedFrame(final long dataLimit) {
+  public DataBlockedFrame(final long maxData) {
     super(FrameType.DATA_BLOCKED);
 
-    this.dataLimit = dataLimit;
+    this.maxData = maxData;
   }
 
-  public long getDataLimit() {
-    return dataLimit;
+  public long getMaxData() {
+    return maxData;
   }
 
   @Override
   public void write(final ByteBuf bb) {
     bb.writeByte(getType().getType());
 
-    Varint.write(dataLimit, bb);
+    Varint.write(maxData, bb);
   }
 
   @Override
@@ -41,11 +41,11 @@ public class DataBlockedFrame extends Frame {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     final DataBlockedFrame that = (DataBlockedFrame) o;
-    return dataLimit == that.dataLimit;
+    return maxData == that.maxData;
   }
 
   @Override
   public int hashCode() {
-    return Objects.hash(dataLimit);
+    return Objects.hash(maxData);
   }
 }
