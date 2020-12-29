@@ -18,7 +18,6 @@ import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificateVerify
 import com.protocol7.quincy.tls.messages.ServerHandshake.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
-import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PublicKey;
@@ -60,7 +59,8 @@ public class ClientTlsSession {
       throw new IllegalStateException("Already started");
     }
 
-    final TransportParameters transportParameters = TransportParameters.newBuilder(transportParametersDefaults)
+    final TransportParameters transportParameters =
+        TransportParameters.newBuilder(transportParametersDefaults)
             .withInitialSourceConnectionId(sourceConnectionId)
             .build();
 

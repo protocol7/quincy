@@ -70,7 +70,7 @@ public class ServerRetryHandler implements InboundHandler {
             Optional.of(newLocalConnectionId),
             initialPacket.getDestinationConnectionId(),
             retryToken,
-                null));
+            null));
   }
 
   private long now() {

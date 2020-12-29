@@ -11,7 +11,6 @@ import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
-
 import java.security.PrivateKey;
 import java.util.List;
 

@@ -1,11 +1,5 @@
 package com.protocol7.quincy.tls.extensions;
 
-import com.protocol7.quincy.Varint;
-import io.netty.buffer.ByteBuf;
-
-import java.util.Arrays;
-import java.util.Objects;
-
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.ACK_DELAY_EXPONENT;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.ACTIVE_CONNECTION_ID_LIMIT;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.DISABLE_ACTIVE_MIGRATION;
@@ -22,6 +16,11 @@ import static com.protocol7.quincy.tls.extensions.TransportParameterType.MAX_UDP
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.ORIGINAL_DESTINATION_CONNECTION_ID;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.RETRY_SOURCE_CONNECTION_ID;
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.STATELESS_RESET_TOKEN;
+
+import com.protocol7.quincy.Varint;
+import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class TransportParameters implements Extension {
 
@@ -137,14 +136,12 @@ public class TransportParameters implements Extension {
       return this;
     }
 
-    public Builder withInitialSourceConnectionId(
-        final byte[] initialSourceConnectionId) {
+    public Builder withInitialSourceConnectionId(final byte[] initialSourceConnectionId) {
       this.initialSourceConnectionId = initialSourceConnectionId;
       return this;
     }
 
-    public Builder withRetrySourceConnectionId(
-        final byte[] retrySourceConnectionId) {
+    public Builder withRetrySourceConnectionId(final byte[] retrySourceConnectionId) {
       this.retrySourceConnectionId = retrySourceConnectionId;
       return this;
     }
@@ -291,8 +288,7 @@ public class TransportParameters implements Extension {
       final byte[] originalDestinationConnectionId,
       final int activeConnectionIdLimit,
       final byte[] initialSourceConnectionId,
-      final byte[] retrySourceConnectionId
-  ) {
+      final byte[] retrySourceConnectionId) {
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
     this.initialMaxStreamsBidi = initialMaxStreamsBidi;
@@ -309,7 +305,6 @@ public class TransportParameters implements Extension {
     this.activeConnectionIdLimit = activeConnectionIdLimit;
     this.initialSourceConnectionId = initialSourceConnectionId;
     this.retrySourceConnectionId = retrySourceConnectionId;
-
   }
 
   @Override
@@ -410,12 +405,12 @@ public class TransportParameters implements Extension {
         Objects.hash(
             initialMaxStreamDataBidiLocal,
             initialMaxData,
-                initialMaxStreamsBidi,
+            initialMaxStreamsBidi,
             idleTimeout,
-                maxUDPPacketSize,
+            maxUDPPacketSize,
             ackDelayExponent,
-                initialMaxStreamsUni,
-                disableActiveMigration,
+            initialMaxStreamsUni,
+            disableActiveMigration,
             initialMaxStreamDataBidiRemote,
             initialMaxStreamDataUni,
             maxAckDelay,
@@ -492,7 +487,7 @@ public class TransportParameters implements Extension {
       writeVarint(INITIAL_MAX_STREAMS_UNI, bb, initialMaxStreamsUni);
     }
     if (disableActiveMigration) {
-      writeVarint(DISABLE_ACTIVE_MIGRATION,  bb,0);
+      writeVarint(DISABLE_ACTIVE_MIGRATION, bb, 0);
     }
     if (initialMaxStreamDataBidiRemote > -1) {
       writeVarint(INITIAL_MAX_STREAM_DATA_BIDI_REMOTE, bb, initialMaxStreamDataBidiRemote);

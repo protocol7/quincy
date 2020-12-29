@@ -20,7 +20,8 @@ public class RetryPacketTest {
   private ConnectionId src = ConnectionId.random();
   private ConnectionId org = ConnectionId.random();
   private byte[] token = Rnd.rndBytes(18);
-  private RetryPacket packet = new RetryPacket(Version.DRAFT_29, of(dest), of(src), of(org), token, null);
+  private RetryPacket packet =
+      new RetryPacket(Version.DRAFT_29, of(dest), of(src), of(org), token, null);
 
   private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
@@ -42,13 +43,19 @@ public class RetryPacketTest {
 
   @Test
   public void parseKnown() {
-    final byte[] data = Hex.dehex("f0ff00001d123198cdb7fc8158ad26651d1333ab78e359dc143ef889880f335aa023d909c376d75aed9804916d7175696368657f000001365ca9c62bac3f083aac2f88a71b8ad8847afd8e41d3dace90ad5494ba86d05ec2f6");
+    final byte[] data =
+        Hex.dehex(
+            "f0ff00001d123198cdb7fc8158ad26651d1333ab78e359dc143ef889880f335aa023d909c376d75aed9804916d7175696368657f000001365ca9c62bac3f083aac2f88a71b8ad8847afd8e41d3dace90ad5494ba86d05ec2f6");
 
     final RetryPacket parsed = RetryPacket.parse(Unpooled.wrappedBuffer(data)).complete(l -> aead);
 
     assertEquals(Version.DRAFT_29, parsed.getVersion());
-    assertEquals(new ConnectionId(Hex.dehex("3198cdb7fc8158ad26651d1333ab78e359dc")), parsed.getDestinationConnectionId().get());
-    assertEquals(new ConnectionId(Hex.dehex("3ef889880f335aa023d909c376d75aed9804916d")), parsed.getSourceConnectionId().get());
+    assertEquals(
+        new ConnectionId(Hex.dehex("3198cdb7fc8158ad26651d1333ab78e359dc")),
+        parsed.getDestinationConnectionId().get());
+    assertEquals(
+        new ConnectionId(Hex.dehex("3ef889880f335aa023d909c376d75aed9804916d")),
+        parsed.getSourceConnectionId().get());
     assertEquals(28, parsed.getRetryToken().length);
 
     // must be verifiable

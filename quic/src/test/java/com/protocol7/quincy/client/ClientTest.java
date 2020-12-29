@@ -113,9 +113,9 @@ public class ClientTest {
             Version.DRAFT_29,
             Optional.empty(),
             Optional.of(srcConnectionId),
-                Optional.of(destConnectionId),
+            Optional.of(destConnectionId),
             retryToken,
-                null));
+            null));
 
     // validate new initial packet sent
     final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);

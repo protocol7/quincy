@@ -11,7 +11,6 @@ import com.protocol7.quincy.utils.Opt;
 import com.protocol7.quincy.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
 import java.util.Objects;
@@ -51,7 +50,8 @@ public class RetryPacket implements Packet {
 
       @Override
       public RetryPacket complete(final AEADProvider aeadProvider) {
-        return new RetryPacket(version, destConnId, srcConnId, Optional.empty(), retryToken, retryTokenIntegrityTag);
+        return new RetryPacket(
+            version, destConnId, srcConnId, Optional.empty(), retryToken, retryTokenIntegrityTag);
       }
     };
   }
@@ -76,7 +76,6 @@ public class RetryPacket implements Packet {
     this.originalConnectionId = originalConnectionId;
     this.retryToken = retryToken;
     this.retryTokenIntegrityTag = retryTokenIntegrityTag;
-
   }
 
   public Version getVersion() {
@@ -102,11 +101,12 @@ public class RetryPacket implements Packet {
     ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
 
     bb.writeBytes(retryToken);
-    
+
     bb.writeBytes(calculateTokenIntegrityTag(bb, originalConnectionId.get()));
   }
 
-  private byte[] calculateTokenIntegrityTag(final ByteBuf header, final ConnectionId originalConnectionId) {
+  private byte[] calculateTokenIntegrityTag(
+      final ByteBuf header, final ConnectionId originalConnectionId) {
 
     try {
       return TAG_AEAD.create(retryPseudoPacket(originalConnectionId));
@@ -125,11 +125,10 @@ public class RetryPacket implements Packet {
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException("Failed to verify tag", e);
     }
-
   }
 
   private byte[] retryPseudoPacket(final ConnectionId originalConnectionId) {
-        final ByteBuf bb = Unpooled.buffer();
+    final ByteBuf bb = Unpooled.buffer();
     ConnectionId.write(Optional.of(originalConnectionId), bb);
 
     int b = (PACKET_TYPE_MASK | PacketType.Retry.getType() << 4) & 0xFF;
@@ -141,7 +140,6 @@ public class RetryPacket implements Packet {
     ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
 
     bb.writeBytes(retryToken);
-
 
     return Bytes.drainToArray(bb);
   }

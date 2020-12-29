@@ -136,7 +136,8 @@ public class ClientTlsManager implements InboundHandler {
   private void sendInitialPacket(final FrameSender frameSender) {
     int len = 1200;
 
-    final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake(initialConnectionId.asBytes()));
+    final CryptoFrame clientHello =
+        new CryptoFrame(0, tlsSession.startHandshake(initialConnectionId.asBytes()));
     len -= clientHello.calculateLength();
     frameSender.send(clientHello, new PaddingFrame(len));
   }

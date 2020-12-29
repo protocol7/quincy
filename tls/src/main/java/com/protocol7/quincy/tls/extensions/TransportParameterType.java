@@ -1,7 +1,6 @@
 package com.protocol7.quincy.tls.extensions;
 
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.Shorts;
 import java.util.EnumSet;
 
 public enum TransportParameterType {

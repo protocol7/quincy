@@ -48,7 +48,8 @@ public class TransportParametersTest {
     assertEquals(tps.getMaxAckDelay(), parsed.getMaxAckDelay());
     assertEquals(tps.getMaxUDPPacketSize(), parsed.getMaxUDPPacketSize());
     assertArrayEquals(tps.getStatelessResetToken(), parsed.getStatelessResetToken());
-    assertArrayEquals(tps.getOriginalDestinationConnectionId(), parsed.getOriginalDestinationConnectionId());
+    assertArrayEquals(
+        tps.getOriginalDestinationConnectionId(), parsed.getOriginalDestinationConnectionId());
   }
 
   @Test

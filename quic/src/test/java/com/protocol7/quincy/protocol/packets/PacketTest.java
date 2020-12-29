@@ -80,7 +80,12 @@ public class PacketTest {
   public void parseRetryPacket() {
     final RetryPacket packet =
         new RetryPacket(
-            Version.DRAFT_29, Optional.ofNullable(connId), empty(), Optional.of(connId), Rnd.rndBytes(11), null);
+            Version.DRAFT_29,
+            Optional.ofNullable(connId),
+            empty(),
+            Optional.of(connId),
+            Rnd.rndBytes(11),
+            null);
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

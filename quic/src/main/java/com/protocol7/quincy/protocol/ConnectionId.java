@@ -60,12 +60,11 @@ public class ConnectionId {
     }
   }
 
-
   private final byte[] id;
 
   public ConnectionId(final byte[] id) {
-    checkArgument(id.length >= MIN_LENGTH, "Connection ID too short: "+ id.length);
-    checkArgument(id.length <= MAX_LENGTH, "Connection ID too long: "+ id.length);
+    checkArgument(id.length >= MIN_LENGTH, "Connection ID too short: " + id.length);
+    checkArgument(id.length <= MAX_LENGTH, "Connection ID too long: " + id.length);
 
     this.id = id;
   }

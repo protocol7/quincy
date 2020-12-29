@@ -87,7 +87,7 @@ public class ClientConnection implements InternalConnection {
             new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
         new ClientTlsManager(
-                localConnectionId.get(), configuration.toTransportParameters(), certificateValidator);
+            localConnectionId.get(), configuration.toTransportParameters(), certificateValidator);
 
     final LoggingHandler logger = new LoggingHandler(true);
 
