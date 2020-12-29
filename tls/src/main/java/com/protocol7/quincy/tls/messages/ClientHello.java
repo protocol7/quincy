@@ -38,7 +38,7 @@ public class ClientHello {
                 new SupportedGroups(Group.X25519),
                 SupportedVersions.TLS13,
                 PskKeyExchangeModes.defaults(),
-                new ALPN(List.of("h3-20")))
+                new ALPN(List.of("http/0.9")))
             .add(exts)
             .build();
 

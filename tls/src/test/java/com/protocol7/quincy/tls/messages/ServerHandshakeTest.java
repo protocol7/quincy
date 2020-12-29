@@ -28,18 +28,18 @@ public class ServerHandshakeTest {
 
     final TransportParameters tps = (TransportParameters) ee.getExtensions().get(0);
     assertEquals(-1, tps.getAckDelayExponent());
-    assertEquals(true, tps.isDisableMigration());
+    assertEquals(true, tps.isDisableActiveMigration());
     assertEquals(30, tps.getIdleTimeout());
-    assertEquals(100, tps.getInitialMaxBidiStreams());
+    assertEquals(100, tps.getInitialMaxStreamsBidi());
     assertEquals(49152, tps.getInitialMaxData());
     assertEquals(32768, tps.getInitialMaxStreamDataBidiLocal());
     assertEquals(32768, tps.getInitialMaxStreamDataBidiRemote());
     assertEquals(32768, tps.getInitialMaxStreamDataUni());
-    assertEquals(100, tps.getInitialMaxUniStreams());
+    assertEquals(100, tps.getInitialMaxStreamsUni());
     assertEquals(-1, tps.getMaxAckDelay());
-    assertEquals(1452, tps.getMaxPacketSize());
+    assertEquals(1452, tps.getMaxUDPPacketSize());
     assertEquals(16, tps.getStatelessResetToken().length);
-    assertEquals(0, tps.getOriginalConnectionId().length);
+    assertEquals(0, tps.getOriginalDestinationConnectionId().length);
   }
 
   @Test

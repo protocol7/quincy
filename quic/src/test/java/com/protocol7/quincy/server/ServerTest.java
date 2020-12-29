@@ -81,7 +81,7 @@ public class ServerTest {
   @Test
   public void handshake() throws CertificateInvalidException {
     assertEquals(State.Started, connection.getState());
-    final byte[] ch = clientTlsSession.startHandshake();
+    final byte[] ch = clientTlsSession.startHandshake(destConnectionId.asBytes());
 
     connection.onPacket(initialPacket(destConnectionId, empty(), new CryptoFrame(0, ch)));
 

@@ -45,7 +45,7 @@ public class ServerTlsManagerTest {
   @Test
   public void handshake() throws CertificateInvalidException {
     // start handshake
-    final byte[] ch = clientTlsSession.startHandshake();
+    final byte[] ch = clientTlsSession.startHandshake(connectionId.asBytes());
 
     final PipelineContext ctx = mock(PipelineContext.class);
 

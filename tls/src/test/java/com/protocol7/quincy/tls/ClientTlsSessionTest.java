@@ -28,6 +28,7 @@ import org.junit.Test;
 
 public class ClientTlsSessionTest {
 
+  private final byte[] connectionId = Rnd.rndBytes(16);
   private final ClientTlsSession engine =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
@@ -41,12 +42,12 @@ public class ClientTlsSessionTest {
 
   @Before
   public void setUp() {
-    started.startHandshake();
+    started.startHandshake(connectionId);
   }
 
   @Test
   public void handshake() {
-    final byte[] ch = engine.startHandshake();
+    final byte[] ch = engine.startHandshake(connectionId);
 
     final ClientHello hello = ClientHello.parse(ch, false);
 

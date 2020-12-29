@@ -4,8 +4,6 @@ import static com.protocol7.quincy.utils.Hex.dehex;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-import com.protocol7.quincy.utils.Bytes;
-import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -38,19 +36,19 @@ public class TransportParametersTest {
     final TransportParameters parsed = TransportParameters.parse(bb);
 
     assertEquals(tps.getAckDelayExponent(), parsed.getAckDelayExponent());
-    assertEquals(tps.isDisableMigration(), parsed.isDisableMigration());
+    assertEquals(tps.isDisableActiveMigration(), parsed.isDisableActiveMigration());
     assertEquals(tps.getIdleTimeout(), parsed.getIdleTimeout());
-    assertEquals(tps.getInitialMaxBidiStreams(), parsed.getInitialMaxBidiStreams());
+    assertEquals(tps.getInitialMaxStreamsBidi(), parsed.getInitialMaxStreamsBidi());
     assertEquals(tps.getInitialMaxData(), parsed.getInitialMaxData());
     assertEquals(tps.getInitialMaxStreamDataBidiLocal(), parsed.getInitialMaxStreamDataBidiLocal());
     assertEquals(
         tps.getInitialMaxStreamDataBidiRemote(), parsed.getInitialMaxStreamDataBidiRemote());
     assertEquals(tps.getInitialMaxStreamDataUni(), parsed.getInitialMaxStreamDataUni());
-    assertEquals(tps.getInitialMaxUniStreams(), parsed.getInitialMaxUniStreams());
+    assertEquals(tps.getInitialMaxStreamsUni(), parsed.getInitialMaxStreamsUni());
     assertEquals(tps.getMaxAckDelay(), parsed.getMaxAckDelay());
-    assertEquals(tps.getMaxPacketSize(), parsed.getMaxPacketSize());
+    assertEquals(tps.getMaxUDPPacketSize(), parsed.getMaxUDPPacketSize());
     assertArrayEquals(tps.getStatelessResetToken(), parsed.getStatelessResetToken());
-    assertArrayEquals(tps.getOriginalConnectionId(), parsed.getOriginalConnectionId());
+    assertArrayEquals(tps.getOriginalDestinationConnectionId(), parsed.getOriginalDestinationConnectionId());
   }
 
   @Test
@@ -63,20 +61,20 @@ public class TransportParametersTest {
     final TransportParameters parsed = TransportParameters.parse(bb);
 
     assertEquals(3, parsed.getAckDelayExponent());
-    assertEquals(true, parsed.isDisableMigration());
+    assertEquals(true, parsed.isDisableActiveMigration());
     assertEquals(30000, parsed.getIdleTimeout());
-    assertEquals(100, parsed.getInitialMaxBidiStreams());
-    assertEquals(100, parsed.getInitialMaxUniStreams());
+    assertEquals(100, parsed.getInitialMaxStreamsBidi());
+    assertEquals(100, parsed.getInitialMaxStreamsUni());
     assertEquals(10000000, parsed.getInitialMaxData());
     assertEquals(1000000, parsed.getInitialMaxStreamDataBidiLocal());
     assertEquals(1000000, parsed.getInitialMaxStreamDataBidiRemote());
     assertEquals(1000000, parsed.getInitialMaxStreamDataUni());
-    assertEquals(100, parsed.getInitialMaxUniStreams());
+    assertEquals(100, parsed.getInitialMaxStreamsUni());
     assertEquals(25, parsed.getMaxAckDelay());
-    assertEquals(1350, parsed.getMaxPacketSize());
+    assertEquals(1350, parsed.getMaxUDPPacketSize());
     assertEquals(-1, parsed.getActiveConnectionIdLimit());
     assertEquals(0, parsed.getStatelessResetToken().length);
-    assertEquals(0, parsed.getOriginalConnectionId().length);
+    assertEquals(0, parsed.getOriginalDestinationConnectionId().length);
     assertEquals(20, parsed.getInitialSourceConnectionId().length);
     assertEquals(0, parsed.getRetrySourceConnectionId().length);
   }

@@ -28,15 +28,17 @@ public class ClientTlsManager implements InboundHandler {
   private Promise promise;
   private final TransportParameters transportParameters;
   private final CertificateValidator certificateValidator;
+  private final ConnectionId initialConnectionId;
 
   public ClientTlsManager(
-      final ConnectionId connectionId,
+      final ConnectionId initialConnectionId,
       final TransportParameters transportParameters,
       final CertificateValidator certificateValidator) {
+    this.initialConnectionId = initialConnectionId;
     this.transportParameters = transportParameters;
     this.certificateValidator = certificateValidator;
 
-    resetTlsSession(connectionId);
+    resetTlsSession(initialConnectionId);
   }
 
   public void resetTlsSession(final ConnectionId connectionId) {
@@ -134,7 +136,7 @@ public class ClientTlsManager implements InboundHandler {
   private void sendInitialPacket(final FrameSender frameSender) {
     int len = 1200;
 
-    final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake());
+    final CryptoFrame clientHello = new CryptoFrame(0, tlsSession.startHandshake(initialConnectionId.asBytes()));
     len -= clientHello.calculateLength();
     frameSender.send(clientHello, new PaddingFrame(len));
   }

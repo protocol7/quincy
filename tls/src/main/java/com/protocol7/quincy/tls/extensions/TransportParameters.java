@@ -44,6 +44,28 @@ public class TransportParameters implements Extension {
     private byte[] initialSourceConnectionId = new byte[0];
     private byte[] retrySourceConnectionId = new byte[0];
 
+    public Builder() {}
+
+    public Builder(final TransportParameters transportParameters) {
+      this.initialMaxStreamDataBidiLocal = transportParameters.initialMaxStreamDataBidiLocal;
+      this.initialMaxData = transportParameters.initialMaxData;
+      this.initialMaxStreamsBidi = transportParameters.initialMaxStreamsBidi;
+      this.idleTimeout = transportParameters.idleTimeout;
+      // TODO PREFERRED_ADDRESS(4),
+      this.maxUDPPacketSize = transportParameters.maxUDPPacketSize;
+      this.statelessResetToken = transportParameters.statelessResetToken;
+      this.ackDelayExponent = transportParameters.ackDelayExponent;
+      this.initialMaxStreamsUni = transportParameters.initialMaxStreamsUni;
+      this.disableActiveMigration = transportParameters.disableActiveMigration;
+      this.initialMaxStreamDataBidiRemote = transportParameters.initialMaxStreamDataBidiRemote;
+      this.initialMaxStreamDataUni = transportParameters.initialMaxStreamDataUni;
+      this.maxAckDelay = transportParameters.maxAckDelay;
+      this.originalDestinationConnectionId = transportParameters.originalDestinationConnectionId;
+      this.activeConnectionIdLimit = transportParameters.activeConnectionIdLimit;
+      this.initialSourceConnectionId = transportParameters.initialSourceConnectionId;
+      this.retrySourceConnectionId = transportParameters.retrySourceConnectionId;
+    }
+
     public Builder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
       this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
       return this;
@@ -152,6 +174,10 @@ public class TransportParameters implements Extension {
     return new Builder();
   }
 
+  public static Builder newBuilder(final TransportParameters transportParameters) {
+    return new Builder(transportParameters);
+  }
+
   public static TransportParameters parse(final ByteBuf bb) {
 
     final Builder builder = new Builder();
@@ -233,18 +259,18 @@ public class TransportParameters implements Extension {
 
   private final int initialMaxStreamDataBidiLocal;
   private final int initialMaxData;
-  private final int initialMaxBidiStreams;
+  private final int initialMaxStreamsBidi;
   private final int idleTimeout;
   // TODO PREFERRED_ADDRESS(4),
-  private final int maxPacketSize;
+  private final int maxUDPPacketSize;
   private final byte[] statelessResetToken;
   private final int ackDelayExponent;
-  private final int initialMaxUniStreams;
-  private final boolean disableMigration;
+  private final int initialMaxStreamsUni;
+  private final boolean disableActiveMigration;
   private final int initialMaxStreamDataBidiRemote;
   private final int initialMaxStreamDataUni;
   private final int maxAckDelay;
-  private final byte[] originalConnectionId;
+  private final byte[] originalDestinationConnectionId;
   private final int activeConnectionIdLimit;
   private final byte[] initialSourceConnectionId;
   private final byte[] retrySourceConnectionId;
@@ -252,34 +278,34 @@ public class TransportParameters implements Extension {
   private TransportParameters(
       final int initialMaxStreamDataBidiLocal,
       final int initialMaxData,
-      final int initialMaxBidiStreams,
+      final int initialMaxStreamsBidi,
       final int idleTimeout,
-      final int maxPacketSize,
+      final int maxUDPPacketSize,
       final byte[] statelessResetToken,
       final int ackDelayExponent,
-      final int initialMaxUniStreams,
-      final boolean disableMigration,
+      final int initialMaxStreamsUni,
+      final boolean disableActiveMigration,
       final int initialMaxStreamDataBidiRemote,
       final int initialMaxStreamDataUni,
       final int maxAckDelay,
-      final byte[] originalConnectionId,
+      final byte[] originalDestinationConnectionId,
       final int activeConnectionIdLimit,
       final byte[] initialSourceConnectionId,
       final byte[] retrySourceConnectionId
   ) {
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
-    this.initialMaxBidiStreams = initialMaxBidiStreams;
+    this.initialMaxStreamsBidi = initialMaxStreamsBidi;
     this.idleTimeout = idleTimeout;
-    this.maxPacketSize = maxPacketSize;
+    this.maxUDPPacketSize = maxUDPPacketSize;
     this.statelessResetToken = statelessResetToken;
     this.ackDelayExponent = ackDelayExponent;
-    this.initialMaxUniStreams = initialMaxUniStreams;
-    this.disableMigration = disableMigration;
+    this.initialMaxStreamsUni = initialMaxStreamsUni;
+    this.disableActiveMigration = disableActiveMigration;
     this.initialMaxStreamDataBidiRemote = initialMaxStreamDataBidiRemote;
     this.initialMaxStreamDataUni = initialMaxStreamDataUni;
     this.maxAckDelay = maxAckDelay;
-    this.originalConnectionId = originalConnectionId;
+    this.originalDestinationConnectionId = originalDestinationConnectionId;
     this.activeConnectionIdLimit = activeConnectionIdLimit;
     this.initialSourceConnectionId = initialSourceConnectionId;
     this.retrySourceConnectionId = retrySourceConnectionId;
@@ -299,16 +325,16 @@ public class TransportParameters implements Extension {
     return initialMaxData;
   }
 
-  public int getInitialMaxBidiStreams() {
-    return initialMaxBidiStreams;
+  public int getInitialMaxStreamsBidi() {
+    return initialMaxStreamsBidi;
   }
 
   public int getIdleTimeout() {
     return idleTimeout;
   }
 
-  public int getMaxPacketSize() {
-    return maxPacketSize;
+  public int getMaxUDPPacketSize() {
+    return maxUDPPacketSize;
   }
 
   public byte[] getStatelessResetToken() {
@@ -319,12 +345,12 @@ public class TransportParameters implements Extension {
     return ackDelayExponent;
   }
 
-  public int getInitialMaxUniStreams() {
-    return initialMaxUniStreams;
+  public int getInitialMaxStreamsUni() {
+    return initialMaxStreamsUni;
   }
 
-  public boolean isDisableMigration() {
-    return disableMigration;
+  public boolean isDisableActiveMigration() {
+    return disableActiveMigration;
   }
 
   public int getInitialMaxStreamDataBidiRemote() {
@@ -339,8 +365,8 @@ public class TransportParameters implements Extension {
     return maxAckDelay;
   }
 
-  public byte[] getOriginalConnectionId() {
-    return originalConnectionId;
+  public byte[] getOriginalDestinationConnectionId() {
+    return originalDestinationConnectionId;
   }
 
   public int getActiveConnectionIdLimit() {
@@ -362,17 +388,17 @@ public class TransportParameters implements Extension {
     final TransportParameters that = (TransportParameters) o;
     return initialMaxStreamDataBidiLocal == that.initialMaxStreamDataBidiLocal
         && initialMaxData == that.initialMaxData
-        && initialMaxBidiStreams == that.initialMaxBidiStreams
+        && initialMaxStreamsBidi == that.initialMaxStreamsBidi
         && idleTimeout == that.idleTimeout
-        && maxPacketSize == that.maxPacketSize
+        && maxUDPPacketSize == that.maxUDPPacketSize
         && ackDelayExponent == that.ackDelayExponent
-        && initialMaxUniStreams == that.initialMaxUniStreams
-        && disableMigration == that.disableMigration
+        && initialMaxStreamsUni == that.initialMaxStreamsUni
+        && disableActiveMigration == that.disableActiveMigration
         && initialMaxStreamDataBidiRemote == that.initialMaxStreamDataBidiRemote
         && initialMaxStreamDataUni == that.initialMaxStreamDataUni
         && maxAckDelay == that.maxAckDelay
         && Arrays.equals(statelessResetToken, that.statelessResetToken)
-        && Arrays.equals(originalConnectionId, that.originalConnectionId)
+        && Arrays.equals(originalDestinationConnectionId, that.originalDestinationConnectionId)
         && activeConnectionIdLimit == that.activeConnectionIdLimit
         && Arrays.equals(initialSourceConnectionId, that.initialSourceConnectionId)
         && Arrays.equals(retrySourceConnectionId, that.retrySourceConnectionId);
@@ -384,18 +410,18 @@ public class TransportParameters implements Extension {
         Objects.hash(
             initialMaxStreamDataBidiLocal,
             initialMaxData,
-            initialMaxBidiStreams,
+                initialMaxStreamsBidi,
             idleTimeout,
-            maxPacketSize,
+                maxUDPPacketSize,
             ackDelayExponent,
-            initialMaxUniStreams,
-            disableMigration,
+                initialMaxStreamsUni,
+                disableActiveMigration,
             initialMaxStreamDataBidiRemote,
             initialMaxStreamDataUni,
             maxAckDelay,
             activeConnectionIdLimit);
     result = 31 * result + Arrays.hashCode(statelessResetToken);
-    result = 31 * result + Arrays.hashCode(originalConnectionId);
+    result = 31 * result + Arrays.hashCode(originalDestinationConnectionId);
     result = 31 * result + Arrays.hashCode(initialSourceConnectionId);
     result = 31 * result + Arrays.hashCode(retrySourceConnectionId);
     return result;
@@ -409,19 +435,19 @@ public class TransportParameters implements Extension {
         + ", initialMaxData="
         + initialMaxData
         + ", initialMaxBidiStreams="
-        + initialMaxBidiStreams
+        + initialMaxStreamsBidi
         + ", idleTimeout="
         + idleTimeout
         + ", maxPacketSize="
-        + maxPacketSize
+        + maxUDPPacketSize
         + ", statelessResetToken="
         + Arrays.toString(statelessResetToken)
         + ", ackDelayExponent="
         + ackDelayExponent
         + ", initialMaxUniStreams="
-        + initialMaxUniStreams
+        + initialMaxStreamsUni
         + ", disableMigration="
-        + disableMigration
+        + disableActiveMigration
         + ", initialMaxStreamDataBidiRemote="
         + initialMaxStreamDataBidiRemote
         + ", initialMaxStreamDataUni="
@@ -429,7 +455,7 @@ public class TransportParameters implements Extension {
         + ", maxAckDelay="
         + maxAckDelay
         + ", originalConnectionId="
-        + Arrays.toString(originalConnectionId)
+        + Arrays.toString(originalDestinationConnectionId)
         + ", activeConnectionIdLimit="
         + activeConnectionIdLimit
         + ", initialSourceConnectionId="
@@ -447,14 +473,14 @@ public class TransportParameters implements Extension {
     if (initialMaxData > -1) {
       writeVarint(INITIAL_MAX_DATA, bb, initialMaxData);
     }
-    if (initialMaxBidiStreams > -1) {
-      writeVarint(INITIAL_MAX_STREAMS_BIDI, bb, initialMaxBidiStreams);
+    if (initialMaxStreamsBidi > -1) {
+      writeVarint(INITIAL_MAX_STREAMS_BIDI, bb, initialMaxStreamsBidi);
     }
     if (idleTimeout > -1) {
       writeVarint(MAX_IDLE_TIMEOUT, bb, idleTimeout);
     }
-    if (maxPacketSize > -1) {
-      writeVarint(MAX_UDP_PACKET_SIZE, bb, maxPacketSize);
+    if (maxUDPPacketSize > -1) {
+      writeVarint(MAX_UDP_PACKET_SIZE, bb, maxUDPPacketSize);
     }
     if (statelessResetToken.length > 0) {
       writeBytes(STATELESS_RESET_TOKEN, bb, statelessResetToken);
@@ -462,10 +488,10 @@ public class TransportParameters implements Extension {
     if (ackDelayExponent > -1) {
       writeVarint(ACK_DELAY_EXPONENT, bb, ackDelayExponent);
     }
-    if (initialMaxUniStreams > -1) {
-      writeVarint(INITIAL_MAX_STREAMS_UNI, bb, initialMaxUniStreams);
+    if (initialMaxStreamsUni > -1) {
+      writeVarint(INITIAL_MAX_STREAMS_UNI, bb, initialMaxStreamsUni);
     }
-    if (disableMigration) {
+    if (disableActiveMigration) {
       writeVarint(DISABLE_ACTIVE_MIGRATION,  bb,0);
     }
     if (initialMaxStreamDataBidiRemote > -1) {
@@ -477,8 +503,8 @@ public class TransportParameters implements Extension {
     if (maxAckDelay > -1) {
       writeVarint(MAX_ACK_DELAY, bb, maxAckDelay);
     }
-    if (originalConnectionId.length > 0) {
-      writeBytes(ORIGINAL_DESTINATION_CONNECTION_ID, bb, originalConnectionId);
+    if (originalDestinationConnectionId.length > 0) {
+      writeBytes(ORIGINAL_DESTINATION_CONNECTION_ID, bb, originalDestinationConnectionId);
     }
     if (activeConnectionIdLimit > -1) {
       writeVarint(ACTIVE_CONNECTION_ID_LIMIT, bb, activeConnectionIdLimit);

@@ -16,9 +16,10 @@ import org.junit.Test;
 public class TlsSessionTest {
 
   private PrivateKey privateKey;
+  private final byte[] connectionId = Rnd.rndBytes(16);
   private final ClientTlsSession client =
       new ClientTlsSession(
-          InitialAEAD.create(Rnd.rndBytes(4), true),
+          InitialAEAD.create(connectionId, true),
           TestUtil.tps(),
           new NoopCertificateValidator());
   private ServerTlsSession server;
@@ -38,7 +39,7 @@ public class TlsSessionTest {
 
   @Test
   public void handshake() throws CertificateInvalidException {
-    final byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake(connectionId);
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -50,7 +51,7 @@ public class TlsSessionTest {
 
   @Test(expected = RuntimeException.class)
   public void handshakeWithInvalidServerCertVerification() throws CertificateInvalidException {
-    final byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake(connectionId);
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -78,7 +79,7 @@ public class TlsSessionTest {
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidClientFin() throws CertificateInvalidException {
-    final byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake(connectionId);
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
@@ -93,7 +94,7 @@ public class TlsSessionTest {
 
   @Test(expected = RuntimeException.class)
   public void handshakeInvalidServerFin() throws CertificateInvalidException {
-    final byte[] clientHello = client.startHandshake();
+    final byte[] clientHello = client.startHandshake(connectionId);
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 

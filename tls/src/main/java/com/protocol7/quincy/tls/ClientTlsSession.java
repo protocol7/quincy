@@ -18,6 +18,7 @@ import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificateVerify
 import com.protocol7.quincy.tls.messages.ServerHandshake.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PublicKey;
@@ -31,7 +32,7 @@ public class ClientTlsSession {
 
   private final Logger log = LoggerFactory.getLogger(ClientTlsSession.class);
 
-  private final TransportParameters transportParameters;
+  private final TransportParameters transportParametersDefaults;
 
   private final AEADs aeads;
   private final KeyExchange kek;
@@ -44,9 +45,9 @@ public class ClientTlsSession {
 
   public ClientTlsSession(
       final AEAD initialAEAD,
-      final TransportParameters transportParameters,
+      final TransportParameters transportParametersDefaults,
       final CertificateValidator certificateValidator) {
-    this.transportParameters = transportParameters;
+    this.transportParametersDefaults = transportParametersDefaults;
 
     aeads = new AEADs(initialAEAD);
     this.certificateValidator = certificateValidator;
@@ -54,10 +55,14 @@ public class ClientTlsSession {
     handshakeBuffer = Unpooled.buffer(); // replace with position keeping buffer
   }
 
-  public byte[] startHandshake() {
+  public byte[] startHandshake(final byte[] sourceConnectionId) {
     if (clientHello != null) {
       throw new IllegalStateException("Already started");
     }
+
+    final TransportParameters transportParameters = TransportParameters.newBuilder(transportParametersDefaults)
+            .withInitialSourceConnectionId(sourceConnectionId)
+            .build();
 
     final ClientHello ch = ClientHello.defaults(kek, transportParameters);
     clientHello = Bytes.write(bb -> ch.write(bb, true));
