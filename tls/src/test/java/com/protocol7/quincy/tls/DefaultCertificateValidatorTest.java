@@ -16,6 +16,8 @@ public class DefaultCertificateValidatorTest {
 
   @Test
   public void google() throws IOException {
+    // openssl s_client -showcerts -connect google.com:443 </dev/null
+
     final CertificateValidator validator = CertificateValidator.defaults();
 
     final byte[] cert1 = Files.readAllBytes(new File("src/test/resources/google1.crt").toPath());
@@ -35,6 +37,9 @@ public class DefaultCertificateValidatorTest {
 
   @Test
   public void selfSigned() throws GeneralSecurityException, IOException {
+    // openssl x509 -inform der -in quic/src/test/resources/server.der -noout -text
+    // openssl x509 -inform der -in quic/src/test/resources/server.crt -noout -text
+
     final KeyStore truststore = KeyStore.getInstance("JKS");
     final X509Certificate cert = KeyUtil.getCertFromCrt("src/test/resources/server.crt");
     truststore.load(() -> new KeyStore.PasswordProtection("hello".toCharArray()));

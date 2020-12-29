@@ -50,6 +50,7 @@ public class DefaultCertificateValidator implements CertificateValidator {
       cpv.validate(cp, params);
       return true;
     } catch (final CertPathValidatorException e) {
+      e.printStackTrace();
       return false;
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException(e);

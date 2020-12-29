@@ -15,9 +15,12 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import java.net.InetSocketAddress;
 import java.util.List;
+
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
+@Ignore
 public class QuicGoTest {
 
   @Rule public QuicGoContainer quicGo = new QuicGoContainer();
@@ -33,7 +36,7 @@ public class QuicGoTest {
       b.remoteAddress(quicGo.getAddress());
       b.handler(
           new QuicBuilder()
-              .withVersion(Version.QUIC_GO)
+              .withVersion(Version.DRAFT_29)
               .clientChannelInitializer(
                   new ChannelDuplexHandler() {
                     @Override

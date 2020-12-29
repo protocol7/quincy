@@ -21,9 +21,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 
+@Ignore
 public class QuiclyTest {
 
   @Rule public QuiclyServerContainer quicly = new QuiclyServerContainer();
@@ -42,7 +45,7 @@ public class QuiclyTest {
       b.remoteAddress(quicly.getAddress());
       b.handler(
           new QuicBuilder()
-              .withVersion(Version.DRAFT_20)
+              .withVersion(Version.DRAFT_29)
               .clientChannelInitializer(
                   new ChannelDuplexHandler() {
                     @Override

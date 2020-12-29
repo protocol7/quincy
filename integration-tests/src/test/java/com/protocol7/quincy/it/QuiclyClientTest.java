@@ -10,8 +10,10 @@ import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
+import org.junit.Ignore;
 import org.junit.Test;
 
+@Ignore
 public class QuiclyClientTest {
 
   @Test
@@ -26,7 +28,7 @@ public class QuiclyClientTest {
       b.option(ChannelOption.SO_BROADCAST, true);
       b.handler(
           new QuicBuilder()
-              .withVersion(Version.DRAFT_20)
+              .withVersion(Version.DRAFT_29)
               .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
               .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
               .serverChannelInitializer(
