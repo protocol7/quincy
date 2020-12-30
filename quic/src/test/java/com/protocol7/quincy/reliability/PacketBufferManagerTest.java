@@ -20,6 +20,7 @@ import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.utils.Ticker;
 import io.netty.util.Timeout;
 import io.netty.util.Timer;
@@ -71,7 +72,7 @@ public class PacketBufferManagerTest {
     buffer.onReceivePacket(ackPacket, ctx);
 
     // should not send an ack
-    verify(ctx, never()).send(any(Frame.class));
+    verify(ctx, never()).send(any(EncryptionLevel.class), any(Frame.class));
     assertBufferEmpty();
 
     final Packet pingPacket = packet(2, PingFrame.INSTANCE);
@@ -206,7 +207,7 @@ public class PacketBufferManagerTest {
 
     resendTask.run(timeout);
 
-    verify(frameSender).send(PingFrame.INSTANCE);
+    verify(frameSender).send(EncryptionLevel.OneRtt, PingFrame.INSTANCE);
   }
 
   private Packet packet(final long pn, final Frame... frames) {
@@ -231,7 +232,7 @@ public class PacketBufferManagerTest {
 
   private Frame verifySent() {
     final ArgumentCaptor<Frame> captor = ArgumentCaptor.forClass(Frame.class);
-    verify(ctx).send(captor.capture());
+    verify(ctx).send(any(EncryptionLevel.class), captor.capture());
 
     return captor.getValue();
   }

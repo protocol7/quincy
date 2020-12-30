@@ -181,6 +181,10 @@ public class ShortPacket implements FullPacket {
     return packetNumber;
   }
 
+  public boolean isKeyPhase() {
+    return keyPhase;
+  }
+
   @Override
   public Optional<ConnectionId> getSourceConnectionId() {
     return Optional.empty();

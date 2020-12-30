@@ -134,11 +134,11 @@ public class ClientConnection implements InternalConnection {
     return newPacket;
   }
 
-  public FullPacket send(final Frame... frames) {
+  public FullPacket send(final EncryptionLevel level, final Frame... frames) {
     final Packet packet;
-    if (tlsManager.available(EncryptionLevel.OneRtt)) {
+    if (level == EncryptionLevel.OneRtt) {
       packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
-    } else if (tlsManager.available(EncryptionLevel.Handshake)) {
+    } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(
               of(remoteConnectionId), localConnectionId, nextSendPacketNumber(), version, frames);

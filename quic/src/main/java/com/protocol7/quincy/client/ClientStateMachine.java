@@ -5,6 +5,7 @@ import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -45,7 +46,8 @@ public class ClientStateMachine {
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {
-    connection.send(ccf);
+    // TODO verify level
+    connection.send(EncryptionLevel.OneRtt, ccf);
 
     state = State.Closing;
 

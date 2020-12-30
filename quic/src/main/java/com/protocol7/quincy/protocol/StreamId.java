@@ -9,10 +9,6 @@ import io.netty.buffer.ByteBuf;
 
 public class StreamId {
 
-  public static long random(final boolean client, final boolean bidirectional) {
-    return encodeType(client, bidirectional, Varint.random(4));
-  }
-
   private static long encodeType(final boolean client, final boolean bidirectional, final long id) {
     long res = id;
     if (client) {

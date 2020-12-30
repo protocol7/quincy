@@ -9,6 +9,8 @@ import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.tls.EncryptionLevel;
+
 import java.net.InetSocketAddress;
 import java.util.Iterator;
 import java.util.List;
@@ -64,8 +66,8 @@ public class Pipeline {
           }
 
           @Override
-          public FullPacket send(final Frame... frames) {
-            return connection.send(frames);
+          public FullPacket send(final EncryptionLevel level, final Frame... frames) {
+            return connection.send(level, frames);
           }
 
           @Override
@@ -123,8 +125,8 @@ public class Pipeline {
           }
 
           @Override
-          public FullPacket send(final Frame... frames) {
-            return connection.send(frames);
+          public FullPacket send(final EncryptionLevel level, final Frame... frames) {
+            return connection.send(level, frames);
           }
 
           @Override

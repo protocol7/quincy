@@ -11,6 +11,7 @@ import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -23,14 +24,14 @@ public class StreamTest {
   @Mock private PipelineContext ctx;
   @Mock private StreamListener listener;
   @Mock private FullPacket packet;
-  private final long streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.next(-1, true, true);
 
   @Before
   public void setUp() {
     MockitoAnnotations.initMocks(this);
 
     when(packet.getPacketNumber()).thenReturn(123L);
-    when(ctx.send(any(Frame.class))).thenReturn(packet);
+    when(ctx.send(any(EncryptionLevel.class), any(Frame.class))).thenReturn(packet);
   }
 
   @Test
@@ -94,7 +95,7 @@ public class StreamTest {
 
   private Frame captureFrame() {
     final ArgumentCaptor<Frame> packetCaptor = ArgumentCaptor.forClass(Frame.class);
-    verify(ctx, atLeastOnce()).send(packetCaptor.capture());
+    verify(ctx, atLeastOnce()).send(any(EncryptionLevel.class), packetCaptor.capture());
     return packetCaptor.getValue();
   }
 

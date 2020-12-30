@@ -6,6 +6,8 @@ import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
+import com.protocol7.quincy.tls.EncryptionLevel;
+
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
@@ -46,7 +48,7 @@ public class DefaultStream implements Stream {
 
     final long frameOffset = offset.getAndAdd(b.length);
     final StreamFrame sf = new StreamFrame(id, frameOffset, finish, b);
-    final FullPacket p = sender.send(sf);
+    final FullPacket p = sender.send(EncryptionLevel.OneRtt, sf);
 
     sendStateMachine.onStream(p.getPacketNumber(), finish);
   }
@@ -56,7 +58,7 @@ public class DefaultStream implements Stream {
 
     final Frame frame = new ResetStreamFrame(id, applicationErrorCode, offset.get());
 
-    final FullPacket p = sender.send(frame);
+    final FullPacket p = sender.send(EncryptionLevel.OneRtt, frame);
 
     sendStateMachine.onReset(p.getPacketNumber());
   }

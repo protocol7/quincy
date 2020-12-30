@@ -14,6 +14,7 @@ import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
 import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.ServerTlsSession;
@@ -44,7 +45,7 @@ public class ClientTest {
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private long packetNumber = 0;
-  private final long streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.next(-1, true, true);
 
   private final FlowControlHandler flowControlHandler = new MockFlowControlHandler();
 
@@ -149,7 +150,7 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHello())));
 
     // verify no packet sent here
-    verify(packetSender, times(2)).send(any(), any());
+    verify(packetSender, times(3)).send(any(), any());
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
@@ -165,15 +166,23 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHandshake())));
 
     // validate client fin handshake packet
-    final HandshakePacket hp = (HandshakePacket) captureSentPacket(3);
-    assertEquals(2, hp.getPacketNumber());
+    final HandshakePacket hp = (HandshakePacket) captureSentPacket(4);
+    assertEquals(3, hp.getPacketNumber());
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
     assertEquals(srcConnectionId, hp.getDestinationConnectionId().get());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
 
+    connection.onPacket(
+            ShortPacket.create(
+                    false,
+                    Optional.of(srcConnectionId),
+                    nextPacketNumber(),
+                    HandshakeDoneFrame.INSTANCE));
+
+
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
-    assertEquals(State.Ready, connection.getState());
+    assertEquals(State.Done, connection.getState());
   }
 
   @Test
@@ -188,7 +197,7 @@ public class ClientTest {
     assertArrayEquals(DATA, dataCaptor.getValue());
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(6, 5, 3, 3);
   }
 
   @Test
@@ -202,9 +211,9 @@ public class ClientTest {
     verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(6, 5, 3, 3);
     // verify ack
-    assertAck(5, 4, 4, 4);
+    assertAck(7, 6, 4, 4);
   }
 
   @Test
@@ -218,8 +227,8 @@ public class ClientTest {
     verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify acks
-    assertAck(4, 3, 3, 3);
-    assertAck(5, 4, 4, 4);
+    assertAck(6, 5, 3, 3);
+    assertAck(7, 6, 4, 4);
   }
 
   @Test
@@ -229,7 +238,7 @@ public class ClientTest {
     connection.onPacket(packet(new ResetStreamFrame(streamId, 123, 0)));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(6, 5, 3, 3);
   }
 
   @Test
@@ -239,7 +248,7 @@ public class ClientTest {
     connection.onPacket(packet(PingFrame.INSTANCE));
 
     // verify ack
-    assertAck(4, 3, 3, 3);
+    assertAck(6, 5, 3, 3);
   }
 
   @Test
@@ -255,7 +264,7 @@ public class ClientTest {
     assertEquals(State.Closed, connection.getState());
 
     try {
-      connection.send(PingFrame.INSTANCE);
+      connection.send(EncryptionLevel.OneRtt, PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
     } catch (final IllegalStateException e) {
       // expected
@@ -271,7 +280,7 @@ public class ClientTest {
     assertEquals(State.Closed, connection.getState());
 
     try {
-      connection.send(PingFrame.INSTANCE);
+      connection.send(EncryptionLevel.OneRtt, PingFrame.INSTANCE);
       fail("Must throw IllegalStateException");
     } catch (final IllegalStateException e) {
       // expected

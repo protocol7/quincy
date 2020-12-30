@@ -14,7 +14,7 @@ public class StreamFrameTest {
 
   @Test
   public void roundtrip() {
-    final StreamFrame frame = new StreamFrame(StreamId.random(true, true), 0, true, DATA);
+    final StreamFrame frame = new StreamFrame(StreamId.next(-1, true, true), 0, true, DATA);
 
     final ByteBuf bb = Unpooled.buffer();
     frame.write(bb);

@@ -31,13 +31,14 @@ public class StreamsTest {
 
   @Test
   public void createAndThenGet() {
-    final long streamId = StreamId.random(true, true);
+    final long streamId = StreamId.next(-1, true, true);
     final DefaultStream stream1 = streams.getOrCreate(streamId, listener);
     final DefaultStream stream2 = streams.getOrCreate(streamId, listener);
 
     assertSame(stream1, stream2);
 
-    final DefaultStream stream3 = streams.getOrCreate(StreamId.random(true, true), listener);
+    // pick a different stream ID
+    final DefaultStream stream3 = streams.getOrCreate(StreamId.next(streamId, true, true), listener);
     assertNotSame(stream1, stream3);
   }
 }

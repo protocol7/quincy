@@ -2,6 +2,7 @@ package com.protocol7.quincy;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.utils.Bytes;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -31,7 +32,7 @@ public class ClientRunner {
                     public void channelActive(final ChannelHandlerContext ctx) {
                       System.out.println("sending GET");
 
-                      ctx.channel().write(QuicPacket.of(null, 0, "GET /\n".getBytes(), peer));
+                      ctx.channel().write(QuicPacket.of(null, 0, "GET /\r\n".getBytes(), peer));
 
                       ctx.fireChannelActive();
                     }
@@ -39,6 +40,12 @@ public class ClientRunner {
                     @Override
                     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
                       System.out.println("got message " + msg);
+
+                      final QuicPacket qp = (QuicPacket) msg;
+
+                        final byte[] b = Bytes.drainToArray(qp.content());
+
+                      System.out.println(new String(b));
 
                       ctx.close();
                       ctx.disconnect();

@@ -16,24 +16,24 @@ public class ResetStreamFrameTest {
 
   @Test
   public void validAppErrorCode() {
-    new ResetStreamFrame(StreamId.random(true, true), 0, 456);
-    new ResetStreamFrame(StreamId.random(true, true), 123, 456);
-    new ResetStreamFrame(StreamId.random(true, true), 0xFFFF, 456);
+    new ResetStreamFrame(StreamId.next(-1, true, true), 0, 456);
+    new ResetStreamFrame(StreamId.next(-1, true, true), 123, 456);
+    new ResetStreamFrame(StreamId.next(-1, true, true), 0xFFFF, 456);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void negativeAppErrorCode() {
-    new ResetStreamFrame(StreamId.random(true, true), -1, 456);
+    new ResetStreamFrame(StreamId.next(-1, true, true), -1, 456);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void tooLargeAppErrorCode() {
-    new ResetStreamFrame(StreamId.random(true, true), 0xFFFF + 1, 456);
+    new ResetStreamFrame(StreamId.next(-1, true, true), 0xFFFF + 1, 456);
   }
 
   @Test
   public void rountrip() {
-    final long streamId = StreamId.random(true, true);
+    final long streamId = StreamId.next(-1, true, true);
     final ResetStreamFrame frame = new ResetStreamFrame(streamId, 123, 456);
 
     final ByteBuf bb = Unpooled.buffer();

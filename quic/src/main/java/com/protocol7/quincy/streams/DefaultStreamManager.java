@@ -32,7 +32,7 @@ public class DefaultStreamManager implements StreamManager {
       final ShortPacket sp = (ShortPacket) packet;
       for (final Frame frame : sp.getPayload().getFrames()) {
         if (frame instanceof StreamFrame) {
-          if (ctx.getState() != State.Ready) {
+          if (ctx.getState() != State.Done) {
             throw new IllegalStateException("Stream frames can only be handled in ready state");
           }
 

@@ -24,6 +24,7 @@ import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import org.junit.Test;
 
 public class DefaultFlowControlHandlerTest {
@@ -40,7 +41,7 @@ public class DefaultFlowControlHandlerTest {
 
     // blocked on stream limit
     assertFalse(handler.tryConsume(sid, 11, ctx));
-    verify(ctx).send(new StreamDataBlockedFrame(sid, 10));
+    verify(ctx).send(EncryptionLevel.OneRtt, new StreamDataBlockedFrame(sid, 10));
   }
 
   @Test
@@ -50,7 +51,7 @@ public class DefaultFlowControlHandlerTest {
 
     // running out of stream tokens
     assertFalse(handler.tryConsume(sid, 12, ctx));
-    verify(ctx).send(new StreamDataBlockedFrame(sid, 10));
+    verify(ctx).send(EncryptionLevel.OneRtt, new StreamDataBlockedFrame(sid, 10));
 
     // increase stream tokens
     Packet packet = p(new MaxStreamDataFrame(sid, 12));
@@ -63,7 +64,7 @@ public class DefaultFlowControlHandlerTest {
 
     // but not this many
     assertFalse(handler.tryConsume(sid, 13, ctx));
-    verify(ctx).send(new StreamDataBlockedFrame(sid, 12));
+    verify(ctx).send(EncryptionLevel.OneRtt, new StreamDataBlockedFrame(sid, 12));
 
     // must not send any additional data blocked frames until new size
     assertFalse(handler.tryConsume(sid, 13, ctx));
@@ -76,7 +77,7 @@ public class DefaultFlowControlHandlerTest {
 
     // we must now get a new data blocked frame
     assertFalse(handler.tryConsume(sid, 14, ctx));
-    verify(ctx).send(new StreamDataBlockedFrame(sid, 13));
+    verify(ctx).send(EncryptionLevel.OneRtt, new StreamDataBlockedFrame(sid, 13));
   }
 
   @Test
@@ -85,7 +86,7 @@ public class DefaultFlowControlHandlerTest {
     verifyZeroInteractions(ctx);
 
     assertFalse(handler.tryConsume(sid2, 6, ctx));
-    verify(ctx).send(new DataBlockedFrame(15));
+    verify(ctx).send(EncryptionLevel.OneRtt, new DataBlockedFrame(15));
 
     Packet packet = p(new MaxDataFrame(16));
     handler.onReceivePacket(packet, ctx);
@@ -95,7 +96,7 @@ public class DefaultFlowControlHandlerTest {
     verifyZeroInteractions(ctx);
 
     assertFalse(handler.tryConsume(sid2, 7, ctx));
-    verify(ctx).send(new DataBlockedFrame(16));
+    verify(ctx).send(EncryptionLevel.OneRtt, new DataBlockedFrame(16));
 
     // must not send any additional data blocked frames until new size
     assertFalse(handler.tryConsume(sid2, 7, ctx));
@@ -108,7 +109,7 @@ public class DefaultFlowControlHandlerTest {
 
     // we must now get a new data blocked frame
     assertFalse(handler.tryConsume(sid2, 8, ctx));
-    verify(ctx).send(new DataBlockedFrame(17));
+    verify(ctx).send(EncryptionLevel.OneRtt, new DataBlockedFrame(17));
   }
 
   @Test
@@ -120,13 +121,13 @@ public class DefaultFlowControlHandlerTest {
     // going over 50% of the max stream offset, send a new max stream offset
     packet = p(new StreamFrame(sid, 3, false, new byte[3]));
     handler.onReceivePacket(packet, ctx);
-    verify(ctx).send(new MaxStreamDataFrame(sid, 20));
+    verify(ctx).send(EncryptionLevel.OneRtt, new MaxStreamDataFrame(sid, 20));
     verify(ctx).next(packet);
 
     // going over 50% of the max connection offset, send a new max connection offset
     packet = p(new StreamFrame(sid, 6, false, new byte[3]));
     handler.onReceivePacket(packet, ctx);
-    verify(ctx).send(new MaxDataFrame(30));
+    verify(ctx).send(EncryptionLevel.OneRtt, new MaxDataFrame(30));
     verify(ctx).next(packet);
 
     // user more than flow control allow, must close connection

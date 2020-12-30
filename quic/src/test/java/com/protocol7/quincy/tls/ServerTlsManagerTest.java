@@ -3,6 +3,7 @@ package com.protocol7.quincy.tls;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -14,10 +15,16 @@ import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
+import com.protocol7.quincy.protocol.frames.AckFrame;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
+import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.HandshakeDoneFrame;
+import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
@@ -55,20 +62,31 @@ public class ServerTlsManagerTest {
 
     // receive server hello
     final ArgumentCaptor<CryptoFrame> cfCaptor = ArgumentCaptor.forClass(CryptoFrame.class);
-    verify(ctx, times(2)).send(cfCaptor.capture());
-    verify(ctx).setState(State.BeforeReady);
+    verify(ctx, times(2)).send(any(EncryptionLevel.class), cfCaptor.capture());
+    verify(ctx).setState(State.BeforeHandshake);
     verify(ctx).next(chPacket);
 
     clientTlsSession.handleServerHello(cfCaptor.getAllValues().get(0).getCryptoData());
     final ClientTlsSession.HandshakeResult hr =
         clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData()).get();
 
-    when(ctx.getState()).thenReturn(State.BeforeReady);
+    // receive fin, should send handshake done
+    when(ctx.getState()).thenReturn(State.BeforeHandshake);
     final Packet finPacket = hp(hr.getFin());
+    final ShortPacket donePacket = sp(HandshakeDoneFrame.INSTANCE);
+    when(ctx.send(eq(EncryptionLevel.OneRtt), any(Frame.class))).thenReturn(donePacket);
+
     manager.onReceivePacket(finPacket, ctx);
 
-    verify(ctx, times(2)).send(any(CryptoFrame.class)); // no more interactions
-    verify(ctx).setState(State.Ready);
+    verify(ctx, times(2)).send(any(EncryptionLevel.class), any(CryptoFrame.class)); // no more interactions
+    verify(ctx).setState(State.BeforeDone);
+    verify(ctx).next(finPacket);
+
+    // receive ack of handshake done
+    when(ctx.getState()).thenReturn(State.BeforeDone);
+    final ShortPacket ack = sp(new AckFrame(123, new AckRange(donePacket.getPacketNumber(), donePacket.getPacketNumber())));
+    manager.onReceivePacket(ack, ctx);
+    verify(ctx).setState(State.Done);
     verify(ctx).next(finPacket);
 
     // and we're done
@@ -87,5 +105,9 @@ public class ServerTlsManagerTest {
   private HandshakePacket hp(final byte[] b) {
     return HandshakePacket.create(
         empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
+  }
+
+  private ShortPacket sp(final Frame... frames) {
+    return ShortPacket.create(false, empty(), PacketNumber.MIN, frames);
   }
 }

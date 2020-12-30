@@ -9,11 +9,13 @@ import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.FrameType;
+import com.protocol7.quincy.protocol.frames.HandshakeDoneFrame;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
+import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
@@ -104,6 +106,22 @@ public class ClientTlsManager implements InboundHandler {
         throw new IllegalStateException(
             "Got packet in an unexpected state: " + state + " - " + packet);
       }
+    } else if (state == State.BeforeDone) {
+      if (packet instanceof ShortPacket) {
+        final ShortPacket sp = (ShortPacket) packet;
+
+        for (final Frame frame : sp.getPayload().getFrames()) {
+          if (frame instanceof HandshakeDoneFrame) {
+            System.out.println("Got handshake done");
+
+            ctx.setState(State.Done);
+            promise.setSuccess(null);
+          }
+        }
+
+
+
+      }
     }
 
     ctx.next(packet);
@@ -121,13 +139,13 @@ public class ClientTlsManager implements InboundHandler {
         if (result.isPresent()) {
           tlsSession.unsetInitialAead();
 
-          ctx.send(new CryptoFrame(0, result.get().getFin()));
+          ctx.send(EncryptionLevel.Handshake, new CryptoFrame(0, result.get().getFin()));
 
           tlsSession.setOneRttAead(result.get().getOneRttAead());
 
           // tlsSession.unsetHandshakeAead(); TODO
-          ctx.setState(State.Ready);
-          promise.setSuccess(null);
+          ctx.setState(State.BeforeDone);
+
         }
       }
     }
@@ -139,7 +157,7 @@ public class ClientTlsManager implements InboundHandler {
     final CryptoFrame clientHello =
         new CryptoFrame(0, tlsSession.startHandshake(initialConnectionId.asBytes()));
     len -= clientHello.calculateLength();
-    frameSender.send(clientHello, new PaddingFrame(len));
+    frameSender.send(EncryptionLevel.Initial, clientHello, new PaddingFrame(len));
   }
 
   public boolean available(final EncryptionLevel encLevel) {

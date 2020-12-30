@@ -123,8 +123,8 @@ public class ClientServerConnectionTest {
 
     sleep();
 
-    assertEquals(State.Ready, clientConnection.getState());
-    assertEquals(State.Ready, serverConnection.getState());
+    assertEquals(State.Done, clientConnection.getState());
+    assertEquals(State.Done, serverConnection.getState());
   }
 
   @Test

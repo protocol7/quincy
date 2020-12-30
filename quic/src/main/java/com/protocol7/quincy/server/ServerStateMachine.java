@@ -6,6 +6,7 @@ import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -40,7 +41,7 @@ public class ServerStateMachine {
   }
 
   public void closeImmediate(final ConnectionCloseFrame ccf) {
-    connection.send(ccf);
+    connection.send(EncryptionLevel.OneRtt, ccf);
 
     state = State.Closing;
 

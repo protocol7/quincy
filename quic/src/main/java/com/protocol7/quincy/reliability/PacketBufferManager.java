@@ -73,7 +73,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
   public void resend() {
     final Collection<Frame> toResend = buffer.drainSince(1000, MILLISECONDS);
-    toResend.stream().forEach(frameSender::send);
+    toResend.stream().forEach(f -> frameSender.send(EncryptionLevel.OneRtt, f));
   }
 
   @Override
@@ -142,9 +142,10 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private boolean shouldFlush(final Packet packet) {
-    if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
-      return false;
-    } else if (packet instanceof FullPacket && acksOnly((FullPacket) packet)) {
+    //if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
+    //  return true;
+    // } else
+    if (packet instanceof FullPacket && acksOnly((FullPacket) packet)) {
       return false;
     } else {
       return true;
@@ -191,12 +192,14 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private void flushAcks(final EncryptionLevel level, final FrameSender sender) {
+    System.out.println("Flushing acks at " + level);
+
     final Pair<List<AckRange>, Long> drained = drainAcks(level);
     final List<AckRange> ranges = drained.getFirst();
     if (!ranges.isEmpty()) {
       final long delay = ackDelay.calculate(drained.getSecond(), NANOSECONDS);
       final AckFrame ackFrame = new AckFrame(delay, ranges);
-      sender.send(ackFrame);
+      sender.send(level, ackFrame);
 
       log.debug("Flushed acks {}", ranges);
     }

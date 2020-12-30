@@ -4,6 +4,7 @@ import static java.util.Optional.of;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
@@ -18,6 +19,7 @@ import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
+import com.protocol7.quincy.tls.EncryptionLevel;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,8 +40,8 @@ public class DefaultStreamManagerTest {
 
   @Before
   public void setUp() {
-    when(ctx.send(any(Frame.class))).thenReturn(packet);
-    when(ctx.getState()).thenReturn(State.Ready);
+    when(ctx.send(any(EncryptionLevel.class), any(Frame.class))).thenReturn(packet);
+    when(ctx.getState()).thenReturn(State.Done);
     when(packet.getPacketNumber()).thenReturn(456L);
 
     manager = new DefaultStreamManager(ctx, listener);
@@ -50,7 +52,7 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, true);
-    verify(ctx).send(new StreamFrame(stream.getId(), 0, true, DATA1));
+    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, true, DATA1)));
 
     assertTrue(stream.isFinished());
   }
@@ -60,12 +62,12 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
+    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
 
     assertFalse(stream.isFinished());
 
     stream.write(DATA2, true);
-    verify(ctx).send(new StreamFrame(stream.getId(), DATA1.length, true, DATA2));
+    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)));
 
     assertTrue(stream.isFinished());
   }
@@ -75,11 +77,11 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(ctx).send(new StreamFrame(stream.getId(), 0, false, DATA1));
+    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
 
     stream.reset(123);
 
-    verify(ctx).send(new ResetStreamFrame(stream.getId(), 123, DATA1.length));
+    verify(ctx).send(any(EncryptionLevel.class), eq(new ResetStreamFrame(stream.getId(), 123, DATA1.length)));
 
     assertTrue(stream.isFinished());
   }
@@ -138,7 +140,7 @@ public class DefaultStreamManagerTest {
 
   @Test(expected = IllegalStateException.class)
   public void receiveInInvalidState() {
-    when(ctx.getState()).thenReturn(State.BeforeReady);
+    when(ctx.getState()).thenReturn(State.BeforeHandshake);
     manager.onReceivePacket(p(new StreamFrame(0, 0, false, DATA1)), ctx);
   }
 

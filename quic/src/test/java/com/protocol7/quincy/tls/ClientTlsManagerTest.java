@@ -15,9 +15,12 @@ import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
+import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.HandshakeDoneFrame;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
+import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
@@ -32,12 +35,12 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ClientTlsManagerTest {
 
-  private ConnectionId connectionId = ConnectionId.random();
-  private TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
-  private ClientTlsManager manager =
+  private final ConnectionId connectionId = ConnectionId.random();
+  private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
+  private final ClientTlsManager manager =
       new ClientTlsManager(connectionId, tps, new NoopCertificateValidator());
 
-  private ServerTlsSession serverTlsSession =
+  private final ServerTlsSession serverTlsSession =
       new ServerTlsSession(
           InitialAEAD.create(connectionId.asBytes(), false),
           tps,
@@ -55,7 +58,7 @@ public class ClientTlsManagerTest {
 
     final ArgumentCaptor<CryptoFrame> chFrame = ArgumentCaptor.forClass(CryptoFrame.class);
 
-    verify(sender).send(chFrame.capture(), any(PaddingFrame.class));
+    verify(sender).send(any(EncryptionLevel.class), chFrame.capture(), any(PaddingFrame.class));
     verify(stateSetter).accept(State.BeforeHello);
 
     final byte[] ch = chFrame.getValue().getCryptoData();
@@ -67,7 +70,7 @@ public class ClientTlsManagerTest {
     when(ctx.getState()).thenReturn(State.BeforeHello);
     manager.onReceivePacket(shPacket, ctx);
 
-    verify(ctx, never()).send(any(CryptoFrame.class));
+    verify(ctx, never()).send(any(EncryptionLevel.class), any(CryptoFrame.class));
     verify(ctx).setState(State.BeforeHandshake);
     verify(ctx).next(shPacket);
 
@@ -76,9 +79,17 @@ public class ClientTlsManagerTest {
     when(ctx.getState()).thenReturn(State.BeforeHandshake);
     manager.onReceivePacket(handshakePacket, ctx);
 
-    verify(ctx).send(any(CryptoFrame.class));
-    verify(ctx).setState(State.Ready);
+    verify(ctx).send(any(EncryptionLevel.class), any(CryptoFrame.class));
+    verify(ctx).setState(State.BeforeDone);
     verify(ctx).next(handshakePacket);
+
+    // receive handshake done
+    final ShortPacket hd = sp(HandshakeDoneFrame.INSTANCE);
+    when(ctx.getState()).thenReturn(State.BeforeDone);
+    manager.onReceivePacket(hd, ctx);
+
+    verify(ctx).setState(State.Done);
+    verify(ctx).next(hd);
 
     // and we're done
   }
@@ -91,5 +102,9 @@ public class ClientTlsManagerTest {
   private HandshakePacket hp(final byte[] b) {
     return HandshakePacket.create(
         empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
+  }
+
+  private ShortPacket sp(final Frame... frames) {
+    return ShortPacket.create(false, empty(), PacketNumber.MIN, frames);
   }
 }

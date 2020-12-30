@@ -44,7 +44,7 @@ public class ServerTest {
   private final ConnectionId srcConnectionId = ConnectionId.random();
   private ServerConnection connection;
   private long packetNumber = 0;
-  private final long streamId = StreamId.random(true, true);
+  private final long streamId = StreamId.next(-1, true, true);
 
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
@@ -118,7 +118,11 @@ public class ServerTest {
 
     connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, hr.getFin())));
 
-    assertEquals(State.Ready, connection.getState());
+    final ShortPacket serverDone = (ShortPacket) captureSentPacket(5);
+
+    connection.onPacket(ShortPacket.create(false, Optional.of(destConnectionId2), nextPacketNumber(), new AckFrame(123, new AckRange(serverDone.getPacketNumber(), serverDone.getPacketNumber()))));
+
+    assertEquals(State.Done, connection.getState());
   }
 
   @Test
@@ -143,7 +147,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));
 
-    assertAck(4, 3, 4, 4);
+    assertAck(7, 6, 4, 5);
   }
 
   private void assertAck(

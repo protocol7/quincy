@@ -9,7 +9,7 @@ public class Streams {
 
   private final FrameSender frameSender;
   private final Map<Long, DefaultStream> streams = new ConcurrentHashMap<>();
-  private long maxId = 0;
+  private long maxId = -1;
 
   public Streams(final FrameSender frameSender) {
     this.frameSender = frameSender;

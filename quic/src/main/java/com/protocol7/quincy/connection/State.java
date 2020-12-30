@@ -4,8 +4,8 @@ public enum State {
   Started,
   BeforeHello,
   BeforeHandshake,
-  BeforeReady,
-  Ready,
+  BeforeDone,
+  Done,
   Closing,
   Closed
 }
