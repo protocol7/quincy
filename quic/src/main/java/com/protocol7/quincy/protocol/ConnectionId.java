@@ -3,7 +3,6 @@ package com.protocol7.quincy.protocol;
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.protocol7.quincy.utils.Hex;
-import com.protocol7.quincy.utils.Pair;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
@@ -21,37 +20,28 @@ public class ConnectionId {
     return new ConnectionId(id);
   }
 
-  public static ConnectionId read(final int length, final ByteBuf bb) {
-    final byte[] id = new byte[length];
-    bb.readBytes(id);
-    return new ConnectionId(id);
-  }
-
-  public static Optional<ConnectionId> readOptional(final int length, final ByteBuf bb) {
+  public static Optional<ConnectionId> read(final int length, final ByteBuf bb) {
     if (length > 0) {
-      return Optional.of(read(length, bb));
+      final byte[] id = new byte[length];
+      bb.readBytes(id);
+      return Optional.of(new ConnectionId(id));
     } else {
       return Optional.empty();
     }
   }
 
-  public static Pair<Optional<ConnectionId>, Optional<ConnectionId>> readPair(final ByteBuf bb) {
-    final int dcil = bb.readByte() & 0xFF;
-    final Optional<ConnectionId> did = readOptional(dcil, bb);
-    final int scil = bb.readByte() & 0xFF;
-    final Optional<ConnectionId> sid = readOptional(scil, bb);
-
-    return Pair.of(did, sid);
+  /**
+    Read connection id prefixed by its length from buffer
+   */
+  public static Optional<ConnectionId> read(final ByteBuf bb) {
+    final int len = bb.readByte() & 0xFF;
+    return read(len, bb);
   }
 
-  public static void write(
-      final Optional<ConnectionId> first, final Optional<ConnectionId> second, final ByteBuf bb) {
-    write(first, bb);
-    write(second, bb);
-  }
-
+  /**
+   * Write connection ID prefixed by its length to buffer. Write 0 length if connection ID not available.
+   */
   public static void write(final Optional<ConnectionId> connectionId, final ByteBuf bb) {
-
     if (connectionId.isPresent()) {
       bb.writeByte(connectionId.get().getLength());
       connectionId.get().write(bb);

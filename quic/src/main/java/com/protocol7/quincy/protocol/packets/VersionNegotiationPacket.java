@@ -28,10 +28,8 @@ public class VersionNegotiationPacket implements Packet {
       throw new IllegalArgumentException("Invalid version");
     }
 
-    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
-
-    final Optional<ConnectionId> destConnId = cids.getFirst();
-    final Optional<ConnectionId> srcConnId = cids.getSecond();
+    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
+    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
 
     final List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
@@ -92,7 +90,8 @@ public class VersionNegotiationPacket implements Packet {
 
     Version.VERSION_NEGOTIATION.write(bb);
 
-    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
+    ConnectionId.write(destinationConnectionId, bb);
+    ConnectionId.write(sourceConnectionId, bb);
 
     for (final Version version : supportedVersions) {
       version.write(bb);

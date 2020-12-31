@@ -25,10 +25,8 @@ public class RetryPacket implements Packet {
 
     final Version version = Version.read(bb);
 
-    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
-
-    final Optional<ConnectionId> destConnId = cids.getFirst();
-    final Optional<ConnectionId> srcConnId = cids.getSecond();
+    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
+    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
 
     final byte[] retryToken = new byte[bb.readableBytes() - 16];
     bb.readBytes(retryToken);
@@ -98,7 +96,8 @@ public class RetryPacket implements Packet {
 
     version.write(bb);
 
-    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
+    ConnectionId.write(destinationConnectionId, bb);
+    ConnectionId.write(sourceConnectionId, bb);
 
     bb.writeBytes(retryToken);
 
@@ -137,7 +136,8 @@ public class RetryPacket implements Packet {
 
     version.write(bb);
 
-    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
+    ConnectionId.write(destinationConnectionId, bb);
+    ConnectionId.write(sourceConnectionId, bb);
 
     bb.writeBytes(retryToken);
 

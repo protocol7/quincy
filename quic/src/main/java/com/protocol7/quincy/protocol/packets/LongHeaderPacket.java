@@ -100,7 +100,8 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     version.write(bb);
 
-    ConnectionId.write(destinationConnectionId, sourceConnectionId, bb);
+    ConnectionId.write(destinationConnectionId, bb);
+    ConnectionId.write(sourceConnectionId, bb);
 
     tokenWriter.accept(bb);
 

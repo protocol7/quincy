@@ -30,12 +30,7 @@ public class ShortPacket implements FullPacket {
 
     final boolean keyPhase = (firstByte & 0x4) == 0x4;
 
-    final Optional<ConnectionId> connId;
-    if (connIdLength > 0) {
-      connId = Optional.of(ConnectionId.read(connIdLength, bb));
-    } else {
-      connId = Optional.empty();
-    }
+    final Optional<ConnectionId> connId = ConnectionId.read(connIdLength, bb);
 
     return new HalfParsedPacket<>() {
       @Override

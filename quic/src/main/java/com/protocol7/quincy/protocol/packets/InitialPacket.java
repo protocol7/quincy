@@ -47,10 +47,8 @@ public class InitialPacket extends LongHeaderPacket {
 
     final Version version = Version.read(bb);
 
-    final Pair<Optional<ConnectionId>, Optional<ConnectionId>> cids = ConnectionId.readPair(bb);
-
-    final Optional<ConnectionId> destConnId = cids.getFirst();
-    final Optional<ConnectionId> srcConnId = cids.getSecond();
+    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
+    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
 
     final int tokenLength = Varint.readAsInt(bb);
 

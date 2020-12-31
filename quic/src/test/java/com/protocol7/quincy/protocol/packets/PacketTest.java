@@ -57,7 +57,8 @@ public class PacketTest {
     final int b = (0b10000000 | PacketType.Initial.getType() << 4) & 0xFF;
     bb.writeByte(b);
     Version.VERSION_NEGOTIATION.write(bb);
-    ConnectionId.write(empty(), empty(), bb);
+    ConnectionId.write(empty(), bb);
+    ConnectionId.write(empty(), bb);
     Version.DRAFT_29.write(bb);
 
     final Packet parsed = Packet.parse(bb, connId.getLength()).complete(l -> aead);
