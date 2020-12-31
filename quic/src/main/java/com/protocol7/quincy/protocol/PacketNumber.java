@@ -1,7 +1,6 @@
 package com.protocol7.quincy.protocol;
 
 import com.google.common.base.Preconditions;
-import com.google.common.primitives.Ints;
 import com.protocol7.quincy.Varint;
 import com.protocol7.quincy.utils.Bytes;
 
@@ -11,10 +10,10 @@ public class PacketNumber {
     final byte[] pad = new byte[4 - b.length];
     final byte[] bs = Bytes.concat(pad, b);
 
-    return Ints.fromByteArray(bs);
+    return bs[0] << 24 | (bs[1] & 0xFF) << 16 | (bs[2] & 0xFF) << 8 | (bs[3] & 0xFF);
   }
 
-  public static final long MIN = 0;
+  public static final long MIN = Varint.MIN;
 
   public static long validate(final long number) {
     Preconditions.checkArgument(number >= 0);

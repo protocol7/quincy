@@ -100,7 +100,7 @@ public class ServerTest {
 
     final ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId().get();
 
-    assertEquals(1, serverHello.getPacketNumber());
+    assertEquals(0, serverHello.getPacketNumber());
     assertFalse(serverHello.getToken().isPresent());
     assertEquals(1, serverHello.getPayload().getFrames().size());
     final CryptoFrame cf = (CryptoFrame) serverHello.getPayload().getFrames().get(0);
@@ -110,7 +110,7 @@ public class ServerTest {
     final HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
     assertEquals(srcConnectionId, handshake.getDestinationConnectionId().get());
     assertEquals(newSourceConnectionId, handshake.getSourceConnectionId().get());
-    assertEquals(2, handshake.getPacketNumber());
+    assertEquals(1, handshake.getPacketNumber());
     assertEquals(1, handshake.getPayload().getFrames().size());
     final CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
 
@@ -153,7 +153,7 @@ public class ServerTest {
 
     connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));
 
-    assertAck(7, 6, 4, 5);
+    assertAck(7, 5, 4, 5);
   }
 
   private void assertAck(

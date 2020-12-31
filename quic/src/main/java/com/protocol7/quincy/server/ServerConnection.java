@@ -47,7 +47,7 @@ public class ServerConnection implements InternalConnection {
   private final Optional<ConnectionId> localConnectionId;
   private final PacketSender packetSender;
   private final Version version;
-  private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(PacketNumber.MIN);
+  private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(-1L);
   private final ServerStateMachine stateMachine;
 
   private final ServerTLSManager tlsManager;

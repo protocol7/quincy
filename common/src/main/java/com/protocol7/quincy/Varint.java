@@ -8,6 +8,7 @@ import java.util.Arrays;
 
 public class Varint {
 
+  public static final long MIN = 0L;
   public static final long MAX = 4611686018427387903L;
 
   public static long random() {
