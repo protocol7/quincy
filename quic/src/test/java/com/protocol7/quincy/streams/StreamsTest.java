@@ -38,7 +38,8 @@ public class StreamsTest {
     assertSame(stream1, stream2);
 
     // pick a different stream ID
-    final DefaultStream stream3 = streams.getOrCreate(StreamId.next(streamId, true, true), listener);
+    final DefaultStream stream3 =
+        streams.getOrCreate(StreamId.next(streamId, true, true), listener);
     assertNotSame(stream1, stream3);
   }
 }

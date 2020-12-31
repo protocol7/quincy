@@ -26,7 +26,8 @@ public class ResetStreamFrame extends Frame {
   private final int applicationErrorCode;
   private final long finalSize;
 
-  public ResetStreamFrame(final long streamId, final int applicationErrorCode, final long finalSize) {
+  public ResetStreamFrame(
+      final long streamId, final int applicationErrorCode, final long finalSize) {
     super(FrameType.RESET_STREAM);
 
     requireNonNull(streamId);

@@ -13,7 +13,6 @@ import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.tls.EncryptionLevel;
-
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

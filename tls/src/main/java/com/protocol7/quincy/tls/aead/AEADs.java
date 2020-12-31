@@ -38,7 +38,7 @@ public class AEADs {
         throw new IllegalStateException("Initial AEAD not set");
       }
 
-      //log.debug("Using initial AEAD: {}", aead);
+      // log.debug("Using initial AEAD: {}", aead);
       return aead;
     } else if (level == EncryptionLevel.Handshake) {
       final AEAD aead = handshakeAead.get();
@@ -46,7 +46,7 @@ public class AEADs {
         throw new IllegalStateException("Handshake AEAD not set");
       }
 
-      //log.debug("Using handshake AEAD: {}", aead);
+      // log.debug("Using handshake AEAD: {}", aead);
       return aead;
     } else {
       final AEAD aead = oneRttAead.get();
@@ -54,7 +54,7 @@ public class AEADs {
         throw new IllegalStateException("1-RTT AEAD not set");
       }
 
-      //log.debug("Using 1-RTT AEAD: {}", aead);
+      // log.debug("Using 1-RTT AEAD: {}", aead);
       return aead;
     }
   }

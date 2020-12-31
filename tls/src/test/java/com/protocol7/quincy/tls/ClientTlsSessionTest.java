@@ -71,7 +71,10 @@ public class ClientTlsSessionTest {
 
     final TransportParameters tps =
         (TransportParameters) hello.getExtension(ExtensionType.QUIC).get();
-    final TransportParameters expectedTp = TransportParameters.newBuilder(TestUtil.tps()).withInitialSourceConnectionId(connectionId).build();
+    final TransportParameters expectedTp =
+        TransportParameters.newBuilder(TestUtil.tps())
+            .withInitialSourceConnectionId(connectionId)
+            .build();
     assertEquals(expectedTp, tps);
   }
 

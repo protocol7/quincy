@@ -173,12 +173,8 @@ public class ClientTest {
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
 
     connection.onPacket(
-            ShortPacket.create(
-                    false,
-                    Optional.of(srcConnectionId),
-                    nextPacketNumber(),
-                    HandshakeDoneFrame.INSTANCE));
-
+        ShortPacket.create(
+            false, Optional.of(srcConnectionId), nextPacketNumber(), HandshakeDoneFrame.INSTANCE));
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());

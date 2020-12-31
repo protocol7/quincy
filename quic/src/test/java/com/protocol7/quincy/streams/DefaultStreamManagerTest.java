@@ -52,7 +52,8 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, true);
-    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, true, DATA1)));
+    verify(ctx)
+        .send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, true, DATA1)));
 
     assertTrue(stream.isFinished());
   }
@@ -62,12 +63,16 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
+    verify(ctx)
+        .send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
 
     assertFalse(stream.isFinished());
 
     stream.write(DATA2, true);
-    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)));
+    verify(ctx)
+        .send(
+            any(EncryptionLevel.class),
+            eq(new StreamFrame(stream.getId(), DATA1.length, true, DATA2)));
 
     assertTrue(stream.isFinished());
   }
@@ -77,11 +82,15 @@ public class DefaultStreamManagerTest {
     final Stream stream = manager.openStream(true, true);
 
     stream.write(DATA1, false);
-    verify(ctx).send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
+    verify(ctx)
+        .send(any(EncryptionLevel.class), eq(new StreamFrame(stream.getId(), 0, false, DATA1)));
 
     stream.reset(123);
 
-    verify(ctx).send(any(EncryptionLevel.class), eq(new ResetStreamFrame(stream.getId(), 123, DATA1.length)));
+    verify(ctx)
+        .send(
+            any(EncryptionLevel.class),
+            eq(new ResetStreamFrame(stream.getId(), 123, DATA1.length)));
 
     assertTrue(stream.isFinished());
   }

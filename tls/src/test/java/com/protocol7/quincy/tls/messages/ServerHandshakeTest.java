@@ -4,7 +4,6 @@ import static com.protocol7.quincy.tls.TestUtil.assertHex;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
-import com.protocol7.quincy.tls.extensions.TransportParameters;
 import com.protocol7.quincy.tls.messages.ServerHandshake.EncryptedExtensions;
 import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificate;
 import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificateVerify;

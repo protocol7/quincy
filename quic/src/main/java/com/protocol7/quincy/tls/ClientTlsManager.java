@@ -118,9 +118,6 @@ public class ClientTlsManager implements InboundHandler {
             promise.setSuccess(null);
           }
         }
-
-
-
       }
     }
 
@@ -145,7 +142,6 @@ public class ClientTlsManager implements InboundHandler {
 
           // tlsSession.unsetHandshakeAead(); TODO
           ctx.setState(State.BeforeDone);
-
         }
       }
     }

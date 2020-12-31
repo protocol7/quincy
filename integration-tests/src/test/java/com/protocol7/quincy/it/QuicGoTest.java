@@ -15,7 +15,6 @@ import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
 import java.net.InetSocketAddress;
 import java.util.List;
-
 import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;

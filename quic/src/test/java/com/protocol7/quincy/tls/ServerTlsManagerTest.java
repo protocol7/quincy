@@ -20,7 +20,6 @@ import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.HandshakeDoneFrame;
-import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
@@ -78,13 +77,17 @@ public class ServerTlsManagerTest {
 
     manager.onReceivePacket(finPacket, ctx);
 
-    verify(ctx, times(2)).send(any(EncryptionLevel.class), any(CryptoFrame.class)); // no more interactions
+    verify(ctx, times(2))
+        .send(any(EncryptionLevel.class), any(CryptoFrame.class)); // no more interactions
     verify(ctx).setState(State.BeforeDone);
     verify(ctx).next(finPacket);
 
     // receive ack of handshake done
     when(ctx.getState()).thenReturn(State.BeforeDone);
-    final ShortPacket ack = sp(new AckFrame(123, new AckRange(donePacket.getPacketNumber(), donePacket.getPacketNumber())));
+    final ShortPacket ack =
+        sp(
+            new AckFrame(
+                123, new AckRange(donePacket.getPacketNumber(), donePacket.getPacketNumber())));
     manager.onReceivePacket(ack, ctx);
     verify(ctx).setState(State.Done);
     verify(ctx).next(finPacket);

@@ -4,7 +4,6 @@ import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;

@@ -43,7 +43,7 @@ public class ClientRunner {
 
                       final QuicPacket qp = (QuicPacket) msg;
 
-                        final byte[] b = Bytes.drainToArray(qp.content());
+                      final byte[] b = Bytes.drainToArray(qp.content());
 
                       System.out.println(new String(b));
 

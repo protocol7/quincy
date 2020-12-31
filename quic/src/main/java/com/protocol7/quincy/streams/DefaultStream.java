@@ -7,7 +7,6 @@ import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.tls.EncryptionLevel;
-
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;

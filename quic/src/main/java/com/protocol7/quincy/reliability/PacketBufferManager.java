@@ -10,8 +10,8 @@ import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.OutboundHandler;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.AckFrame;
+import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.packets.*;
 import com.protocol7.quincy.reliability.AckQueue.Entry;
@@ -142,7 +142,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private boolean shouldFlush(final Packet packet) {
-    //if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
+    // if (packet instanceof InitialPacket || packet instanceof HandshakePacket) {
     //  return true;
     // } else
     if (packet instanceof FullPacket && acksOnly((FullPacket) packet)) {

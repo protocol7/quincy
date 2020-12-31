@@ -120,7 +120,13 @@ public class ServerTest {
 
     final ShortPacket serverDone = (ShortPacket) captureSentPacket(5);
 
-    connection.onPacket(ShortPacket.create(false, Optional.of(destConnectionId2), nextPacketNumber(), new AckFrame(123, new AckRange(serverDone.getPacketNumber(), serverDone.getPacketNumber()))));
+    connection.onPacket(
+        ShortPacket.create(
+            false,
+            Optional.of(destConnectionId2),
+            nextPacketNumber(),
+            new AckFrame(
+                123, new AckRange(serverDone.getPacketNumber(), serverDone.getPacketNumber()))));
 
     assertEquals(State.Done, connection.getState());
   }
