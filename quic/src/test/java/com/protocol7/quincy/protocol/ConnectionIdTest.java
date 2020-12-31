@@ -5,8 +5,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
@@ -71,9 +69,6 @@ public class ConnectionIdTest {
     ConnectionId.write(Optional.empty(), bb);
 
     assertEquals(Optional.empty(), ConnectionId.read(bb));
-  }
-
-  private void assertRoundtrip(final ConnectionId connectionId) {
   }
 
   @Test

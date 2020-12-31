@@ -19,6 +19,8 @@ public class HandshakePacketTest {
   private final ConnectionId destConnId = ConnectionId.random();
   private final ConnectionId srcConnId = ConnectionId.random();
 
+  private final int paddingLength = 6;
+
   private final AEAD aead = TestAEAD.create();
 
   @Test
@@ -35,7 +37,7 @@ public class HandshakePacketTest {
     assertEquals(srcConnId, parsed.getSourceConnectionId().get());
     assertEquals(PacketNumber.MIN, parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
-    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
+    assertEquals(paddingLength + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PaddingFrame);
   }
 
@@ -61,6 +63,10 @@ public class HandshakePacketTest {
 
   private HandshakePacket p(final long pn) {
     return HandshakePacket.create(
-        Optional.of(destConnId), Optional.of(srcConnId), pn, Version.DRAFT_29, new PaddingFrame(1));
+        Optional.of(destConnId),
+        Optional.of(srcConnId),
+        pn,
+        Version.DRAFT_29,
+        new PaddingFrame(paddingLength));
   }
 }

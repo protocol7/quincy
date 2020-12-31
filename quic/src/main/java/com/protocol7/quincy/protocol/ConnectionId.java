@@ -30,16 +30,15 @@ public class ConnectionId {
     }
   }
 
-  /**
-    Read connection id prefixed by its length from buffer
-   */
+  /** Read connection id prefixed by its length from buffer */
   public static Optional<ConnectionId> read(final ByteBuf bb) {
     final int len = bb.readByte() & 0xFF;
     return read(len, bb);
   }
 
   /**
-   * Write connection ID prefixed by its length to buffer. Write 0 length if connection ID not available.
+   * Write connection ID prefixed by its length to buffer. Write 0 length if connection ID not
+   * available.
    */
   public static void write(final Optional<ConnectionId> connectionId, final ByteBuf bb) {
     if (connectionId.isPresent()) {

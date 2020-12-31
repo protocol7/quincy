@@ -94,8 +94,8 @@ public abstract class LongHeaderPacket implements FullPacket {
     int b = (PACKET_TYPE_MASK | packetType.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
 
-    final int pnLen = PacketNumber.getLength(packetNumber);
-    b = (byte) (b | (pnLen - 1)); // pn length
+    final byte[] pn = PacketNumber.write(packetNumber);
+    b = (byte) (b | (pn.length - 1)); // pn length
     bb.writeByte(b);
 
     version.write(bb);
@@ -105,12 +105,13 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     tokenWriter.accept(bb);
 
-    final byte[] pn = PacketNumber.write(packetNumber, PacketNumber.getLength(packetNumber));
-
-    Varint.write(payload.calculateLength() + pn.length, bb);
+    final int payloadLength = payload.calculateLength();
+    final int length = payloadLength + pn.length;
+    Varint.write(length, bb);
 
     final int pnOffset = bb.writerIndex();
-    final int sampleOffset = pnOffset + 4;
+    // sampling assumes a fixed 4 byte PN length
+    final int sampleOffset = bb.writerIndex() + 4;
 
     bb.writeBytes(pn);
 
@@ -119,7 +120,15 @@ public abstract class LongHeaderPacket implements FullPacket {
 
     payload.write(bb, aead, packetNumber, aad);
 
-    final byte[] sample = new byte[aead.getSampleLength()];
+    final int sampleLength = aead.getSampleLength();
+
+    // sampling assumes a fixed 4 byte PN length
+    if (payloadLength + 4 < sampleLength) {
+      throw new IllegalArgumentException("Packet too short to sample");
+    }
+
+    final byte[] sample = new byte[sampleLength];
+
     bb.getBytes(sampleOffset, sample);
 
     final byte firstBýte = bb.getByte(bbOffset);

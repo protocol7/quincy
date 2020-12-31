@@ -8,7 +8,6 @@ import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.AEADProvider;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Opt;
-import com.protocol7.quincy.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -79,10 +78,17 @@ public class InitialPacket extends LongHeaderPacket {
         final AEAD aead = aeadProvider.get(EncryptionLevel.Initial);
 
         final int pnOffset = bb.readerIndex();
+        // sampling assumes a fixed 4 byte PN length
         final int sampleOffset = pnOffset + 4;
 
-        final byte[] sample = new byte[aead.getSampleLength()];
+        final int sampleLength = aead.getSampleLength();
 
+        // sampling assumes a fixed 4 byte PN length
+        if (length + 4 < sampleLength) {
+          throw new IllegalArgumentException("Packet too short to sample");
+        }
+
+        final byte[] sample = new byte[sampleLength];
         bb.getBytes(sampleOffset, sample);
 
         // get 4 bytes for PN. Might be too long, but we'll handle that below

@@ -2,18 +2,23 @@ package com.protocol7.quincy.protocol;
 
 import com.google.common.base.Preconditions;
 import com.protocol7.quincy.Varint;
-import com.protocol7.quincy.utils.Bytes;
 
 public class PacketNumber {
 
   public static long parse(final byte[] b) {
-    final byte[] pad = new byte[4 - b.length];
-    final byte[] bs = Bytes.concat(pad, b);
+    if (b.length < 1 || b.length > 4) {
+      throw new IllegalArgumentException("Invalid packet buffer length");
+    }
 
-    return bs[0] << 24 | (bs[1] & 0xFF) << 16 | (bs[2] & 0xFF) << 8 | (bs[3] & 0xFF);
+    long number = 0;
+    for (int i = 0; i < b.length; i++) {
+      number = number << 8 | (b[i] & 0xFF);
+    }
+    return number;
   }
 
-  public static final long MIN = Varint.MIN;
+  public static final long MIN = 0;
+  public static final long MAX = 0xFFFFFFFFL;
 
   public static long validate(final long number) {
     Preconditions.checkArgument(number >= 0);
@@ -25,11 +30,28 @@ public class PacketNumber {
     return number + 1;
   }
 
-  public static int getLength(final long number) {
-    return 4; // TODO
+  private static int getLength(final long number) {
+    if (number < MIN) {
+      throw new IllegalArgumentException("number too small");
+    } else if (number <= 0xFF) {
+      return 1;
+    } else if (number <= 0xFFFF) {
+      return 2;
+    } else if (number <= 0xFFFFFF) {
+      return 3;
+    } else if (number <= 0xFFFFFFFFL) {
+      return 4;
+    } else {
+      throw new IllegalArgumentException("number too large");
+    }
   }
 
-  public static byte[] write(final long number, final int length) {
+  public static byte[] write(final long number) {
+    if (number < MIN || number > MAX) {
+      throw new IllegalArgumentException("Invalid number");
+    }
+
+    final int length = getLength(number);
     final byte[] b = new byte[length];
     for (int j = length; j > 0; j--) {
       b[length - j] = (byte) ((number >> (8 * (j - 1))) & 0xFF);

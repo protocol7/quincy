@@ -57,7 +57,7 @@ public class PacketRouterTest {
   public void route() {
     final InitialPacket packet =
         InitialPacket.create(
-            of(destConnId), empty(), 2, Version.DRAFT_29, empty(), new PaddingFrame(1));
+            of(destConnId), empty(), 2, Version.DRAFT_29, empty(), new PaddingFrame(6));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
@@ -78,7 +78,7 @@ public class PacketRouterTest {
   public void versionMismatch() {
     final InitialPacket packet =
         InitialPacket.create(
-            of(destConnId), empty(), 2, Version.FINAL, empty(), new PaddingFrame(1));
+            of(destConnId), empty(), 2, Version.FINAL, empty(), new PaddingFrame(6));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);

@@ -37,6 +37,7 @@ public class InitialPacketTest {
   private final ConnectionId destConnId = ConnectionId.random();
   private final ConnectionId srcConnId = ConnectionId.random();
   private final byte[] token = Rnd.rndBytes(16);
+  final int paddingLength = 6;
 
   private final AEAD aead = TestAEAD.create();
 
@@ -80,7 +81,7 @@ public class InitialPacketTest {
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertArrayEquals(token, parsed.getToken().get());
-    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
+    assertEquals(paddingLength + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PaddingFrame);
   }
 
@@ -117,7 +118,7 @@ public class InitialPacketTest {
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertFalse(parsed.getToken().isPresent());
-    assertEquals(1 + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
+    assertEquals(paddingLength + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
     assertTrue(parsed.getPayload().getFrames().get(0) instanceof PaddingFrame);
   }
 
@@ -165,6 +166,6 @@ public class InitialPacketTest {
         pn,
         Version.DRAFT_29,
         token,
-        List.of(new PaddingFrame(1)));
+        List.of(new PaddingFrame(paddingLength)));
   }
 }

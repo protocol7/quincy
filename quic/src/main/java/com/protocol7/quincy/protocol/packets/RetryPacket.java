@@ -8,7 +8,6 @@ import com.protocol7.quincy.tls.aead.RetryTokenIntegrityTagAEAD;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Hex;
 import com.protocol7.quincy.utils.Opt;
-import com.protocol7.quincy.utils.Pair;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.GeneralSecurityException;

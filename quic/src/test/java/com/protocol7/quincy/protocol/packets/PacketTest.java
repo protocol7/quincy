@@ -29,7 +29,7 @@ public class PacketTest {
             pn,
             Version.DRAFT_29,
             empty(),
-            new PaddingFrame(1));
+            new PaddingFrame(6));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -69,7 +69,7 @@ public class PacketTest {
   public void parseHandshakePacket() {
     final HandshakePacket packet =
         HandshakePacket.create(
-            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_29, new PaddingFrame(1));
+            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_29, new PaddingFrame(6));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

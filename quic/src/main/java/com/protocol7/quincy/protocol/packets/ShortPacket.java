@@ -138,9 +138,9 @@ public class ShortPacket implements FullPacket {
     // TODO spin bit
     // TODO reserved bits
 
-    final int pnLen = PacketNumber.getLength(packetNumber);
+    final byte[] pn = PacketNumber.write(packetNumber);
 
-    b = (byte) (b | (pnLen - 1)); // pn length
+    b = (byte) (b | (pn.length - 1)); // pn length
 
     bb.writeByte(b);
 
@@ -149,7 +149,6 @@ public class ShortPacket implements FullPacket {
     final int pnOffset = bb.writerIndex();
     final int sampleOffset = pnOffset + 4;
 
-    final byte[] pn = PacketNumber.write(packetNumber, pnLen);
     bb.writeBytes(pn);
 
     final byte[] aad = new byte[bb.writerIndex() - bbOffset];
