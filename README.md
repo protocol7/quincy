@@ -1,5 +1,7 @@
 # Quincy
 
+![openjdk11](https://github.com/protocol7/quincy/workflows/openjdk11/badge.svg)
+
 Quincy is an implementation of [QUIC](https://quicwg.org/) in Java, based 
 on the [Netty framework](https://netty.io/). Focusing on having fun and 
 learning. Development is still very much in an early stage, exploring what 
@@ -14,7 +16,7 @@ anything missing, incomplete or wrong.
   - [X] Handshake
   - [ ] Certification validation
   - [ ] Key phase
-  - [ ] ALPN
+  - [X] ALPN
 - [X] Protocol/packets/frames
 - [X] Connections
 - [ ] Packet coalescing
@@ -23,10 +25,10 @@ anything missing, incomplete or wrong.
 - [X] Streams
 - [ ] Reliability
   - [X] Acking
-  - [ ] Resends
+  - [X] Resends
 - [ ] Flow control
   - [X] Max data
-  - [ ] Max streams
+  - [X] Max streams
 - [ ] Congestion control
 - [ ] Address validation
   - [X] Retry
@@ -36,5 +38,4 @@ anything missing, incomplete or wrong.
   - [X] Idle timeout
   - [X] Immediate close
   - [ ] Stateless reset
-- [ ] HTTP binding
-- [X] Integration tests (quic-go, quicly)
+- [X] Integration tests (quiche)
