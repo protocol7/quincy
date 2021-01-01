@@ -28,7 +28,6 @@ import com.protocol7.quincy.utils.Hex;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.List;
 import java.util.Optional;
 import org.junit.Test;
 
@@ -150,11 +149,6 @@ public class InitialPacketTest {
 
   private InitialPacket p(final long pn, final Optional<byte[]> token) {
     return InitialPacket.create(
-        destConnId,
-        srcConnId,
-        pn,
-        Version.DRAFT_29,
-        token,
-        List.of(new PaddingFrame(paddingLength)));
+        destConnId, srcConnId, pn, Version.DRAFT_29, token, new PaddingFrame(paddingLength));
   }
 }

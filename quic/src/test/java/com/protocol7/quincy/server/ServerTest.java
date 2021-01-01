@@ -174,7 +174,7 @@ public class ServerTest {
   private InitialPacket initialPacket(
       final ConnectionId destConnId, final Optional<byte[]> token, final Frame... frames) {
     return InitialPacket.create(
-        destConnId, srcConnectionId, nextPacketNumber(), Version.DRAFT_29, token, List.of(frames));
+        destConnId, srcConnectionId, nextPacketNumber(), Version.DRAFT_29, token, frames);
   }
 
   private Packet packet(final ConnectionId destConnId, final Frame... frames) {

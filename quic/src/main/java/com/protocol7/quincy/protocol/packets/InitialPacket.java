@@ -11,7 +11,6 @@ import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -25,7 +24,8 @@ public class InitialPacket extends LongHeaderPacket {
       final Version version,
       final Optional<byte[]> token,
       final Frame... frames) {
-    return create(destConnectionId, srcConnectionId, packetNumber, version, token, List.of(frames));
+    return create(
+        destConnectionId, srcConnectionId, packetNumber, version, token, new Payload(frames));
   }
 
   public static InitialPacket create(
@@ -34,9 +34,9 @@ public class InitialPacket extends LongHeaderPacket {
       final long packetNumber,
       final Version version,
       final Optional<byte[]> token,
-      final List<Frame> frames) {
+      final Payload payload) {
     return new InitialPacket(
-        destConnectionId, srcConnectionId, version, packetNumber, new Payload(frames), token);
+        destConnectionId, srcConnectionId, version, packetNumber, payload, token);
   }
 
   public static HalfParsedPacket<InitialPacket> parse(final ByteBuf bb) {
@@ -122,8 +122,7 @@ public class InitialPacket extends LongHeaderPacket {
 
           final Payload payload = Payload.parse(bb, payloadLength, aead, packetNumber, aad);
 
-          return InitialPacket.create(
-              destConnId, srcConnId, packetNumber, version, token, payload.getFrames());
+          return InitialPacket.create(destConnId, srcConnId, packetNumber, version, token, payload);
 
         } catch (final GeneralSecurityException e) {
           throw new RuntimeException(e);
