@@ -1,6 +1,5 @@
 package com.protocol7.quincy.flowcontrol;
 
-import static java.util.Optional.of;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -139,6 +138,6 @@ public class DefaultFlowControlHandlerTest {
   }
 
   private FullPacket p(final Frame frame) {
-    return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frame));
+    return new ShortPacket(false, ConnectionId.random(), PacketNumber.MIN, new Payload(frame));
   }
 }

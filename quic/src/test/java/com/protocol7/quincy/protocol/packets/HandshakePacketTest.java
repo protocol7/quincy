@@ -11,7 +11,6 @@ import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.Optional;
 import org.junit.Test;
 
 public class HandshakePacketTest {
@@ -33,8 +32,8 @@ public class HandshakePacketTest {
 
     final HandshakePacket parsed = HandshakePacket.parse(bb).complete(l -> aead);
 
-    assertEquals(destConnId, parsed.getDestinationConnectionId().get());
-    assertEquals(srcConnId, parsed.getSourceConnectionId().get());
+    assertEquals(destConnId, parsed.getDestinationConnectionId());
+    assertEquals(srcConnId, parsed.getSourceConnectionId());
     assertEquals(PacketNumber.MIN, parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertEquals(paddingLength + AEAD.OVERHEAD, parsed.getPayload().calculateLength());
@@ -63,10 +62,6 @@ public class HandshakePacketTest {
 
   private HandshakePacket p(final long pn) {
     return HandshakePacket.create(
-        Optional.of(destConnId),
-        Optional.of(srcConnId),
-        pn,
-        Version.DRAFT_29,
-        new PaddingFrame(paddingLength));
+        destConnId, srcConnId, pn, Version.DRAFT_29, new PaddingFrame(paddingLength));
   }
 }

@@ -30,7 +30,7 @@ public class ShortPacket implements FullPacket {
 
     final boolean keyPhase = (firstByte & 0x4) == 0x4;
 
-    final Optional<ConnectionId> connId = ConnectionId.read(connIdLength, bb);
+    final ConnectionId connId = ConnectionId.read(connIdLength, bb);
 
     return new HalfParsedPacket<>() {
       @Override
@@ -39,7 +39,7 @@ public class ShortPacket implements FullPacket {
       }
 
       @Override
-      public Optional<ConnectionId> getConnectionId() {
+      public ConnectionId getConnectionId() {
         return connId;
       }
 
@@ -94,20 +94,20 @@ public class ShortPacket implements FullPacket {
 
   public static ShortPacket create(
       final boolean keyPhase,
-      final Optional<ConnectionId> connectionId,
+      final ConnectionId connectionId,
       final long packetNumber,
       final Frame... frames) {
     return new ShortPacket(keyPhase, connectionId, packetNumber, new Payload(frames));
   }
 
   private final boolean keyPhase;
-  private final Optional<ConnectionId> connectionId;
+  private final ConnectionId connectionId;
   private final long packetNumber;
   private final Payload payload;
 
   public ShortPacket(
       final boolean keyPhase,
-      final Optional<ConnectionId> connectionId,
+      final ConnectionId connectionId,
       final long packetNumber,
       final Payload payload) {
     this.keyPhase = keyPhase;
@@ -144,7 +144,7 @@ public class ShortPacket implements FullPacket {
 
     bb.writeByte(b);
 
-    connectionId.get().write(bb);
+    connectionId.write(bb);
 
     final int pnOffset = bb.writerIndex();
     final int sampleOffset = pnOffset + 4;
@@ -180,12 +180,12 @@ public class ShortPacket implements FullPacket {
   }
 
   @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
-    return Optional.empty();
+  public ConnectionId getSourceConnectionId() {
+    throw new IllegalStateException("ShortPacket does not have source connection ID");
   }
 
   @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
+  public ConnectionId getDestinationConnectionId() {
     return connectionId;
   }
 

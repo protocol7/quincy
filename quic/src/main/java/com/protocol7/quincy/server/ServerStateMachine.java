@@ -32,9 +32,7 @@ public class ServerStateMachine {
         final InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
-          if (packet.getSourceConnectionId().isPresent()) {
-            connection.setRemoteConnectionId(packet.getSourceConnectionId().get());
-          }
+          connection.setRemoteConnectionId(packet.getSourceConnectionId());
         }
       }
     }

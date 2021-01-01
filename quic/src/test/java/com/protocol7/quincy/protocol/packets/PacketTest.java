@@ -1,5 +1,6 @@
 package com.protocol7.quincy.protocol.packets;
 
+import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static java.util.Optional.empty;
 import static org.junit.Assert.assertTrue;
 
@@ -23,13 +24,7 @@ public class PacketTest {
   @Test
   public void parseInitialPacket() {
     final InitialPacket packet =
-        InitialPacket.create(
-            Optional.ofNullable(connId),
-            empty(),
-            pn,
-            Version.DRAFT_29,
-            empty(),
-            new PaddingFrame(6));
+        InitialPacket.create(connId, EMPTY, pn, Version.DRAFT_29, empty(), new PaddingFrame(6));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -40,7 +35,7 @@ public class PacketTest {
   @Test
   public void parseVerNegPacket() {
     final VersionNegotiationPacket packet =
-        new VersionNegotiationPacket(empty(), empty(), Version.DRAFT_29);
+        new VersionNegotiationPacket(EMPTY, EMPTY, Version.DRAFT_29);
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -57,8 +52,8 @@ public class PacketTest {
     final int b = (0b10000000 | PacketType.Initial.getType() << 4) & 0xFF;
     bb.writeByte(b);
     Version.VERSION_NEGOTIATION.write(bb);
-    ConnectionId.write(empty(), bb);
-    ConnectionId.write(empty(), bb);
+    ConnectionId.write(EMPTY, bb);
+    ConnectionId.write(EMPTY, bb);
     Version.DRAFT_29.write(bb);
 
     final Packet parsed = Packet.parse(bb, connId.getLength()).complete(l -> aead);
@@ -68,8 +63,7 @@ public class PacketTest {
   @Test
   public void parseHandshakePacket() {
     final HandshakePacket packet =
-        HandshakePacket.create(
-            Optional.ofNullable(connId), empty(), pn, Version.DRAFT_29, new PaddingFrame(6));
+        HandshakePacket.create(connId, EMPTY, pn, Version.DRAFT_29, new PaddingFrame(6));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -81,12 +75,7 @@ public class PacketTest {
   public void parseRetryPacket() {
     final RetryPacket packet =
         new RetryPacket(
-            Version.DRAFT_29,
-            Optional.ofNullable(connId),
-            empty(),
-            Optional.of(connId),
-            Rnd.rndBytes(11),
-            null);
+            Version.DRAFT_29, connId, EMPTY, Optional.of(connId), Rnd.rndBytes(11), empty());
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
@@ -96,8 +85,7 @@ public class PacketTest {
 
   @Test
   public void parseShortPacket() {
-    final ShortPacket packet =
-        new ShortPacket(false, Optional.of(connId), pn, new Payload(PingFrame.INSTANCE));
+    final ShortPacket packet = new ShortPacket(false, connId, pn, new Payload(PingFrame.INSTANCE));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

@@ -56,10 +56,10 @@ public class InitialPacketTest {
     assertEquals(0, packet.getPacketNumber());
     assertEquals(
         new ConnectionId(Hex.dehex("0ab8c6777e6b7cb24441f8f1d030cf63")),
-        packet.getDestinationConnectionId().get());
+        packet.getDestinationConnectionId());
     assertEquals(
         new ConnectionId(Hex.dehex("b4860ea2b36e0d4b8064611cfaf37f15c58c0e7b")),
-        packet.getSourceConnectionId().get());
+        packet.getSourceConnectionId());
     assertEquals(PacketType.Initial, packet.getType());
     assertEquals(Version.UNKNOWN, packet.getVersion());
     assertEquals(Optional.empty(), packet.getToken());
@@ -76,8 +76,8 @@ public class InitialPacketTest {
 
     final InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
-    assertEquals(destConnId, parsed.getDestinationConnectionId().get());
-    assertEquals(srcConnId, parsed.getSourceConnectionId().get());
+    assertEquals(destConnId, parsed.getDestinationConnectionId());
+    assertEquals(srcConnId, parsed.getSourceConnectionId());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertArrayEquals(token, parsed.getToken().get());
@@ -113,8 +113,8 @@ public class InitialPacketTest {
 
     final InitialPacket parsed = InitialPacket.parse(bb).complete(l -> aead);
 
-    assertEquals(destConnId, parsed.getDestinationConnectionId().get());
-    assertEquals(srcConnId, parsed.getSourceConnectionId().get());
+    assertEquals(destConnId, parsed.getDestinationConnectionId());
+    assertEquals(srcConnId, parsed.getSourceConnectionId());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getVersion(), parsed.getVersion());
     assertFalse(parsed.getToken().isPresent());
@@ -136,24 +136,13 @@ public class InitialPacketTest {
   }
 
   private void assertFrameAllowed(final Frame frame) {
-    InitialPacket.create(
-        Optional.of(destConnId),
-        Optional.of(srcConnId),
-        PacketNumber.MIN,
-        Version.DRAFT_29,
-        empty(),
-        frame);
+    InitialPacket.create(destConnId, srcConnId, PacketNumber.MIN, Version.DRAFT_29, empty(), frame);
   }
 
   private void assertFrameNotAllowed(final Frame frame) {
     try {
       InitialPacket.create(
-          Optional.of(destConnId),
-          Optional.of(srcConnId),
-          PacketNumber.MIN,
-          Version.DRAFT_29,
-          empty(),
-          frame);
+          destConnId, srcConnId, PacketNumber.MIN, Version.DRAFT_29, empty(), frame);
       fail();
     } catch (final IllegalArgumentException e) {
     }
@@ -161,8 +150,8 @@ public class InitialPacketTest {
 
   private InitialPacket p(final long pn, final Optional<byte[]> token) {
     return InitialPacket.create(
-        Optional.of(destConnId),
-        Optional.of(srcConnId),
+        destConnId,
+        srcConnId,
         pn,
         Version.DRAFT_29,
         token,

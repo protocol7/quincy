@@ -9,7 +9,6 @@ import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.buffer.ByteBuf;
-import java.util.Optional;
 
 public interface Packet {
 
@@ -64,7 +63,7 @@ public interface Packet {
 
   void write(ByteBuf bb, AEAD aead);
 
-  Optional<ConnectionId> getSourceConnectionId();
+  ConnectionId getSourceConnectionId();
 
-  Optional<ConnectionId> getDestinationConnectionId();
+  ConnectionId getDestinationConnectionId();
 }

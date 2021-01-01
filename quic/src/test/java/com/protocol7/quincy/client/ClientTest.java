@@ -1,5 +1,6 @@
 package com.protocol7.quincy.client;
 
+import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
@@ -92,10 +93,9 @@ public class ClientTest {
     // validate first packet sent
     final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
     assertEquals(1, initialPacket.getPacketNumber());
-    assertEquals(destConnectionId, initialPacket.getDestinationConnectionId().get());
-    assertTrue(initialPacket.getSourceConnectionId().isPresent());
+    assertEquals(destConnectionId, initialPacket.getDestinationConnectionId());
 
-    final ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId().get();
+    final ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId();
 
     assertFalse(initialPacket.getToken().isPresent());
     assertEquals(Version.DRAFT_29, initialPacket.getVersion());
@@ -112,18 +112,18 @@ public class ClientTest {
     connection.onPacket(
         new RetryPacket(
             Version.DRAFT_29,
-            Optional.empty(),
-            Optional.of(srcConnectionId),
+            EMPTY,
+            srcConnectionId,
             Optional.of(destConnectionId),
             retryToken,
-            null));
+            Optional.empty()));
 
     // validate new initial packet sent
     final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
     assertEquals(1, initialPacket2.getPacketNumber());
-    final ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId().get();
+    final ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId();
     assertEquals(srcConnectionId, newDestConnId);
-    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
+    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId());
     assertArrayEquals(retryToken, initialPacket2.getToken().get());
     assertEquals(Version.DRAFT_29, initialPacket2.getVersion());
 
@@ -142,8 +142,8 @@ public class ClientTest {
     // receive server hello
     connection.onPacket(
         InitialPacket.create(
-            Optional.of(newDestConnId),
-            Optional.of(srcConnectionId),
+            newDestConnId,
+            srcConnectionId,
             nextPacketNumber(),
             Version.DRAFT_29,
             Optional.empty(),
@@ -159,8 +159,8 @@ public class ClientTest {
     // receive server handshake
     connection.onPacket(
         HandshakePacket.create(
-            Optional.of(newDestConnId),
-            Optional.of(srcConnectionId),
+            newDestConnId,
+            srcConnectionId,
             nextPacketNumber(),
             Version.DRAFT_29,
             new CryptoFrame(0, shah.getServerHandshake())));
@@ -168,13 +168,13 @@ public class ClientTest {
     // validate client fin handshake packet
     final HandshakePacket hp = (HandshakePacket) captureSentPacket(4);
     assertEquals(3, hp.getPacketNumber());
-    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId().get());
-    assertEquals(srcConnectionId, hp.getDestinationConnectionId().get());
+    assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId());
+    assertEquals(srcConnectionId, hp.getDestinationConnectionId());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
 
     connection.onPacket(
         ShortPacket.create(
-            false, Optional.of(srcConnectionId), nextPacketNumber(), HandshakeDoneFrame.INSTANCE));
+            false, srcConnectionId, nextPacketNumber(), HandshakeDoneFrame.INSTANCE));
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
@@ -296,8 +296,7 @@ public class ClientTest {
     // server does not support this version and sends a VerNeg
 
     final VersionNegotiationPacket verNeg =
-        new VersionNegotiationPacket(
-            Optional.of(destConnectionId), Optional.of(srcConnectionId), Version.FINAL);
+        new VersionNegotiationPacket(destConnectionId, srcConnectionId, Version.FINAL);
 
     connection.onPacket(verNeg);
 
@@ -312,7 +311,7 @@ public class ClientTest {
       final int number, final int packetNumber, final int smallest, final int largest) {
     final ShortPacket ackPacket = (ShortPacket) captureSentPacket(number);
     assertEquals(packetNumber, ackPacket.getPacketNumber());
-    assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId().get());
+    assertEquals(srcConnectionId, ackPacket.getDestinationConnectionId());
 
     final List<AckRange> actual =
         ((AckFrame) ackPacket.getPayload().getFrames().get(0)).getRanges();
@@ -340,7 +339,7 @@ public class ClientTest {
   private Packet packet(final Frame... frames) {
     return new ShortPacket(
         false,
-        Optional.of(srcConnectionId), // TODO correct?
+        srcConnectionId, // TODO correct?
         nextPacketNumber(),
         new Payload(frames));
   }

@@ -50,7 +50,7 @@ public class ClientConnection implements InternalConnection {
 
   private ConnectionId remoteConnectionId;
   private int lastDestConnectionIdLength;
-  private final Optional<ConnectionId> localConnectionId = of(ConnectionId.random());
+  private final ConnectionId localConnectionId = ConnectionId.random();
   private final PacketSender packetSender;
 
   private final Version version;
@@ -74,10 +74,10 @@ public class ClientConnection implements InternalConnection {
       final InetSocketAddress peerAddress,
       final CertificateValidator certificateValidator,
       final Timer timer) {
-    this.version = configuration.getVersion();
-    this.remoteConnectionId = initialRemoteConnectionId;
-    this.packetSender = packetSender;
-    this.peerAddress = peerAddress;
+    this.version = requireNonNull(configuration.getVersion());
+    this.remoteConnectionId = requireNonNull(initialRemoteConnectionId);
+    this.packetSender = requireNonNull(packetSender);
+    this.peerAddress = requireNonNull(peerAddress);
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     final Ticker ticker = Ticker.systemTicker();
@@ -87,7 +87,7 @@ public class ClientConnection implements InternalConnection {
             new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
         new ClientTlsManager(
-            localConnectionId.get(), configuration.toTransportParameters(), certificateValidator);
+            localConnectionId, configuration.toTransportParameters(), certificateValidator);
 
     final LoggingHandler logger = new LoggingHandler(true);
 
@@ -106,7 +106,7 @@ public class ClientConnection implements InternalConnection {
             List.of(packetBuffer, logger));
 
     this.stateMachine = new ClientStateMachine(this);
-    this.timer = timer;
+    this.timer = requireNonNull(timer);
   }
 
   private void resetTlsSession() {
@@ -137,15 +137,15 @@ public class ClientConnection implements InternalConnection {
   public FullPacket send(final EncryptionLevel level, final Frame... frames) {
     final Packet packet;
     if (level == EncryptionLevel.OneRtt) {
-      packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
+      packet = ShortPacket.create(false, remoteConnectionId, nextSendPacketNumber(), frames);
     } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(
-              of(remoteConnectionId), localConnectionId, nextSendPacketNumber(), version, frames);
+              remoteConnectionId, localConnectionId, nextSendPacketNumber(), version, frames);
     } else {
       packet =
           InitialPacket.create(
-              of(remoteConnectionId),
+              remoteConnectionId,
               localConnectionId,
               nextSendPacketNumber(),
               version,
@@ -157,13 +157,13 @@ public class ClientConnection implements InternalConnection {
   }
 
   @Override
-  public Optional<ConnectionId> getLocalConnectionId() {
+  public ConnectionId getLocalConnectionId() {
     return localConnectionId;
   }
 
   @Override
   public Optional<ConnectionId> getRemoteConnectionId() {
-    return Optional.ofNullable(remoteConnectionId);
+    return Optional.of(remoteConnectionId);
   }
 
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId, final boolean retry) {
@@ -193,11 +193,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   public void onPacket(final Packet packet) {
-    if (packet.getDestinationConnectionId().isPresent()) {
-      lastDestConnectionIdLength = packet.getDestinationConnectionId().get().getLength();
-    } else {
-      lastDestConnectionIdLength = 0;
-    }
+    lastDestConnectionIdLength = packet.getDestinationConnectionId().getLength();
 
     final EncryptionLevel encLevel = getEncryptionLevel(packet);
     if (tlsManager.available(encLevel)) {

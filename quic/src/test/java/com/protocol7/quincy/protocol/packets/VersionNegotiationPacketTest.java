@@ -1,6 +1,5 @@
 package com.protocol7.quincy.protocol.packets;
 
-import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
@@ -15,11 +14,11 @@ import org.junit.Test;
 
 public class VersionNegotiationPacketTest {
 
-  private ConnectionId dest = ConnectionId.random();
-  private ConnectionId src = ConnectionId.random();
-  private List<Version> supported = List.of(Version.DRAFT_29, Version.FINAL);
-  private VersionNegotiationPacket packet =
-      new VersionNegotiationPacket(of(dest), of(src), supported);
+  private final ConnectionId dest = ConnectionId.random();
+  private final ConnectionId src = ConnectionId.random();
+  private final List<Version> supported = List.of(Version.DRAFT_29, Version.FINAL);
+  private final VersionNegotiationPacket packet =
+      new VersionNegotiationPacket(dest, src, supported);
 
   private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
@@ -30,8 +29,8 @@ public class VersionNegotiationPacketTest {
 
     final VersionNegotiationPacket parsed = VersionNegotiationPacket.parse(bb).complete(l -> aead);
 
-    assertEquals(dest, parsed.getDestinationConnectionId().get());
-    assertEquals(src, parsed.getSourceConnectionId().get());
+    assertEquals(dest, parsed.getDestinationConnectionId());
+    assertEquals(src, parsed.getSourceConnectionId());
     assertEquals(supported, parsed.getSupportedVersions());
   }
 

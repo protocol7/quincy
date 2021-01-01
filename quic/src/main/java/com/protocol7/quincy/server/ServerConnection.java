@@ -44,7 +44,7 @@ import java.util.concurrent.atomic.AtomicReference;
 public class ServerConnection implements InternalConnection {
 
   private Optional<ConnectionId> remoteConnectionId = Optional.empty();
-  private final Optional<ConnectionId> localConnectionId;
+  private final ConnectionId localConnectionId;
   private final PacketSender packetSender;
   private final Version version;
   private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(-1L);
@@ -97,7 +97,7 @@ public class ServerConnection implements InternalConnection {
                 terminationManager),
             List.of(flowControlHandler, packetBuffer, logger));
 
-    this.localConnectionId = Optional.of(localConnectionId);
+    this.localConnectionId = localConnectionId;
 
     this.stateMachine = new ServerStateMachine(this);
   }
@@ -106,7 +106,7 @@ public class ServerConnection implements InternalConnection {
     return remoteConnectionId;
   }
 
-  public Optional<ConnectionId> getLocalConnectionId() {
+  public ConnectionId getLocalConnectionId() {
     return localConnectionId;
   }
 
@@ -128,9 +128,14 @@ public class ServerConnection implements InternalConnection {
   }
 
   public FullPacket send(final EncryptionLevel level, final Frame... frames) {
+    if (getRemoteConnectionId().isEmpty()) {
+      throw new IllegalStateException("Can send when remote connection ID is unknown");
+    }
+    final ConnectionId remoteConnectionId = getRemoteConnectionId().get();
+
     final Packet packet;
     if (level == EncryptionLevel.OneRtt) {
-      packet = ShortPacket.create(false, getRemoteConnectionId(), nextSendPacketNumber(), frames);
+      packet = ShortPacket.create(false, remoteConnectionId, nextSendPacketNumber(), frames);
     } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(

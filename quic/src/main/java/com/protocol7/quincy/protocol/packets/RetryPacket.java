@@ -1,5 +1,7 @@
 package com.protocol7.quincy.protocol.packets;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.tls.aead.AEAD;
@@ -7,7 +9,6 @@ import com.protocol7.quincy.tls.aead.AEADProvider;
 import com.protocol7.quincy.tls.aead.RetryTokenIntegrityTagAEAD;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Hex;
-import com.protocol7.quincy.utils.Opt;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.GeneralSecurityException;
@@ -24,8 +25,8 @@ public class RetryPacket implements Packet {
 
     final Version version = Version.read(bb);
 
-    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
-    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
+    final ConnectionId destConnId = ConnectionId.read(bb);
+    final ConnectionId srcConnId = ConnectionId.read(bb);
 
     final byte[] retryToken = new byte[bb.readableBytes() - 16];
     bb.readBytes(retryToken);
@@ -41,45 +42,50 @@ public class RetryPacket implements Packet {
       }
 
       @Override
-      public Optional<ConnectionId> getConnectionId() {
+      public ConnectionId getConnectionId() {
         return destConnId;
       }
 
       @Override
       public RetryPacket complete(final AEADProvider aeadProvider) {
         return new RetryPacket(
-            version, destConnId, srcConnId, Optional.empty(), retryToken, retryTokenIntegrityTag);
+            version,
+            destConnId,
+            srcConnId,
+            Optional.empty(),
+            retryToken,
+            Optional.of(retryTokenIntegrityTag));
       }
     };
   }
 
   private final Version version;
-  private final Optional<ConnectionId> destinationConnectionId;
-  private final Optional<ConnectionId> sourceConnectionId;
+  private final ConnectionId destinationConnectionId;
+  private final ConnectionId sourceConnectionId;
   private final Optional<ConnectionId> originalConnectionId;
   private final byte[] retryToken;
-  private final byte[] retryTokenIntegrityTag;
+  private final Optional<byte[]> retryTokenIntegrityTag;
 
   public RetryPacket(
       final Version version,
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final Optional<ConnectionId> originalConnectionId,
       final byte[] retryToken,
-      final byte[] retryTokenIntegrityTag) {
-    this.version = version;
-    this.destinationConnectionId = destinationConnectionId;
-    this.sourceConnectionId = sourceConnectionId;
-    this.originalConnectionId = originalConnectionId;
-    this.retryToken = retryToken;
-    this.retryTokenIntegrityTag = retryTokenIntegrityTag;
+      final Optional<byte[]> retryTokenIntegrityTag) {
+    this.version = requireNonNull(version);
+    this.destinationConnectionId = requireNonNull(destinationConnectionId);
+    this.sourceConnectionId = requireNonNull(sourceConnectionId);
+    this.originalConnectionId = requireNonNull(originalConnectionId);
+    this.retryToken = requireNonNull(retryToken);
+    this.retryTokenIntegrityTag = requireNonNull(retryTokenIntegrityTag);
   }
 
   public Version getVersion() {
     return version;
   }
 
-  public Optional<ConnectionId> getDestinationConnectionId() {
+  public ConnectionId getDestinationConnectionId() {
     return destinationConnectionId;
   }
 
@@ -114,12 +120,12 @@ public class RetryPacket implements Packet {
   }
 
   public void verify(final ConnectionId originalConnectionId) {
-    if (retryTokenIntegrityTag == null) {
+    if (retryTokenIntegrityTag.isEmpty()) {
       throw new IllegalStateException("Can't verify retry packet without retryTokenIntegrityTag");
     }
 
     try {
-      TAG_AEAD.verify(retryPseudoPacket(originalConnectionId), retryTokenIntegrityTag);
+      TAG_AEAD.verify(retryPseudoPacket(originalConnectionId), retryTokenIntegrityTag.get());
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException("Failed to verify tag", e);
     }
@@ -127,7 +133,7 @@ public class RetryPacket implements Packet {
 
   private byte[] retryPseudoPacket(final ConnectionId originalConnectionId) {
     final ByteBuf bb = Unpooled.buffer();
-    ConnectionId.write(Optional.of(originalConnectionId), bb);
+    ConnectionId.write(originalConnectionId, bb);
 
     int b = (PACKET_TYPE_MASK | PacketType.Retry.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
@@ -143,7 +149,7 @@ public class RetryPacket implements Packet {
     return Bytes.drainToArray(bb);
   }
 
-  public Optional<ConnectionId> getSourceConnectionId() {
+  public ConnectionId getSourceConnectionId() {
     return sourceConnectionId;
   }
 
@@ -177,9 +183,9 @@ public class RetryPacket implements Packet {
         + "version="
         + version
         + ", destinationConnectionId="
-        + Opt.toString(destinationConnectionId)
+        + destinationConnectionId
         + ", sourceConnectionId="
-        + Opt.toString(sourceConnectionId)
+        + sourceConnectionId
         + ", originalConnectionId="
         + originalConnectionId
         + ", retryToken="

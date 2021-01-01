@@ -86,7 +86,7 @@ public class ClientTlsManager implements InboundHandler {
         }
       } else if (packet instanceof RetryPacket) {
         // reset the TLS session
-        resetTlsSession(packet.getSourceConnectionId().get());
+        resetTlsSession(packet.getSourceConnectionId());
 
         // restart handshake
         sendInitialPacket(ctx);

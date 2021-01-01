@@ -81,7 +81,7 @@ public class ServerRetryHandlerTest {
     verify(ctx, never()).next(any(Packet.class));
   }
 
-  private void assertToken(final Optional<ConnectionId> expectedDestConnId) {
+  private void assertToken(final ConnectionId expectedDestConnId) {
     final ArgumentCaptor<RetryPacket> retryCaptor = ArgumentCaptor.forClass(RetryPacket.class);
     verify(ctx).sendPacket(retryCaptor.capture());
 
@@ -108,8 +108,8 @@ public class ServerRetryHandlerTest {
 
   private InitialPacket p(final Optional<byte[]> token) {
     return InitialPacket.create(
-        of(ConnectionId.random()),
-        of(ConnectionId.random()),
+        ConnectionId.random(),
+        ConnectionId.random(),
         PacketNumber.MIN,
         Version.DRAFT_29,
         token,

@@ -1,6 +1,5 @@
 package com.protocol7.quincy.protocol;
 
-import static java.util.Optional.of;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -8,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Arrays;
-import java.util.Optional;
 import org.junit.Test;
 
 public class ConnectionIdTest {
@@ -29,11 +27,6 @@ public class ConnectionIdTest {
   }
 
   @Test(expected = IllegalArgumentException.class)
-  public void cstrLengthsTooShort() {
-    new ConnectionId(new byte[3]);
-  }
-
-  @Test(expected = IllegalArgumentException.class)
   public void cstrLengthsTooLong() {
     new ConnectionId(new byte[21]);
   }
@@ -45,7 +38,7 @@ public class ConnectionIdTest {
 
     connectionId.write(bb);
 
-    final ConnectionId parsed = ConnectionId.read(connectionId.getLength(), bb).get();
+    final ConnectionId parsed = ConnectionId.read(connectionId.getLength(), bb);
 
     assertEquals(parsed, connectionId);
   }
@@ -55,20 +48,20 @@ public class ConnectionIdTest {
     final ByteBuf bb = Unpooled.buffer();
     final ConnectionId connectionId = ConnectionId.random();
 
-    ConnectionId.write(Optional.of(connectionId), bb);
+    ConnectionId.write(connectionId, bb);
 
-    final ConnectionId parsed = ConnectionId.read(bb).get();
+    final ConnectionId parsed = ConnectionId.read(bb);
 
     assertEquals(parsed, connectionId);
   }
 
   @Test
-  public void roundtripEmptyWithLenth() {
+  public void roundtripEmptyWithLength() {
     final ByteBuf bb = Unpooled.buffer();
 
-    ConnectionId.write(Optional.empty(), bb);
+    ConnectionId.write(ConnectionId.EMPTY, bb);
 
-    assertEquals(Optional.empty(), ConnectionId.read(bb));
+    assertEquals(ConnectionId.EMPTY, ConnectionId.read(bb));
   }
 
   @Test
@@ -80,7 +73,7 @@ public class ConnectionIdTest {
     final ConnectionId id18 = new ConnectionId(b18);
 
     final ByteBuf bb = Unpooled.buffer();
-    ConnectionId.write(of(id16), bb);
+    ConnectionId.write(id16, bb);
 
     assertEquals(b16.length, bb.readByte() & 0xFF);
     final byte[] a16 = new byte[16];
@@ -95,6 +88,6 @@ public class ConnectionIdTest {
     bb.writeByte(b16.length);
     bb.writeBytes(b16);
 
-    assertArrayEquals(b16, ConnectionId.read(bb).get().asBytes());
+    assertArrayEquals(b16, ConnectionId.read(bb).asBytes());
   }
 }

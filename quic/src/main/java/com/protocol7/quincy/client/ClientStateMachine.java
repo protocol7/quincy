@@ -27,10 +27,10 @@ public class ClientStateMachine {
       // TODO validate connection ID
       if (state == State.BeforeHello) {
         if (packet instanceof InitialPacket) {
-          connection.setRemoteConnectionId(packet.getSourceConnectionId().get(), false);
+          connection.setRemoteConnectionId(packet.getSourceConnectionId(), false);
         } else if (packet instanceof RetryPacket) {
           final RetryPacket retryPacket = (RetryPacket) packet;
-          connection.setRemoteConnectionId(packet.getSourceConnectionId().get(), true);
+          connection.setRemoteConnectionId(packet.getSourceConnectionId(), true);
           connection.resetSendPacketNumber();
           connection.setToken(retryPacket.getRetryToken());
         } else if (packet instanceof VersionNegotiationPacket) {

@@ -10,26 +10,16 @@ import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
 
 public class HandshakePacket extends LongHeaderPacket {
 
   public static HandshakePacket create(
-      final Optional<ConnectionId> destConnectionId,
-      final Optional<ConnectionId> srcConnectionId,
+      final ConnectionId destConnectionId,
+      final ConnectionId srcConnectionId,
       final long packetNumber,
       final Version version,
       final Frame... frames) {
-    return create(destConnectionId, srcConnectionId, packetNumber, version, Arrays.asList(frames));
-  }
-
-  public static HandshakePacket create(
-      final Optional<ConnectionId> destConnectionId,
-      final Optional<ConnectionId> srcConnectionId,
-      final long packetNumber,
-      final Version version,
-      final List<Frame> frames) {
     final Payload payload = new Payload(frames);
     return new HandshakePacket(destConnectionId, srcConnectionId, version, packetNumber, payload);
   }
@@ -49,8 +39,8 @@ public class HandshakePacket extends LongHeaderPacket {
 
     final Version version = Version.read(bb);
 
-    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
-    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
+    final ConnectionId destConnId = ConnectionId.read(bb);
+    final ConnectionId srcConnId = ConnectionId.read(bb);
 
     return new HalfParsedPacket<>() {
       @Override
@@ -59,7 +49,7 @@ public class HandshakePacket extends LongHeaderPacket {
       }
 
       @Override
-      public Optional<ConnectionId> getConnectionId() {
+      public ConnectionId getConnectionId() {
         return destConnId;
       }
 
@@ -124,8 +114,8 @@ public class HandshakePacket extends LongHeaderPacket {
   }
 
   private HandshakePacket(
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final Version version,
       final long packetNumber,
       final Payload payload) {

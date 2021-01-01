@@ -17,7 +17,7 @@ public interface Connection extends FrameSender {
 
   Packet sendPacket(Packet p);
 
-  Optional<ConnectionId> getLocalConnectionId();
+  ConnectionId getLocalConnectionId();
 
   Optional<ConnectionId> getRemoteConnectionId();
 

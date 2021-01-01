@@ -1,6 +1,5 @@
 package com.protocol7.quincy.streams;
 
-import static java.util.Optional.of;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -154,6 +153,6 @@ public class DefaultStreamManagerTest {
   }
 
   private FullPacket p(final Frame... frames) {
-    return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frames));
+    return new ShortPacket(false, ConnectionId.random(), PacketNumber.MIN, new Payload(frames));
   }
 }

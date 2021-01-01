@@ -6,13 +6,14 @@ import com.protocol7.quincy.utils.Hex;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
-import java.util.Optional;
 
 public class ConnectionId {
 
-  private static final int MIN_LENGTH = 4;
+  private static final int MIN_LENGTH = 0;
   public static final int LENGTH = 18;
   private static final int MAX_LENGTH = 20;
+
+  public static final ConnectionId EMPTY = new ConnectionId(new byte[0]);
 
   public static ConnectionId random() {
     final byte[] id = new byte[LENGTH];
@@ -20,18 +21,18 @@ public class ConnectionId {
     return new ConnectionId(id);
   }
 
-  public static Optional<ConnectionId> read(final int length, final ByteBuf bb) {
+  public static ConnectionId read(final int length, final ByteBuf bb) {
     if (length > 0) {
       final byte[] id = new byte[length];
       bb.readBytes(id);
-      return Optional.of(new ConnectionId(id));
+      return new ConnectionId(id);
     } else {
-      return Optional.empty();
+      return ConnectionId.EMPTY;
     }
   }
 
   /** Read connection id prefixed by its length from buffer */
-  public static Optional<ConnectionId> read(final ByteBuf bb) {
+  public static ConnectionId read(final ByteBuf bb) {
     final int len = bb.readByte() & 0xFF;
     return read(len, bb);
   }
@@ -40,13 +41,9 @@ public class ConnectionId {
    * Write connection ID prefixed by its length to buffer. Write 0 length if connection ID not
    * available.
    */
-  public static void write(final Optional<ConnectionId> connectionId, final ByteBuf bb) {
-    if (connectionId.isPresent()) {
-      bb.writeByte(connectionId.get().getLength());
-      connectionId.get().write(bb);
-    } else {
-      bb.writeByte(0);
-    }
+  public static void write(final ConnectionId connectionId, final ByteBuf bb) {
+    bb.writeByte(connectionId.getLength());
+    connectionId.write(bb);
   }
 
   private final byte[] id;

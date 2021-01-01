@@ -38,12 +38,10 @@ public class Connections {
   }
 
   public ServerConnection get(
-      final Optional<ConnectionId> connIdOpt,
+      final ConnectionId connId,
       final StreamListener streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
-
-    final ConnectionId connId = connIdOpt.get();
 
     ServerConnection conn = connections.get(connId);
     if (conn == null) {

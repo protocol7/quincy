@@ -14,7 +14,6 @@ import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public abstract class LongHeaderPacket implements FullPacket {
@@ -37,16 +36,16 @@ public abstract class LongHeaderPacket implements FullPacket {
   }
 
   private final PacketType packetType;
-  private final Optional<ConnectionId> destinationConnectionId;
-  private final Optional<ConnectionId> sourceConnectionId;
+  private final ConnectionId destinationConnectionId;
+  private final ConnectionId sourceConnectionId;
   private final Version version;
   private final long packetNumber;
   private final Payload payload;
 
   public LongHeaderPacket(
       final PacketType packetType,
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final Version version,
       final long packetNumber,
       final Payload payload) {
@@ -64,12 +63,12 @@ public abstract class LongHeaderPacket implements FullPacket {
   }
 
   @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
+  public ConnectionId getDestinationConnectionId() {
     return destinationConnectionId;
   }
 
   @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
+  public ConnectionId getSourceConnectionId() {
     return sourceConnectionId;
   }
 

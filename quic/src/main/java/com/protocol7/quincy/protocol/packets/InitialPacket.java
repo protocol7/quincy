@@ -19,8 +19,8 @@ import java.util.function.Consumer;
 public class InitialPacket extends LongHeaderPacket {
 
   public static InitialPacket create(
-      final Optional<ConnectionId> destConnectionId,
-      final Optional<ConnectionId> srcConnectionId,
+      final ConnectionId destConnectionId,
+      final ConnectionId srcConnectionId,
       final long packetNumber,
       final Version version,
       final Optional<byte[]> token,
@@ -29,8 +29,8 @@ public class InitialPacket extends LongHeaderPacket {
   }
 
   public static InitialPacket create(
-      final Optional<ConnectionId> destConnectionId,
-      final Optional<ConnectionId> srcConnectionId,
+      final ConnectionId destConnectionId,
+      final ConnectionId srcConnectionId,
       final long packetNumber,
       final Version version,
       final Optional<byte[]> token,
@@ -46,8 +46,8 @@ public class InitialPacket extends LongHeaderPacket {
 
     final Version version = Version.read(bb);
 
-    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
-    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
+    final ConnectionId destConnId = ConnectionId.read(bb);
+    final ConnectionId srcConnId = ConnectionId.read(bb);
 
     final int tokenLength = Varint.readAsInt(bb);
 
@@ -67,7 +67,7 @@ public class InitialPacket extends LongHeaderPacket {
       }
 
       @Override
-      public Optional<ConnectionId> getConnectionId() {
+      public ConnectionId getConnectionId() {
         return destConnId;
       }
 
@@ -135,8 +135,8 @@ public class InitialPacket extends LongHeaderPacket {
   private final Optional<byte[]> token;
 
   private InitialPacket(
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final Version version,
       final long packetNumber,
       final Payload payload,
@@ -205,9 +205,9 @@ public class InitialPacket extends LongHeaderPacket {
         + "packetType="
         + getType()
         + ", destinationConnectionId="
-        + Opt.toString(getDestinationConnectionId())
+        + getDestinationConnectionId()
         + ", sourceConnectionId="
-        + Opt.toString(getSourceConnectionId())
+        + getSourceConnectionId()
         + ", version="
         + getVersion()
         + ", packetNumber="

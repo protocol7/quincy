@@ -1,6 +1,6 @@
 package com.protocol7.quincy.tls;
 
-import static java.util.Optional.empty;
+import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static java.util.Optional.of;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -97,8 +97,8 @@ public class ServerTlsManagerTest {
 
   private InitialPacket ip(final byte[] b) {
     return InitialPacket.create(
-        empty(),
-        empty(),
+        EMPTY,
+        EMPTY,
         PacketNumber.MIN,
         Version.DRAFT_29,
         of("some token".getBytes()),
@@ -107,10 +107,10 @@ public class ServerTlsManagerTest {
 
   private HandshakePacket hp(final byte[] b) {
     return HandshakePacket.create(
-        empty(), empty(), PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
+        EMPTY, EMPTY, PacketNumber.MIN, Version.DRAFT_29, new CryptoFrame(0, b));
   }
 
   private ShortPacket sp(final Frame... frames) {
-    return ShortPacket.create(false, empty(), PacketNumber.MIN, frames);
+    return ShortPacket.create(false, EMPTY, PacketNumber.MIN, frames);
   }
 }

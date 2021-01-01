@@ -1,5 +1,6 @@
 package com.protocol7.quincy.reliability;
 
+import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -11,7 +12,6 @@ import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.utils.Ticker;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
@@ -79,7 +79,7 @@ public class PacketBufferTest {
   }
 
   private FullPacket p(final long pn) {
-    return ShortPacket.create(false, Optional.empty(), pn, f(pn));
+    return ShortPacket.create(false, EMPTY, pn, f(pn));
   }
 
   private Frame f(final long i) {

@@ -1,7 +1,6 @@
 package com.protocol7.quincy.reliability;
 
 import static com.protocol7.quincy.protocol.ConnectionId.random;
-import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -211,16 +210,15 @@ public class PacketBufferManagerTest {
   }
 
   private Packet packet(final long pn, final Frame... frames) {
-    return new ShortPacket(false, of(random()), pn, new Payload(frames));
+    return new ShortPacket(false, random(), pn, new Payload(frames));
   }
 
   private Packet ip(final long pn, final Frame... frames) {
-    return InitialPacket.create(
-        of(random()), of(random()), pn, Version.DRAFT_29, Optional.empty(), frames);
+    return InitialPacket.create(random(), random(), pn, Version.DRAFT_29, Optional.empty(), frames);
   }
 
   private Packet hp(final long pn, final Frame... frames) {
-    return HandshakePacket.create(of(random()), of(random()), pn, Version.DRAFT_29, frames);
+    return HandshakePacket.create(random(), random(), pn, Version.DRAFT_29, frames);
   }
 
   private Packet verifyNext() {

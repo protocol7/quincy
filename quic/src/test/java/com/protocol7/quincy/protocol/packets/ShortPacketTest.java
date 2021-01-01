@@ -1,6 +1,5 @@
 package com.protocol7.quincy.protocol.packets;
 
-import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.protocol.ConnectionId;
@@ -70,7 +69,7 @@ public class ShortPacketTest {
   }
 
   private ShortPacket packet() {
-    return new ShortPacket(false, of(dest), pn, new Payload(PingFrame.INSTANCE));
+    return new ShortPacket(false, dest, pn, new Payload(PingFrame.INSTANCE));
   }
 
   private ByteBuf buffer(final ShortPacket packet) {

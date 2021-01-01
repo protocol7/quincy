@@ -36,7 +36,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
         public void onData(final Stream stream, final byte[] data, final boolean finished) {
           ctx.fireChannelRead(
               QuicPacket.of(
-                  connection.getLocalConnectionId().get(),
+                  connection.getLocalConnectionId(),
                   stream.getId(),
                   data,
                   connection.getPeerAddress()));
@@ -98,9 +98,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
         if (packet instanceof FullPacket) {
           MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
         }
-        packet
-            .getDestinationConnectionId()
-            .ifPresent(connId -> MDC.put("connectionid", connId.toString()));
+        MDC.put("connectionid", packet.getDestinationConnectionId().toString());
 
         connection.onPacket(packet);
       }

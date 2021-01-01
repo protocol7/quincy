@@ -10,7 +10,6 @@ import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.quincy.streams.StreamListener;
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 import org.slf4j.MDC;
 
 public class PacketRouter {
@@ -29,7 +28,7 @@ public class PacketRouter {
   private boolean validateVersion(
       final HalfParsedPacket<?> halfParsed,
       final PacketSender sender,
-      final Optional<ConnectionId> srcConnId) {
+      final ConnectionId srcConnId) {
 
     if (halfParsed.getVersion().isPresent()) {
       if (halfParsed.getVersion().get() != version) {
@@ -62,9 +61,7 @@ public class PacketRouter {
         if (packet instanceof FullPacket) {
           MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
         }
-        if (packet.getDestinationConnectionId().isPresent()) {
-          MDC.put("connectionid", packet.getDestinationConnectionId().get().toString());
-        }
+        MDC.put("connectionid", packet.getDestinationConnectionId().toString());
 
         conn.onPacket(packet);
       } else {

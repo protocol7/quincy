@@ -27,8 +27,8 @@ public class VersionNegotiationPacket implements Packet {
       throw new IllegalArgumentException("Invalid version");
     }
 
-    final Optional<ConnectionId> destConnId = ConnectionId.read(bb);
-    final Optional<ConnectionId> srcConnId = ConnectionId.read(bb);
+    final ConnectionId destConnId = ConnectionId.read(bb);
+    final ConnectionId srcConnId = ConnectionId.read(bb);
 
     final List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
@@ -46,7 +46,7 @@ public class VersionNegotiationPacket implements Packet {
       }
 
       @Override
-      public Optional<ConnectionId> getConnectionId() {
+      public ConnectionId getConnectionId() {
         return destConnId;
       }
 
@@ -57,20 +57,20 @@ public class VersionNegotiationPacket implements Packet {
     };
   }
 
-  private final Optional<ConnectionId> destinationConnectionId;
-  private final Optional<ConnectionId> sourceConnectionId;
+  private final ConnectionId destinationConnectionId;
+  private final ConnectionId sourceConnectionId;
   private final List<Version> supportedVersions;
 
   public VersionNegotiationPacket(
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final Version... supportedVersions) {
     this(destinationConnectionId, sourceConnectionId, List.of(supportedVersions));
   }
 
   public VersionNegotiationPacket(
-      final Optional<ConnectionId> destinationConnectionId,
-      final Optional<ConnectionId> sourceConnectionId,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
       final List<Version> supportedVersions) {
     this.destinationConnectionId = destinationConnectionId;
     this.sourceConnectionId = sourceConnectionId;
@@ -98,12 +98,12 @@ public class VersionNegotiationPacket implements Packet {
   }
 
   @Override
-  public Optional<ConnectionId> getSourceConnectionId() {
+  public ConnectionId getSourceConnectionId() {
     return sourceConnectionId;
   }
 
   @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
+  public ConnectionId getDestinationConnectionId() {
     return destinationConnectionId;
   }
 

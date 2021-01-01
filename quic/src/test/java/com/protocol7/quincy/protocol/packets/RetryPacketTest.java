@@ -1,5 +1,6 @@
 package com.protocol7.quincy.protocol.packets;
 
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -16,12 +17,12 @@ import org.junit.Test;
 
 public class RetryPacketTest {
 
-  private ConnectionId dest = ConnectionId.random();
-  private ConnectionId src = ConnectionId.random();
-  private ConnectionId org = ConnectionId.random();
-  private byte[] token = Rnd.rndBytes(18);
-  private RetryPacket packet =
-      new RetryPacket(Version.DRAFT_29, of(dest), of(src), of(org), token, null);
+  private final ConnectionId dest = ConnectionId.random();
+  private final ConnectionId src = ConnectionId.random();
+  private final ConnectionId org = ConnectionId.random();
+  private final byte[] token = Rnd.rndBytes(18);
+  private final RetryPacket packet =
+      new RetryPacket(Version.DRAFT_29, dest, src, of(org), token, empty());
 
   private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
@@ -33,8 +34,8 @@ public class RetryPacketTest {
     final RetryPacket parsed = RetryPacket.parse(bb).complete(l -> aead);
 
     assertEquals(Version.DRAFT_29, parsed.getVersion());
-    assertEquals(dest, parsed.getDestinationConnectionId().get());
-    assertEquals(src, parsed.getSourceConnectionId().get());
+    assertEquals(dest, parsed.getDestinationConnectionId());
+    assertEquals(src, parsed.getSourceConnectionId());
     assertArrayEquals(token, parsed.getRetryToken());
 
     // must be verifiable
@@ -52,10 +53,10 @@ public class RetryPacketTest {
     assertEquals(Version.DRAFT_29, parsed.getVersion());
     assertEquals(
         new ConnectionId(Hex.dehex("3198cdb7fc8158ad26651d1333ab78e359dc")),
-        parsed.getDestinationConnectionId().get());
+        parsed.getDestinationConnectionId());
     assertEquals(
         new ConnectionId(Hex.dehex("3ef889880f335aa023d909c376d75aed9804916d")),
-        parsed.getSourceConnectionId().get());
+        parsed.getSourceConnectionId());
     assertEquals(28, parsed.getRetryToken().length);
 
     // must be verifiable

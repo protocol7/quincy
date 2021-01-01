@@ -1,6 +1,5 @@
 package com.protocol7.quincy.logging;
 
-import static java.util.Optional.of;
 import static org.mockito.Mockito.verify;
 
 import com.protocol7.quincy.PipelineContext;
@@ -40,6 +39,6 @@ public class LoggingHandlerTest {
   }
 
   private FullPacket p(final Frame... frames) {
-    return new ShortPacket(false, of(ConnectionId.random()), PacketNumber.MIN, new Payload(frames));
+    return new ShortPacket(false, ConnectionId.random(), PacketNumber.MIN, new Payload(frames));
   }
 }
