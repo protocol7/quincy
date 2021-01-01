@@ -112,7 +112,7 @@ public class ClientTlsManager implements InboundHandler {
 
         for (final Frame frame : sp.getPayload().getFrames()) {
           if (frame instanceof HandshakeDoneFrame) {
-            System.out.println("Got handshake done");
+            tlsSession.unsetHandshakeAead();
 
             ctx.setState(State.Done);
             promise.setSuccess(null);

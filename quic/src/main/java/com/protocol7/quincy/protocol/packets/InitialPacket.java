@@ -7,7 +7,7 @@ import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.AEADProvider;
 import com.protocol7.quincy.utils.Bytes;
-import com.protocol7.quincy.utils.Opt;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
@@ -215,7 +215,9 @@ public class InitialPacket extends LongHeaderPacket {
         + ", payload="
         + getPayload()
         + ", token="
-        + Opt.toStringBytes(token)
+        + "["
+        + Hex.hex(token.orElse(new byte[0]))
+        + "]"
         + '}';
   }
 }

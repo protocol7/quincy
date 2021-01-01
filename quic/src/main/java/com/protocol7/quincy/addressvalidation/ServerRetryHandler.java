@@ -9,7 +9,6 @@ import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class ServerRetryHandler implements InboundHandler {
@@ -64,13 +63,12 @@ public class ServerRetryHandler implements InboundHandler {
     final ConnectionId newLocalConnectionId = ConnectionId.random();
 
     ctx.sendPacket(
-        new RetryPacket(
+        RetryPacket.createOutgoing(
             ctx.getVersion(),
             initialPacket.getSourceConnectionId(),
             newLocalConnectionId,
-            Optional.of(initialPacket.getDestinationConnectionId()),
-            retryToken,
-            Optional.empty()));
+            initialPacket.getDestinationConnectionId(),
+            retryToken));
   }
 
   private long now() {

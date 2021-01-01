@@ -12,7 +12,6 @@ import com.protocol7.quincy.tls.aead.TestAEAD;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import java.util.Optional;
 import org.junit.Test;
 
 public class PacketTest {
@@ -74,8 +73,7 @@ public class PacketTest {
   @Test
   public void parseRetryPacket() {
     final RetryPacket packet =
-        new RetryPacket(
-            Version.DRAFT_29, connId, EMPTY, Optional.of(connId), Rnd.rndBytes(11), empty());
+        RetryPacket.createOutgoing(Version.DRAFT_29, connId, EMPTY, connId, Rnd.rndBytes(11));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

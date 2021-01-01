@@ -20,6 +20,21 @@ public class RetryPacket implements Packet {
 
   private static final RetryTokenIntegrityTagAEAD TAG_AEAD = new RetryTokenIntegrityTagAEAD();
 
+  public static RetryPacket createOutgoing(
+      final Version version,
+      final ConnectionId destinationConnectionId,
+      final ConnectionId sourceConnectionId,
+      final ConnectionId originalConnectionId,
+      final byte[] retryToken) {
+    return new RetryPacket(
+        version,
+        destinationConnectionId,
+        sourceConnectionId,
+        Optional.of(originalConnectionId),
+        retryToken,
+        Optional.empty());
+  }
+
   public static HalfParsedPacket<RetryPacket> parse(final ByteBuf bb) {
     final byte b = bb.readByte(); // TODO verify reserved and packet types
 
@@ -66,7 +81,7 @@ public class RetryPacket implements Packet {
   private final byte[] retryToken;
   private final Optional<byte[]> retryTokenIntegrityTag;
 
-  public RetryPacket(
+  private RetryPacket(
       final Version version,
       final ConnectionId destinationConnectionId,
       final ConnectionId sourceConnectionId,

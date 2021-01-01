@@ -4,7 +4,7 @@ import java.security.SecureRandom;
 
 public class Rnd {
 
-  private static SecureRandom rnd = new SecureRandom();
+  private static final SecureRandom rnd = new SecureRandom();
 
   public static void rndBytes(final byte[] b) {
     rnd.nextBytes(b);

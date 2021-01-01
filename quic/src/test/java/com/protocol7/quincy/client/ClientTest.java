@@ -110,13 +110,8 @@ public class ClientTest {
 
     // first packet did not contain token, server sends retry
     connection.onPacket(
-        new RetryPacket(
-            Version.DRAFT_29,
-            EMPTY,
-            srcConnectionId,
-            Optional.of(destConnectionId),
-            retryToken,
-            Optional.empty()));
+        RetryPacket.createOutgoing(
+            Version.DRAFT_29, EMPTY, srcConnectionId, destConnectionId, retryToken));
 
     // validate new initial packet sent
     final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);

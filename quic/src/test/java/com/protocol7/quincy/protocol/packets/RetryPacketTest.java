@@ -1,7 +1,5 @@
 package com.protocol7.quincy.protocol.packets;
 
-import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
@@ -22,7 +20,7 @@ public class RetryPacketTest {
   private final ConnectionId org = ConnectionId.random();
   private final byte[] token = Rnd.rndBytes(18);
   private final RetryPacket packet =
-      new RetryPacket(Version.DRAFT_29, dest, src, of(org), token, empty());
+      RetryPacket.createOutgoing(Version.DRAFT_29, dest, src, org, token);
 
   private final AEAD aead = InitialAEAD.create(ConnectionId.random().asBytes(), true);
 
