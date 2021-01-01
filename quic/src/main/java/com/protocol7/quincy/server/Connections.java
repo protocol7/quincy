@@ -4,6 +4,7 @@ import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.streams.StreamListener;
 import io.netty.util.Timer;
@@ -25,16 +26,19 @@ public class Connections {
   private final PrivateKey privateKey;
   private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
   private final Timer timer;
+  private final QuicTokenHandler tokenHandler;
 
   public Connections(
       final Configuration configuration,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final Timer timer) {
+      final Timer timer,
+      final QuicTokenHandler tokenHandler) {
     this.configuration = configuration;
     this.certificates = certificates;
     this.privateKey = privateKey;
     this.timer = timer;
+    this.tokenHandler = tokenHandler;
   }
 
   public ServerConnection get(
@@ -57,7 +61,8 @@ public class Connections {
               new DefaultFlowControlHandler(
                   configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
               peerAddress,
-              timer);
+              timer,
+              tokenHandler);
       final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;

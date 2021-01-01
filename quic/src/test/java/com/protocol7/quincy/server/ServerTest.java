@@ -12,6 +12,7 @@ import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
@@ -75,7 +76,8 @@ public class ServerTest {
             privateKey,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            scheduler);
+            scheduler,
+            InsecureQuicTokenHandler.INSTANCE);
   }
 
   @Test

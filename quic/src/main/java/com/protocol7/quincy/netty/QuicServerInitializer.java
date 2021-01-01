@@ -1,6 +1,7 @@
 package com.protocol7.quincy.netty;
 
 import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -15,23 +16,26 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
   private final ChannelHandler handler;
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
+  private final QuicTokenHandler tokenHandler;
 
   public QuicServerInitializer(
       final Configuration configuration,
       final ChannelHandler handler,
       final List<byte[]> certificates,
-      final PrivateKey privateKey) {
+      final PrivateKey privateKey,
+      final QuicTokenHandler tokenHandler) {
     this.configuration = configuration;
     this.handler = handler;
     this.certificates = certificates;
     this.privateKey = privateKey;
+    this.tokenHandler = tokenHandler;
   }
 
   @Override
   protected void initChannel(final DatagramChannel ch) {
     final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast(new LoggingHandler());
-    pipeline.addLast(new QuicServerHandler(configuration, certificates, privateKey));
+    pipeline.addLast(new QuicServerHandler(configuration, certificates, privateKey, tokenHandler));
     pipeline.addLast(handler);
   }
 }

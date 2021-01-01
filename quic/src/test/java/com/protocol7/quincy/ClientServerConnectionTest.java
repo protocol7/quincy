@@ -16,6 +16,7 @@ import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.netty.QuicBuilder;
+import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.server.ServerConnection;
@@ -108,7 +109,8 @@ public class ClientServerConnectionTest {
             privateKey,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            scheduler);
+            scheduler,
+            InsecureQuicTokenHandler.INSTANCE);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

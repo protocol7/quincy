@@ -3,6 +3,8 @@ package com.protocol7.quincy.netty;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
+import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.Version;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
@@ -27,6 +29,7 @@ public class QuicBuilder {
 
   private List<byte[]> certificates;
   private PrivateKey privateKey;
+  private QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
 
   public QuicBuilder withVersion(final Version version) {
     this.version = version;
@@ -98,6 +101,11 @@ public class QuicBuilder {
     return this;
   }
 
+  public QuicBuilder withTokenHandler(final QuicTokenHandler tokenHandler) {
+    this.tokenHandler = tokenHandler;
+    return this;
+  }
+
   public Configuration configuration() {
     return new Configuration(
         version,
@@ -118,7 +126,8 @@ public class QuicBuilder {
     requireNonNull(certificates);
     requireNonNull(privateKey);
 
-    return new QuicServerInitializer(configuration(), handler, certificates, privateKey);
+    return new QuicServerInitializer(
+        configuration(), handler, certificates, privateKey, tokenHandler);
   }
 
   public ChannelInitializer<DatagramChannel> clientChannelInitializer(

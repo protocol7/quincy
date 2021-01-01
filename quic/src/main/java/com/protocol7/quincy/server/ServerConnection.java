@@ -4,13 +4,13 @@ import static java.util.Optional.empty;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.addressvalidation.RetryToken;
 import com.protocol7.quincy.addressvalidation.ServerRetryHandler;
 import com.protocol7.quincy.connection.InternalConnection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.logging.LoggingHandler;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -64,7 +64,8 @@ public class ServerConnection implements InternalConnection {
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final Timer timer) {
+      final Timer timer,
+      final QuicTokenHandler tokenHandler) {
     this.version = configuration.getVersion();
     this.packetSender = packetSender;
     this.peerAddress = peerAddress;
@@ -89,7 +90,7 @@ public class ServerConnection implements InternalConnection {
         new Pipeline(
             List.of(
                 logger,
-                new ServerRetryHandler(new RetryToken(privateKey), 30, TimeUnit.MINUTES),
+                new ServerRetryHandler(tokenHandler),
                 tlsManager,
                 packetBuffer,
                 streamManager,

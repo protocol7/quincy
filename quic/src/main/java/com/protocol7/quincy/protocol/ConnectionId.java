@@ -5,13 +5,14 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.protocol7.quincy.utils.Hex;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 
 public class ConnectionId {
 
   private static final int MIN_LENGTH = 0;
   public static final int LENGTH = 18;
-  private static final int MAX_LENGTH = 20;
+  public static final int MAX_LENGTH = 20;
 
   public static final ConnectionId EMPTY = new ConnectionId(new byte[0]);
 
@@ -65,6 +66,10 @@ public class ConnectionId {
 
   public byte[] asBytes() {
     return id;
+  }
+
+  public ByteBuf asByteBuffer() {
+    return Unpooled.wrappedBuffer(id);
   }
 
   @Override

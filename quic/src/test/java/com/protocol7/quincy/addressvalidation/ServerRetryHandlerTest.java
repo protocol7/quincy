@@ -1,8 +1,9 @@
 package com.protocol7.quincy.addressvalidation;
 
-import static java.lang.System.currentTimeMillis;
+import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -11,6 +12,8 @@ import static org.mockito.Mockito.when;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.State;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
+import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
@@ -18,10 +21,11 @@ import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
-import com.protocol7.quincy.tls.KeyUtil;
-import java.net.InetAddress;
+import com.protocol7.quincy.utils.Bytes;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+import java.net.InetSocketAddress;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -33,11 +37,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ServerRetryHandlerTest {
 
   @Mock PipelineContext ctx;
-  private final RetryToken retryToken =
-      new RetryToken(KeyUtil.getPrivateKey("src/test/resources/server.der"));
+  private final QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
+
   private final ServerRetryHandler handler =
-      new ServerRetryHandler(retryToken, 10000, TimeUnit.MILLISECONDS);
-  private final InetAddress address = TestUtil.getTestAddress().getAddress();
+      new ServerRetryHandler(InsecureQuicTokenHandler.INSTANCE);
+  private final InetSocketAddress address = TestUtil.getTestAddress();
 
   @Before
   public void setUp() {
@@ -48,7 +52,7 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void retry() {
-    final InitialPacket initialPacket = p(Optional.empty());
+    final InitialPacket initialPacket = p(ConnectionId.random(), Optional.empty());
     handler.onReceivePacket(initialPacket, ctx);
 
     assertToken(initialPacket.getSourceConnectionId());
@@ -59,8 +63,12 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void withToken() {
-    final InitialPacket initialPacket =
-        p(of(retryToken.create(address, currentTimeMillis() + 10000)));
+    final ConnectionId destConnId = ConnectionId.random();
+    final ByteBuf tokenBB = Unpooled.buffer();
+    tokenHandler.writeToken(tokenBB, destConnId.asByteBuffer(), address);
+    final Optional<byte[]> token = Optional.of(Bytes.drainToArray(tokenBB));
+
+    final InitialPacket initialPacket = p(destConnId, token);
     handler.onReceivePacket(initialPacket, ctx);
 
     // no retry sent
@@ -72,7 +80,8 @@ public class ServerRetryHandlerTest {
 
   @Test
   public void withInvalidToken() {
-    final InitialPacket initialPacket = p(of("this is not a token".getBytes()));
+    final InitialPacket initialPacket =
+        p(ConnectionId.random(), of("this is not a token".getBytes()));
     handler.onReceivePacket(initialPacket, ctx);
 
     assertToken(initialPacket.getSourceConnectionId());
@@ -87,7 +96,8 @@ public class ServerRetryHandlerTest {
 
     final RetryPacket retry = retryCaptor.getValue();
     assertEquals(expectedDestConnId, retry.getDestinationConnectionId());
-    retryToken.validate(retry.getRetryToken(), address, currentTimeMillis() + 10000);
+    assertNotEquals(
+        -1, tokenHandler.validateToken(Unpooled.wrappedBuffer(retry.getRetryToken()), address));
   }
 
   @Test
@@ -96,7 +106,7 @@ public class ServerRetryHandlerTest {
     // TODO if this correct?
     when(ctx.getState()).thenReturn(State.BeforeHello);
 
-    final InitialPacket initialPacket = p(Optional.empty());
+    final InitialPacket initialPacket = p(ConnectionId.random(), empty());
     handler.onReceivePacket(initialPacket, ctx);
 
     // no retry packet sent
@@ -106,9 +116,10 @@ public class ServerRetryHandlerTest {
     verify(ctx).next(initialPacket);
   }
 
-  private InitialPacket p(final Optional<byte[]> token) {
+  private InitialPacket p(final ConnectionId destConnId, final Optional<byte[]> token) {
+
     return InitialPacket.create(
-        ConnectionId.random(),
+        destConnId,
         ConnectionId.random(),
         PacketNumber.MIN,
         Version.DRAFT_29,

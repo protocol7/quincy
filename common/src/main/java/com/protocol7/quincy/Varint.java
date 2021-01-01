@@ -10,6 +10,7 @@ public class Varint {
 
   public static final long MIN = 0L;
   public static final long MAX = 4611686018427387903L;
+  public static final int MAX_LENGTH = 8;
 
   public static long random() {
     return random(0);

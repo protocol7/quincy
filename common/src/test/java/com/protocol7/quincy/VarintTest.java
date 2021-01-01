@@ -40,7 +40,7 @@ public class VarintTest {
 
   @Test
   public void read8() {
-    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("c2 19 7c 5e ff 14 e8 8c"));
+    final ByteBuf bb = Unpooled.copiedBuffer(Hex.dehex("c2197c5eff14e88c"));
 
     final long vi = Varint.readAsLong(bb);
 

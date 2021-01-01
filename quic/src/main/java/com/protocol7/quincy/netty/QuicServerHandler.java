@@ -3,6 +3,7 @@ package com.protocol7.quincy.netty;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.NettyPacketSender;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.server.Connections;
 import com.protocol7.quincy.server.PacketRouter;
 import com.protocol7.quincy.streams.Stream;
@@ -40,8 +41,10 @@ public class QuicServerHandler extends ChannelDuplexHandler {
   public QuicServerHandler(
       final Configuration configuration,
       final List<byte[]> certificates,
-      final PrivateKey privateKey) {
-    this.connections = new Connections(configuration, certificates, privateKey, timer);
+      final PrivateKey privateKey,
+      final QuicTokenHandler tokenHandler) {
+    this.connections =
+        new Connections(configuration, certificates, privateKey, timer, tokenHandler);
     this.router = new PacketRouter(configuration.getVersion(), connections, streamListener);
   }
 

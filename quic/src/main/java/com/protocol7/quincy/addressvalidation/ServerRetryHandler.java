@@ -5,21 +5,21 @@ import static java.util.Objects.requireNonNull;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.RetryPacket;
-import java.util.concurrent.TimeUnit;
+import com.protocol7.quincy.utils.Bytes;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 
 public class ServerRetryHandler implements InboundHandler {
 
-  private final RetryToken retryTokenManager;
-  private final long ttlMs;
+  private final QuicTokenHandler tokenHandler;
 
-  public ServerRetryHandler(
-      final RetryToken retryTokenManager, final long ttl, final TimeUnit timeUnit) {
-    this.retryTokenManager = requireNonNull(retryTokenManager);
-    this.ttlMs = timeUnit.toMillis(ttl);
+  public ServerRetryHandler(final QuicTokenHandler tokenHandler) {
+    this.tokenHandler = requireNonNull(tokenHandler);
   }
 
   @Override
@@ -32,14 +32,18 @@ public class ServerRetryHandler implements InboundHandler {
         final InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
-          if (retryTokenManager.validate(
-              initialPacket.getToken().get(), ctx.getPeerAddress().getAddress(), now())) {
-            // good to go
-          } else {
-            // send retry
-            sendRetry(ctx, initialPacket);
+          final ByteBuf token = Unpooled.wrappedBuffer(initialPacket.getToken().get());
+          try {
+            if (tokenHandler.validateToken(token, ctx.getPeerAddress()) != -1) {
+              // good to go
+            } else {
+              // send retry
+              sendRetry(ctx, initialPacket);
 
-            return;
+              return;
+            }
+          } finally {
+            token.release();
           }
         } else {
           // send retry
@@ -57,8 +61,11 @@ public class ServerRetryHandler implements InboundHandler {
   }
 
   private void sendRetry(final PipelineContext ctx, final InitialPacket initialPacket) {
-    final byte[] retryToken =
-        retryTokenManager.create(ctx.getPeerAddress().getAddress(), now() + ttlMs);
+    final ByteBuf tokenBB = Unpooled.buffer();
+    tokenHandler.writeToken(
+        tokenBB, initialPacket.getSourceConnectionId().asByteBuffer(), ctx.getPeerAddress());
+
+    final byte[] retryToken = Bytes.drainToArray(tokenBB);
 
     final ConnectionId newLocalConnectionId = ConnectionId.random();
 
