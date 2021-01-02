@@ -1,5 +1,6 @@
 package com.protocol7.quincy.tls.messages;
 
+import static com.protocol7.quincy.tls.messages.MessageType.SERVER_HELLO;
 import static com.protocol7.quincy.utils.Hex.hex;
 
 import com.google.common.collect.ImmutableList;
@@ -21,8 +22,9 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ServerHello implements Writeable {
+public class ServerHello implements Message, Writeable {
 
+  private static final MessageType TYPE = SERVER_HELLO;
   private static final byte[] VERSION = new byte[] {0x03, 0x03};
 
   public static ServerHello defaults(final KeyExchange ke, final Extension... exts) {
@@ -45,7 +47,7 @@ public class ServerHello implements Writeable {
 
   public static ServerHello parse(final ByteBuf bb, final boolean isClient) {
     final int messageType = bb.readByte(); // server hello
-    if (messageType != 0x02) {
+    if (messageType != TYPE.getType()) {
       throw new IllegalArgumentException("Not a server hello");
     }
 
@@ -82,7 +84,7 @@ public class ServerHello implements Writeable {
   }
 
   public void write(final ByteBuf bb) {
-    bb.writeByte(0x02);
+    bb.writeByte(TYPE.getType());
 
     final int lenPosition = bb.writerIndex();
     // write placeholder
@@ -158,5 +160,10 @@ public class ServerHello implements Writeable {
         + ", extensions="
         + extensions
         + '}';
+  }
+
+  @Override
+  public MessageType getType() {
+    return TYPE;
   }
 }

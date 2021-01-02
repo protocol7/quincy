@@ -49,7 +49,7 @@ public class ClientTlsSessionTest {
 
   @Test
   public void handshake() {
-    final byte[] ch = engine.startHandshake(connectionId);
+    final ByteBuf ch = Unpooled.wrappedBuffer(engine.startHandshake(connectionId));
 
     final ClientHello hello = ClientHello.parse(ch, false);
 
@@ -88,7 +88,7 @@ public class ClientTlsSessionTest {
   public void serverHello() {
     final List<Extension> ext = List.of(keyshare(), SupportedVersions.TLS13, TestUtil.tps());
 
-    final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
+    final ByteBuf b = Unpooled.wrappedBuffer(sh(new byte[32], TLS_AES_128_GCM_SHA256, ext));
 
     assertFalse(started.available(EncryptionLevel.Handshake));
 
@@ -111,44 +111,49 @@ public class ClientTlsSessionTest {
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloIllegalVersion() {
-    final byte[] b =
-        dehex(
-            "0200009c"
-                + "9999"
-                + "000000000000000000000000000000000000000000000000000000000000000000130100007400330024001d0020071967d323b1e8362ae9dfdb5280a220b4795019261715f54a6bfc251b17fc45002b000203040ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000");
+    final ByteBuf b =
+        Unpooled.wrappedBuffer(
+            dehex(
+                "0200009c"
+                    + "9999"
+                    + "000000000000000000000000000000000000000000000000000000000000000000130100007400330024001d0020071967d323b1e8362ae9dfdb5280a220b4795019261715f54a6bfc251b17fc45002b000203040ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000"));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoKeyShare() {
-    final byte[] b =
-        sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(SupportedVersions.TLS13, TestUtil.tps()));
+    final ByteBuf b =
+        Unpooled.wrappedBuffer(
+            sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(SupportedVersions.TLS13, TestUtil.tps())));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloNoSupportedVersion() {
-    final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps()));
+    final ByteBuf b =
+        Unpooled.wrappedBuffer(
+            sh(new byte[32], TLS_AES_128_GCM_SHA256, ext(keyshare(), TestUtil.tps())));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalArgumentException.class)
   public void serverHelloIllegalSupportedVersion() {
-    final byte[] b =
-        dehex(
-            "0200009c0303000000000000000000000000000000000000000000000000000000000000000000130100007400330024001d0020071967d323b1e8362ae9dfdb5280a220b4795019261715f54a6bfc251b17fc45002b0002"
-                + "9999"
-                + "0ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000");
+    final ByteBuf b =
+        Unpooled.wrappedBuffer(
+            dehex(
+                "0200009c0303000000000000000000000000000000000000000000000000000000000000000000130100007400330024001d0020071967d323b1e8362ae9dfdb5280a220b4795019261715f54a6bfc251b17fc45002b0002"
+                    + "9999"
+                    + "0ff5004200000000003c0000000400008000000100040000c00000020002006400030002001e0005000205ac00080002006400090000000a000400008000000b000400008000"));
 
     started.handleServerHello(b);
   }
 
   @Test(expected = IllegalStateException.class)
   public void serverHelloWithoutStart() {
-    engine.handleServerHello(new byte[0]);
+    engine.handleServerHello(Unpooled.wrappedBuffer(new byte[0]));
   }
 
   @Test(expected = IllegalStateException.class)

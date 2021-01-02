@@ -22,6 +22,8 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.util.concurrent.Promise;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -85,7 +87,12 @@ public class ClientTlsManager implements InboundHandler {
           if (frame instanceof CryptoFrame) {
             final CryptoFrame cf = (CryptoFrame) frame;
 
-            tlsSession.handleServerHello(cf.getCryptoData());
+            final ByteBuf cryptoData = Unpooled.wrappedBuffer(cf.getCryptoData());
+            try {
+              tlsSession.handleServerHello(cryptoData);
+            } finally {
+              cryptoData.release();
+            }
             ctx.setState(State.BeforeHandshake);
           }
         }

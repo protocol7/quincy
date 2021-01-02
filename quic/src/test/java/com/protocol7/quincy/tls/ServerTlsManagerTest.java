@@ -27,6 +27,7 @@ import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+import io.netty.buffer.Unpooled;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -68,7 +69,8 @@ public class ServerTlsManagerTest {
     verify(ctx).setState(State.BeforeHandshake);
     verify(ctx).next(chPacket);
 
-    clientTlsSession.handleServerHello(cfCaptor.getAllValues().get(0).getCryptoData());
+    clientTlsSession.handleServerHello(
+        Unpooled.wrappedBuffer(cfCaptor.getAllValues().get(0).getCryptoData()));
     final byte[] clientFin =
         clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData()).get();
 

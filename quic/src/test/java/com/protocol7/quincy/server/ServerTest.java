@@ -22,6 +22,7 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
+import io.netty.buffer.Unpooled;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.SucceededFuture;
@@ -104,7 +105,7 @@ public class ServerTest {
     assertEquals(1, serverHello.getPayload().getFrames().size());
     final CryptoFrame cf = (CryptoFrame) serverHello.getPayload().getFrames().get(0);
 
-    clientTlsSession.handleServerHello(cf.getCryptoData());
+    clientTlsSession.handleServerHello(Unpooled.wrappedBuffer(cf.getCryptoData()));
 
     final HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
     assertEquals(srcConnectionId, handshake.getDestinationConnectionId());

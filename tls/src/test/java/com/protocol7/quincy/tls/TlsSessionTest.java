@@ -4,9 +4,9 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.messages.EncryptedExtensions;
+import com.protocol7.quincy.tls.messages.Finished;
 import com.protocol7.quincy.tls.messages.ServerCertificate;
 import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
-import com.protocol7.quincy.tls.messages.ServerHandshakeFinished;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
@@ -47,7 +47,7 @@ public class TlsSessionTest {
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
-    client.handleServerHello(shah.getServerHello());
+    client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
     final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get();
 
     server.handleClientFinished(clientFin);
@@ -59,13 +59,13 @@ public class TlsSessionTest {
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
-    client.handleServerHello(shah.getServerHello());
+    client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
 
     final ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
     final EncryptedExtensions parsedEE = EncryptedExtensions.parse(bb, true);
     final ServerCertificate parsedSC = ServerCertificate.parse(bb);
     final ServerCertificateVerify parsedSCV = ServerCertificateVerify.parse(bb);
-    final ServerHandshakeFinished parsedSHE = ServerHandshakeFinished.parse(bb);
+    final Finished parsedSHE = Finished.parse(bb);
 
     final byte[] sig = parsedSCV.getSignature();
 
@@ -73,7 +73,10 @@ public class TlsSessionTest {
 
     final byte[] scv =
         Bytes.write(
-            parsedEE, parsedSC, new ServerCertificateVerify(parsedSCV.getType(), sig), parsedSHE);
+            parsedEE,
+            parsedSC,
+            new ServerCertificateVerify(parsedSCV.getVerifyType(), sig),
+            parsedSHE);
 
     final byte[] clientFin = client.handleHandshake(scv).get();
 
@@ -86,7 +89,7 @@ public class TlsSessionTest {
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
-    client.handleServerHello(shah.getServerHello());
+    client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
     final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get();
 
     // modify verification data
@@ -101,19 +104,19 @@ public class TlsSessionTest {
 
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
-    client.handleServerHello(shah.getServerHello());
+    client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
 
     final ByteBuf bb = Unpooled.wrappedBuffer(shah.getServerHandshake());
     final EncryptedExtensions parsedEE = EncryptedExtensions.parse(bb, true);
     final ServerCertificate parsedSC = ServerCertificate.parse(bb);
     final ServerCertificateVerify parsedSCV = ServerCertificateVerify.parse(bb);
-    final ServerHandshakeFinished parsedSHE = ServerHandshakeFinished.parse(bb);
+    final Finished parsedSHE = Finished.parse(bb);
 
     final byte[] vd = parsedSHE.getVerificationData();
 
     vd[0]++; // modify verification data
 
-    final byte[] scv = Bytes.write(parsedEE, parsedSC, parsedSCV, new ServerHandshakeFinished(vd));
+    final byte[] scv = Bytes.write(parsedEE, parsedSC, parsedSCV, new Finished(vd));
 
     client.handleHandshake(scv).get();
   }

@@ -13,12 +13,11 @@ import com.protocol7.quincy.tls.extensions.KeyShare;
 import com.protocol7.quincy.tls.extensions.SupportedVersion;
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
-import com.protocol7.quincy.tls.messages.ClientFinished;
 import com.protocol7.quincy.tls.messages.ClientHello;
 import com.protocol7.quincy.tls.messages.EncryptedExtensions;
+import com.protocol7.quincy.tls.messages.Finished;
 import com.protocol7.quincy.tls.messages.ServerCertificate;
 import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
-import com.protocol7.quincy.tls.messages.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -55,71 +54,77 @@ public class ServerTlsSession {
   public ServerHelloAndHandshake handleClientHello(final byte[] msg) {
     clientHello = msg;
 
-    final ClientHello ch = ClientHello.parse(msg, false);
+    final ByteBuf bb = Unpooled.wrappedBuffer(msg);
+    try {
+      final ClientHello ch = ClientHello.parse(bb, false);
 
-    // verify expected extensions
-    final SupportedVersions versions =
-        (SupportedVersions)
-            ch.getExtension(ExtensionType.SUPPORTED_VERSIONS)
-                .orElseThrow(IllegalArgumentException::new);
-    if (!versions.getVersions().contains(SupportedVersion.TLS13)) {
-      throw new IllegalArgumentException("Illegal version");
+      // verify expected extensions
+      final SupportedVersions versions =
+          (SupportedVersions)
+              ch.getExtension(ExtensionType.SUPPORTED_VERSIONS)
+                  .orElseThrow(IllegalArgumentException::new);
+      if (!versions.getVersions().contains(SupportedVersion.TLS13)) {
+        throw new IllegalArgumentException("Illegal version");
+      }
+
+      final KeyShare keyShareExtension =
+          (KeyShare)
+              ch.getExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
+
+      // create ServerHello
+      serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));
+
+      final ByteBuf handshakeBB = Unpooled.buffer();
+
+      // TODO decide on what parameters to send where
+      final EncryptedExtensions ee = EncryptedExtensions.defaults(transportParameters);
+      ee.write(handshakeBB);
+
+      final ServerCertificate sc = new ServerCertificate(new byte[0], certificates);
+      sc.write(handshakeBB);
+
+      // create server cert verification
+      final byte[] toVerify = peekToArray(handshakeBB);
+
+      final byte[] verificationSig =
+          CertificateVerify.sign(
+              Hash.sha256(clientHello, serverHello, toVerify), privateKey, false);
+
+      final ServerCertificateVerify scv = new ServerCertificateVerify(2052, verificationSig);
+      scv.write(handshakeBB);
+
+      // create server finished
+      final byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
+      final byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
+      handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
+      final byte[] helloHash = Hash.sha256(clientHello, serverHello);
+
+      // create handshake AEAD
+      final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, false);
+      aeads.setHandshakeAead(handshakeAEAD);
+
+      final byte[] serverHandshakeTrafficSecret =
+          HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
+
+      // finished_hash = SHA256(Client Hello ... Server Cert Verify)
+      final byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
+
+      final byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash);
+
+      final Finished fin = new Finished(verifyData);
+      fin.write(handshakeBB);
+
+      // create 1-RTT AEAD
+      handshake = Bytes.drainToArray(handshakeBB);
+
+      final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
+      final AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
+      aeads.setOneRttAead(oneRttAEAD);
+
+      return new ServerHelloAndHandshake(serverHello, handshake);
+    } finally {
+
     }
-
-    final KeyShare keyShareExtension =
-        (KeyShare)
-            ch.getExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
-
-    // create ServerHello
-    serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));
-
-    final ByteBuf handshakeBB = Unpooled.buffer();
-
-    // TODO decide on what parameters to send where
-    final EncryptedExtensions ee = EncryptedExtensions.defaults(transportParameters);
-    ee.write(handshakeBB);
-
-    final ServerCertificate sc = new ServerCertificate(new byte[0], certificates);
-    sc.write(handshakeBB);
-
-    // create server cert verification
-    final byte[] toVerify = peekToArray(handshakeBB);
-
-    final byte[] verificationSig =
-        CertificateVerify.sign(Hash.sha256(clientHello, serverHello, toVerify), privateKey, false);
-
-    final ServerCertificateVerify scv = new ServerCertificateVerify(2052, verificationSig);
-    scv.write(handshakeBB);
-
-    // create server finished
-    final byte[] peerPublicKey = keyShareExtension.getKey(Group.X25519).get();
-    final byte[] sharedSecret = kek.generateSharedSecret(peerPublicKey);
-    handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
-    final byte[] helloHash = Hash.sha256(clientHello, serverHello);
-
-    // create handshake AEAD
-    final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, false);
-    aeads.setHandshakeAead(handshakeAEAD);
-
-    final byte[] serverHandshakeTrafficSecret =
-        HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
-
-    // finished_hash = SHA256(Client Hello ... Server Cert Verify)
-    final byte[] finishedHash = Hash.sha256(clientHello, serverHello, peekToArray(handshakeBB));
-
-    final byte[] verifyData = VerifyData.create(serverHandshakeTrafficSecret, finishedHash);
-
-    final ServerHandshakeFinished fin = new ServerHandshakeFinished(verifyData);
-    fin.write(handshakeBB);
-
-    // create 1-RTT AEAD
-    handshake = Bytes.drainToArray(handshakeBB);
-
-    final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
-    final AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
-    aeads.setOneRttAead(oneRttAEAD);
-
-    return new ServerHelloAndHandshake(serverHello, handshake);
   }
 
   public synchronized void handleClientFinished(final byte[] msg) {
@@ -128,7 +133,7 @@ public class ServerTlsSession {
     }
 
     final ByteBuf bb = Unpooled.wrappedBuffer(msg);
-    final ClientFinished fin = ClientFinished.parse(bb);
+    final Finished fin = Finished.parse(bb);
 
     final byte[] helloHash = Hash.sha256(clientHello, serverHello);
 

@@ -18,7 +18,7 @@ public class ServerCertificateVerifyTest {
                 "0f0001040804010062c0a38f1b6f04544157ec95e84024783e50f6ce0eff68d23529208d71e2cb615d77214973d60068de606b243ad43cac6a708d0efd7de55829e20b95ea8d65bc9e3a70e69ba6ccd6693cd4df68a1e3ced6fac9615a461f2a2c34c45d4234b88262b8fb6b3b37428b1f939dadc73e9783b30037480c38cae0db041cc637b000eb8e162ddb6ff115c192735ba487a45159dee18215a62d45e95a33f3ef62eb93835a2dae84944549eacd4405aa66b9245f8944b4de7c2fbf48070a9b770a2271555f00bb10032182bf3912f57fa22ef8b11f680b78c6c18484db750f623125dea2a97976c4b0e86d0532def08e61434be4006afbddd1de91238a6b2eb44c32e5c2140000206438e3dfae06a5f19b7da35905e073f2bf4f81d4f1a8a411bbdedda2f7f76f76"));
 
     final ServerCertificateVerify scv = ServerCertificateVerify.parse(bb);
-    assertEquals(2052, scv.getType());
+    assertEquals(2052, scv.getVerifyType());
     assertHex(
         "62c0a38f1b6f04544157ec95e84024783e50f6ce0eff68d23529208d71e2cb615d77214973d60068de606b243ad43cac6a708d0efd7de55829e20b95ea8d65bc9e3a70e69ba6ccd6693cd4df68a1e3ced6fac9615a461f2a2c34c45d4234b88262b8fb6b3b37428b1f939dadc73e9783b30037480c38cae0db041cc637b000eb8e162ddb6ff115c192735ba487a45159dee18215a62d45e95a33f3ef62eb93835a2dae84944549eacd4405aa66b9245f8944b4de7c2fbf48070a9b770a2271555f00bb10032182bf3912f57fa22ef8b11f680b78c6c18484db750f623125dea2a97976c4b0e86d0532def08e61434be4006afbddd1de91238a6b2eb44c32e5c2",
         scv.getSignature());
@@ -36,7 +36,7 @@ public class ServerCertificateVerifyTest {
 
     final ServerCertificateVerify parsedSCV = ServerCertificateVerify.parse(bb);
 
-    assertEquals(scv.getType(), parsedSCV.getType());
+    assertEquals(scv.getVerifyType(), parsedSCV.getVerifyType());
     assertHex(scv.getSignature(), parsedSCV.getSignature());
   }
 }

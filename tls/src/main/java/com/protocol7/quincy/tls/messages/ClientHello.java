@@ -18,12 +18,13 @@ import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Hex;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class ClientHello {
+public class ClientHello implements Message {
+
+  private static final MessageType TYPE = MessageType.CLIENT_HELLO;
 
   public static ClientHello defaults(final KeyExchange ke, final List<Extension> exts) {
     final byte[] clientRandom = Rnd.rndBytes(32);
@@ -43,12 +44,10 @@ public class ClientHello {
     return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);
   }
 
-  public static ClientHello parse(final byte[] ch, final boolean isClient) {
-    final ByteBuf bb = Unpooled.wrappedBuffer(ch);
-
+  public static ClientHello parse(final ByteBuf bb, final boolean isClient) {
     final byte handshakeType = bb.readByte();
 
-    if (handshakeType != 0x01) {
+    if (handshakeType != TYPE.getType()) {
       throw new IllegalArgumentException("Invalid handshake type");
     }
 
@@ -135,7 +134,7 @@ public class ClientHello {
   }
 
   public void write(final ByteBuf bb, final boolean isClient) {
-    bb.writeByte(0x01);
+    bb.writeByte(TYPE.getType());
 
     // payload length
     final int lenPos = bb.writerIndex();
@@ -177,5 +176,10 @@ public class ClientHello {
         + ", extensions="
         + extensions
         + '}';
+  }
+
+  @Override
+  public MessageType getType() {
+    return TYPE;
   }
 }

@@ -1,15 +1,19 @@
 package com.protocol7.quincy.tls.messages;
 
+import static com.protocol7.quincy.tls.messages.MessageType.SERVER_CERTIFICATE_VERIFY;
+
 import com.protocol7.quincy.Writeable;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 
-public class ServerCertificateVerify implements Writeable {
+public class ServerCertificateVerify implements Message, Writeable {
+
+  private static final MessageType TYPE = SERVER_CERTIFICATE_VERIFY;
 
   public static ServerCertificateVerify parse(final ByteBuf bb) {
     // server cert verify
     final int serverCertVerifyType = bb.readByte();
-    if (serverCertVerifyType != 0x0f) {
+    if (serverCertVerifyType != TYPE.getType()) {
       throw new IllegalArgumentException(
           "Invalid server cert verify type: " + serverCertVerifyType);
     }
@@ -33,7 +37,7 @@ public class ServerCertificateVerify implements Writeable {
     this.signature = signature;
   }
 
-  public int getType() {
+  public int getVerifyType() {
     return type;
   }
 
@@ -43,7 +47,7 @@ public class ServerCertificateVerify implements Writeable {
 
   public void write(final ByteBuf bb) {
     // server cert verify
-    bb.writeByte(0x0f);
+    bb.writeByte(TYPE.getType());
 
     final int scvMsgLenPos = bb.writerIndex();
     Bytes.write24(bb, 0);
@@ -53,5 +57,10 @@ public class ServerCertificateVerify implements Writeable {
     bb.writeBytes(signature);
 
     Bytes.set24(bb, scvMsgLenPos, bb.writerIndex() - scvMsgLenPos - 3);
+  }
+
+  @Override
+  public MessageType getType() {
+    return TYPE;
   }
 }

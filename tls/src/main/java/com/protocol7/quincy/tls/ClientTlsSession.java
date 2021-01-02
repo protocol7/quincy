@@ -12,12 +12,11 @@ import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
-import com.protocol7.quincy.tls.messages.ClientFinished;
 import com.protocol7.quincy.tls.messages.ClientHello;
 import com.protocol7.quincy.tls.messages.EncryptedExtensions;
+import com.protocol7.quincy.tls.messages.Finished;
 import com.protocol7.quincy.tls.messages.ServerCertificate;
 import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
-import com.protocol7.quincy.tls.messages.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -84,15 +83,14 @@ public class ClientTlsSession {
     return clientHello;
   }
 
-  public void handleServerHello(final byte[] msg) {
+  public void handleServerHello(final ByteBuf msg) {
     if (clientHello == null) {
       throw new IllegalStateException("Not started");
     }
 
-    serverHello = msg;
+    serverHello = Bytes.peekToArray(msg);
 
-    final ByteBuf bb = Unpooled.wrappedBuffer(msg);
-    final ServerHello hello = ServerHello.parse(bb, true);
+    final ServerHello hello = ServerHello.parse(msg, true);
 
     final SupportedVersions version =
         (SupportedVersions)
@@ -143,7 +141,7 @@ public class ClientTlsSession {
       handshakeBuffer.resetReaderIndex();
       handshakeBuffer.readBytes(finBytes);
 
-      final ServerHandshakeFinished fin = ServerHandshakeFinished.parse(handshakeBuffer);
+      final Finished fin = Finished.parse(handshakeBuffer);
 
       final byte[] helloHash = Hash.sha256(clientHello, serverHello);
       validateServerFinish(fin, helloHash, finBytes);
@@ -166,8 +164,8 @@ public class ClientTlsSession {
       final byte[] clientHandshakeTrafficSecret =
           HKDF.expandLabel(handshakeSecret, CLIENT_HANDSHAKE_TRAFFIC_SECRET, helloHash, 32);
 
-      final ClientFinished clientFinished =
-          ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash);
+      final Finished clientFinished =
+          Finished.createClientFinished(clientHandshakeTrafficSecret, handshakeHash);
 
       final byte[] clientFin = Bytes.write(clientFinished);
 
@@ -182,7 +180,7 @@ public class ClientTlsSession {
   }
 
   private void validateServerFinish(
-      final ServerHandshakeFinished fin, final byte[] helloHash, final byte[] finBytes) {
+      final Finished fin, final byte[] helloHash, final byte[] finBytes) {
     // verify server fin
     final byte[] finishedHash = Hash.sha256(clientHello, serverHello, finBytes);
 

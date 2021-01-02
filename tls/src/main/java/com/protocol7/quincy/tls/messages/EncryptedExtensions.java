@@ -1,5 +1,7 @@
 package com.protocol7.quincy.tls.messages;
 
+import static com.protocol7.quincy.tls.messages.MessageType.ENCRYPTED_EXTENSIONS;
+
 import com.protocol7.quincy.Writeable;
 import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.utils.Bytes;
@@ -7,7 +9,9 @@ import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.List;
 
-public class EncryptedExtensions implements Writeable {
+public class EncryptedExtensions implements Message, Writeable {
+
+  private static final MessageType TYPE = ENCRYPTED_EXTENSIONS;
 
   public static EncryptedExtensions defaults(final Extension... extensions) {
     return new EncryptedExtensions(List.of(extensions));
@@ -16,7 +20,7 @@ public class EncryptedExtensions implements Writeable {
   public static EncryptedExtensions parse(final ByteBuf bb, final boolean isClient) {
     // EE
     final int eeType = bb.readByte();
-    if (eeType != 0x08) {
+    if (eeType != TYPE.getType()) {
       throw new IllegalArgumentException("Invalid EE type: " + eeType);
     }
 
@@ -49,7 +53,7 @@ public class EncryptedExtensions implements Writeable {
 
   public void write(final ByteBuf bb) {
     // EE
-    bb.writeByte(0x08);
+    bb.writeByte(TYPE.getType());
     final int eeMsgLenPos = bb.writerIndex();
     Bytes.write24(bb, 0);
 
@@ -60,5 +64,10 @@ public class EncryptedExtensions implements Writeable {
 
     Bytes.set24(bb, eeMsgLenPos, bb.writerIndex() - eeMsgLenPos - 3);
     bb.setShort(extLenPos, bb.writerIndex() - extLenPos - 2);
+  }
+
+  @Override
+  public MessageType getType() {
+    return TYPE;
   }
 }

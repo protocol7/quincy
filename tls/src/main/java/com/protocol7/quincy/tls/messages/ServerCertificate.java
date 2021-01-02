@@ -1,5 +1,7 @@
 package com.protocol7.quincy.tls.messages;
 
+import static com.protocol7.quincy.tls.messages.MessageType.SERVER_CERTIFICATE;
+
 import com.protocol7.quincy.Writeable;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -12,12 +14,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-public class ServerCertificate implements Writeable {
+public class ServerCertificate implements Message, Writeable {
+
+  private static final MessageType TYPE = SERVER_CERTIFICATE;
 
   public static ServerCertificate parse(final ByteBuf bb) {
     // server cert
     final int serverCertType = bb.readByte();
-    if (serverCertType != 0x0b) {
+    if (serverCertType != TYPE.getType()) {
       throw new IllegalArgumentException("Invalid server cert type: " + serverCertType);
     }
 
@@ -85,7 +89,7 @@ public class ServerCertificate implements Writeable {
 
   public void write(final ByteBuf bb) {
     // server cert
-    bb.writeByte(0x0b);
+    bb.writeByte(TYPE.getType());
     final int scMsgLenPos = bb.writerIndex();
     Bytes.write24(bb, 0);
 
@@ -104,5 +108,10 @@ public class ServerCertificate implements Writeable {
 
     Bytes.set24(bb, scMsgLenPos, bb.writerIndex() - scMsgLenPos - 3);
     Bytes.set24(bb, certsLenPos, bb.writerIndex() - certsLenPos - 3);
+  }
+
+  @Override
+  public MessageType getType() {
+    return TYPE;
   }
 }
