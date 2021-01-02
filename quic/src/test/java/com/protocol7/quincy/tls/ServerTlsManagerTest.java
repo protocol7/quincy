@@ -69,12 +69,12 @@ public class ServerTlsManagerTest {
     verify(ctx).next(chPacket);
 
     clientTlsSession.handleServerHello(cfCaptor.getAllValues().get(0).getCryptoData());
-    final ClientTlsSession.HandshakeResult hr =
+    final byte[] clientFin =
         clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData()).get();
 
     // receive fin, should send handshake done
     when(ctx.getState()).thenReturn(State.BeforeHandshake);
-    final Packet finPacket = hp(hr.getFin());
+    final Packet finPacket = hp(clientFin);
     final ShortPacket donePacket = sp(HandshakeDoneFrame.INSTANCE);
     when(ctx.send(eq(EncryptionLevel.OneRtt), any(Frame.class))).thenReturn(donePacket);
 

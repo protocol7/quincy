@@ -85,8 +85,7 @@ public class ClientTlsManager implements InboundHandler {
           if (frame instanceof CryptoFrame) {
             final CryptoFrame cf = (CryptoFrame) frame;
 
-            final AEAD handshakeAead = tlsSession.handleServerHello(cf.getCryptoData());
-            tlsSession.setHandshakeAead(handshakeAead);
+            tlsSession.handleServerHello(cf.getCryptoData());
             ctx.setState(State.BeforeHandshake);
           }
         }
@@ -136,17 +135,13 @@ public class ClientTlsManager implements InboundHandler {
       if (frame instanceof CryptoFrame) {
         final CryptoFrame cf = (CryptoFrame) frame;
 
-        final Optional<ClientTlsSession.HandshakeResult> result =
-            tlsSession.handleHandshake(cf.getCryptoData());
+        final Optional<byte[]> clientFin = tlsSession.handleHandshake(cf.getCryptoData());
 
-        if (result.isPresent()) {
+        if (clientFin.isPresent()) {
           tlsSession.unsetInitialAead();
 
-          ctx.send(EncryptionLevel.Handshake, new CryptoFrame(0, result.get().getFin()));
+          ctx.send(EncryptionLevel.Handshake, new CryptoFrame(0, clientFin.get()));
 
-          tlsSession.setOneRttAead(result.get().getOneRttAead());
-
-          // tlsSession.unsetHandshakeAead(); TODO
           ctx.setState(State.BeforeDone);
         }
       }

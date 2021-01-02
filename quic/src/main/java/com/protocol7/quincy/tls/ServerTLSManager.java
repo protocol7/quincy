@@ -56,12 +56,8 @@ public class ServerTLSManager implements InboundHandler {
         // TODO ack?
         ctx.send(EncryptionLevel.Initial, new CryptoFrame(0, shah.getServerHello()));
 
-        tlsSession.setHandshakeAead(shah.getHandshakeAEAD());
-
         // sent as handshake packet
         ctx.send(EncryptionLevel.Handshake, new CryptoFrame(0, shah.getServerHandshake()));
-
-        tlsSession.setOneRttAead(shah.getOneRttAEAD());
 
         ctx.setState(State.BeforeHandshake);
       } else {

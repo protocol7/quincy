@@ -19,7 +19,6 @@ import com.protocol7.quincy.protocol.packets.*;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.ClientTlsSession;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
-import com.protocol7.quincy.tls.ClientTlsSession.HandshakeResult;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
@@ -114,9 +113,9 @@ public class ServerTest {
     assertEquals(1, handshake.getPayload().getFrames().size());
     final CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
 
-    final HandshakeResult hr = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
+    final byte[] clientFin = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
 
-    connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, hr.getFin())));
+    connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, clientFin)));
 
     final ShortPacket serverDone = (ShortPacket) captureSentPacket(5);
 

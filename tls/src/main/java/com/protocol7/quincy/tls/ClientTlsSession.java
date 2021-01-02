@@ -14,10 +14,10 @@ import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import com.protocol7.quincy.tls.messages.ClientFinished;
 import com.protocol7.quincy.tls.messages.ClientHello;
-import com.protocol7.quincy.tls.messages.ServerHandshake.EncryptedExtensions;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificate;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificateVerify;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerHandshakeFinished;
+import com.protocol7.quincy.tls.messages.EncryptedExtensions;
+import com.protocol7.quincy.tls.messages.ServerCertificate;
+import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
+import com.protocol7.quincy.tls.messages.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -84,7 +84,7 @@ public class ClientTlsSession {
     return clientHello;
   }
 
-  public AEAD handleServerHello(final byte[] msg) {
+  public void handleServerHello(final byte[] msg) {
     if (clientHello == null) {
       throw new IllegalStateException("Not started");
     }
@@ -113,15 +113,16 @@ public class ClientTlsSession {
 
     handshakeSecret = HKDF.calculateHandshakeSecret(sharedSecret);
 
-    return HandshakeAEAD.create(handshakeSecret, helloHash, true);
+    aeads.setHandshakeAead(HandshakeAEAD.create(handshakeSecret, helloHash, true));
   }
 
-  public synchronized Optional<HandshakeResult> handleHandshake(final byte[] msg)
+  public synchronized Optional<byte[]> handleHandshake(final byte[] msg)
       throws CertificateInvalidException {
     if (clientHello == null || serverHello == null) {
       throw new IllegalStateException("Got handshake in unexpected state");
     }
 
+    // TODO handle out of order
     handshakeBuffer.writeBytes(msg);
 
     handshakeBuffer.markReaderIndex();
@@ -158,7 +159,8 @@ public class ClientTlsSession {
 
       final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, hs);
 
-      final AEAD aead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
+      final AEAD oneRttAead = OneRttAEAD.create(handshakeSecret, handshakeHash, true);
+      aeads.setOneRttAead(oneRttAead);
 
       // TODO dedup
       final byte[] clientHandshakeTrafficSecret =
@@ -167,9 +169,9 @@ public class ClientTlsSession {
       final ClientFinished clientFinished =
           ClientFinished.create(clientHandshakeTrafficSecret, handshakeHash);
 
-      final byte[] b = Bytes.write(clientFinished);
+      final byte[] clientFin = Bytes.write(clientFinished);
 
-      return Optional.of(new HandshakeResult(b, aead));
+      return Optional.of(clientFin);
     } catch (final IndexOutOfBoundsException e) {
       // wait for more data
       log.debug("Need more data, waiting...");
@@ -217,37 +219,11 @@ public class ClientTlsSession {
     return aeads.get(level);
   }
 
-  public void setHandshakeAead(final AEAD handshakeAead) {
-    aeads.setHandshakeAead(handshakeAead);
-  }
-
-  public void setOneRttAead(final AEAD oneRttAead) {
-    aeads.setOneRttAead(oneRttAead);
-  }
-
   public void unsetInitialAead() {
     aeads.unsetInitialAead();
   }
 
   public void unsetHandshakeAead() {
     aeads.unsetHandshakeAead();
-  }
-
-  public static class HandshakeResult {
-    private final byte[] fin;
-    private final AEAD oneRttAead;
-
-    public HandshakeResult(final byte[] fin, final AEAD oneRttAead) {
-      this.fin = fin;
-      this.oneRttAead = oneRttAead;
-    }
-
-    public byte[] getFin() {
-      return fin;
-    }
-
-    public AEAD getOneRttAead() {
-      return oneRttAead;
-    }
   }
 }

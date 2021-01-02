@@ -15,10 +15,10 @@ import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import com.protocol7.quincy.tls.messages.ClientFinished;
 import com.protocol7.quincy.tls.messages.ClientHello;
-import com.protocol7.quincy.tls.messages.ServerHandshake.EncryptedExtensions;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificate;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerCertificateVerify;
-import com.protocol7.quincy.tls.messages.ServerHandshake.ServerHandshakeFinished;
+import com.protocol7.quincy.tls.messages.EncryptedExtensions;
+import com.protocol7.quincy.tls.messages.ServerCertificate;
+import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
+import com.protocol7.quincy.tls.messages.ServerHandshakeFinished;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -99,6 +99,7 @@ public class ServerTlsSession {
 
     // create handshake AEAD
     final AEAD handshakeAEAD = HandshakeAEAD.create(handshakeSecret, helloHash, false);
+    aeads.setHandshakeAead(handshakeAEAD);
 
     final byte[] serverHandshakeTrafficSecret =
         HKDF.expandLabel(handshakeSecret, "s hs traffic", helloHash, 32);
@@ -116,8 +117,9 @@ public class ServerTlsSession {
 
     final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, handshake);
     final AEAD oneRttAEAD = OneRttAEAD.create(handshakeSecret, handshakeHash, false);
+    aeads.setOneRttAead(oneRttAEAD);
 
-    return new ServerHelloAndHandshake(serverHello, handshake, handshakeAEAD, oneRttAEAD);
+    return new ServerHelloAndHandshake(serverHello, handshake);
   }
 
   public synchronized void handleClientFinished(final byte[] msg) {
@@ -148,14 +150,6 @@ public class ServerTlsSession {
     return aeads.get(level);
   }
 
-  public void setHandshakeAead(final AEAD handshakeAEAD) {
-    aeads.setHandshakeAead(handshakeAEAD);
-  }
-
-  public void setOneRttAead(final AEAD oneRttAEAD) {
-    aeads.setOneRttAead(oneRttAEAD);
-  }
-
   public boolean available(final EncryptionLevel level) {
     return aeads.available(level);
   }
@@ -173,18 +167,9 @@ public class ServerTlsSession {
     private final byte[] serverHello;
     private final byte[] serverHandshake;
 
-    private final AEAD handshakeAEAD;
-    private final AEAD oneRttAEAD;
-
-    public ServerHelloAndHandshake(
-        final byte[] serverHello,
-        final byte[] serverHandshake,
-        final AEAD handshakeAEAD,
-        final AEAD oneRttAEAD) {
+    public ServerHelloAndHandshake(final byte[] serverHello, final byte[] serverHandshake) {
       this.serverHello = serverHello;
       this.serverHandshake = serverHandshake;
-      this.handshakeAEAD = handshakeAEAD;
-      this.oneRttAEAD = oneRttAEAD;
     }
 
     public byte[] getServerHello() {
@@ -193,14 +178,6 @@ public class ServerTlsSession {
 
     public byte[] getServerHandshake() {
       return serverHandshake;
-    }
-
-    public AEAD getHandshakeAEAD() {
-      return handshakeAEAD;
-    }
-
-    public AEAD getOneRttAEAD() {
-      return oneRttAEAD;
     }
   }
 }

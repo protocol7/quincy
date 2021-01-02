@@ -2,11 +2,11 @@ package com.protocol7.quincy.tls;
 
 import static com.protocol7.quincy.tls.CipherSuite.TLS_AES_128_GCM_SHA256;
 import static com.protocol7.quincy.utils.Hex.dehex;
+import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
-import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
@@ -90,10 +90,11 @@ public class ClientTlsSessionTest {
 
     final byte[] b = sh(new byte[32], TLS_AES_128_GCM_SHA256, ext);
 
-    final AEAD aead = started.handleServerHello(b);
+    assertFalse(started.available(EncryptionLevel.Handshake));
 
-    assertNotNull(aead);
-    // TODO mock random and test AEAD keys
+    started.handleServerHello(b);
+
+    assertTrue(started.available(EncryptionLevel.Handshake));
   }
 
   private byte[] sh(
