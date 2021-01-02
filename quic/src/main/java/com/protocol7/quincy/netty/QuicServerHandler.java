@@ -9,12 +9,13 @@ import com.protocol7.quincy.server.PacketRouter;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.utils.Bytes;
+import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
+import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -50,12 +51,12 @@ public class QuicServerHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-    if (msg instanceof DatagramPacket) {
-      final DatagramPacket datagram = (DatagramPacket) msg;
+    if (msg instanceof ByteBuf) {
+      final ByteBuf bb = (ByteBuf) msg;
       router.route(
-          datagram.content(),
-          new NettyPacketSender(ctx.channel(), datagram.sender()),
-          datagram.sender());
+          bb,
+          new NettyPacketSender(ctx.channel()),
+          (InetSocketAddress) ctx.channel().remoteAddress());
 
     } else {
       ctx.fireChannelRead(msg);

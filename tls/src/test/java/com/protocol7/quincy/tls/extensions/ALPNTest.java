@@ -10,7 +10,7 @@ public class ALPNTest {
 
   @Test
   public void roundtrip() {
-    final ALPN alpn = new ALPN("h3");
+    final ALPN alpn = new ALPN(ALPN.from("h3"));
 
     final ByteBuf bb = Unpooled.buffer();
 
@@ -18,6 +18,6 @@ public class ALPNTest {
 
     final ALPN parsed = ALPN.parse(bb);
 
-    assertEquals(alpn.getProtocols(), parsed.getProtocols());
+    assertArrayEquals(alpn.getProtocols(), parsed.getProtocols());
   }
 }

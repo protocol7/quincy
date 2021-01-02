@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
@@ -37,6 +38,7 @@ public class QuicheTest {
       b.remoteAddress(peer);
       b.handler(
           new QuicBuilder()
+              .withApplicationProtocols(ALPN.from("http/0.9"))
               .clientChannelInitializer(
                   new ChannelInboundHandlerAdapter() {
                     @Override

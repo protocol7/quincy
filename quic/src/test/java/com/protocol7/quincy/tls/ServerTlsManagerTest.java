@@ -46,7 +46,10 @@ public class ServerTlsManagerTest {
 
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
-          InitialAEAD.create(connectionId.asBytes(), true), tps, new NoopCertificateValidator());
+          InitialAEAD.create(connectionId.asBytes(), true),
+          new byte[0],
+          tps,
+          new NoopCertificateValidator());
 
   @Test
   public void handshake() throws CertificateInvalidException {

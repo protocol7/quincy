@@ -39,7 +39,7 @@ public class ClientTlsManagerTest {
   private final ConnectionId connectionId = ConnectionId.random();
   private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
   private final ClientTlsManager manager =
-      new ClientTlsManager(connectionId, tps, new NoopCertificateValidator());
+      new ClientTlsManager(connectionId, new byte[0], tps, new NoopCertificateValidator());
 
   private final ServerTlsSession serverTlsSession =
       new ServerTlsSession(

@@ -32,11 +32,13 @@ public class ClientTlsSessionTest {
   private final ClientTlsSession engine =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
+          new byte[0],
           TestUtil.tps(),
           new NoopCertificateValidator());
   private final ClientTlsSession started =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
+          new byte[0],
           TestUtil.tps(),
           new NoopCertificateValidator());
 

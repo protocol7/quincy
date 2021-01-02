@@ -16,7 +16,6 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
-import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
@@ -59,7 +58,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
             configuration,
             ConnectionId.random(),
             streamListener,
-            new NettyPacketSender(ctx.channel(), remoteAddress()),
+            new NettyPacketSender(ctx.channel()),
             new DefaultFlowControlHandler(
                 configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
             (InetSocketAddress) ctx.channel().remoteAddress(),
@@ -83,10 +82,8 @@ public class QuicClientHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-    if (msg instanceof DatagramPacket) {
-      final DatagramPacket dg = (DatagramPacket) msg;
-
-      final ByteBuf bb = dg.content();
+    if (msg instanceof ByteBuf) {
+      final ByteBuf bb = (ByteBuf) msg;
 
       while (bb.isReadable()) {
         final HalfParsedPacket<?> halfParsed =

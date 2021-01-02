@@ -17,6 +17,7 @@ public class Configuration {
   private final int initialMaxStreamDataBidiRemote;
   private final int initialMaxStreamDataUni;
   private final int maxAckDelay;
+  private final byte[] applicationProtocols;
 
   public Configuration(
       final Version version,
@@ -30,7 +31,8 @@ public class Configuration {
       final boolean disableMigration,
       final int initialMaxStreamDataBidiRemote,
       final int initialMaxStreamDataUni,
-      final int maxAckDelay) {
+      final int maxAckDelay,
+      final byte[] applicationProtocols) {
     this.version = version;
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
@@ -43,6 +45,7 @@ public class Configuration {
     this.initialMaxStreamDataBidiRemote = initialMaxStreamDataBidiRemote;
     this.initialMaxStreamDataUni = initialMaxStreamDataUni;
     this.maxAckDelay = maxAckDelay;
+    this.applicationProtocols = applicationProtocols;
   }
 
   public Version getVersion() {
@@ -91,6 +94,10 @@ public class Configuration {
 
   public int getMaxAckDelay() {
     return maxAckDelay;
+  }
+
+  public byte[] getApplicationProtocols() {
+    return applicationProtocols;
   }
 
   public TransportParameters toTransportParameters() {

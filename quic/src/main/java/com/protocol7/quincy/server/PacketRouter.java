@@ -48,11 +48,7 @@ public class PacketRouter {
       final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
       final ServerConnection conn =
-          connections.get(
-              halfParsed.getConnectionId(),
-              listener,
-              sender,
-              peerAddress); // TODO fix for when connId is omitted
+          connections.get(halfParsed.getConnectionId(), listener, sender, peerAddress);
 
       if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
         final Packet packet = halfParsed.complete(conn::getAEAD);

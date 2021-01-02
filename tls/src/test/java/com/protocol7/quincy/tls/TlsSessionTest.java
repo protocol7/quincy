@@ -19,7 +19,10 @@ public class TlsSessionTest {
   private final byte[] connectionId = Rnd.rndBytes(16);
   private final ClientTlsSession client =
       new ClientTlsSession(
-          InitialAEAD.create(connectionId, true), TestUtil.tps(), new NoopCertificateValidator());
+          InitialAEAD.create(connectionId, true),
+          new byte[0],
+          TestUtil.tps(),
+          new NoopCertificateValidator());
   private ServerTlsSession server;
 
   @Before

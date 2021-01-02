@@ -163,10 +163,6 @@ public class ServerHandshake {
       this(new byte[0], Arrays.asList(serverCertificates));
     }
 
-    public byte[] getRequestContext() {
-      return requestContext;
-    }
-
     public List<byte[]> getServerCertificates() {
       return serverCertificates;
     }

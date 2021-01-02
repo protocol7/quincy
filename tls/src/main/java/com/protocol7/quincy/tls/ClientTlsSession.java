@@ -6,6 +6,8 @@ import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.AEADs;
 import com.protocol7.quincy.tls.aead.HandshakeAEAD;
 import com.protocol7.quincy.tls.aead.OneRttAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
+import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
@@ -21,6 +23,8 @@ import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -36,6 +40,7 @@ public class ClientTlsSession {
   private final AEADs aeads;
   private final KeyExchange kek;
   private final CertificateValidator certificateValidator;
+  private final byte[] applicationProtocols;
 
   private ByteBuf handshakeBuffer;
   private byte[] clientHello;
@@ -44,8 +49,11 @@ public class ClientTlsSession {
 
   public ClientTlsSession(
       final AEAD initialAEAD,
+      final byte[] applicationProtocols,
       final TransportParameters transportParametersDefaults,
       final CertificateValidator certificateValidator) {
+
+    this.applicationProtocols = applicationProtocols;
     this.transportParametersDefaults = transportParametersDefaults;
 
     aeads = new AEADs(initialAEAD);
@@ -59,12 +67,19 @@ public class ClientTlsSession {
       throw new IllegalStateException("Already started");
     }
 
+    final List<Extension> extensions = new ArrayList<>();
     final TransportParameters transportParameters =
         TransportParameters.newBuilder(transportParametersDefaults)
             .withInitialSourceConnectionId(sourceConnectionId)
             .build();
 
-    final ClientHello ch = ClientHello.defaults(kek, transportParameters);
+    extensions.add(transportParameters);
+
+    if (applicationProtocols.length > 0) {
+      extensions.add(new ALPN(applicationProtocols));
+    }
+
+    final ClientHello ch = ClientHello.defaults(kek, extensions);
     clientHello = Bytes.write(bb -> ch.write(bb, true));
     return clientHello;
   }

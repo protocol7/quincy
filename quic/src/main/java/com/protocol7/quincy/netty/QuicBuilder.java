@@ -30,6 +30,7 @@ public class QuicBuilder {
   private List<byte[]> certificates;
   private PrivateKey privateKey;
   private QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
+  private byte[] applicationProtocols = new byte[0];
 
   public QuicBuilder withVersion(final Version version) {
     this.version = version;
@@ -106,6 +107,11 @@ public class QuicBuilder {
     return this;
   }
 
+  public QuicBuilder withApplicationProtocols(final byte[] applicationProtocols) {
+    this.applicationProtocols = applicationProtocols;
+    return this;
+  }
+
   public Configuration configuration() {
     return new Configuration(
         version,
@@ -119,7 +125,8 @@ public class QuicBuilder {
         disableMigration,
         initialMaxStreamDataBidiRemote,
         initialMaxStreamDataUni,
-        maxAckDelay);
+        maxAckDelay,
+        applicationProtocols);
   }
 
   public ChannelHandler serverChannelInitializer(final ChannelHandler handler) {

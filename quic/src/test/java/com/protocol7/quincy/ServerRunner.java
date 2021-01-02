@@ -29,7 +29,7 @@ public class ServerRunner {
                   new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-                      System.out.println("############# server got message " + msg);
+                      System.out.println("server got message " + msg);
 
                       final QuicPacket qp = (QuicPacket) msg;
 

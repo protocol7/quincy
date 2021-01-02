@@ -59,7 +59,7 @@ public class ClientHelloTest {
   @Test
   public void defaults() {
     final KeyExchange kek = KeyExchange.generate(Group.X25519);
-    final ClientHello ch = ClientHello.defaults(kek, TestUtil.tps());
+    final ClientHello ch = ClientHello.defaults(kek, List.of(TestUtil.tps()));
 
     assertEquals(32, ch.getClientRandom().length);
     assertEquals(0, ch.getSessionId().length);

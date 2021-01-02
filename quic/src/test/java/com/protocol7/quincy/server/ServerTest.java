@@ -50,6 +50,7 @@ public class ServerTest {
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
+          new byte[0],
           new QuicBuilder().configuration().toTransportParameters(),
           new NoopCertificateValidator());
 

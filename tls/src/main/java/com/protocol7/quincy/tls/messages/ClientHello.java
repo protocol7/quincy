@@ -7,7 +7,6 @@ import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.tls.CipherSuite;
 import com.protocol7.quincy.tls.Group;
 import com.protocol7.quincy.tls.KeyExchange;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
@@ -26,7 +25,7 @@ import java.util.Optional;
 
 public class ClientHello {
 
-  public static ClientHello defaults(final KeyExchange ke, final Extension... exts) {
+  public static ClientHello defaults(final KeyExchange ke, final List<Extension> exts) {
     final byte[] clientRandom = Rnd.rndBytes(32);
     final byte[] sessionId = new byte[0];
     final List<CipherSuite> cipherSuites = CipherSuite.SUPPORTED;
@@ -37,9 +36,8 @@ public class ClientHello {
                 SignatureAlgorithms.defaults(),
                 new SupportedGroups(Group.X25519),
                 SupportedVersions.TLS13,
-                PskKeyExchangeModes.defaults(),
-                new ALPN(List.of("http/0.9")))
-            .add(exts)
+                PskKeyExchangeModes.defaults())
+            .addAll(exts)
             .build();
 
     return new ClientHello(clientRandom, sessionId, cipherSuites, extensions);

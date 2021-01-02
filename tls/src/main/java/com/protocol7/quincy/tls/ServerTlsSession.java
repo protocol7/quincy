@@ -1,9 +1,9 @@
 package com.protocol7.quincy.tls;
 
 import static com.protocol7.quincy.utils.Bytes.peekToArray;
+import static io.netty.util.internal.ObjectUtil.checkNonEmpty;
 import static java.util.Objects.requireNonNull;
 
-import com.google.common.base.Preconditions;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.AEADs;
 import com.protocol7.quincy.tls.aead.HandshakeAEAD;
@@ -45,12 +45,10 @@ public class ServerTlsSession {
       final TransportParameters transportParameters,
       final List<byte[]> certificates,
       final PrivateKey privateKey) {
-    this.transportParameters = transportParameters;
-    Preconditions.checkArgument(!certificates.isEmpty());
-
-    aeads = new AEADs(initialAEAD);
-    this.privateKey = privateKey;
-    this.certificates = requireNonNull(certificates);
+    this.transportParameters = requireNonNull(transportParameters);
+    this.aeads = new AEADs(requireNonNull(initialAEAD));
+    this.privateKey = requireNonNull(privateKey);
+    this.certificates = checkNonEmpty(certificates, "certificates");
     this.kek = KeyExchange.generate(Group.X25519);
   }
 

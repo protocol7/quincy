@@ -1,5 +1,7 @@
 package com.protocol7.quincy.tls;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
@@ -28,17 +30,20 @@ public class ClientTlsManager implements InboundHandler {
 
   private ClientTlsSession tlsSession;
   private Promise promise;
+  private final byte[] applicationProtocols;
   private final TransportParameters transportParameters;
   private final CertificateValidator certificateValidator;
   private final ConnectionId initialConnectionId;
 
   public ClientTlsManager(
       final ConnectionId initialConnectionId,
+      final byte[] applicationProtocols,
       final TransportParameters transportParameters,
       final CertificateValidator certificateValidator) {
-    this.initialConnectionId = initialConnectionId;
-    this.transportParameters = transportParameters;
-    this.certificateValidator = certificateValidator;
+    this.initialConnectionId = requireNonNull(initialConnectionId);
+    this.applicationProtocols = requireNonNull(applicationProtocols);
+    this.transportParameters = requireNonNull(transportParameters);
+    this.certificateValidator = requireNonNull(certificateValidator);
 
     resetTlsSession(initialConnectionId);
   }
@@ -47,6 +52,7 @@ public class ClientTlsManager implements InboundHandler {
     this.tlsSession =
         new ClientTlsSession(
             InitialAEAD.create(connectionId.asBytes(), true),
+            applicationProtocols,
             transportParameters,
             certificateValidator);
   }
