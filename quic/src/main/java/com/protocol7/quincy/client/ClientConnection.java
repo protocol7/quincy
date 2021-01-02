@@ -49,7 +49,6 @@ import org.slf4j.MDC;
 public class ClientConnection implements InternalConnection {
 
   private ConnectionId remoteConnectionId;
-  private int lastDestConnectionIdLength;
   private final ConnectionId localConnectionId = ConnectionId.random();
   private final PacketSender packetSender;
 
@@ -185,10 +184,6 @@ public class ClientConnection implements InternalConnection {
     this.token = of(token);
   }
 
-  public int getLastDestConnectionIdLength() {
-    return lastDestConnectionIdLength;
-  }
-
   private void sendPacketUnbuffered(final Packet packet) {
     packetSender
         .send(packet, getAEAD(getEncryptionLevel(packet)))
@@ -196,8 +191,6 @@ public class ClientConnection implements InternalConnection {
   }
 
   public void onPacket(final Packet packet) {
-    lastDestConnectionIdLength = packet.getDestinationConnectionId().getLength();
-
     final EncryptionLevel encLevel = getEncryptionLevel(packet);
     if (tlsManager.available(encLevel)) {
       stateMachine.handlePacket(packet);

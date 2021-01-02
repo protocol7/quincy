@@ -86,8 +86,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
       final ByteBuf bb = (ByteBuf) msg;
 
       while (bb.isReadable()) {
-        final HalfParsedPacket<?> halfParsed =
-            Packet.parse(bb, connection.getLastDestConnectionIdLength());
+        final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
         final Packet packet = halfParsed.complete(connection::getAEAD);
 
