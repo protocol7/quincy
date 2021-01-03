@@ -51,7 +51,7 @@ public class PacketRouter {
       final ServerConnection conn =
           connections.get(halfParsed.getDestinationConnectionId(), listener, sender, peerAddress);
 
-      if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
+      if (validateVersion(halfParsed, sender, conn.getSourceConnectionId())) {
         final Packet packet = halfParsed.complete(conn::getAEAD);
 
         MDC.put("actor", "server");

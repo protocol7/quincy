@@ -48,8 +48,8 @@ import org.slf4j.MDC;
 
 public class ClientConnection implements InternalConnection {
 
-  private ConnectionId remoteConnectionId;
-  private final ConnectionId localConnectionId = ConnectionId.random();
+  private ConnectionId destinationConnectionId;
+  private final ConnectionId sourceConnectionId;
   private final PacketSender packetSender;
 
   private final Version version;
@@ -67,6 +67,7 @@ public class ClientConnection implements InternalConnection {
   public ClientConnection(
       final Configuration configuration,
       final ConnectionId initialRemoteConnectionId,
+      final ConnectionId sourceConnectionId,
       final StreamListener streamListener,
       final PacketSender packetSender,
       final FlowControlHandler flowControlHandler,
@@ -74,7 +75,8 @@ public class ClientConnection implements InternalConnection {
       final CertificateValidator certificateValidator,
       final Timer timer) {
     this.version = requireNonNull(configuration.getVersion());
-    this.remoteConnectionId = requireNonNull(initialRemoteConnectionId);
+    this.sourceConnectionId = requireNonNull(sourceConnectionId);
+    this.destinationConnectionId = requireNonNull(initialRemoteConnectionId);
     this.packetSender = requireNonNull(packetSender);
     this.peerAddress = requireNonNull(peerAddress);
     this.streamManager = new DefaultStreamManager(this, streamListener);
@@ -86,7 +88,7 @@ public class ClientConnection implements InternalConnection {
             new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
         new ClientTlsManager(
-            localConnectionId,
+            sourceConnectionId,
             configuration.getApplicationProtocols(),
             configuration.toTransportParameters(),
             certificateValidator);
@@ -112,7 +114,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   private void resetTlsSession() {
-    tlsManager.resetTlsSession(remoteConnectionId);
+    tlsManager.resetTlsSession(destinationConnectionId);
   }
 
   public void handshake(final Promise promise) {
@@ -141,16 +143,16 @@ public class ClientConnection implements InternalConnection {
     if (level == EncryptionLevel.OneRtt) {
       packet =
           ShortPacket.create(
-              false, remoteConnectionId, localConnectionId, nextSendPacketNumber(), frames);
+              false, destinationConnectionId, sourceConnectionId, nextSendPacketNumber(), frames);
     } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(
-              remoteConnectionId, localConnectionId, nextSendPacketNumber(), version, frames);
+              destinationConnectionId, sourceConnectionId, nextSendPacketNumber(), version, frames);
     } else {
       packet =
           InitialPacket.create(
-              remoteConnectionId,
-              localConnectionId,
+              destinationConnectionId,
+              sourceConnectionId,
               nextSendPacketNumber(),
               version,
               token,
@@ -161,17 +163,17 @@ public class ClientConnection implements InternalConnection {
   }
 
   @Override
-  public ConnectionId getLocalConnectionId() {
-    return localConnectionId;
+  public ConnectionId getSourceConnectionId() {
+    return sourceConnectionId;
   }
 
   @Override
-  public Optional<ConnectionId> getRemoteConnectionId() {
-    return Optional.of(remoteConnectionId);
+  public Optional<ConnectionId> getDestinationConnectionId() {
+    return Optional.of(destinationConnectionId);
   }
 
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId, final boolean retry) {
-    this.remoteConnectionId = requireNonNull(remoteConnectionId);
+    this.destinationConnectionId = requireNonNull(remoteConnectionId);
 
     if (retry) {
       resetTlsSession();

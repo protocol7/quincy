@@ -36,7 +36,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
         public void onData(final Stream stream, final byte[] data, final boolean finished) {
           ctx.fireChannelRead(
               QuicPacket.of(
-                  connection.getLocalConnectionId(),
+                  connection.getSourceConnectionId(),
                   stream.getId(),
                   data,
                   connection.getPeerAddress()));
@@ -57,6 +57,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
     final ClientConnection connection =
         new ClientConnection(
             configuration,
+            ConnectionId.random(),
             ConnectionId.random(),
             streamListener,
             new NettyPacketSender(ctx.channel()),

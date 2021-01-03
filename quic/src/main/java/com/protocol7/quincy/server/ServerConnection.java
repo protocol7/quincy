@@ -103,11 +103,11 @@ public class ServerConnection implements InternalConnection {
     this.stateMachine = new ServerStateMachine(this);
   }
 
-  public Optional<ConnectionId> getRemoteConnectionId() {
+  public Optional<ConnectionId> getDestinationConnectionId() {
     return remoteConnectionId;
   }
 
-  public ConnectionId getLocalConnectionId() {
+  public ConnectionId getSourceConnectionId() {
     return localConnectionId;
   }
 
@@ -129,10 +129,10 @@ public class ServerConnection implements InternalConnection {
   }
 
   public FullPacket send(final EncryptionLevel level, final Frame... frames) {
-    if (getRemoteConnectionId().isEmpty()) {
+    if (getDestinationConnectionId().isEmpty()) {
       throw new IllegalStateException("Can send when remote connection ID is unknown");
     }
-    final ConnectionId remoteConnectionId = getRemoteConnectionId().get();
+    final ConnectionId remoteConnectionId = getDestinationConnectionId().get();
 
     final Packet packet;
     if (level == EncryptionLevel.OneRtt) {

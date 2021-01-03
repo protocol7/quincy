@@ -94,12 +94,16 @@ public class ShortPacket implements FullPacket {
 
   public static ShortPacket create(
       final boolean keyPhase,
-      final ConnectionId connectionId,
+      final ConnectionId destinationConnectionId,
       final ConnectionId sourceConnectionId,
       final long packetNumber,
       final Frame... frames) {
     return new ShortPacket(
-        keyPhase, connectionId, Optional.of(sourceConnectionId), packetNumber, new Payload(frames));
+        keyPhase,
+        destinationConnectionId,
+        Optional.of(sourceConnectionId),
+        packetNumber,
+        new Payload(frames));
   }
 
   private final boolean keyPhase;
