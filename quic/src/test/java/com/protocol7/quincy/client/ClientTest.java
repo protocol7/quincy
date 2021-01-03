@@ -6,6 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
+import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -93,7 +94,7 @@ public class ClientTest {
 
     // validate first packet sent
     final InitialPacket initialPacket = (InitialPacket) captureSentPacket(1);
-    assertEquals(1, initialPacket.getPacketNumber());
+    assertEquals(0, initialPacket.getPacketNumber());
     assertEquals(destConnectionId, initialPacket.getDestinationConnectionId());
 
     final ConnectionId generatedSrcConnId = initialPacket.getSourceConnectionId();
@@ -116,7 +117,7 @@ public class ClientTest {
 
     // validate new initial packet sent
     final InitialPacket initialPacket2 = (InitialPacket) captureSentPacket(2);
-    assertEquals(1, initialPacket2.getPacketNumber());
+    assertEquals(0, initialPacket2.getPacketNumber());
     final ConnectionId newDestConnId = initialPacket2.getDestinationConnectionId();
     assertEquals(srcConnectionId, newDestConnId);
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId());
@@ -163,7 +164,7 @@ public class ClientTest {
 
     // validate client fin handshake packet
     final HandshakePacket hp = (HandshakePacket) captureSentPacket(4);
-    assertEquals(3, hp.getPacketNumber());
+    assertEquals(2, hp.getPacketNumber());
     assertEquals(generatedSrcConnId, initialPacket2.getSourceConnectionId());
     assertEquals(srcConnectionId, hp.getDestinationConnectionId());
     assertTrue(initialPacket.getPayload().getFrames().get(0) instanceof CryptoFrame);
@@ -193,7 +194,7 @@ public class ClientTest {
     assertArrayEquals(DATA, dataCaptor.getValue());
 
     // verify ack
-    assertAck(6, 5, 3, 3);
+    assertAck(6, 4, 3, 3);
   }
 
   @Test
@@ -207,9 +208,9 @@ public class ClientTest {
     verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify ack
-    assertAck(6, 5, 3, 3);
+    assertAck(6, 4, 3, 3);
     // verify ack
-    assertAck(7, 6, 4, 4);
+    assertAck(7, 5, 4, 4);
   }
 
   @Test
@@ -223,8 +224,8 @@ public class ClientTest {
     verify(streamListener).onData(any(), eq(DATA2), eq(true));
 
     // verify acks
-    assertAck(6, 5, 3, 3);
-    assertAck(7, 6, 4, 4);
+    assertAck(6, 4, 3, 3);
+    assertAck(7, 5, 4, 4);
   }
 
   @Test
@@ -234,7 +235,7 @@ public class ClientTest {
     connection.onPacket(packet(new ResetStreamFrame(streamId, 123, 0)));
 
     // verify ack
-    assertAck(6, 5, 3, 3);
+    assertAck(6, 4, 3, 3);
   }
 
   @Test
@@ -244,7 +245,7 @@ public class ClientTest {
     connection.onPacket(packet(PingFrame.INSTANCE));
 
     // verify ack
-    assertAck(6, 5, 3, 3);
+    assertAck(6, 4, 3, 3);
   }
 
   @Test

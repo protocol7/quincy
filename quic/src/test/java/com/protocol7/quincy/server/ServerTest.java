@@ -8,6 +8,7 @@ import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
+import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;

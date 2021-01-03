@@ -1,10 +1,14 @@
 package com.protocol7.quincy.client;
 
-import com.google.common.annotations.VisibleForTesting;
+import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
-import com.protocol7.quincy.protocol.frames.*;
-import com.protocol7.quincy.protocol.packets.*;
+import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
+import com.protocol7.quincy.protocol.frames.FrameType;
+import com.protocol7.quincy.protocol.packets.InitialPacket;
+import com.protocol7.quincy.protocol.packets.Packet;
+import com.protocol7.quincy.protocol.packets.RetryPacket;
+import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -60,8 +64,7 @@ public class ClientStateMachine {
             TransportError.NO_ERROR.getValue(), FrameType.PADDING, "Closing connection"));
   }
 
-  @VisibleForTesting
-  protected State getState() {
+  public State getState() {
     return state;
   }
 

@@ -1,29 +1,19 @@
-package com.protocol7.quincy.client;
+package com.protocol7.quincy.connection;
 
 import static com.protocol7.quincy.connection.State.Closed;
 import static com.protocol7.quincy.protocol.packets.Packet.getEncryptionLevel;
 import static java.util.Objects.requireNonNull;
-import static java.util.Optional.of;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.connection.PacketSender;
-import com.protocol7.quincy.connection.State;
+import com.protocol7.quincy.client.ClientStateMachine;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.logging.LoggingHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.TransportError;
-import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
-import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.FrameType;
-import com.protocol7.quincy.protocol.packets.FullPacket;
-import com.protocol7.quincy.protocol.packets.HandshakePacket;
-import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
-import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.reliability.AckDelay;
 import com.protocol7.quincy.reliability.PacketBufferManager;
 import com.protocol7.quincy.streams.DefaultStreamManager;
@@ -41,22 +31,15 @@ import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.MDC;
 
-public class ClientConnection implements Connection {
+public class ClientConnection extends AbstractConnection {
 
-  private ConnectionId destinationConnectionId;
-  private final ConnectionId sourceConnectionId;
   private final PacketSender packetSender;
 
-  private final Version version;
-  private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(0L);
   private final PacketBufferManager packetBuffer;
   private final ClientStateMachine stateMachine;
-  private Optional<byte[]> token = Optional.empty();
 
   private final StreamManager streamManager;
   private final ClientTlsManager tlsManager;
@@ -74,9 +57,8 @@ public class ClientConnection implements Connection {
       final InetSocketAddress peerAddress,
       final CertificateValidator certificateValidator,
       final Timer timer) {
-    this.version = requireNonNull(configuration.getVersion());
-    this.sourceConnectionId = requireNonNull(sourceConnectionId);
-    this.destinationConnectionId = requireNonNull(initialRemoteConnectionId);
+    super(configuration.getVersion(), sourceConnectionId);
+    setRemoteConnectionId(initialRemoteConnectionId);
     this.packetSender = requireNonNull(packetSender);
     this.peerAddress = requireNonNull(peerAddress);
     this.streamManager = new DefaultStreamManager(this, streamListener);
@@ -114,7 +96,7 @@ public class ClientConnection implements Connection {
   }
 
   private void resetTlsSession() {
-    tlsManager.resetTlsSession(destinationConnectionId);
+    tlsManager.resetTlsSession(getDestinationConnectionId().get());
   }
 
   public void handshake(final Promise promise) {
@@ -138,54 +120,12 @@ public class ClientConnection implements Connection {
     return newPacket;
   }
 
-  public FullPacket send(final EncryptionLevel level, final Frame... frames) {
-    final Packet packet;
-    if (level == EncryptionLevel.OneRtt) {
-      packet =
-          ShortPacket.create(
-              false, destinationConnectionId, sourceConnectionId, nextSendPacketNumber(), frames);
-    } else if (level == EncryptionLevel.Handshake) {
-      packet =
-          HandshakePacket.create(
-              destinationConnectionId, sourceConnectionId, nextSendPacketNumber(), version, frames);
-    } else {
-      packet =
-          InitialPacket.create(
-              destinationConnectionId,
-              sourceConnectionId,
-              nextSendPacketNumber(),
-              version,
-              token,
-              frames);
-    }
-
-    return (FullPacket) sendPacket(packet);
-  }
-
-  @Override
-  public ConnectionId getSourceConnectionId() {
-    return sourceConnectionId;
-  }
-
-  @Override
-  public Optional<ConnectionId> getDestinationConnectionId() {
-    return Optional.of(destinationConnectionId);
-  }
-
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId, final boolean retry) {
-    this.destinationConnectionId = requireNonNull(remoteConnectionId);
+    setRemoteConnectionId(remoteConnectionId);
 
     if (retry) {
       resetTlsSession();
     }
-  }
-
-  public Optional<byte[]> getToken() {
-    return token;
-  }
-
-  public void setToken(final byte[] token) {
-    this.token = of(token);
   }
 
   private void sendPacketUnbuffered(final Packet packet) {
@@ -207,18 +147,6 @@ public class ClientConnection implements Connection {
   @Override
   public AEAD getAEAD(final EncryptionLevel level) {
     return tlsManager.getAEAD(level);
-  }
-
-  public Version getVersion() {
-    return version;
-  }
-
-  private long nextSendPacketNumber() {
-    return sendPacketNumber.updateAndGet(packetNumber -> PacketNumber.next(packetNumber));
-  }
-
-  public void resetSendPacketNumber() {
-    sendPacketNumber.set(0L);
   }
 
   public Stream openStream() {

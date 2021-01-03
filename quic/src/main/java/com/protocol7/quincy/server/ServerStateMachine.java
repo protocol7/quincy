@@ -1,5 +1,6 @@
 package com.protocol7.quincy.server;
 
+import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;

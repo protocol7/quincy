@@ -3,6 +3,7 @@ package com.protocol7.quincy.server;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
+import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;

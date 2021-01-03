@@ -9,6 +9,7 @@ import static org.mockito.Mockito.when;
 
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.PacketSender;
+import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;

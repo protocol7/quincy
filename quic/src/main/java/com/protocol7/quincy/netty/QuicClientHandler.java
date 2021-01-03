@@ -1,7 +1,7 @@
 package com.protocol7.quincy.netty;
 
 import com.protocol7.quincy.Configuration;
-import com.protocol7.quincy.client.ClientConnection;
+import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.NettyPacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
