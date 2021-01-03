@@ -20,6 +20,7 @@ public class QuicClientInitializer extends ChannelInitializer<DatagramChannel> {
   protected void initChannel(final DatagramChannel ch) {
     final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast(new DatagramPacketHandler());
+    pipeline.addLast(new QuicConnectionHandler());
     pipeline.addLast(new QuicClientHandler(configuration));
     pipeline.addLast(handler);
   }

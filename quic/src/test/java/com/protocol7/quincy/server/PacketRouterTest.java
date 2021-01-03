@@ -85,7 +85,7 @@ public class PacketRouterTest {
 
     final ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);
-    verify(sender).send(captor.capture(), any());
+    verify(sender).send(captor.capture());
 
     final VersionNegotiationPacket verNeg = captor.getValue();
 

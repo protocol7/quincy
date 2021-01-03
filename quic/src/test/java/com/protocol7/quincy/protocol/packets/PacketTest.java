@@ -83,7 +83,7 @@ public class PacketTest {
 
   @Test
   public void parseShortPacket() {
-    final ShortPacket packet = new ShortPacket(false, connId, pn, new Payload(PingFrame.INSTANCE));
+    final ShortPacket packet = ShortPacket.create(false, connId, EMPTY, pn, PingFrame.INSTANCE);
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

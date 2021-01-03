@@ -9,7 +9,7 @@ public interface HalfParsedPacket<P extends Packet> {
 
   Optional<Version> getVersion();
 
-  ConnectionId getConnectionId();
+  ConnectionId getDestinationConnectionId();
 
   P complete(AEADProvider aeadProvider);
 }

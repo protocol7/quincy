@@ -25,6 +25,7 @@ public class DatagramPacketHandler extends ChannelDuplexHandler {
   @Override
   public void write(
       final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
+    System.out.println("DatagramPacketHandler.write");
     if (msg instanceof ByteBuf) {
 
       final ByteBuf bb = (ByteBuf) msg;

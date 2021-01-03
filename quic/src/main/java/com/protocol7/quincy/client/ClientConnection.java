@@ -139,7 +139,9 @@ public class ClientConnection implements InternalConnection {
   public FullPacket send(final EncryptionLevel level, final Frame... frames) {
     final Packet packet;
     if (level == EncryptionLevel.OneRtt) {
-      packet = ShortPacket.create(false, remoteConnectionId, nextSendPacketNumber(), frames);
+      packet =
+          ShortPacket.create(
+              false, remoteConnectionId, localConnectionId, nextSendPacketNumber(), frames);
     } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(
@@ -185,9 +187,7 @@ public class ClientConnection implements InternalConnection {
   }
 
   private void sendPacketUnbuffered(final Packet packet) {
-    packetSender
-        .send(packet, getAEAD(getEncryptionLevel(packet)))
-        .awaitUninterruptibly(); // TODO fix
+    packetSender.send(packet).awaitUninterruptibly(); // TODO fix
   }
 
   public void onPacket(final Packet packet) {

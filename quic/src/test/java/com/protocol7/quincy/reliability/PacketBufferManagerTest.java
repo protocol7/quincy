@@ -8,7 +8,6 @@ import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.AckRange;
@@ -210,7 +209,7 @@ public class PacketBufferManagerTest {
   }
 
   private Packet packet(final long pn, final Frame... frames) {
-    return new ShortPacket(false, random(), pn, new Payload(frames));
+    return ShortPacket.create(false, random(), random(), pn, frames);
   }
 
   private Packet ip(final long pn, final Frame... frames) {

@@ -56,7 +56,7 @@ public class ClientTest {
 
   @Before
   public void setUp() {
-    when(packetSender.send(any(), any()))
+    when(packetSender.send(any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
@@ -145,7 +145,7 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHello())));
 
     // verify no packet sent here
-    verify(packetSender, times(3)).send(any(), any());
+    verify(packetSender, times(3)).send(any());
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
@@ -169,7 +169,11 @@ public class ClientTest {
 
     connection.onPacket(
         ShortPacket.create(
-            false, srcConnectionId, nextPacketNumber(), HandshakeDoneFrame.INSTANCE));
+            false,
+            srcConnectionId,
+            destConnectionId,
+            nextPacketNumber(),
+            HandshakeDoneFrame.INSTANCE));
 
     // verify that handshake is complete
     assertTrue(handshakeFuture.isDone());
@@ -296,7 +300,7 @@ public class ClientTest {
     connection.onPacket(verNeg);
 
     // should not have sent any more packets
-    verify(packetSender, times(1)).send(any(), any());
+    verify(packetSender, times(1)).send(any());
 
     // should close connection
     verify(packetSender).destroy();
@@ -320,23 +324,24 @@ public class ClientTest {
     connection.onPacket(packet(PingFrame.INSTANCE));
 
     // ignoring in unexpected state, nothing should happen
-    verify(packetSender, never()).send(any(), any());
+    verify(packetSender, never()).send(any());
   }
 
   private Packet captureSentPacket(final int number) {
     final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture());
 
     final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);
   }
 
   private Packet packet(final Frame... frames) {
-    return new ShortPacket(
+    return ShortPacket.create(
         false,
         srcConnectionId, // TODO correct?
+        destConnectionId,
         nextPacketNumber(),
-        new Payload(frames));
+        frames);
   }
 
   private long nextPacketNumber() {

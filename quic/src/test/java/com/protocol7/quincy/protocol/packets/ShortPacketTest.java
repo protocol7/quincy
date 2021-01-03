@@ -3,7 +3,6 @@ package com.protocol7.quincy.protocol.packets;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.frames.PingFrame;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.TestAEAD;
@@ -69,7 +68,7 @@ public class ShortPacketTest {
   }
 
   private ShortPacket packet() {
-    return new ShortPacket(false, dest, pn, new Payload(PingFrame.INSTANCE));
+    return ShortPacket.create(false, dest, ConnectionId.EMPTY, pn, PingFrame.INSTANCE);
   }
 
   private ByteBuf buffer(final ShortPacket packet) {

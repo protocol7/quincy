@@ -59,7 +59,7 @@ public class VersionNegotiationHandlerTest {
 
   @Test
   public void testShortPacket() {
-    final ShortPacket packet = ShortPacket.create(false, dcid, 123, new PaddingFrame(10));
+    final ShortPacket packet = ShortPacket.create(false, dcid, scid, 123, new PaddingFrame(10));
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 

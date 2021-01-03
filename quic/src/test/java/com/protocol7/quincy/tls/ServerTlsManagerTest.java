@@ -116,6 +116,6 @@ public class ServerTlsManagerTest {
   }
 
   private ShortPacket sp(final Frame... frames) {
-    return ShortPacket.create(false, EMPTY, PacketNumber.MIN, frames);
+    return ShortPacket.create(false, EMPTY, EMPTY, PacketNumber.MIN, frames);
   }
 }

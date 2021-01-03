@@ -33,8 +33,9 @@ public class PacketRouter {
     if (halfParsed.getVersion().isPresent()) {
       if (halfParsed.getVersion().get() != version) {
         final VersionNegotiationPacket verNeg =
-            new VersionNegotiationPacket(halfParsed.getConnectionId(), srcConnId, version);
-        sender.send(verNeg, null); // TODO remove null
+            new VersionNegotiationPacket(
+                halfParsed.getDestinationConnectionId(), srcConnId, version);
+        sender.send(verNeg);
         return false;
       }
     }
@@ -48,7 +49,7 @@ public class PacketRouter {
       final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
       final ServerConnection conn =
-          connections.get(halfParsed.getConnectionId(), listener, sender, peerAddress);
+          connections.get(halfParsed.getDestinationConnectionId(), listener, sender, peerAddress);
 
       if (validateVersion(halfParsed, sender, conn.getLocalConnectionId())) {
         final Packet packet = halfParsed.complete(conn::getAEAD);

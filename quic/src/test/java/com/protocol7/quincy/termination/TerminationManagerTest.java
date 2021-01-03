@@ -12,7 +12,6 @@ import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.InternalConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.PacketNumber;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -69,6 +68,6 @@ public class TerminationManagerTest {
   }
 
   private Packet packet(final Frame... frames) {
-    return new ShortPacket(false, random(), PacketNumber.MIN, new Payload(frames));
+    return ShortPacket.create(false, random(), random(), PacketNumber.MIN, frames);
   }
 }

@@ -57,7 +57,7 @@ public class RetryPacket implements Packet {
       }
 
       @Override
-      public ConnectionId getConnectionId() {
+      public ConnectionId getDestinationConnectionId() {
         return destConnId;
       }
 

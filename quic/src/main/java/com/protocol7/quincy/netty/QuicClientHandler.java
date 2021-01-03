@@ -13,6 +13,7 @@ import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
@@ -65,11 +66,10 @@ public class QuicClientHandler extends ChannelDuplexHandler {
             new NoopCertificateValidator(), // cert validation disabled
             timer);
 
-    final Promise<Void> handshakePromise = ctx.newPromise();
-
-    connection.handshake(handshakePromise);
     this.connection = connection;
 
+    final Promise<Void> handshakePromise = ctx.newPromise();
+    connection.handshake(handshakePromise);
     handshakePromise.addListener(future -> ctx.fireChannelActive());
   }
 
@@ -82,41 +82,41 @@ public class QuicClientHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-    if (msg instanceof ByteBuf) {
-      final ByteBuf bb = (ByteBuf) msg;
+    if (msg instanceof HalfParsedPacket) {
+      final HalfParsedPacket<?> halfParsed = (HalfParsedPacket) msg;
 
-      while (bb.isReadable()) {
-        final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
+      final Packet packet = halfParsed.complete(connection::getAEAD);
 
-        final Packet packet = halfParsed.complete(connection::getAEAD);
-
-        MDC.put("actor", "client");
-        if (packet instanceof FullPacket) {
-          MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
-        }
-        MDC.put("connectionid", packet.getDestinationConnectionId().toString());
-
-        connection.onPacket(packet);
+      MDC.put("actor", "client");
+      if (packet instanceof FullPacket) {
+        MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
       }
+      MDC.put("connectionid", packet.getDestinationConnectionId().toString());
+
+      connection.onPacket(packet);
+
     } else {
-      ctx.fireChannelRead(msg);
+      throw new IllegalArgumentException("Expected HalfParsedPacket message");
     }
   }
 
   @Override
   public void write(
       final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
-    if (msg instanceof QuicPacket) {
+    if (msg instanceof Packet) {
+      final Packet packet = (Packet) msg;
+
+      final ByteBuf bb = Unpooled.buffer();
+      packet.write(bb, connection.getAEAD(Packet.getEncryptionLevel(packet)));
+
+      ctx.write(bb, promise);
+    } else if (msg instanceof QuicPacket) {
       final QuicPacket qp = (QuicPacket) msg;
       final byte[] data = Bytes.drainToArray(qp.content());
 
       connection.openStream().write(data, true);
     } else {
-      ctx.write(msg, promise);
+      throw new IllegalArgumentException("Expected Packet message");
     }
-  }
-
-  private InetSocketAddress remoteAddress() {
-    return (InetSocketAddress) ctx.channel().remoteAddress();
   }
 }

@@ -79,7 +79,7 @@ public class PacketBufferTest {
   }
 
   private FullPacket p(final long pn) {
-    return ShortPacket.create(false, EMPTY, pn, f(pn));
+    return ShortPacket.create(false, EMPTY, EMPTY, pn, f(pn));
   }
 
   private Frame f(final long i) {

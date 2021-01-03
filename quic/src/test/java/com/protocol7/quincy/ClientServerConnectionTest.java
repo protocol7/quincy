@@ -25,7 +25,6 @@ import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamListener;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
-import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
@@ -71,7 +70,7 @@ public class ClientServerConnectionTest {
     }
 
     @Override
-    public Future<Void> send(final Packet packet, final AEAD aead) {
+    public Future<Void> send(final Packet packet) {
       executor.execute(() -> peer.onPacket(packet));
 
       return new SucceededFuture(executor, null);

@@ -12,7 +12,6 @@ import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.ResetStreamFrame;
 import com.protocol7.quincy.protocol.frames.StreamFrame;
@@ -153,6 +152,7 @@ public class DefaultStreamManagerTest {
   }
 
   private FullPacket p(final Frame... frames) {
-    return new ShortPacket(false, ConnectionId.random(), PacketNumber.MIN, new Payload(frames));
+    return ShortPacket.create(
+        false, ConnectionId.random(), ConnectionId.random(), PacketNumber.MIN, frames);
   }
 }

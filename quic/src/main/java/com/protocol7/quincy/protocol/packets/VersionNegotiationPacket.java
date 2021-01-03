@@ -46,7 +46,7 @@ public class VersionNegotiationPacket implements Packet {
       }
 
       @Override
-      public ConnectionId getConnectionId() {
+      public ConnectionId getDestinationConnectionId() {
         return destConnId;
       }
 

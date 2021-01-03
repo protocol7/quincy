@@ -11,7 +11,6 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
-import com.protocol7.quincy.protocol.Payload;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.DataBlockedFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -138,6 +137,7 @@ public class DefaultFlowControlHandlerTest {
   }
 
   private FullPacket p(final Frame frame) {
-    return new ShortPacket(false, ConnectionId.random(), PacketNumber.MIN, new Payload(frame));
+    return ShortPacket.create(
+        false, ConnectionId.random(), ConnectionId.random(), PacketNumber.MIN, frame);
   }
 }

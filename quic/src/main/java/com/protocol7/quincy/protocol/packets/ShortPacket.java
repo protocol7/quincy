@@ -30,7 +30,7 @@ public class ShortPacket implements FullPacket {
 
     final boolean keyPhase = (firstByte & 0x4) == 0x4;
 
-    final ConnectionId connId = ConnectionId.read(connIdLength, bb);
+    final ConnectionId destConnId = ConnectionId.read(connIdLength, bb);
 
     return new HalfParsedPacket<>() {
       @Override
@@ -39,8 +39,8 @@ public class ShortPacket implements FullPacket {
       }
 
       @Override
-      public ConnectionId getConnectionId() {
-        return connId;
+      public ConnectionId getDestinationConnectionId() {
+        return destConnId;
       }
 
       @Override
@@ -84,7 +84,7 @@ public class ShortPacket implements FullPacket {
 
           final Payload payload = Payload.parse(bb, bb.readableBytes(), aead, packetNumber, aad);
 
-          return new ShortPacket(keyPhase, connId, packetNumber, payload);
+          return new ShortPacket(keyPhase, destConnId, Optional.empty(), packetNumber, payload);
         } catch (final GeneralSecurityException e) {
           throw new RuntimeException(e);
         }
@@ -95,23 +95,28 @@ public class ShortPacket implements FullPacket {
   public static ShortPacket create(
       final boolean keyPhase,
       final ConnectionId connectionId,
+      final ConnectionId sourceConnectionId,
       final long packetNumber,
       final Frame... frames) {
-    return new ShortPacket(keyPhase, connectionId, packetNumber, new Payload(frames));
+    return new ShortPacket(
+        keyPhase, connectionId, Optional.of(sourceConnectionId), packetNumber, new Payload(frames));
   }
 
   private final boolean keyPhase;
-  private final ConnectionId connectionId;
+  private final ConnectionId destinationConnectionId;
+  private final Optional<ConnectionId> sourceConnectionId;
   private final long packetNumber;
   private final Payload payload;
 
-  public ShortPacket(
+  private ShortPacket(
       final boolean keyPhase,
-      final ConnectionId connectionId,
+      final ConnectionId destinationConnectionId,
+      final Optional<ConnectionId> sourceConnectionId,
       final long packetNumber,
       final Payload payload) {
     this.keyPhase = keyPhase;
-    this.connectionId = connectionId;
+    this.destinationConnectionId = destinationConnectionId;
+    this.sourceConnectionId = sourceConnectionId;
     this.packetNumber = PacketNumber.validate(packetNumber);
     this.payload = payload;
   }
@@ -123,7 +128,12 @@ public class ShortPacket implements FullPacket {
 
   @Override
   public FullPacket addFrame(final Frame frame) {
-    return new ShortPacket(keyPhase, connectionId, packetNumber, payload.addFrame(frame));
+    return new ShortPacket(
+        keyPhase,
+        destinationConnectionId,
+        sourceConnectionId,
+        packetNumber,
+        payload.addFrame(frame));
   }
 
   @Override
@@ -144,7 +154,7 @@ public class ShortPacket implements FullPacket {
 
     bb.writeByte(b);
 
-    connectionId.write(bb);
+    destinationConnectionId.write(bb);
 
     final int pnOffset = bb.writerIndex();
     final int sampleOffset = pnOffset + 4;
@@ -181,12 +191,16 @@ public class ShortPacket implements FullPacket {
 
   @Override
   public ConnectionId getSourceConnectionId() {
-    throw new IllegalStateException("ShortPacket does not have source connection ID");
+    if (sourceConnectionId.isPresent()) {
+      return sourceConnectionId.get();
+    } else {
+      throw new IllegalStateException("Parsed ShortPacket does not have source connection ID");
+    }
   }
 
   @Override
   public ConnectionId getDestinationConnectionId() {
-    return connectionId;
+    return destinationConnectionId;
   }
 
   @Override
@@ -200,7 +214,7 @@ public class ShortPacket implements FullPacket {
         + "keyPhase="
         + keyPhase
         + ", connectionId="
-        + connectionId
+        + destinationConnectionId
         + ", packetNumber="
         + packetNumber
         + ", payload="

@@ -49,7 +49,7 @@ public class HandshakePacket extends LongHeaderPacket {
       }
 
       @Override
-      public ConnectionId getConnectionId() {
+      public ConnectionId getDestinationConnectionId() {
         return destConnId;
       }
 

@@ -61,7 +61,7 @@ public class ServerTest {
 
   @Before
   public void setUp() {
-    when(packetSender.send(any(), any()))
+    when(packetSender.send(any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
 
     final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
@@ -124,6 +124,7 @@ public class ServerTest {
         ShortPacket.create(
             false,
             destConnectionId2,
+            srcConnectionId,
             nextPacketNumber(),
             new AckFrame(
                 123, new AckRange(serverDone.getPacketNumber(), serverDone.getPacketNumber()))));
@@ -181,7 +182,7 @@ public class ServerTest {
   }
 
   private Packet packet(final ConnectionId destConnId, final Frame... frames) {
-    return new ShortPacket(false, destConnId, nextPacketNumber(), new Payload(frames));
+    return ShortPacket.create(false, destConnId, srcConnectionId, nextPacketNumber(), frames);
   }
 
   private Packet hp(final ConnectionId destConnId, final Frame... frames) {
@@ -196,7 +197,7 @@ public class ServerTest {
 
   private Packet captureSentPacket(final int number) {
     final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture());
 
     final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);
