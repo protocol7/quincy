@@ -2,7 +2,7 @@ package com.protocol7.quincy.termination;
 
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.connection.InternalConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
@@ -19,13 +19,13 @@ import java.util.concurrent.atomic.AtomicReference;
 public class TerminationManager implements InboundHandler {
 
   private final AtomicReference<Timeout> timeout = new AtomicReference<>(null);
-  private final InternalConnection connection;
+  private final Connection connection;
   private final Timer timer;
   private final long idleTimeoutMs;
   private final TimerTask idleTask;
 
   public TerminationManager(
-      final InternalConnection connection,
+      final Connection connection,
       final Timer timer,
       final long idleTimeout,
       final TimeUnit idleUnit) {

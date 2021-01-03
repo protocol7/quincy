@@ -1,5 +1,6 @@
 package com.protocol7.quincy.server;
 
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
@@ -48,7 +49,7 @@ public class PacketRouter {
     while (bb.isReadable()) {
       final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
-      final ServerConnection conn =
+      final Connection conn =
           connections.get(halfParsed.getDestinationConnectionId(), listener, sender, peerAddress);
 
       if (validateVersion(halfParsed, sender, conn.getSourceConnectionId())) {

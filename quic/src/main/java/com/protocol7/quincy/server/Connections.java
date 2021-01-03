@@ -24,7 +24,7 @@ public class Connections {
   private final Configuration configuration;
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
-  private final Map<ConnectionId, ServerConnection> connections = new ConcurrentHashMap<>();
+  private final Map<ConnectionId, Connection> connections = new ConcurrentHashMap<>();
   private final Timer timer;
   private final QuicTokenHandler tokenHandler;
 
@@ -41,13 +41,13 @@ public class Connections {
     this.tokenHandler = tokenHandler;
   }
 
-  public ServerConnection get(
+  public Connection get(
       final ConnectionId connId,
       final StreamListener streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
 
-    ServerConnection conn = connections.get(connId);
+    Connection conn = connections.get(connId);
     if (conn == null) {
       log.debug("Creating new server connection for {}", connId);
       conn =
@@ -63,7 +63,7 @@ public class Connections {
               peerAddress,
               timer,
               tokenHandler);
-      final ServerConnection existingConn = connections.putIfAbsent(connId, conn);
+      final Connection existingConn = connections.putIfAbsent(connId, conn);
       if (existingConn != null) {
         conn = existingConn;
       }

@@ -7,7 +7,7 @@ import static java.util.Optional.of;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.connection.InternalConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -46,7 +46,7 @@ import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 import org.slf4j.MDC;
 
-public class ClientConnection implements InternalConnection {
+public class ClientConnection implements Connection {
 
   private ConnectionId destinationConnectionId;
   private final ConnectionId sourceConnectionId;

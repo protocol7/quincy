@@ -9,7 +9,7 @@ import static org.mockito.Mockito.verify;
 
 import com.protocol7.quincy.MockTimer;
 import com.protocol7.quincy.PipelineContext;
-import com.protocol7.quincy.connection.InternalConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.TransportError;
@@ -29,11 +29,11 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class TerminationManagerTest {
 
-  @Mock private InternalConnection connection;
+  @Mock private Connection connection;
   @Mock private PipelineContext ctx;
 
   private TerminationManager manager;
-  private MockTimer timer = new MockTimer();
+  private final MockTimer timer = new MockTimer();
 
   @Before
   public void setUp() {

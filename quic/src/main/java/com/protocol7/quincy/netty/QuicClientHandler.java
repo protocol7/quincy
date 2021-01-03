@@ -2,6 +2,7 @@ package com.protocol7.quincy.netty;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.client.ClientConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.NettyPacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
@@ -26,7 +27,7 @@ import org.slf4j.MDC;
 public class QuicClientHandler extends ChannelDuplexHandler {
 
   private ChannelHandlerContext ctx;
-  private ClientConnection connection;
+  private Connection connection;
   private final Configuration configuration;
   private final Timer timer = new HashedWheelTimer();
 

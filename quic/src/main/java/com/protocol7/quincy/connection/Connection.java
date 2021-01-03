@@ -27,9 +27,17 @@ public interface Connection extends FrameSender {
 
   Future<Void> close(TransportError error, FrameType frameType, String msg);
 
+  Future<Void> close();
+
   InetSocketAddress getPeerAddress();
 
   Stream openStream();
 
   State getState();
+
+  void onPacket(Packet packet);
+
+  void setState(State state);
+
+  void closeByPeer();
 }

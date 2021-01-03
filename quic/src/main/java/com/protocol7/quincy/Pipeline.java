@@ -1,7 +1,6 @@
 package com.protocol7.quincy;
 
 import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.connection.InternalConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
 import com.protocol7.quincy.protocol.Version;
@@ -56,7 +55,7 @@ public class Pipeline {
 
           @Override
           public void setState(final State state) {
-            ((InternalConnection) connection).setState(state);
+            connection.setState(state);
           }
 
           @Override
@@ -115,7 +114,7 @@ public class Pipeline {
 
           @Override
           public void setState(final State state) {
-            ((InternalConnection) connection).setState(state);
+            connection.setState(state);
           }
 
           @Override

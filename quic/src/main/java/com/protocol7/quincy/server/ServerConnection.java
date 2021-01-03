@@ -5,7 +5,7 @@ import static java.util.Optional.empty;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.Pipeline;
 import com.protocol7.quincy.addressvalidation.ServerRetryHandler;
-import com.protocol7.quincy.connection.InternalConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
-public class ServerConnection implements InternalConnection {
+public class ServerConnection implements Connection {
 
   private Optional<ConnectionId> remoteConnectionId = Optional.empty();
   private final ConnectionId localConnectionId;

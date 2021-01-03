@@ -10,7 +10,7 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
 import com.protocol7.quincy.client.ClientConnection;
-import com.protocol7.quincy.connection.InternalConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
@@ -63,9 +63,9 @@ public class ClientServerConnectionTest {
 
     private final DefaultEventExecutor executor = new DefaultEventExecutor();
 
-    private InternalConnection peer;
+    private Connection peer;
 
-    public void setPeer(final InternalConnection peer) {
+    public void setPeer(final Connection peer) {
       this.peer = peer;
     }
 
