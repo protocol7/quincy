@@ -31,7 +31,7 @@ import java.util.function.Consumer;
 public class ClientTlsManager implements InboundHandler {
 
   private ClientTlsSession tlsSession;
-  private Promise promise;
+  private Promise<Void> promise;
   private final byte[] applicationProtocols;
   private final TransportParameters transportParameters;
   private final CertificateValidator certificateValidator;

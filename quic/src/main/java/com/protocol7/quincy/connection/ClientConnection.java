@@ -1,18 +1,12 @@
 package com.protocol7.quincy.connection;
 
-import static com.protocol7.quincy.connection.State.Closed;
 import static com.protocol7.quincy.protocol.packets.Packet.getEncryptionLevel;
-import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.client.ClientStateMachine;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.logging.LoggingHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.protocol.TransportError;
-import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
-import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.reliability.AckDelay;
 import com.protocol7.quincy.reliability.PacketBufferManager;
@@ -27,7 +21,6 @@ import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Ticker;
 import io.netty.util.Timer;
-import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
 import java.util.List;
@@ -36,16 +29,9 @@ import org.slf4j.MDC;
 
 public class ClientConnection extends AbstractConnection {
 
-  private final PacketSender packetSender;
-
-  private final PacketBufferManager packetBuffer;
-  private final ClientStateMachine stateMachine;
-
   private final StreamManager streamManager;
   private final ClientTlsManager tlsManager;
   private final Pipeline pipeline;
-  private final InetSocketAddress peerAddress;
-  private final Timer timer;
 
   public ClientConnection(
       final Configuration configuration,
@@ -57,15 +43,17 @@ public class ClientConnection extends AbstractConnection {
       final InetSocketAddress peerAddress,
       final CertificateValidator certificateValidator,
       final Timer timer) {
-    super(configuration.getVersion(), sourceConnectionId);
+    super(configuration.getVersion(), peerAddress, sourceConnectionId, packetSender);
+
+    this.stateMachine = new ClientStateMachine(this);
+
     setRemoteConnectionId(initialRemoteConnectionId);
-    this.packetSender = requireNonNull(packetSender);
-    this.peerAddress = requireNonNull(peerAddress);
+
     this.streamManager = new DefaultStreamManager(this, streamListener);
 
     final Ticker ticker = Ticker.systemTicker();
 
-    this.packetBuffer =
+    final PacketBufferManager packetBuffer =
         new PacketBufferManager(
             new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
     this.tlsManager =
@@ -90,13 +78,6 @@ public class ClientConnection extends AbstractConnection {
                 flowControlHandler,
                 terminationManager),
             List.of(packetBuffer, logger));
-
-    this.stateMachine = new ClientStateMachine(this);
-    this.timer = requireNonNull(timer);
-  }
-
-  private void resetTlsSession() {
-    tlsManager.resetTlsSession(getDestinationConnectionId().get());
   }
 
   public void handshake(final Promise promise) {
@@ -104,32 +85,12 @@ public class ClientConnection extends AbstractConnection {
     tlsManager.handshake(getState(), this, stateMachine::setState, promise);
   }
 
-  public Packet sendPacket(final Packet p) {
-    if (stateMachine.getState() == Closed) {
-      throw new IllegalStateException("Connection not open");
-    }
-
-    final Packet newPacket = pipeline.send(this, p);
-
-    // check again if any handler closed the connection
-    if (stateMachine.getState() == Closed) {
-      throw new IllegalStateException("Connection not open");
-    }
-
-    sendPacketUnbuffered(newPacket);
-    return newPacket;
-  }
-
-  public void setRemoteConnectionId(final ConnectionId remoteConnectionId, final boolean retry) {
+  public void reset(final ConnectionId remoteConnectionId) {
     setRemoteConnectionId(remoteConnectionId);
 
-    if (retry) {
-      resetTlsSession();
-    }
-  }
+    resetSendPacketNumber();
 
-  private void sendPacketUnbuffered(final Packet packet) {
-    packetSender.send(packet).awaitUninterruptibly(); // TODO fix
+    tlsManager.resetTlsSession(remoteConnectionId);
   }
 
   public void onPacket(final Packet packet) {
@@ -153,39 +114,8 @@ public class ClientConnection extends AbstractConnection {
     return streamManager.openStream(true, true);
   }
 
-  public Future<Void> close(
-      final TransportError error, final FrameType frameType, final String msg) {
-    stateMachine.closeImmediate(new ConnectionCloseFrame(error.getValue(), frameType, msg));
-
-    return closeInternal();
-  }
-
   @Override
-  public InetSocketAddress getPeerAddress() {
-    return peerAddress;
-  }
-
-  public Future<Void> close() {
-    stateMachine.closeImmediate();
-
-    return closeInternal();
-  }
-
-  public void closeByPeer() {
-    closeInternal().awaitUninterruptibly(); // TODO fis
-  }
-
-  private Future<Void> closeInternal() {
-    timer.stop();
-
-    return packetSender.destroy();
-  }
-
-  public State getState() {
-    return stateMachine.getState();
-  }
-
-  public void setState(final State state) {
-    stateMachine.setState(state);
+  protected Pipeline getPipeline() {
+    return pipeline;
   }
 }

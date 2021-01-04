@@ -11,15 +11,12 @@ import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 
 public interface Connection extends FrameSender {
 
   Packet sendPacket(Packet p);
 
   ConnectionId getSourceConnectionId();
-
-  Optional<ConnectionId> getDestinationConnectionId();
 
   Version getVersion();
 
