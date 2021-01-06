@@ -16,7 +16,6 @@ public class ServerStateMachine extends StateMachine {
   }
 
   public synchronized void handlePacket(final Packet packet) {
-    // TODO check version
     if (getState() == State.Started) {
       if (packet instanceof InitialPacket) {
         final InitialPacket initialPacket = (InitialPacket) packet;

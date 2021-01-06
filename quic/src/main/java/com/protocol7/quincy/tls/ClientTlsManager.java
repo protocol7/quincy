@@ -3,7 +3,6 @@ package com.protocol7.quincy.tls;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.FrameSender;
-import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
@@ -28,7 +27,7 @@ import io.netty.util.concurrent.Promise;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class ClientTlsManager implements InboundHandler {
+public class ClientTlsManager implements TlsManager {
 
   private ClientTlsSession tlsSession;
   private Promise<Void> promise;
@@ -79,7 +78,9 @@ public class ClientTlsManager implements InboundHandler {
   public void onReceivePacket(final Packet packet, final PipelineContext ctx) {
     final State state = ctx.getState();
 
-    if (state == State.BeforeHello) {
+    if (state == State.Started) {
+      throw new IllegalStateException("Unexpected packet in Started: " + packet);
+    } else if (state == State.BeforeHello) {
       if (packet instanceof InitialPacket) {
         final InitialPacket ip = (InitialPacket) packet;
 

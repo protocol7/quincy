@@ -1,6 +1,6 @@
 package com.protocol7.quincy.tls;
 
-import com.protocol7.quincy.InboundHandler;
+import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.ConnectionId;
@@ -16,16 +16,18 @@ import com.protocol7.quincy.reliability.AckUtil;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+import io.netty.util.concurrent.Promise;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
 
-public class ServerTLSManager implements InboundHandler {
+public class ServerTlsManager implements TlsManager {
 
   private final ServerTlsSession tlsSession;
   private final AtomicLong donePacketNumber = new AtomicLong(-1);
 
-  public ServerTLSManager(
+  public ServerTlsManager(
       final ConnectionId connectionId,
       final TransportParameters transportParameters,
       final PrivateKey privateKey,
@@ -99,6 +101,20 @@ public class ServerTLSManager implements InboundHandler {
 
   public AEAD getAEAD(final EncryptionLevel level) {
     return tlsSession.getAEAD(level);
+  }
+
+  @Override
+  public void resetTlsSession(final ConnectionId connectionId) {
+    throw new UnsupportedOperationException();
+  }
+
+  @Override
+  public void handshake(
+      final State state,
+      final FrameSender sender,
+      final Consumer<State> stateSetter,
+      final Promise<Void> promise) {
+    throw new UnsupportedOperationException();
   }
 
   public boolean available(final EncryptionLevel level) {

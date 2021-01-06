@@ -319,14 +319,11 @@ public class ClientTest {
     assertEquals(List.of(new AckRange(smallest, largest)), actual);
   }
 
-  @Test
+  @Test(expected = IllegalStateException.class)
   public void frameBeforeHandshake() {
     // not handshaking
 
     connection.onPacket(packet(PingFrame.INSTANCE));
-
-    // ignoring in unexpected state, nothing should happen
-    verify(packetSender, never()).send(any());
   }
 
   private Packet captureSentPacket(final int number) {

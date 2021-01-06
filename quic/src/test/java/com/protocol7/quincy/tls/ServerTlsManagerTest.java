@@ -38,8 +38,8 @@ public class ServerTlsManagerTest {
 
   private final ConnectionId connectionId = ConnectionId.random();
   private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
-  private final ServerTLSManager manager =
-      new ServerTLSManager(
+  private final ServerTlsManager manager =
+      new ServerTlsManager(
           connectionId,
           tps,
           KeyUtil.getPrivateKey("src/test/resources/server.der"),

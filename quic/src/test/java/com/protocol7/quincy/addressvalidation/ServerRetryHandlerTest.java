@@ -40,7 +40,7 @@ public class ServerRetryHandlerTest {
   private final QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
 
   private final ServerRetryHandler handler =
-      new ServerRetryHandler(InsecureQuicTokenHandler.INSTANCE);
+      new ServerRetryHandler(of(InsecureQuicTokenHandler.INSTANCE));
   private final InetSocketAddress address = TestUtil.getTestAddress();
 
   @Before

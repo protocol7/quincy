@@ -4,7 +4,12 @@ import static com.protocol7.quincy.connection.State.Closed;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
+import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.Pipeline;
+import com.protocol7.quincy.addressvalidation.ServerRetryHandler;
+import com.protocol7.quincy.logging.LoggingHandler;
+import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.TransportError;
@@ -17,10 +22,23 @@ import com.protocol7.quincy.protocol.packets.HandshakePacket;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
+import com.protocol7.quincy.reliability.AckDelay;
+import com.protocol7.quincy.reliability.PacketBufferManager;
+import com.protocol7.quincy.streams.DefaultStreamManager;
+import com.protocol7.quincy.streams.Stream;
+import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamManager;
+import com.protocol7.quincy.termination.TerminationManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
+import com.protocol7.quincy.tls.TlsManager;
+import com.protocol7.quincy.tls.aead.AEAD;
+import com.protocol7.quincy.utils.Ticker;
+import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
+import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
 
 public abstract class AbstractConnection implements Connection {
@@ -32,8 +50,14 @@ public abstract class AbstractConnection implements Connection {
   private Optional<ConnectionId> destinationConnectionId = empty();
   private final ConnectionId sourceConnectionId;
 
+  protected final TlsManager tlsManager;
   protected StateMachine stateMachine;
   private final PacketSender packetSender;
+  protected final StreamManager streamManager;
+
+  protected final Pipeline pipeline;
+
+  private final boolean isClient;
 
   private Optional<byte[]> token = Optional.empty();
 
@@ -43,21 +67,70 @@ public abstract class AbstractConnection implements Connection {
       final Version version,
       final InetSocketAddress peerAddress,
       final ConnectionId sourceConnectionId,
-      final PacketSender packetSender) {
+      final TlsManager tlsManager,
+      final PacketSender packetSender,
+      final StreamListener streamListener,
+      final boolean isClient,
+      final InboundHandler flowControlHandler,
+      final Configuration configuration,
+      final Timer timer,
+      final Optional<QuicTokenHandler> tokenHandler) {
     this.version = version;
     this.peerAddress = peerAddress;
     this.sourceConnectionId = sourceConnectionId;
+    this.tlsManager = tlsManager;
     this.packetSender = packetSender;
+    this.streamManager = new DefaultStreamManager(this, streamListener);
+    this.isClient = isClient;
+
+    final Ticker ticker = Ticker.systemTicker();
+
+    final PacketBufferManager packetBuffer =
+        new PacketBufferManager(
+            new AckDelay(configuration.getAckDelayExponent(), ticker), this, timer, ticker);
+
+    final LoggingHandler logger = new LoggingHandler(isClient);
+
+    final TerminationManager terminationManager =
+        new TerminationManager(this, timer, configuration.getIdleTimeout(), TimeUnit.SECONDS);
+
+    this.pipeline =
+        new Pipeline(
+            List.of(
+                logger,
+                new ServerRetryHandler(tokenHandler),
+                tlsManager,
+                packetBuffer,
+                streamManager,
+                flowControlHandler,
+                terminationManager),
+            List.of(packetBuffer, logger));
   }
 
-  protected abstract Pipeline getPipeline();
+  public void onPacket(final Packet packet) {
+    // final EncryptionLevel encLevel = getEncryptionLevel(packet);
+    // if (tlsManager.available(encLevel)) {
+    stateMachine.handlePacket(packet);
+    pipeline.onPacket(this, packet);
+    // } else {
+    // TODO handle unencryptable packet
+    //  throw new IllegalStateException("Encryption level not available for packet " + packet);
+    // }
+  }
+
+  /*  public void onPacket(final Packet packet) {
+    // with incorrect conn ID
+    stateMachine.handlePacket(packet);
+
+    pipeline.onPacket(this, packet);
+  }*/
 
   public Packet sendPacket(final Packet p) {
     if (stateMachine.getState() == Closed) {
       throw new IllegalStateException("Connection not open");
     }
 
-    final Packet newPacket = getPipeline().send(this, p);
+    final Packet newPacket = pipeline.send(this, p);
 
     // check again if any handler closed the connection
     if (stateMachine.getState() == Closed) {
@@ -126,6 +199,11 @@ public abstract class AbstractConnection implements Connection {
     stateMachine.setState(state);
   }
 
+  @Override
+  public AEAD getAEAD(final EncryptionLevel level) {
+    return tlsManager.getAEAD(level);
+  }
+
   public Optional<byte[]> getToken() {
     return token;
   }
@@ -140,6 +218,10 @@ public abstract class AbstractConnection implements Connection {
 
   public void resetSendPacketNumber() {
     sendPacketNumber.set(-1L);
+  }
+
+  public Stream openStream() {
+    return streamManager.openStream(isClient, true);
   }
 
   public Future<Void> close(

@@ -43,18 +43,18 @@ public class Connections {
   }
 
   public Connection get(
-      final ConnectionId connId,
+      final ConnectionId dcid,
       final StreamListener streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
 
-    Connection conn = connections.get(connId);
+    Connection conn = connections.get(dcid);
     if (conn == null) {
-      log.debug("Creating new server connection for {}", connId);
+      log.debug("Creating new server connection for {}", dcid);
       conn =
           new ServerConnection(
               configuration,
-              connId,
+              dcid,
               streamHandler,
               packetSender,
               certificates,
@@ -64,7 +64,7 @@ public class Connections {
               peerAddress,
               timer,
               tokenHandler);
-      final Connection existingConn = connections.putIfAbsent(connId, conn);
+      final Connection existingConn = connections.putIfAbsent(dcid, conn);
       if (existingConn != null) {
         conn = existingConn;
       }
@@ -72,7 +72,7 @@ public class Connections {
     return conn;
   }
 
-  public Optional<Connection> get(final ConnectionId connId) {
-    return Optional.ofNullable(connections.get(connId));
+  public Optional<Connection> get(final ConnectionId dcid) {
+    return Optional.ofNullable(connections.get(dcid));
   }
 }

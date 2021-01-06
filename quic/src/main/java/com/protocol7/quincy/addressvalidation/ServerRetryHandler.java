@@ -13,12 +13,13 @@ import com.protocol7.quincy.protocol.packets.RetryPacket;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
+import java.util.Optional;
 
 public class ServerRetryHandler implements InboundHandler {
 
-  private final QuicTokenHandler tokenHandler;
+  private final Optional<QuicTokenHandler> tokenHandler;
 
-  public ServerRetryHandler(final QuicTokenHandler tokenHandler) {
+  public ServerRetryHandler(final Optional<QuicTokenHandler> tokenHandler) {
     this.tokenHandler = requireNonNull(tokenHandler);
   }
 
@@ -27,43 +28,47 @@ public class ServerRetryHandler implements InboundHandler {
     requireNonNull(packet);
     requireNonNull(ctx);
 
-    if (ctx.getState() == State.Started) {
-      if (packet instanceof InitialPacket) {
-        final InitialPacket initialPacket = (InitialPacket) packet;
+    if (tokenHandler.isPresent()) {
 
-        if (initialPacket.getToken().isPresent()) {
-          final ByteBuf token = Unpooled.wrappedBuffer(initialPacket.getToken().get());
-          try {
-            if (tokenHandler.validateToken(token, ctx.getPeerAddress()) != -1) {
-              // good to go
-            } else {
-              // send retry
-              sendRetry(ctx, initialPacket);
+      if (ctx.getState() == State.Started) {
+        if (packet instanceof InitialPacket) {
+          final InitialPacket initialPacket = (InitialPacket) packet;
 
-              return;
+          if (initialPacket.getToken().isPresent()) {
+            final ByteBuf token = Unpooled.wrappedBuffer(initialPacket.getToken().get());
+            try {
+              if (tokenHandler.get().validateToken(token, ctx.getPeerAddress()) != -1) {
+                // good to go
+              } else {
+                // send retry
+                sendRetry(ctx, initialPacket);
+
+                return;
+              }
+            } finally {
+              token.release();
             }
-          } finally {
-            token.release();
+          } else {
+            // send retry
+            // TODO close old connection
+
+            sendRetry(ctx, initialPacket);
+
+            // don't propagate packet
+            return;
           }
-        } else {
-          // send retry
-          // TODO close old connection
-
-          sendRetry(ctx, initialPacket);
-
-          // don't propagate packet
-          return;
         }
       }
     }
-
     ctx.next(packet);
   }
 
   private void sendRetry(final PipelineContext ctx, final InitialPacket initialPacket) {
     final ByteBuf tokenBB = Unpooled.buffer();
-    tokenHandler.writeToken(
-        tokenBB, initialPacket.getSourceConnectionId().asByteBuffer(), ctx.getPeerAddress());
+    tokenHandler
+        .get()
+        .writeToken(
+            tokenBB, initialPacket.getSourceConnectionId().asByteBuffer(), ctx.getPeerAddress());
 
     final byte[] retryToken = Bytes.drainToArray(tokenBB);
 
