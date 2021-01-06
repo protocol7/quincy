@@ -24,7 +24,7 @@ public class VersionTest {
     assertEquals(Version.DRAFT_29, Version.read(b("ff00001d")));
     assertEquals(Version.FINAL, Version.read(b("00000001")));
     assertEquals(Version.VERSION_NEGOTIATION, Version.read(b("00000000")));
-    assertEquals(Version.UNKNOWN, Version.read(b("abcdabcd")));
+    assertEquals(new Version(Hex.dehex("abcdabcd")), Version.read(b("abcdabcd")));
   }
 
   private ByteBuf b(final String d) {

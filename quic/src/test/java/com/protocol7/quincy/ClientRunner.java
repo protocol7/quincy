@@ -18,7 +18,7 @@ import java.net.InetSocketAddress;
 public class ClientRunner {
 
   public static void main(final String[] args) throws InterruptedException {
-    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 6121);
+    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 4433);
 
     final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -29,8 +29,8 @@ public class ClientRunner {
       b.remoteAddress(peer);
       b.handler(
           new QuicBuilder()
-              .withApplicationProtocols(ALPN.from("hq-29"))
-              .withVersion(Version.TLS)
+              .withApplicationProtocols(ALPN.from("http/0.9"))
+              .withVersion(Version.DRAFT_29)
               .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override

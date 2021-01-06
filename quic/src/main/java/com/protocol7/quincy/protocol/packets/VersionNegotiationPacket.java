@@ -32,10 +32,7 @@ public class VersionNegotiationPacket implements Packet {
 
     final List<Version> supported = new ArrayList<>();
     while (bb.isReadable()) {
-      final Version v = Version.read(bb);
-      if (v != Version.UNKNOWN) {
-        supported.add(v);
-      }
+      supported.add(Version.read(bb));
     }
 
     return new HalfParsedPacket<>() {

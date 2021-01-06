@@ -1,5 +1,6 @@
 package com.protocol7.quincy.it;
 
+import static com.protocol7.quincy.utils.Hex.dehex;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.netty.QuicBuilder;
@@ -41,7 +42,7 @@ public class QuicGoTest {
       b.handler(
           new QuicBuilder()
               .withApplicationProtocols(ALPN.from("hq-29"))
-              .withVersion(Version.TLS)
+              .withVersion(new Version(dehex("51474fff")))
               .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override

@@ -60,7 +60,7 @@ public class InitialPacketTest {
         new ConnectionId(Hex.dehex("b4860ea2b36e0d4b8064611cfaf37f15c58c0e7b")),
         packet.getSourceConnectionId());
     assertEquals(PacketType.Initial, packet.getType());
-    assertEquals(Version.UNKNOWN, packet.getVersion());
+    assertEquals(new Version(Hex.dehex("babababa")), packet.getVersion());
     assertEquals(Optional.empty(), packet.getToken());
     assertEquals(2, packet.getPayload().getFrames().size());
   }

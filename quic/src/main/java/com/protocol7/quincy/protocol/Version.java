@@ -1,16 +1,15 @@
 package com.protocol7.quincy.protocol;
 
 import static com.protocol7.quincy.utils.Hex.dehex;
+import static com.protocol7.quincy.utils.Hex.hex;
 
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 
-public enum Version {
-  VERSION_NEGOTIATION(dehex("00000000")),
-  FINAL(dehex("00000001")),
-  DRAFT_29(dehex("ff00001d")),
-  TLS(dehex("51474fff")),
-  UNKNOWN(new byte[0]);
+public class Version {
+  public static final Version VERSION_NEGOTIATION = new Version(dehex("00000000"));
+  public static final Version FINAL = new Version(dehex("00000001"));
+  public static final Version DRAFT_29 = new Version(dehex("ff00001d"));
 
   public static Version read(final ByteBuf bb) {
     final byte[] l = new byte[4];
@@ -22,16 +21,14 @@ public enum Version {
       return FINAL;
     } else if (Arrays.equals(l, DRAFT_29.version)) {
       return DRAFT_29;
-    } else if (Arrays.equals(l, TLS.version)) {
-      return TLS;
     } else {
-      return UNKNOWN;
+      return new Version(l);
     }
   }
 
   private final byte[] version;
 
-  Version(final byte[] version) {
+  public Version(final byte[] version) {
     this.version = version;
   }
 
@@ -41,5 +38,23 @@ public enum Version {
 
   public byte[] asBytes() {
     return version;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final Version version1 = (Version) o;
+    return Arrays.equals(version, version1.version);
+  }
+
+  @Override
+  public int hashCode() {
+    return Arrays.hashCode(version);
+  }
+
+  @Override
+  public String toString() {
+    return "Version[" + hex(version) + ']';
   }
 }

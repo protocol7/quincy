@@ -175,8 +175,6 @@ public class ClientTlsSession {
       return Optional.of(clientFin);
     } catch (final IndexOutOfBoundsException e) {
       // wait for more data
-      log.debug("Need more data, waiting...");
-      buffer.resetReaderIndex();
 
       return Optional.empty();
     } finally {
