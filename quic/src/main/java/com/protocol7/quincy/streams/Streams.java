@@ -16,7 +16,7 @@ public class Streams {
   }
 
   public Stream openStream(
-      final boolean client, final boolean bidirectional, final StreamListener handler) {
+      final boolean client, final boolean bidirectional, final StreamHandler handler) {
     final StreamType type = bidirectional ? StreamType.Bidirectional : StreamType.Sending;
     final long streamId = StreamId.next(maxId, client, bidirectional);
     this.maxId = streamId;
@@ -25,7 +25,7 @@ public class Streams {
     return stream;
   }
 
-  public DefaultStream getOrCreate(final long streamId, final StreamListener handler) {
+  public DefaultStream getOrCreate(final long streamId, final StreamHandler handler) {
     DefaultStream stream = streams.get(streamId);
     if (stream == null) {
       stream =

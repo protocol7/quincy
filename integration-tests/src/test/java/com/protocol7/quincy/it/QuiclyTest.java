@@ -45,7 +45,7 @@ public class QuiclyTest {
       b.handler(
           new QuicBuilder()
               .withVersion(Version.DRAFT_29)
-              .clientChannelInitializer(
+              .withChannelHandler(
                   new ChannelDuplexHandler() {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
@@ -64,7 +64,8 @@ public class QuiclyTest {
                       final QuicPacket packet = (QuicPacket) msg;
                       capturedData.add(Bytes.drainToArray(packet.content()));
                     }
-                  }));
+                  })
+              .clientChannelInitializer());
 
       b.connect().awaitUninterruptibly();
       final String actual =

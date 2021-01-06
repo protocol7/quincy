@@ -1,11 +1,10 @@
 package com.protocol7.quincy;
 
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.streams.Stream;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.KeyUtil;
 import io.netty.bootstrap.Bootstrap;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
@@ -25,25 +24,17 @@ public class ServerRunner {
           new QuicBuilder()
               .withCertificates(KeyUtil.getCertsFromCrt("quic/src/test/resources/server.crt"))
               .withPrivateKey(KeyUtil.getPrivateKey("quic/src/test/resources/server.der"))
-              .serverChannelInitializer(
-                  new ChannelInboundHandlerAdapter() {
+              .withStreamHandler(
+                  new StreamHandler() {
                     @Override
-                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-                      System.out.println("server got message " + msg);
+                    public void onData(
+                        final Stream stream, final byte[] data, final boolean finished) {
+                      System.out.println("server got message " + new String(data));
 
-                      final QuicPacket qp = (QuicPacket) msg;
-
-                      ctx.write(
-                          QuicPacket.of(
-                              qp.getLocalConnectionId(),
-                              qp.getStreamId(),
-                              "PONG".getBytes(),
-                              qp.sender()));
-
-                      ctx.close();
-                      ctx.disconnect();
+                      stream.write("PONG".getBytes(), true);
                     }
-                  }));
+                  })
+              .serverChannelInitializer());
 
       b.bind("0.0.0.0", 4444).awaitUninterruptibly();
       System.out.println("Bound");

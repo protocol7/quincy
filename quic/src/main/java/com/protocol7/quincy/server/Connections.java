@@ -7,7 +7,7 @@ import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.util.Timer;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
@@ -44,7 +44,7 @@ public class Connections {
 
   public Connection get(
       final ConnectionId dcid,
-      final StreamListener streamHandler,
+      final StreamHandler streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
 

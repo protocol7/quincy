@@ -36,7 +36,7 @@ public class QuicGoTest {
       b.handler(
           new QuicBuilder()
               .withVersion(Version.DRAFT_29)
-              .clientChannelInitializer(
+              .withChannelHandler(
                   new ChannelDuplexHandler() {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
@@ -49,7 +49,8 @@ public class QuicGoTest {
 
                       ctx.fireChannelActive();
                     }
-                  }));
+                  })
+              .clientChannelInitializer());
 
       b.connect().awaitUninterruptibly();
 

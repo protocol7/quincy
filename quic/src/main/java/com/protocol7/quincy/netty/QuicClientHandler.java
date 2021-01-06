@@ -9,8 +9,7 @@ import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.HalfParsedPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -26,31 +25,27 @@ import org.slf4j.MDC;
 
 public class QuicClientHandler extends ChannelDuplexHandler {
 
-  private ChannelHandlerContext ctx;
   private Connection connection;
   private final Configuration configuration;
   private final Timer timer = new HashedWheelTimer();
+  private final StreamHandler streamHandler;
 
-  private final StreamListener streamListener =
-      new StreamListener() {
-        @Override
-        public void onData(final Stream stream, final byte[] data, final boolean finished) {
-          ctx.fireChannelRead(
-              QuicPacket.of(
-                  connection.getSourceConnectionId(),
-                  stream.getId(),
-                  data,
-                  connection.getPeerAddress()));
-        }
-      };
+  /*private final StreamHandler streamListener =
+  new StreamHandler() {
+    @Override
+    public void onData(final Stream stream, final byte[] data, final boolean finished) {
+      ctx.fireChannelRead(
+          QuicPacket.of(
+              connection.getSourceConnectionId(),
+              stream.getId(),
+              data,
+              connection.getPeerAddress()));
+    }
+  };*/
 
-  public QuicClientHandler(final Configuration configuration) {
+  public QuicClientHandler(final Configuration configuration, final StreamHandler streamHandler) {
     this.configuration = configuration;
-  }
-
-  @Override
-  public void handlerAdded(final ChannelHandlerContext ctx) {
-    this.ctx = ctx;
+    this.streamHandler = streamHandler;
   }
 
   @Override
@@ -60,7 +55,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
             configuration,
             ConnectionId.random(),
             ConnectionId.random(),
-            streamListener,
+            streamHandler,
             new NettyPacketSender(ctx.channel()),
             new DefaultFlowControlHandler(
                 configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
@@ -96,6 +91,8 @@ public class QuicClientHandler extends ChannelDuplexHandler {
       MDC.put("connectionid", packet.getDestinationConnectionId().toString());
 
       connection.onPacket(packet);
+
+      ctx.fireChannelRead(packet);
 
     } else {
       throw new IllegalArgumentException("Expected HalfParsedPacket message");

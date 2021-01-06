@@ -16,11 +16,11 @@ import com.protocol7.quincy.protocol.packets.ShortPacket;
 public class DefaultStreamManager implements StreamManager {
 
   private final Streams streams;
-  private final StreamListener listener;
+  private final StreamHandler handler;
 
-  public DefaultStreamManager(final FrameSender frameSender, final StreamListener listener) {
+  public DefaultStreamManager(final FrameSender frameSender, final StreamHandler handler) {
     this.streams = new Streams(requireNonNull(frameSender));
-    this.listener = requireNonNull(listener);
+    this.handler = requireNonNull(handler);
   }
 
   @Override
@@ -38,12 +38,12 @@ public class DefaultStreamManager implements StreamManager {
 
           final StreamFrame sf = (StreamFrame) frame;
 
-          final DefaultStream stream = streams.getOrCreate(sf.getStreamId(), listener);
+          final DefaultStream stream = streams.getOrCreate(sf.getStreamId(), handler);
 
           stream.onData(sf.getOffset(), sf.isFin(), sf.getData());
         } else if (frame instanceof ResetStreamFrame) {
           final ResetStreamFrame rsf = (ResetStreamFrame) frame;
-          final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), listener);
+          final DefaultStream stream = streams.getOrCreate(rsf.getStreamId(), handler);
           stream.onReset(rsf.getApplicationErrorCode(), rsf.getFinalSize());
         } else if (frame instanceof AckFrame) {
           final AckFrame af = (AckFrame) frame;
@@ -66,6 +66,6 @@ public class DefaultStreamManager implements StreamManager {
 
   @Override
   public Stream openStream(final boolean client, final boolean bidirectional) {
-    return streams.openStream(client, bidirectional, listener);
+    return streams.openStream(client, bidirectional, handler);
   }
 }

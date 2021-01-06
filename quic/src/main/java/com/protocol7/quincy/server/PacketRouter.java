@@ -8,7 +8,7 @@ import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.HalfParsedPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
 import org.slf4j.MDC;
@@ -17,10 +17,10 @@ public class PacketRouter {
 
   private final Version version;
   private final Connections connections;
-  private final StreamListener listener;
+  private final StreamHandler listener;
 
   public PacketRouter(
-      final Version version, final Connections connections, final StreamListener listener) {
+      final Version version, final Connections connections, final StreamHandler listener) {
     this.version = version;
     this.connections = connections;
     this.listener = listener;

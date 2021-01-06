@@ -15,7 +15,7 @@ import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
@@ -40,7 +40,7 @@ public class PacketRouterTest {
   private final ConnectionId srcConnId = ConnectionId.random();
   @Mock private Connections connections;
   @Mock private Connection connection;
-  @Mock private StreamListener listener;
+  @Mock private StreamHandler listener;
   @Mock private PacketSender sender;
   private final InetSocketAddress peerAddress = TestUtil.getTestAddress();
 

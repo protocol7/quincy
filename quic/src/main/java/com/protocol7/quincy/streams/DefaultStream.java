@@ -15,7 +15,7 @@ public class DefaultStream implements Stream {
 
   private final long id;
   private final FrameSender sender;
-  private final StreamListener listener;
+  private final StreamHandler handler;
   private final AtomicLong offset = new AtomicLong(0);
   private final StreamType streamType;
   private final SendStateMachine sendStateMachine = new SendStateMachine();
@@ -26,11 +26,11 @@ public class DefaultStream implements Stream {
   public DefaultStream(
       final long id,
       final FrameSender sender,
-      final StreamListener listener,
+      final StreamHandler handler,
       final StreamType streamType) {
     this.id = StreamId.validate(id);
     this.sender = sender;
-    this.listener = listener;
+    this.handler = handler;
     this.streamType = streamType;
   }
 
@@ -84,7 +84,7 @@ public class DefaultStream implements Stream {
     while (receivedDataBuffer.hasMore()) {
       final Optional<byte[]> data = receivedDataBuffer.read();
 
-      listener.onData(this, data.get(), receivedDataBuffer.isDone() && seenFinish.get());
+      handler.onData(this, data.get(), receivedDataBuffer.isDone() && seenFinish.get());
     }
 
     receiveStateMachine.onStream(finish);

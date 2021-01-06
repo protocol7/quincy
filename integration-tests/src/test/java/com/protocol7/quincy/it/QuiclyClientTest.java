@@ -31,13 +31,14 @@ public class QuiclyClientTest {
               .withVersion(Version.DRAFT_29)
               .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
               .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
-              .serverChannelInitializer(
+              .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
                       System.out.println("server got message " + msg);
                     }
-                  }));
+                  })
+              .serverChannelInitializer());
 
       b.bind("0.0.0.0", 4444).awaitUninterruptibly();
 

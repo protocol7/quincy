@@ -31,7 +31,7 @@ public class DefaultStreamManagerTest {
   private static final byte[] DATA2 = "world".getBytes();
 
   @Mock private PipelineContext ctx;
-  @Mock private StreamListener listener;
+  @Mock private StreamHandler listener;
   @Mock private FullPacket packet;
 
   private DefaultStreamManager manager;

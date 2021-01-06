@@ -22,7 +22,7 @@ import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.streams.DefaultStream;
 import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import io.netty.util.Timer;
@@ -54,8 +54,8 @@ public class ClientServerConnectionTest {
   private final ForwardingPacketSender clientSender = new ForwardingPacketSender();
   private final ForwardingPacketSender serverSender = new ForwardingPacketSender();
 
-  private @Mock StreamListener clientListener;
-  private @Mock StreamListener serverListener;
+  private @Mock StreamHandler clientListener;
+  private @Mock StreamHandler serverListener;
   private @Mock Timer scheduler;
   private final FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 

@@ -6,11 +6,14 @@ import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.Version;
+import com.protocol7.quincy.streams.Stream;
+import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.DatagramChannel;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Optional;
 
 public class QuicBuilder {
 
@@ -32,10 +35,18 @@ public class QuicBuilder {
   private QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
   private byte[] applicationProtocols = new byte[0];
 
+  private StreamHandler streamHandler =
+      new StreamHandler() {
+        @Override
+        public void onData(final Stream stream, final byte[] data, final boolean finished) {}
+      };
+
   public QuicBuilder withVersion(final Version version) {
     this.version = version;
     return this;
   }
+
+  private ChannelHandler channelHandler;
 
   public QuicBuilder withInitialMaxStreamDataBidiLocal(final int initialMaxStreamDataBidiLocal) {
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
@@ -112,6 +123,16 @@ public class QuicBuilder {
     return this;
   }
 
+  public QuicBuilder withStreamHandler(final StreamHandler streamHandler) {
+    this.streamHandler = streamHandler;
+    return this;
+  }
+
+  public QuicBuilder withChannelHandler(final ChannelHandler channelHandler) {
+    this.channelHandler = channelHandler;
+    return this;
+  }
+
   public Configuration configuration() {
     return new Configuration(
         version,
@@ -129,16 +150,24 @@ public class QuicBuilder {
         applicationProtocols);
   }
 
-  public ChannelHandler serverChannelInitializer(final ChannelHandler handler) {
+  public ChannelHandler serverChannelInitializer() {
     requireNonNull(certificates);
     requireNonNull(privateKey);
+    requireNonNull(streamHandler);
 
     return new QuicServerInitializer(
-        configuration(), handler, certificates, privateKey, tokenHandler);
+        configuration(),
+        Optional.ofNullable(channelHandler),
+        certificates,
+        privateKey,
+        tokenHandler,
+        streamHandler);
   }
 
-  public ChannelInitializer<DatagramChannel> clientChannelInitializer(
-      final ChannelHandler handler) {
-    return new QuicClientInitializer(configuration(), handler);
+  public ChannelInitializer<DatagramChannel> clientChannelInitializer() {
+    requireNonNull(streamHandler);
+
+    return new QuicClientInitializer(
+        configuration(), Optional.ofNullable(channelHandler), streamHandler);
   }
 }

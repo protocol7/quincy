@@ -1,5 +1,5 @@
 package com.protocol7.quincy.streams;
 
-public interface StreamListener {
+public interface StreamHandler {
   void onData(Stream stream, byte[] data, boolean finished);
 }

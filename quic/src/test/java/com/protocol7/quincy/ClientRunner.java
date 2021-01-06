@@ -2,8 +2,9 @@ package com.protocol7.quincy;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.streams.Stream;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.extensions.ALPN;
-import com.protocol7.quincy.utils.Bytes;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -28,7 +29,7 @@ public class ClientRunner {
       b.handler(
           new QuicBuilder()
               .withApplicationProtocols(ALPN.from("http/0.9"))
-              .clientChannelInitializer(
+              .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
@@ -38,21 +39,16 @@ public class ClientRunner {
 
                       ctx.fireChannelActive();
                     }
-
+                  })
+              .withStreamHandler(
+                  new StreamHandler() {
                     @Override
-                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-                      System.out.println("got message " + msg);
-
-                      final QuicPacket qp = (QuicPacket) msg;
-
-                      final byte[] b = Bytes.drainToArray(qp.content());
-
-                      System.out.println(new String(b));
-
-                      ctx.close();
-                      ctx.disconnect();
+                    public void onData(
+                        final Stream stream, final byte[] data, final boolean finished) {
+                      System.out.println(new String(data));
                     }
-                  }));
+                  })
+              .clientChannelInitializer());
 
       final Channel channel = b.connect().syncUninterruptibly().channel();
       System.out.println("Connected");

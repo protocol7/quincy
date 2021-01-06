@@ -39,24 +39,20 @@ public class QuicheTest {
       b.handler(
           new QuicBuilder()
               .withApplicationProtocols(ALPN.from("http/0.9"))
-              .clientChannelInitializer(
+              .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
                       ctx.channel().write(QuicPacket.of(null, 0, "GET /\r\n".getBytes(), peer));
+                      System.out.println("############ Sent request");
                       ctx.fireChannelActive();
                     }
-
-                    @Override
-                    public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-                      final QuicPacket qp = (QuicPacket) msg;
-
-                      responses.add(qp.content().toString(StandardCharsets.US_ASCII));
-
-                      ctx.close();
-                      ctx.disconnect();
-                    }
-                  }));
+                  })
+              .withStreamHandler(
+                  (stream, data, finished) -> {
+                    responses.add(new String(data, StandardCharsets.US_ASCII));
+                  })
+              .clientChannelInitializer());
 
       b.connect();
 

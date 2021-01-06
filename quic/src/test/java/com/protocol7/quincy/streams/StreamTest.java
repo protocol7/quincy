@@ -22,7 +22,7 @@ public class StreamTest {
 
   public static final byte[] DATA = "Hello".getBytes();
   @Mock private PipelineContext ctx;
-  @Mock private StreamListener listener;
+  @Mock private StreamHandler listener;
   @Mock private FullPacket packet;
   private final long streamId = StreamId.next(-1, true, true);
 

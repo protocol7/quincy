@@ -18,7 +18,7 @@ import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.ClientTlsSession;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.KeyUtil;
@@ -57,7 +57,7 @@ public class ServerTest {
           new NoopCertificateValidator());
 
   @Mock private PacketSender packetSender;
-  @Mock private StreamListener streamListener;
+  @Mock private StreamHandler streamListener;
   @Mock private Timer scheduler;
   private final FlowControlHandler flowControlHandler = new DefaultFlowControlHandler(1000, 1000);
 

@@ -27,7 +27,7 @@ import com.protocol7.quincy.reliability.AckDelay;
 import com.protocol7.quincy.reliability.PacketBufferManager;
 import com.protocol7.quincy.streams.DefaultStreamManager;
 import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.streams.StreamManager;
 import com.protocol7.quincy.termination.TerminationManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
@@ -49,7 +49,7 @@ public class AbstractConnection implements Connection {
   public static AbstractConnection forServer(
       final Configuration configuration,
       final ConnectionId localConnectionId,
-      final StreamListener streamListener,
+      final StreamHandler streamListener,
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
@@ -100,7 +100,7 @@ public class AbstractConnection implements Connection {
       final TlsManager tlsManager,
       final StateMachine stateMachine,
       final PacketSender packetSender,
-      final StreamListener streamListener,
+      final StreamHandler streamHandler,
       final boolean isClient,
       final InboundHandler flowControlHandler,
       final Configuration configuration,
@@ -112,7 +112,7 @@ public class AbstractConnection implements Connection {
     this.tlsManager = tlsManager;
     this.stateMachine = stateMachine;
     this.packetSender = packetSender;
-    this.streamManager = new DefaultStreamManager(this, streamListener);
+    this.streamManager = new DefaultStreamManager(this, streamHandler);
     this.isClient = isClient;
 
     final Ticker ticker = Ticker.systemTicker();

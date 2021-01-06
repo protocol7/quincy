@@ -14,7 +14,7 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class StreamsTest {
 
   @Mock PipelineContext ctx;
-  @Mock StreamListener listener;
+  @Mock StreamHandler listener;
 
   private Streams streams;
 

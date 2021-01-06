@@ -15,7 +15,7 @@ import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;
-import com.protocol7.quincy.streams.StreamListener;
+import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
@@ -52,7 +52,7 @@ public class ClientTest {
   private final FlowControlHandler flowControlHandler = new MockFlowControlHandler();
 
   @Mock private PacketSender packetSender;
-  @Mock private StreamListener streamListener;
+  @Mock private StreamHandler streamListener;
   @Mock private Timer scheduler;
 
   @Before
