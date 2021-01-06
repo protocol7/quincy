@@ -7,8 +7,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
+import com.protocol7.quincy.connection.AbstractConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
-import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -44,7 +45,7 @@ public class ServerTest {
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId destConnectionId2 = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
-  private ServerConnection connection;
+  private Connection connection;
   private long packetNumber = 0;
   private final long streamId = StreamId.next(-1, true, true);
 
@@ -69,7 +70,7 @@ public class ServerTest {
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     connection =
-        new ServerConnection(
+        AbstractConnection.forServer(
             new QuicBuilder().configuration(),
             srcConnectionId,
             streamListener,

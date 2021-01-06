@@ -15,13 +15,7 @@ public class ClientStateMachine extends StateMachine {
 
   private final Logger log = LoggerFactory.getLogger(ClientStateMachine.class);
 
-  private final ClientConnection connection;
-
-  public ClientStateMachine(final ClientConnection connection) {
-    this.connection = connection;
-  }
-
-  public void handlePacket(final Packet packet) {
+  public void handlePacket(final Connection connection, final Packet packet) {
     log.info(
         "Client got {} in state {}: {}", packet.getClass().getCanonicalName(), getState(), packet);
 
@@ -47,7 +41,7 @@ public class ClientStateMachine extends StateMachine {
     }
   }
 
-  public void closeImmediate(final ConnectionCloseFrame ccf) {
+  public void closeImmediate(final Connection connection, final ConnectionCloseFrame ccf) {
     // TODO verify level
     connection.send(EncryptionLevel.OneRtt, ccf);
 
@@ -56,8 +50,9 @@ public class ClientStateMachine extends StateMachine {
     setState(State.Closed);
   }
 
-  public void closeImmediate() {
+  public void closeImmediate(final Connection connection) {
     closeImmediate(
+        connection,
         new ConnectionCloseFrame(
             TransportError.NO_ERROR.getValue(), FrameType.PADDING, "Closing connection"));
   }

@@ -33,6 +33,7 @@ public class ClientConnection extends AbstractConnection {
             configuration.getApplicationProtocols(),
             configuration.toTransportParameters(),
             certificateValidator),
+        new ClientStateMachine(),
         packetSender,
         streamListener,
         true,
@@ -41,21 +42,11 @@ public class ClientConnection extends AbstractConnection {
         timer,
         Optional.empty());
 
-    this.stateMachine = new ClientStateMachine(this);
-
     setRemoteConnectionId(initialRemoteConnectionId);
   }
 
   public void handshake(final Promise promise) {
     MDC.put("actor", "client");
     tlsManager.handshake(getState(), this, stateMachine::setState, promise);
-  }
-
-  public void reset(final ConnectionId remoteConnectionId) {
-    setRemoteConnectionId(remoteConnectionId);
-
-    resetSendPacketNumber();
-
-    tlsManager.resetTlsSession(remoteConnectionId);
   }
 }

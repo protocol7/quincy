@@ -9,13 +9,7 @@ import com.protocol7.quincy.tls.EncryptionLevel;
 
 public class ServerStateMachine extends StateMachine {
 
-  private final ServerConnection connection;
-
-  public ServerStateMachine(final ServerConnection connection) {
-    this.connection = connection;
-  }
-
-  public synchronized void handlePacket(final Packet packet) {
+  public synchronized void handlePacket(final Connection connection, final Packet packet) {
     if (getState() == State.Started) {
       if (packet instanceof InitialPacket) {
         final InitialPacket initialPacket = (InitialPacket) packet;
@@ -27,7 +21,7 @@ public class ServerStateMachine extends StateMachine {
     }
   }
 
-  public void closeImmediate(final ConnectionCloseFrame ccf) {
+  public void closeImmediate(final Connection connection, final ConnectionCloseFrame ccf) {
     connection.send(EncryptionLevel.OneRtt, ccf);
 
     setState(State.Closing);
@@ -35,8 +29,9 @@ public class ServerStateMachine extends StateMachine {
     setState(State.Closed);
   }
 
-  public void closeImmediate() {
+  public void closeImmediate(final Connection connection) {
     closeImmediate(
+        connection,
         new ConnectionCloseFrame(
             TransportError.NO_ERROR.getValue(), FrameType.PADDING, "Closing connection"));
   }

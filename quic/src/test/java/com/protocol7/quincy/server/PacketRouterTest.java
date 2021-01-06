@@ -8,8 +8,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import com.protocol7.quincy.TestUtil;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
-import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
@@ -39,7 +39,7 @@ public class PacketRouterTest {
   private final ConnectionId destConnId = ConnectionId.random();
   private final ConnectionId srcConnId = ConnectionId.random();
   @Mock private Connections connections;
-  @Mock private ServerConnection connection;
+  @Mock private Connection connection;
   @Mock private StreamListener listener;
   @Mock private PacketSender sender;
   private final InetSocketAddress peerAddress = TestUtil.getTestAddress();

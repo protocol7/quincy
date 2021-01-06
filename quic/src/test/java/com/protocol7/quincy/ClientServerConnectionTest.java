@@ -9,10 +9,10 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
+import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
-import com.protocol7.quincy.connection.ServerConnection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -47,7 +47,7 @@ public class ClientServerConnectionTest {
   private static final byte[] PONG = "pong".getBytes();
 
   private ClientConnection clientConnection;
-  private ServerConnection serverConnection;
+  private Connection serverConnection;
 
   private final ConnectionId destConnectionId = ConnectionId.random();
   private final ConnectionId srcConnectionId = ConnectionId.random();
@@ -100,7 +100,7 @@ public class ClientServerConnectionTest {
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
-        new ServerConnection(
+        AbstractConnection.forServer(
             new QuicBuilder().configuration(),
             srcConnectionId,
             serverListener,

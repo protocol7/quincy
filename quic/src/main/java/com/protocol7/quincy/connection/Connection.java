@@ -18,6 +18,8 @@ public interface Connection extends FrameSender {
 
   ConnectionId getSourceConnectionId();
 
+  void setRemoteConnectionId(final ConnectionId remoteConnectionId);
+
   Version getVersion();
 
   AEAD getAEAD(EncryptionLevel level);
@@ -37,4 +39,8 @@ public interface Connection extends FrameSender {
   void setState(State state);
 
   void closeByPeer();
+
+  void reset(ConnectionId sourceConnectionId);
+
+  void setToken(byte[] retryToken);
 }
