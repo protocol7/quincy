@@ -9,6 +9,7 @@ public enum Version {
   VERSION_NEGOTIATION(dehex("00000000")),
   FINAL(dehex("00000001")),
   DRAFT_29(dehex("ff00001d")),
+  TLS(dehex("51474fff")),
   UNKNOWN(new byte[0]);
 
   public static Version read(final ByteBuf bb) {
@@ -21,6 +22,8 @@ public enum Version {
       return FINAL;
     } else if (Arrays.equals(l, DRAFT_29.version)) {
       return DRAFT_29;
+    } else if (Arrays.equals(l, TLS.version)) {
+      return TLS;
     } else {
       return UNKNOWN;
     }

@@ -4,6 +4,8 @@ import static com.protocol7.quincy.utils.Hex.dehex;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
+import com.protocol7.quincy.utils.Bytes;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -78,5 +80,14 @@ public class TransportParametersTest {
     assertEquals(0, parsed.getOriginalDestinationConnectionId().length);
     assertEquals(20, parsed.getInitialSourceConnectionId().length);
     assertEquals(0, parsed.getRetrySourceConnectionId().length);
+  }
+
+  @Test
+  public void writeDisableActiveMigration() {
+    final ByteBuf bb = Unpooled.buffer();
+    TransportParameters.newBuilder().withDisableActiveMigration(true).build().write(bb, true);
+
+    // disable active migration must be written as an empty value
+    assertEquals("0c00", Hex.hex(Bytes.drainToArray(bb)));
   }
 }

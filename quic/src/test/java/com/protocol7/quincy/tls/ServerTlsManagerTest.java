@@ -72,7 +72,7 @@ public class ServerTlsManagerTest {
     clientTlsSession.handleServerHello(
         Unpooled.wrappedBuffer(cfCaptor.getAllValues().get(0).getCryptoData()));
     final byte[] clientFin =
-        clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData()).get();
+        clientTlsSession.handleHandshake(cfCaptor.getAllValues().get(1).getCryptoData(), 0).get();
 
     // receive fin, should send handshake done
     when(ctx.getState()).thenReturn(State.BeforeHandshake);

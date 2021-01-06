@@ -20,7 +20,8 @@ public enum TransportParameterType {
   PREFERRED_ADDRESS(0x000d),
   ACTIVE_CONNECTION_ID_LIMIT(0x000e),
   INITIAL_SOURCE_CONNECTION_ID(0x000f),
-  RETRY_SOURCE_CONNECTION_ID(0x0010);
+  RETRY_SOURCE_CONNECTION_ID(0x0010),
+  UNKNOWN(0xFFFF);
 
   public static TransportParameterType fromValue(final byte[] value) {
     Preconditions.checkArgument(value.length == 2);
@@ -34,7 +35,7 @@ public enum TransportParameterType {
         return tp;
       }
     }
-    throw new IllegalArgumentException("Unknown value: " + value);
+    return UNKNOWN;
   }
 
   private final short value;

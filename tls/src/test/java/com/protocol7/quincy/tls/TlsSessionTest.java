@@ -48,7 +48,7 @@ public class TlsSessionTest {
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
-    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get();
+    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake(), 0).get();
 
     server.handleClientFinished(clientFin);
   }
@@ -78,7 +78,7 @@ public class TlsSessionTest {
             new ServerCertificateVerify(parsedSCV.getVerifyType(), sig),
             parsedSHE);
 
-    final byte[] clientFin = client.handleHandshake(scv).get();
+    final byte[] clientFin = client.handleHandshake(scv, 0).get();
 
     server.handleClientFinished(clientFin);
   }
@@ -90,7 +90,7 @@ public class TlsSessionTest {
     final ServerHelloAndHandshake shah = server.handleClientHello(clientHello);
 
     client.handleServerHello(Unpooled.wrappedBuffer(shah.getServerHello()));
-    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake()).get();
+    final byte[] clientFin = client.handleHandshake(shah.getServerHandshake(), 0).get();
 
     // modify verification data
     clientFin[clientFin.length - 1]++;
@@ -118,6 +118,6 @@ public class TlsSessionTest {
 
     final byte[] scv = Bytes.write(parsedEE, parsedSC, parsedSCV, new Finished(vd));
 
-    client.handleHandshake(scv).get();
+    client.handleHandshake(scv, 0).get();
   }
 }

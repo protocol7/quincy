@@ -143,7 +143,8 @@ public class ClientTlsManager implements TlsManager {
       if (frame instanceof CryptoFrame) {
         final CryptoFrame cf = (CryptoFrame) frame;
 
-        final Optional<byte[]> clientFin = tlsSession.handleHandshake(cf.getCryptoData());
+        final Optional<byte[]> clientFin =
+            tlsSession.handleHandshake(cf.getCryptoData(), cf.getOffset());
 
         if (clientFin.isPresent()) {
           tlsSession.unsetInitialAead();

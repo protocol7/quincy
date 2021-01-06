@@ -35,6 +35,7 @@
         <directory>src/main/resources</directory>
         <includes>
           <include>QuicGoDockerfile</include>
+          <include>main.go</include>
         </includes>
       </resource>
     </resources>

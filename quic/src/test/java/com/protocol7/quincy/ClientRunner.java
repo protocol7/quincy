@@ -2,6 +2,7 @@ package com.protocol7.quincy;
 
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
+import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.extensions.ALPN;
@@ -17,7 +18,7 @@ import java.net.InetSocketAddress;
 public class ClientRunner {
 
   public static void main(final String[] args) throws InterruptedException {
-    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 4433);
+    final InetSocketAddress peer = new InetSocketAddress("127.0.0.1", 6121);
 
     final EventLoopGroup workerGroup = new NioEventLoopGroup();
 
@@ -28,7 +29,8 @@ public class ClientRunner {
       b.remoteAddress(peer);
       b.handler(
           new QuicBuilder()
-              .withApplicationProtocols(ALPN.from("http/0.9"))
+              .withApplicationProtocols(ALPN.from("hq-29"))
+              .withVersion(Version.TLS)
               .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {
                     @Override

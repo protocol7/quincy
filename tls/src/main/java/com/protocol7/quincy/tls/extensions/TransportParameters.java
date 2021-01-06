@@ -487,7 +487,7 @@ public class TransportParameters implements Extension {
       writeVarint(INITIAL_MAX_STREAMS_UNI, bb, initialMaxStreamsUni);
     }
     if (disableActiveMigration) {
-      writeVarint(DISABLE_ACTIVE_MIGRATION, bb, 0);
+      writeEmpty(DISABLE_ACTIVE_MIGRATION, bb);
     }
     if (initialMaxStreamDataBidiRemote > -1) {
       writeVarint(INITIAL_MAX_STREAM_DATA_BIDI_REMOTE, bb, initialMaxStreamDataBidiRemote);
@@ -523,5 +523,10 @@ public class TransportParameters implements Extension {
     final byte[] b = Varint.write(value);
     Varint.write(b.length, bb);
     bb.writeBytes(b);
+  }
+
+  private void writeEmpty(final TransportParameterType type, final ByteBuf bb) {
+    Varint.write(type.getValue(), bb);
+    Varint.write(0, bb);
   }
 }

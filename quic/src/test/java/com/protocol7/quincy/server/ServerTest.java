@@ -116,7 +116,7 @@ public class ServerTest {
     assertEquals(1, handshake.getPayload().getFrames().size());
     final CryptoFrame cf2 = (CryptoFrame) handshake.getPayload().getFrames().get(0);
 
-    final byte[] clientFin = clientTlsSession.handleHandshake(cf2.getCryptoData()).get();
+    final byte[] clientFin = clientTlsSession.handleHandshake(cf2.getCryptoData(), 0).get();
 
     connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, clientFin)));
 

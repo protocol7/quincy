@@ -44,7 +44,6 @@ public class QuicheTest {
                     @Override
                     public void channelActive(final ChannelHandlerContext ctx) {
                       ctx.channel().write(QuicPacket.of(null, 0, "GET /\r\n".getBytes(), peer));
-                      System.out.println("############ Sent request");
                       ctx.fireChannelActive();
                     }
                   })

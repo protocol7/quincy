@@ -158,6 +158,6 @@ public class ClientTlsSessionTest {
 
   @Test(expected = IllegalStateException.class)
   public void serverHandshakeWithoutStart() throws CertificateInvalidException {
-    engine.handleHandshake(new byte[0]);
+    engine.handleHandshake(new byte[0], 0);
   }
 }

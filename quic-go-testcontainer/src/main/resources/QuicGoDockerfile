@@ -1,16 +1,15 @@
-FROM golang:1.12
+FROM golang:1.14.5
 
-ARG hash=3dcbaee8
+ARG hash=d1c5297c0bd9176e5f76e4245a1bcb2fe51bed2a
 
 WORKDIR /root/src/github.com/lucas-clemente/quic-go
 
 RUN git clone https://github.com/lucas-clemente/quic-go.git . && git checkout $hash
 
-RUN GO111MODULE=on go get -d -v ./...
+RUN go get -d -v ./...
 
-RUN mkdir -p /var/www
-RUN touch /var/www/index.html
+COPY main.go interop/main.go
 
 EXPOSE 6121/udp
 
-ENTRYPOINT ["go", "run", "example/main.go", "-v", "-bind", "0.0.0.0:6121", "-tcp" ]
+ENTRYPOINT ["go", "run", "interop/main.go"]

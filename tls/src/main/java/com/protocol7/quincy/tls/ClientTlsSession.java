@@ -20,7 +20,6 @@ import com.protocol7.quincy.tls.messages.ServerCertificateVerify;
 import com.protocol7.quincy.tls.messages.ServerHello;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.security.PublicKey;
 import java.util.ArrayList;
 import java.util.List;
@@ -41,7 +40,7 @@ public class ClientTlsSession {
   private final CertificateValidator certificateValidator;
   private final byte[] applicationProtocols;
 
-  private ByteBuf handshakeBuffer;
+  private ReceivedDataBuffer handshakeBuffer = new ReceivedDataBuffer();
   private byte[] clientHello;
   private byte[] serverHello;
   private byte[] handshakeSecret;
@@ -58,7 +57,6 @@ public class ClientTlsSession {
     aeads = new AEADs(initialAEAD);
     this.certificateValidator = certificateValidator;
     kek = KeyExchange.generate(Group.X25519);
-    handshakeBuffer = Unpooled.buffer(); // replace with position keeping buffer
   }
 
   public byte[] startHandshake(final byte[] sourceConnectionId) {
@@ -114,34 +112,40 @@ public class ClientTlsSession {
     aeads.setHandshakeAead(HandshakeAEAD.create(handshakeSecret, helloHash, true));
   }
 
-  public synchronized Optional<byte[]> handleHandshake(final byte[] msg)
+  public synchronized Optional<byte[]> handleHandshake(final byte[] msg, final long offset)
       throws CertificateInvalidException {
     if (clientHello == null || serverHello == null) {
       throw new IllegalStateException("Got handshake in unexpected state");
     }
 
     // TODO handle out of order
-    handshakeBuffer.writeBytes(msg);
+    handshakeBuffer.onData(msg, offset);
 
-    handshakeBuffer.markReaderIndex();
+    final Optional<ByteBuf> optBuf = handshakeBuffer.read();
+    if (optBuf.isEmpty()) {
+      return Optional.empty();
+    }
+    final ByteBuf buffer = optBuf.get();
+
+    buffer.markReaderIndex();
     try {
-      final int pos = handshakeBuffer.readerIndex();
-      EncryptedExtensions.parse(handshakeBuffer, true);
-      final ServerCertificate sc = ServerCertificate.parse(handshakeBuffer);
+      final int pos = buffer.readerIndex();
+      EncryptedExtensions.parse(buffer, true);
+      final ServerCertificate sc = ServerCertificate.parse(buffer);
 
-      final byte[] scvBytes = new byte[handshakeBuffer.readerIndex() - pos];
-      handshakeBuffer.resetReaderIndex();
-      handshakeBuffer.readBytes(scvBytes);
+      final byte[] scvBytes = new byte[buffer.readerIndex() - pos];
+      buffer.resetReaderIndex();
+      buffer.readBytes(scvBytes);
 
-      final ServerCertificateVerify scv = ServerCertificateVerify.parse(handshakeBuffer);
+      final ServerCertificateVerify scv = ServerCertificateVerify.parse(buffer);
 
       validateServerCertificateVerify(sc, scv, scvBytes);
 
-      final byte[] finBytes = new byte[handshakeBuffer.readerIndex() - pos];
-      handshakeBuffer.resetReaderIndex();
-      handshakeBuffer.readBytes(finBytes);
+      final byte[] finBytes = new byte[buffer.readerIndex() - pos];
+      buffer.resetReaderIndex();
+      buffer.readBytes(finBytes);
 
-      final Finished fin = Finished.parse(handshakeBuffer);
+      final Finished fin = Finished.parse(buffer);
 
       final byte[] helloHash = Hash.sha256(clientHello, serverHello);
       validateServerFinish(fin, helloHash, finBytes);
@@ -150,10 +154,9 @@ public class ClientTlsSession {
         throw new CertificateInvalidException();
       }
 
-      handshakeBuffer.resetReaderIndex();
-
-      final byte[] hs = Bytes.drainToArray(handshakeBuffer);
-      handshakeBuffer = Unpooled.buffer();
+      buffer.resetReaderIndex();
+      final byte[] hs = Bytes.peekToArray(buffer);
+      handshakeBuffer = new ReceivedDataBuffer();
 
       final byte[] handshakeHash = Hash.sha256(clientHello, serverHello, hs);
 
@@ -173,9 +176,11 @@ public class ClientTlsSession {
     } catch (final IndexOutOfBoundsException e) {
       // wait for more data
       log.debug("Need more data, waiting...");
-      handshakeBuffer.resetReaderIndex();
+      buffer.resetReaderIndex();
 
       return Optional.empty();
+    } finally {
+      buffer.release();
     }
   }
 
