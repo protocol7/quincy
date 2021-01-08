@@ -20,4 +20,13 @@ public class ALPNTest {
 
     assertArrayEquals(alpn.getProtocols(), parsed.getProtocols());
   }
+
+  @Test
+  public void contains() {
+    final ALPN alpn = new ALPN(ALPN.from("h3", "http/0.9"));
+
+    assertTrue(alpn.contains("h3".getBytes()));
+    assertTrue(alpn.contains("http/0.9".getBytes()));
+    assertFalse(alpn.contains("http/1.1".getBytes()));
+  }
 }

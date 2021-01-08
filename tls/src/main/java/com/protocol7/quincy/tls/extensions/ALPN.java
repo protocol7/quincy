@@ -34,6 +34,22 @@ public class ALPN implements Extension {
     }
   }
 
+  public static byte[] from(final byte[]... protocols) {
+    final ByteBuf bb = Unpooled.buffer();
+    try {
+      for (final byte[] protocol : protocols) {
+        bb.writeByte(protocol.length);
+        bb.writeBytes(protocol);
+      }
+
+      final byte[] b = new byte[bb.readableBytes()];
+      bb.readBytes(b);
+      return b;
+    } finally {
+      bb.release();
+    }
+  }
+
   private final byte[] protocols;
 
   public ALPN(final byte[] protocols) {
@@ -53,6 +69,25 @@ public class ALPN implements Extension {
 
   public byte[] getProtocols() {
     return protocols;
+  }
+
+  public boolean contains(final byte[] protocol) {
+    final ByteBuf bb = Unpooled.wrappedBuffer(protocols);
+
+    try {
+      while (bb.readableBytes() > 0) {
+        final byte len = bb.readByte();
+        final byte[] b = new byte[len];
+        bb.readBytes(b);
+
+        if (Arrays.equals(b, protocol)) {
+          return true;
+        }
+      }
+      return false;
+    } finally {
+      bb.release();
+    }
   }
 
   @Override
