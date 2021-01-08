@@ -5,12 +5,35 @@ import static com.protocol7.quincy.tls.TestUtil.assertHex;
 import static org.junit.Assert.assertEquals;
 
 import com.protocol7.quincy.utils.Hex;
+import com.protocol7.quincy.utils.Rnd;
+import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.util.Iterator;
 import java.util.List;
 import org.junit.Test;
 
 public class ExtensionTest {
+
+  @Test
+  public void roundtripClientToServer() {
+    final List<Extension> extensions =
+        List.of(
+            new ALPN("http/0.9".getBytes()),
+            TransportParameters.newBuilder().withMaxUDPPacketSize(123).build(),
+            KeyShare.of(X25519, Rnd.rndBytes(16)),
+            SupportedVersions.TLS13,
+            new SupportedGroups(X25519),
+            SignatureAlgorithms.defaults(),
+            PskKeyExchangeModes.defaults(),
+            new ServerName("foo"));
+
+    final ByteBuf bb = Unpooled.buffer();
+    Extension.writeAll(extensions, bb, true);
+
+    final List<Extension> parsed = Extension.parseAll(bb, false);
+
+    assertEquals(extensions, parsed);
+  }
 
   @Test
   public void parseKnown() {

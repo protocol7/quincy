@@ -39,6 +39,8 @@ public interface Extension {
         return PskKeyExchangeModes.parse(b);
       } else if (type == ExtensionType.SERVER_NAME) {
         return ServerName.parse(b);
+      } else if (type == ExtensionType.APPLICATION_LAYER_PROTOCOL_NEGOTIATION) {
+        return ALPN.parse(b);
       } else {
         return RawExtension.parse(type, b);
       }
