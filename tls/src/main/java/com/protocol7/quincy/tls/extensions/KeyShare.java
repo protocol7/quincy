@@ -5,7 +5,9 @@ import com.google.common.collect.ImmutableSortedMap.Builder;
 import com.protocol7.quincy.tls.Group;
 import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
+import java.util.Arrays;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.SortedMap;
 
@@ -76,6 +78,29 @@ public class KeyShare implements Extension {
     if (isClient) {
       bb.setShort(lenPos, bb.writerIndex() - lenPos - 2);
     }
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final KeyShare keyShare = (KeyShare) o;
+
+    // check that keys are the same
+    if (!keys.keySet().equals(keyShare.keys.keySet())) return false;
+
+    // keys are the same, verify each value
+    for (final Map.Entry<Group, byte[]> entry : keys.entrySet()) {
+      if (!Arrays.equals(entry.getValue(), keyShare.keys.get(entry.getKey()))) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(keys);
   }
 
   @Override

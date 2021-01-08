@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList.Builder;
 import com.protocol7.quincy.tls.Group;
 import io.netty.buffer.ByteBuf;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class SupportedGroups implements Extension {
@@ -48,6 +49,19 @@ public class SupportedGroups implements Extension {
     for (final Group group : groups) {
       bb.writeShort(group.getValue());
     }
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final SupportedGroups that = (SupportedGroups) o;
+    return Objects.equals(groups, that.groups);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(groups);
   }
 
   @Override
