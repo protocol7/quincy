@@ -43,11 +43,13 @@ public class ClientStateMachine extends StateMachine {
 
   public void closeImmediate(final Connection connection, final ConnectionCloseFrame ccf) {
     // TODO verify level
-    connection.send(EncryptionLevel.OneRtt, ccf);
+    if (getState() != State.Closing && getState() != State.Closed) {
+      connection.send(EncryptionLevel.OneRtt, ccf);
 
-    setState(State.Closing);
+      setState(State.Closing);
 
-    setState(State.Closed);
+      setState(State.Closed);
+    }
   }
 
   public void closeImmediate(final Connection connection) {

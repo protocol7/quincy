@@ -3,6 +3,8 @@ package com.protocol7.quincy.netty;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.channel.ChannelHandler;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.DatagramChannel;
@@ -32,6 +34,13 @@ public class QuicClientInitializer extends ChannelInitializer<DatagramChannel> {
 
     if (handler.isPresent()) {
       pipeline.addLast(handler.get());
+    } else {
+      pipeline.addLast(
+          new ChannelInboundHandlerAdapter() {
+            @Override
+            public void channelRead(final ChannelHandlerContext ctx, final Object msg)
+                throws Exception {}
+          });
     }
   }
 }

@@ -7,6 +7,7 @@ import static org.junit.Assert.assertTrue;
 import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.testcontainers.quicly.QuiclyPacket;
 import com.protocol7.testcontainers.quicly.QuiclyServerContainer;
@@ -45,6 +46,7 @@ public class QuiclyTest {
       b.handler(
           new QuicBuilder()
               .withVersion(Version.DRAFT_29)
+              .withApplicationProtocols(ALPN.from("http/1.1"))
               .withChannelHandler(
                   new ChannelDuplexHandler() {
                     @Override
@@ -68,6 +70,11 @@ public class QuiclyTest {
               .clientChannelInitializer());
 
       b.connect().awaitUninterruptibly();
+
+      Thread.sleep(1000);
+
+      quicly.copyFileFromContainer("/log.log", "/tmp/log.log");
+
       final String actual =
           new String(capturedData.poll(10000, MILLISECONDS), StandardCharsets.US_ASCII);
 
