@@ -57,19 +57,14 @@ public class Connections {
     requireNonNull(packetSender);
     requireNonNull(peerAddress);
 
+    // TODO reconsider
     Optional<ConnectionId> originalRemoteConnectionId = Optional.empty();
     if (scid.isPresent()) {
       final ConnectionId oldDcid = scidMap.get(scid.get());
 
       if (oldDcid != null && !oldDcid.equals(dcid)) {
-        System.out.println("########## dcid switch");
 
         originalRemoteConnectionId = Optional.of(oldDcid);
-
-        /*final Connection connection = connections.get(oldDcid);
-        connections.put(dcid, connection);
-
-        // TODO remove from old DCID?*/
       }
 
       scidMap.put(scid.get(), dcid);

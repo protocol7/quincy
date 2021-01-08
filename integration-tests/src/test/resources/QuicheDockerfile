@@ -1,5 +1,3 @@
 FROM cloudflare/quiche
 
 EXPOSE 4433/udp
-
-ENTRYPOINT ["/usr/local/bin/quiche-server", "--cert", "/keys/server.crt", "--key", "/keys/server.pem", "--listen", "0.0.0.0:4433"]

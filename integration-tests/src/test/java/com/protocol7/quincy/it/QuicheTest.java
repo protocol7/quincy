@@ -28,7 +28,9 @@ import org.junit.Test;
 public class QuicheTest {
 
   public static final String ALPN = "http/0.9";
-  @Rule public QuicheContainer quiche = new QuicheContainer();
+
+  @Rule public QuicheContainer quiche = (QuicheContainer) new QuicheContainer(true)
+          .withCommand("/usr/local/bin/quiche-server", "--cert", "/keys/server.crt", "--key", "/keys/server.pem", "--listen", "0.0.0.0:4433");
 
   private final EventLoopGroup workerGroup = new NioEventLoopGroup();
   private final Bootstrap b = new Bootstrap();

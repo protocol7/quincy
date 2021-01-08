@@ -11,12 +11,14 @@ import org.testcontainers.images.builder.ImageFromDockerfile;
 
 public class QuicheContainer extends GenericContainer {
 
-  public QuicheContainer() {
+  public QuicheContainer(final boolean wait) {
     super(
         new ImageFromDockerfile("quiche", false)
             .withFileFromClasspath("Dockerfile", "QuicheDockerfile"));
 
-    waitingFor(Wait.forLogMessage(".*listening on.*", 1));
+    if (wait) {
+      waitingFor(Wait.forLogMessage(".*listening on.*", 1));
+    }
     withFileSystemBind(
         new File("src/test/resources").getAbsolutePath(), "/keys", BindMode.READ_ONLY);
   }
