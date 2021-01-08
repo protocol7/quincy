@@ -24,6 +24,7 @@ import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.DefaultPromise;
 import io.netty.util.concurrent.GlobalEventExecutor;
@@ -39,11 +40,13 @@ public class ClientTlsManagerTest {
   private final ConnectionId connectionId = ConnectionId.random();
   private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
   private final ClientTlsManager manager =
-      new ClientTlsManager(connectionId, new byte[0], tps, new NoopCertificateValidator());
+      new ClientTlsManager(
+          connectionId, ALPN.from("http/0.9"), tps, new NoopCertificateValidator());
 
   private final ServerTlsSession serverTlsSession =
       new ServerTlsSession(
           InitialAEAD.create(connectionId.asBytes(), false),
+          "http/0.9".getBytes(),
           tps,
           KeyUtil.getCertsFromCrt("src/test/resources/server.crt"),
           KeyUtil.getPrivateKey("src/test/resources/server.der"));

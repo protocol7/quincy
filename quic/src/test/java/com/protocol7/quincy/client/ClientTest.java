@@ -22,6 +22,7 @@ import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.ServerTlsSession;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.*;
@@ -57,14 +58,14 @@ public class ClientTest {
 
   @Before
   public void setUp() {
-    when(packetSender.send(any()))
+    when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
     when(packetSender.destroy())
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
     connection =
         new ClientConnection(
-            new QuicBuilder().configuration(),
+            new QuicBuilder().withApplicationProtocols(ALPN.from("http/0.9")).configuration(),
             destConnectionId,
             srcConnectionId,
             streamListener,
@@ -80,6 +81,7 @@ public class ClientTest {
     serverTlsSession =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
+            "http/0.9".getBytes(),
             new QuicBuilder().configuration().toTransportParameters(),
             serverCert,
             privateKey);
@@ -147,7 +149,7 @@ public class ClientTest {
             new CryptoFrame(0, shah.getServerHello())));
 
     // verify no packet sent here
-    verify(packetSender, times(3)).send(any());
+    verify(packetSender, times(3)).send(any(), any());
 
     // verify handshake state
     assertFalse(handshakeFuture.isDone());
@@ -302,7 +304,7 @@ public class ClientTest {
     connection.onPacket(verNeg);
 
     // should not have sent any more packets
-    verify(packetSender, times(1)).send(any());
+    verify(packetSender, times(1)).send(any(), any());
 
     // should close connection
     verify(packetSender).destroy();
@@ -328,7 +330,7 @@ public class ClientTest {
 
   private Packet captureSentPacket(final int number) {
     final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
     final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);

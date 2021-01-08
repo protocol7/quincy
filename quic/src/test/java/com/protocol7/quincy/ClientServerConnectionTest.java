@@ -25,6 +25,8 @@ import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
+import com.protocol7.quincy.tls.aead.AEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
@@ -70,7 +72,7 @@ public class ClientServerConnectionTest {
     }
 
     @Override
-    public Future<Void> send(final Packet packet) {
+    public Future<Void> send(final Packet packet, final AEAD aead) {
       executor.execute(() -> peer.onPacket(packet));
 
       return new SucceededFuture(executor, null);
@@ -86,7 +88,7 @@ public class ClientServerConnectionTest {
   public void setUp() {
     clientConnection =
         new ClientConnection(
-            new QuicBuilder().configuration(),
+            new QuicBuilder().withApplicationProtocols(ALPN.from("http/0.9")).configuration(),
             destConnectionId,
             srcConnectionId,
             clientListener,
@@ -101,8 +103,10 @@ public class ClientServerConnectionTest {
 
     serverConnection =
         AbstractConnection.forServer(
-            new QuicBuilder().configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9".getBytes()).configuration(),
             srcConnectionId,
+            destConnectionId,
+            java.util.Optional.of(destConnectionId),
             serverListener,
             serverSender,
             certificates,

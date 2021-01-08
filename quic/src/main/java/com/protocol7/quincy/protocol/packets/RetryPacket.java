@@ -62,6 +62,11 @@ public class RetryPacket implements Packet {
       }
 
       @Override
+      public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.of(srcConnId);
+      }
+
+      @Override
       public RetryPacket complete(final AEADProvider aeadProvider) {
         return new RetryPacket(
             version,

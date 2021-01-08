@@ -17,6 +17,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
@@ -29,19 +30,6 @@ public class QuicClientHandler extends ChannelDuplexHandler {
   private final Configuration configuration;
   private final Timer timer = new HashedWheelTimer();
   private final StreamHandler streamHandler;
-
-  /*private final StreamHandler streamListener =
-  new StreamHandler() {
-    @Override
-    public void onData(final Stream stream, final byte[] data, final boolean finished) {
-      ctx.fireChannelRead(
-          QuicPacket.of(
-              connection.getSourceConnectionId(),
-              stream.getId(),
-              data,
-              connection.getPeerAddress()));
-    }
-  };*/
 
   public QuicClientHandler(final Configuration configuration, final StreamHandler streamHandler) {
     this.configuration = configuration;
@@ -56,7 +44,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
             ConnectionId.random(),
             ConnectionId.random(),
             streamHandler,
-            new NettyPacketSender(ctx.channel()),
+            new NettyPacketSender(ctx.channel(), (InetSocketAddress) ctx.channel().remoteAddress()),
             new DefaultFlowControlHandler(
                 configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
             (InetSocketAddress) ctx.channel().remoteAddress(),
@@ -79,8 +67,11 @@ public class QuicClientHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-    if (msg instanceof HalfParsedPacket) {
-      final HalfParsedPacket<?> halfParsed = (HalfParsedPacket) msg;
+    if (msg instanceof DatagramPacket) {
+      final DatagramPacket datagramPacket = (DatagramPacket) msg;
+      final ByteBuf bb = datagramPacket.content();
+
+      final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
 
       final Packet packet = halfParsed.complete(connection::getAEAD);
 
@@ -102,6 +93,7 @@ public class QuicClientHandler extends ChannelDuplexHandler {
   @Override
   public void write(
       final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
+
     if (msg instanceof Packet) {
       final Packet packet = (Packet) msg;
 
@@ -114,6 +106,8 @@ public class QuicClientHandler extends ChannelDuplexHandler {
       final byte[] data = Bytes.drainToArray(qp.content());
 
       connection.openStream().write(data, true);
+    } else if (msg instanceof DatagramPacket) {
+      ctx.write(msg, promise);
     } else {
       throw new IllegalArgumentException("Expected Packet message");
     }

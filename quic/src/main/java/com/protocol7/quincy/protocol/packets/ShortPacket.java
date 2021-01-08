@@ -44,6 +44,11 @@ public class ShortPacket implements FullPacket {
       }
 
       @Override
+      public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.empty();
+      }
+
+      @Override
       public ShortPacket complete(final AEADProvider aeadProvider) {
 
         final AEAD aead = aeadProvider.get(EncryptionLevel.OneRtt);

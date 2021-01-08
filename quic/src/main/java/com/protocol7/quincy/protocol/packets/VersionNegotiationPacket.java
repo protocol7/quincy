@@ -48,6 +48,11 @@ public class VersionNegotiationPacket implements Packet {
       }
 
       @Override
+      public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.of(srcConnId);
+      }
+
+      @Override
       public VersionNegotiationPacket complete(final AEADProvider aeadProvider) {
         return new VersionNegotiationPacket(destConnId, srcConnId, supported);
       }

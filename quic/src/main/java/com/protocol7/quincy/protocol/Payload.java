@@ -4,6 +4,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
@@ -11,6 +12,7 @@ import io.netty.buffer.Unpooled;
 import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Payload {
 
@@ -57,6 +59,15 @@ public class Payload {
     final List<Frame> newFrames = new ArrayList<>(frames);
     newFrames.add(frame);
     return new Payload(newFrames);
+  }
+
+  public Optional<Frame> getFirst(final FrameType frameType) {
+    for (final Frame frame : frames) {
+      if (frame.getType() == frameType) {
+        return Optional.of(frame);
+      }
+    }
+    return Optional.empty();
   }
 
   public int calculateLength() {

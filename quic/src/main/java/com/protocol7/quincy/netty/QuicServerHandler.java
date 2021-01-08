@@ -12,9 +12,9 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelDuplexHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelPromise;
+import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.HashedWheelTimer;
 import io.netty.util.Timer;
-import java.net.InetSocketAddress;
 import java.security.PrivateKey;
 import java.util.List;
 import java.util.Optional;
@@ -22,18 +22,6 @@ import java.util.Optional;
 public class QuicServerHandler extends ChannelDuplexHandler {
 
   private final Timer timer = new HashedWheelTimer();
-  /*private final StreamHandler streamListener =
-  new StreamHandler() {
-    @Override
-    public void onData(final Stream stream, final byte[] data, final boolean finished) {
-      System.out.println("onData " + new String(data));
-
-      //              ctx.fireChannelRead(
-      //                      new QuicPacket(
-      //                              stream.getId().getValue(), Unpooled.wrappedBuffer(data),
-      // remoteAddress()));
-    }
-  };*/
 
   private final Connections connections;
   private final PacketRouter router;
@@ -53,21 +41,23 @@ public class QuicServerHandler extends ChannelDuplexHandler {
 
   @Override
   public void channelRead(final ChannelHandlerContext ctx, final Object msg) {
-    if (msg instanceof ByteBuf) {
-      final ByteBuf bb = (ByteBuf) msg;
+    if (msg instanceof DatagramPacket) {
+      final DatagramPacket datagramPacket = (DatagramPacket) msg;
+      final ByteBuf bb = datagramPacket.content();
       router.route(
           bb,
-          new NettyPacketSender(ctx.channel()),
-          (InetSocketAddress) ctx.channel().remoteAddress());
+          new NettyPacketSender(ctx.channel(), datagramPacket.sender()),
+          datagramPacket.sender());
 
     } else {
-      ctx.fireChannelRead(msg);
+      throw new IllegalArgumentException("Expected DatagramPacket packet");
     }
   }
 
   @Override
   public void write(
       final ChannelHandlerContext ctx, final Object msg, final ChannelPromise promise) {
+
     if (msg instanceof QuicPacket) {
       final QuicPacket qp = (QuicPacket) msg;
       final byte[] data = Bytes.drainToArray(qp.content());
@@ -77,8 +67,10 @@ public class QuicServerHandler extends ChannelDuplexHandler {
       if (connection.isPresent()) {
         connection.get().openStream().write(data, true);
       }
-    } else {
+    } else if (msg instanceof DatagramPacket) {
       ctx.write(msg, promise);
+    } else {
+      throw new IllegalArgumentException("Expected QuicPacket message");
     }
   }
 }

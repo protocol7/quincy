@@ -72,6 +72,11 @@ public class InitialPacket extends LongHeaderPacket {
       }
 
       @Override
+      public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.of(srcConnId);
+      }
+
+      @Override
       public InitialPacket complete(final AEADProvider aeadProvider) {
         final int length = Varint.readAsInt(bb);
 

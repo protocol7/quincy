@@ -28,6 +28,7 @@ public class ClientConnection extends AbstractConnection {
         configuration.getVersion(),
         peerAddress,
         sourceConnectionId,
+        initialRemoteConnectionId,
         new ClientTlsManager(
             sourceConnectionId,
             configuration.getApplicationProtocols(),
@@ -41,8 +42,6 @@ public class ClientConnection extends AbstractConnection {
         configuration,
         timer,
         Optional.empty());
-
-    setRemoteConnectionId(initialRemoteConnectionId);
   }
 
   public void handshake(final Promise promise) {

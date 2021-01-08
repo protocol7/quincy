@@ -54,6 +54,11 @@ public class HandshakePacket extends LongHeaderPacket {
       }
 
       @Override
+      public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.of(srcConnId);
+      }
+
+      @Override
       public HandshakePacket complete(final AEADProvider aeadProvider) {
         final int length = Varint.readAsInt(bb);
 

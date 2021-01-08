@@ -38,7 +38,6 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
   @Override
   protected void initChannel(final DatagramChannel ch) {
     final ChannelPipeline pipeline = ch.pipeline();
-    pipeline.addLast(new DatagramPacketHandler());
     pipeline.addLast(
         new QuicServerHandler(
             configuration, certificates, privateKey, tokenHandler, streamHandler));

@@ -26,6 +26,7 @@ import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import io.netty.buffer.Unpooled;
 import org.junit.Test;
@@ -36,26 +37,29 @@ import org.mockito.junit.MockitoJUnitRunner;
 @RunWith(MockitoJUnitRunner.class)
 public class ServerTlsManagerTest {
 
-  private final ConnectionId connectionId = ConnectionId.random();
+  private final ConnectionId localConnectionId = ConnectionId.random();
+  private final ConnectionId remoteConnectionId = ConnectionId.random();
   private final TransportParameters tps = new QuicBuilder().configuration().toTransportParameters();
   private final ServerTlsManager manager =
       new ServerTlsManager(
-          connectionId,
+          localConnectionId,
+          of(remoteConnectionId),
+          "http/0.9".getBytes(),
           tps,
           KeyUtil.getPrivateKey("src/test/resources/server.der"),
           KeyUtil.getCertsFromCrt("src/test/resources/server.crt"));
 
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
-          InitialAEAD.create(connectionId.asBytes(), true),
-          new byte[0],
+          InitialAEAD.create(localConnectionId.asBytes(), true),
+          ALPN.from("http/0.9"),
           tps,
           new NoopCertificateValidator());
 
   @Test
   public void handshake() throws CertificateInvalidException {
     // start handshake
-    final byte[] ch = clientTlsSession.startHandshake(connectionId.asBytes());
+    final byte[] ch = clientTlsSession.startHandshake(localConnectionId.asBytes());
 
     final PipelineContext ctx = mock(PipelineContext.class);
 

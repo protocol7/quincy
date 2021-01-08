@@ -7,6 +7,7 @@ import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.CryptoFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
+import com.protocol7.quincy.protocol.frames.FrameType;
 import com.protocol7.quincy.protocol.frames.HandshakeDoneFrame;
 import com.protocol7.quincy.protocol.packets.FullPacket;
 import com.protocol7.quincy.protocol.packets.HandshakePacket;
@@ -19,6 +20,7 @@ import com.protocol7.quincy.tls.extensions.TransportParameters;
 import io.netty.util.concurrent.Promise;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
@@ -28,14 +30,27 @@ public class ServerTlsManager implements TlsManager {
   private final AtomicLong donePacketNumber = new AtomicLong(-1);
 
   public ServerTlsManager(
-      final ConnectionId connectionId,
+      final ConnectionId localConnectionId,
+      final Optional<ConnectionId> originalLocalConnectionId,
+      final byte[] applicationProtocol,
       final TransportParameters transportParameters,
       final PrivateKey privateKey,
       final List<byte[]> certificates) {
+
+    final TransportParameters.Builder tps =
+        TransportParameters.newBuilder(transportParameters)
+            .withInitialSourceConnectionId(localConnectionId.asBytes())
+            .withRetrySourceConnectionId(localConnectionId.asBytes());
+
+    if (originalLocalConnectionId.isPresent()) {
+      tps.withOriginalDestinationConnectionId(originalLocalConnectionId.get().asBytes());
+    }
+
     this.tlsSession =
         new ServerTlsSession(
-            InitialAEAD.create(connectionId.asBytes(), false),
-            transportParameters,
+            InitialAEAD.create(localConnectionId.asBytes(), false),
+            applicationProtocol,
+            tps.build(),
             certificates,
             privateKey);
   }
@@ -67,7 +82,12 @@ public class ServerTlsManager implements TlsManager {
       }
     } else if (state == State.BeforeHandshake && packet instanceof HandshakePacket) {
       final HandshakePacket fp = (HandshakePacket) packet;
-      final CryptoFrame cryptoFrame = (CryptoFrame) fp.getPayload().getFrames().get(0);
+
+      final Optional<Frame> cryptoFrameOpt = fp.getPayload().getFirst(FrameType.CRYPTO);
+      if (cryptoFrameOpt.isEmpty()) {
+        throw new IllegalArgumentException("Missing crypto frame");
+      }
+      final CryptoFrame cryptoFrame = (CryptoFrame) cryptoFrameOpt.get();
       tlsSession.handleClientFinished(cryptoFrame.getCryptoData());
 
       final FullPacket donePacket = ctx.send(EncryptionLevel.OneRtt, HandshakeDoneFrame.INSTANCE);

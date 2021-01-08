@@ -11,5 +11,7 @@ public interface HalfParsedPacket<P extends Packet> {
 
   ConnectionId getDestinationConnectionId();
 
+  Optional<ConnectionId> getSourceConnectionId();
+
   P complete(AEADProvider aeadProvider);
 }

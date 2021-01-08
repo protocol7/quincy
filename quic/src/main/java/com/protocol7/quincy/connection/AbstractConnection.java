@@ -1,7 +1,6 @@
 package com.protocol7.quincy.connection;
 
 import static com.protocol7.quincy.connection.State.Closed;
-import static java.util.Optional.empty;
 import static java.util.Optional.of;
 
 import com.protocol7.quincy.Configuration;
@@ -49,6 +48,8 @@ public class AbstractConnection implements Connection {
   public static AbstractConnection forServer(
       final Configuration configuration,
       final ConnectionId localConnectionId,
+      final ConnectionId remoteConnectionId,
+      final Optional<ConnectionId> originalRemoteConnectionId,
       final StreamHandler streamListener,
       final PacketSender packetSender,
       final List<byte[]> certificates,
@@ -61,8 +62,14 @@ public class AbstractConnection implements Connection {
         configuration.getVersion(),
         peerAddress,
         localConnectionId,
+        remoteConnectionId,
         new ServerTlsManager(
-            localConnectionId, configuration.toTransportParameters(), privateKey, certificates),
+            localConnectionId,
+            originalRemoteConnectionId,
+            configuration.getApplicationProtocols(),
+            configuration.toTransportParameters(),
+            privateKey,
+            certificates),
         new ServerStateMachine(),
         packetSender,
         streamListener,
@@ -77,8 +84,8 @@ public class AbstractConnection implements Connection {
 
   private final InetSocketAddress peerAddress;
 
-  private Optional<ConnectionId> destinationConnectionId = empty();
-  private final ConnectionId sourceConnectionId;
+  private ConnectionId remoteConnectionId;
+  private ConnectionId localConnectionId;
 
   protected final TlsManager tlsManager;
   protected final StateMachine stateMachine;
@@ -96,7 +103,8 @@ public class AbstractConnection implements Connection {
   protected AbstractConnection(
       final Version version,
       final InetSocketAddress peerAddress,
-      final ConnectionId sourceConnectionId,
+      final ConnectionId localConnectionId,
+      final ConnectionId remoteConnectionId,
       final TlsManager tlsManager,
       final StateMachine stateMachine,
       final PacketSender packetSender,
@@ -108,7 +116,8 @@ public class AbstractConnection implements Connection {
       final Optional<QuicTokenHandler> tokenHandler) {
     this.version = version;
     this.peerAddress = peerAddress;
-    this.sourceConnectionId = sourceConnectionId;
+    this.localConnectionId = localConnectionId;
+    this.remoteConnectionId = remoteConnectionId;
     this.tlsManager = tlsManager;
     this.stateMachine = stateMachine;
     this.packetSender = packetSender;
@@ -161,29 +170,26 @@ public class AbstractConnection implements Connection {
   }
 
   private void sendPacketUnbuffered(final Packet packet) {
-    packetSender.send(packet).awaitUninterruptibly(); // TODO fix
+    packetSender
+        .send(packet, getAEAD(Packet.getEncryptionLevel(packet)))
+        .awaitUninterruptibly(); // TODO fix
   }
 
   public FullPacket send(final EncryptionLevel level, final Frame... frames) {
-    if (destinationConnectionId.isEmpty()) {
-      throw new IllegalStateException("Can send when remote connection ID is unknown");
-    }
-    final ConnectionId remoteConnectionId = destinationConnectionId.get();
-
     final Packet packet;
     if (level == EncryptionLevel.OneRtt) {
       packet =
           ShortPacket.create(
-              false, remoteConnectionId, sourceConnectionId, nextSendPacketNumber(), frames);
+              false, remoteConnectionId, localConnectionId, nextSendPacketNumber(), frames);
     } else if (level == EncryptionLevel.Handshake) {
       packet =
           HandshakePacket.create(
-              remoteConnectionId, sourceConnectionId, nextSendPacketNumber(), version, frames);
+              remoteConnectionId, localConnectionId, nextSendPacketNumber(), version, frames);
     } else {
       packet =
           InitialPacket.create(
               remoteConnectionId,
-              sourceConnectionId,
+              localConnectionId,
               nextSendPacketNumber(),
               version,
               token,
@@ -202,12 +208,12 @@ public class AbstractConnection implements Connection {
     return peerAddress;
   }
 
-  public ConnectionId getSourceConnectionId() {
-    return sourceConnectionId;
+  public ConnectionId getLocalConnectionId() {
+    return localConnectionId;
   }
 
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId) {
-    this.destinationConnectionId = Optional.of(remoteConnectionId);
+    this.remoteConnectionId = remoteConnectionId;
   }
 
   public State getState() {

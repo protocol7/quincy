@@ -4,6 +4,7 @@ import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static java.util.Optional.empty;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -48,10 +49,10 @@ public class PacketRouterTest {
   public void setUp() {
     router = new PacketRouter(Version.DRAFT_29, connections, listener);
 
-    when(connections.get(any(), any(), any(), any())).thenReturn(connection);
+    when(connections.get(any(), any(), any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
-    when(connection.getSourceConnectionId()).thenReturn(srcConnId);
+    when(connection.getLocalConnectionId()).thenReturn(srcConnId);
   }
 
   @Test
@@ -86,7 +87,7 @@ public class PacketRouterTest {
 
     final ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);
-    verify(sender).send(captor.capture());
+    verify(sender).send(captor.capture(), eq(aead));
 
     final VersionNegotiationPacket verNeg = captor.getValue();
 

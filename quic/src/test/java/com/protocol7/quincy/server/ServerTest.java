@@ -24,6 +24,7 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.buffer.Unpooled;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
@@ -52,7 +53,7 @@ public class ServerTest {
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
-          new byte[0],
+          ALPN.from("http/0.9"),
           new QuicBuilder().configuration().toTransportParameters(),
           new NoopCertificateValidator());
 
@@ -63,7 +64,7 @@ public class ServerTest {
 
   @Before
   public void setUp() {
-    when(packetSender.send(any()))
+    when(packetSender.send(any(), any()))
         .thenReturn(new SucceededFuture(new DefaultEventExecutor(), null));
 
     final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
@@ -71,8 +72,10 @@ public class ServerTest {
 
     connection =
         AbstractConnection.forServer(
-            new QuicBuilder().configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9".getBytes()).configuration(),
             srcConnectionId,
+            destConnectionId,
+            Optional.of(destConnectionId),
             streamListener,
             packetSender,
             certificates,
@@ -199,7 +202,7 @@ public class ServerTest {
 
   private Packet captureSentPacket(final int number) {
     final ArgumentCaptor<Packet> packetCaptor = ArgumentCaptor.forClass(Packet.class);
-    verify(packetSender, atLeast(number)).send(packetCaptor.capture());
+    verify(packetSender, atLeast(number)).send(packetCaptor.capture(), any());
 
     final List<Packet> values = packetCaptor.getAllValues();
     return values.get(number - 1);

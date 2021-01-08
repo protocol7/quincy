@@ -1,5 +1,7 @@
 package com.protocol7.quincy.server;
 
+import static java.util.Objects.requireNonNull;
+
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
@@ -25,7 +27,9 @@ public class Connections {
   private final Configuration configuration;
   private final List<byte[]> certificates;
   private final PrivateKey privateKey;
-  private final Map<ConnectionId, Connection> connections = new ConcurrentHashMap<>();
+  private final Map<ConnectionId, Connection> connections =
+      new ConcurrentHashMap<>(); // dcid -> connection
+  private final Map<ConnectionId, ConnectionId> scidMap = new ConcurrentHashMap<>(); // scid -> dcid
   private final Timer timer;
   private final QuicTokenHandler tokenHandler;
 
@@ -44,9 +48,32 @@ public class Connections {
 
   public Connection get(
       final ConnectionId dcid,
+      final Optional<ConnectionId> scid,
       final StreamHandler streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
+    requireNonNull(dcid);
+    requireNonNull(streamHandler);
+    requireNonNull(packetSender);
+    requireNonNull(peerAddress);
+
+    Optional<ConnectionId> originalRemoteConnectionId = Optional.empty();
+    if (scid.isPresent()) {
+      final ConnectionId oldDcid = scidMap.get(scid.get());
+
+      if (oldDcid != null && !oldDcid.equals(dcid)) {
+        System.out.println("########## dcid switch");
+
+        originalRemoteConnectionId = Optional.of(oldDcid);
+
+        /*final Connection connection = connections.get(oldDcid);
+        connections.put(dcid, connection);
+
+        // TODO remove from old DCID?*/
+      }
+
+      scidMap.put(scid.get(), dcid);
+    }
 
     Connection conn = connections.get(dcid);
     if (conn == null) {
@@ -55,6 +82,8 @@ public class Connections {
           AbstractConnection.forServer(
               configuration,
               dcid,
+              scid.get(),
+              originalRemoteConnectionId,
               streamHandler,
               packetSender,
               certificates,
