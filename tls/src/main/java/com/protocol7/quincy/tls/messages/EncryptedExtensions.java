@@ -13,10 +13,6 @@ public class EncryptedExtensions implements Message, Writeable {
 
   private static final MessageType TYPE = ENCRYPTED_EXTENSIONS;
 
-  public static EncryptedExtensions defaults(final Extension... extensions) {
-    return new EncryptedExtensions(List.of(extensions));
-  }
-
   public static EncryptedExtensions parse(final ByteBuf bb, final boolean isClient) {
     // EE
     final int eeType = bb.readByte();

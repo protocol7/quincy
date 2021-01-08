@@ -8,8 +8,11 @@ import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.tls.aead.AEADs;
 import com.protocol7.quincy.tls.aead.HandshakeAEAD;
 import com.protocol7.quincy.tls.aead.OneRttAEAD;
+import com.protocol7.quincy.tls.extensions.ALPN;
+import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
+import com.protocol7.quincy.tls.extensions.SupportedGroups;
 import com.protocol7.quincy.tls.extensions.SupportedVersion;
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
@@ -24,13 +27,16 @@ import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.security.PrivateKey;
 import java.util.List;
+import java.util.Optional;
 
 public class ServerTlsSession {
 
-  private final TransportParameters transportParameters;
+  private final TransportParameters defaultTransportParameters;
 
   private final AEADs aeads;
   private final KeyExchange kek;
+
+  private final byte[] applicationProtocol;
 
   private final PrivateKey privateKey;
   private final List<byte[]> certificates;
@@ -41,11 +47,13 @@ public class ServerTlsSession {
 
   public ServerTlsSession(
       final AEAD initialAEAD,
-      final TransportParameters transportParameters,
+      final byte[] applicationProtocol,
+      final TransportParameters defaultTransportParameters,
       final List<byte[]> certificates,
       final PrivateKey privateKey) {
-    this.transportParameters = requireNonNull(transportParameters);
+    this.defaultTransportParameters = requireNonNull(defaultTransportParameters);
     this.aeads = new AEADs(requireNonNull(initialAEAD));
+    this.applicationProtocol = applicationProtocol;
     this.privateKey = requireNonNull(privateKey);
     this.certificates = checkNonEmpty(certificates, "certificates");
     this.kek = KeyExchange.generate(Group.X25519);
@@ -67,17 +75,32 @@ public class ServerTlsSession {
         throw new IllegalArgumentException("Illegal version");
       }
 
+      final Optional<Extension> clientALPNOpt =
+          ch.getExtension(ExtensionType.APPLICATION_LAYER_PROTOCOL_NEGOTIATION);
+      if (clientALPNOpt.isEmpty()) {
+        throw new IllegalArgumentException("Missing ALPN");
+      } else {
+        final ALPN clientALPN = (ALPN) clientALPNOpt.get();
+
+        if (!clientALPN.contains(applicationProtocol)) {
+          throw new IllegalArgumentException("Client ALPN not supported");
+        }
+      }
+
       final KeyShare keyShareExtension =
           (KeyShare)
               ch.getExtension(ExtensionType.KEY_SHARE).orElseThrow(IllegalArgumentException::new);
 
       // create ServerHello
-      serverHello = Bytes.write(ServerHello.defaults(kek, transportParameters));
+      serverHello = Bytes.write(ServerHello.defaults(kek));
 
       final ByteBuf handshakeBB = Unpooled.buffer();
 
-      // TODO decide on what parameters to send where
-      final EncryptedExtensions ee = EncryptedExtensions.defaults(transportParameters);
+      final EncryptedExtensions ee =
+          new EncryptedExtensions(
+              new SupportedGroups(Group.X25519),
+              new ALPN(ALPN.from(applicationProtocol)),
+              defaultTransportParameters);
       ee.write(handshakeBB);
 
       final ServerCertificate sc = new ServerCertificate(new byte[0], certificates);

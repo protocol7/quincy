@@ -6,14 +6,10 @@ import static com.protocol7.quincy.utils.Hex.hex;
 import com.google.common.collect.ImmutableList;
 import com.protocol7.quincy.Writeable;
 import com.protocol7.quincy.tls.CipherSuite;
-import com.protocol7.quincy.tls.Group;
 import com.protocol7.quincy.tls.KeyExchange;
 import com.protocol7.quincy.tls.extensions.Extension;
 import com.protocol7.quincy.tls.extensions.ExtensionType;
 import com.protocol7.quincy.tls.extensions.KeyShare;
-import com.protocol7.quincy.tls.extensions.PskKeyExchangeModes;
-import com.protocol7.quincy.tls.extensions.SignatureAlgorithms;
-import com.protocol7.quincy.tls.extensions.SupportedGroups;
 import com.protocol7.quincy.tls.extensions.SupportedVersions;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Rnd;
@@ -33,12 +29,7 @@ public class ServerHello implements Message, Writeable {
     final CipherSuite cipherSuites = CipherSuite.TLS_AES_128_GCM_SHA256;
     final List<Extension> extensions =
         ImmutableList.<Extension>builder()
-            .add(
-                KeyShare.of(ke.getGroup(), ke.getPublicKey()),
-                SignatureAlgorithms.defaults(),
-                PskKeyExchangeModes.defaults(),
-                new SupportedGroups(Group.X25519),
-                SupportedVersions.TLS13)
+            .add(KeyShare.of(ke.getGroup(), ke.getPublicKey()), SupportedVersions.TLS13)
             .add(exts)
             .build();
 
