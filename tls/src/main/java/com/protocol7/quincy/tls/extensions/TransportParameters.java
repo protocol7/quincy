@@ -18,6 +18,7 @@ import static com.protocol7.quincy.tls.extensions.TransportParameterType.RETRY_S
 import static com.protocol7.quincy.tls.extensions.TransportParameterType.STATELESS_RESET_TOKEN;
 
 import com.protocol7.quincy.Varint;
+import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 import java.util.Objects;
@@ -450,13 +451,13 @@ public class TransportParameters implements Extension {
         + ", maxAckDelay="
         + maxAckDelay
         + ", originalConnectionId="
-        + Arrays.toString(originalDestinationConnectionId)
+        + Hex.hex(originalDestinationConnectionId)
         + ", activeConnectionIdLimit="
         + activeConnectionIdLimit
         + ", initialSourceConnectionId="
-        + Arrays.toString(initialSourceConnectionId)
+        + Hex.hex(initialSourceConnectionId)
         + ", retrySourceConnectionId="
-        + Arrays.toString(retrySourceConnectionId)
+        + Hex.hex(retrySourceConnectionId)
         + '}';
   }
 
