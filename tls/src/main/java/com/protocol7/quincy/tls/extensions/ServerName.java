@@ -64,6 +64,6 @@ public class ServerName implements Extension {
 
   @Override
   public String toString() {
-    return "ServerName{" + serverName + +'}';
+    return "ServerName{" + serverName + '}';
   }
 }
