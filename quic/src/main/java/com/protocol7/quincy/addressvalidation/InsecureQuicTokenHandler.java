@@ -13,15 +13,16 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.protocol7.quincy.netty2.impl;
+package com.protocol7.quincy.addressvalidation;
 
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
 import io.netty.util.NetUtil;
 import java.net.InetSocketAddress;
+import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * Insecure {@link QuicTokenHandler} which only does basic token generation / validation without any
@@ -45,35 +46,43 @@ public final class InsecureQuicTokenHandler implements QuicTokenHandler {
 
   @Override
   public boolean writeToken(
-      final ByteBuf out, final ByteBuf dcid, final InetSocketAddress address) {
+      final ByteBuf out, final ConnectionId dcid, final InetSocketAddress address) {
     final byte[] addr = address.getAddress().getAddress();
     out.writeBytes(SERVER_NAME_BYTES)
+        .writeByte(addr.length)
         .writeBytes(addr)
-        .writeBytes(dcid, dcid.readerIndex(), dcid.readableBytes());
+        .writeByte(dcid.getLength())
+        .writeBytes(dcid.asBytes());
     return true;
   }
 
   @Override
-  public int validateToken(final ByteBuf token, final InetSocketAddress address) {
+  public Optional<ConnectionId> validateToken(
+      final ByteBuf token, final InetSocketAddress address) {
     final byte[] addr = address.getAddress().getAddress();
 
-    final int minLength = SERVER_NAME_BYTES.length + address.getAddress().getAddress().length;
-    if (token.readableBytes() <= SERVER_NAME_BYTES.length + addr.length) {
-      return -1;
+    if (token.readableBytes() <= SERVER_NAME_BYTES.length + addr.length + 1 + 1) {
+      return Optional.empty();
     }
 
-    if (!SERVER_NAME_BUFFER.equals(token.slice(0, SERVER_NAME_BYTES.length))) {
-      return -1;
+    final byte[] name = new byte[SERVER_NAME_BYTES.length];
+    token.readBytes(name);
+    if (!Arrays.equals(SERVER_NAME_BYTES, name)) {
+      return Optional.empty();
     }
-    final ByteBuf addressBuffer = Unpooled.wrappedBuffer(addr);
-    try {
-      if (!addressBuffer.equals(token.slice(SERVER_NAME_BYTES.length, addr.length))) {
-        return -1;
-      }
-    } finally {
-      addressBuffer.release();
+
+    final int addrLen = token.readByte();
+    final byte[] tokenAddr = new byte[addrLen];
+    token.readBytes(tokenAddr);
+    if (!Arrays.equals(tokenAddr, addr)) {
+      return Optional.empty();
     }
-    return minLength;
+
+    final int cidLen = token.readByte();
+    final byte[] cid = new byte[cidLen];
+    token.readBytes(cid);
+
+    return Optional.of(new ConnectionId(cid));
   }
 
   @Override

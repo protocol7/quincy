@@ -23,7 +23,7 @@ public class QuicGoContainer extends GenericContainer {
   }
 
   private int getUdpPort() {
-    return Integer.valueOf(
+    return Integer.parseInt(
         getContainerInfo()
             .getNetworkSettings()
             .getPorts()

@@ -24,11 +24,11 @@ public class NettyPacketSender implements PacketSender {
   @Override
   public Future<Void> send(final Packet packet, final AEAD aead) {
     requireNonNull(packet);
-    requireNonNull(aead);
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
+    System.out.println("writeAndFlush");
     return channel.writeAndFlush(new DatagramPacket(bb, peerAddress));
   }
 

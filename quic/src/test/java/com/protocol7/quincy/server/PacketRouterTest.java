@@ -4,7 +4,6 @@ import static com.protocol7.quincy.protocol.ConnectionId.EMPTY;
 import static java.util.Optional.empty;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -28,6 +27,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -52,7 +52,6 @@ public class PacketRouterTest {
     when(connections.get(any(), any(), any(), any(), any())).thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
-    when(connection.getLocalConnectionId()).thenReturn(srcConnId);
   }
 
   @Test
@@ -78,7 +77,7 @@ public class PacketRouterTest {
   @Test
   public void versionMismatch() {
     final InitialPacket packet =
-        InitialPacket.create(destConnId, EMPTY, 2, Version.FINAL, empty(), new PaddingFrame(6));
+        InitialPacket.create(destConnId, srcConnId, 2, Version.FINAL, empty(), new PaddingFrame(6));
 
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
@@ -87,12 +86,12 @@ public class PacketRouterTest {
 
     final ArgumentCaptor<VersionNegotiationPacket> captor =
         ArgumentCaptor.forClass(VersionNegotiationPacket.class);
-    verify(sender).send(captor.capture(), eq(aead));
+    verify(sender).send(captor.capture(), Mockito.eq(null));
 
     final VersionNegotiationPacket verNeg = captor.getValue();
 
-    assertEquals(destConnId, verNeg.getDestinationConnectionId());
-    assertEquals(srcConnId, verNeg.getSourceConnectionId());
+    assertEquals(srcConnId, verNeg.getDestinationConnectionId());
+    assertEquals(destConnId, verNeg.getSourceConnectionId());
     assertEquals(List.of(Version.DRAFT_29), verNeg.getSupportedVersions());
   }
 }

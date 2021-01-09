@@ -7,6 +7,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
+import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
@@ -14,7 +15,6 @@ import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.*;
 import com.protocol7.quincy.protocol.frames.*;
 import com.protocol7.quincy.protocol.packets.*;

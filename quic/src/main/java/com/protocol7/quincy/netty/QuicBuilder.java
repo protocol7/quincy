@@ -3,8 +3,8 @@ package com.protocol7.quincy.netty;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
-import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
+import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
+import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamHandler;

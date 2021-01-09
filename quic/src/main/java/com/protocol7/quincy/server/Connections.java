@@ -3,11 +3,11 @@ package com.protocol7.quincy.server;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.util.Timer;

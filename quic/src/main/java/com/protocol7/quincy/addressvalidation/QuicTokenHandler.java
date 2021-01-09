@@ -13,10 +13,12 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.protocol7.quincy.netty2.api;
+package com.protocol7.quincy.addressvalidation;
 
+import com.protocol7.quincy.protocol.ConnectionId;
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
+import java.util.Optional;
 
 /** Handle token related operations. */
 public interface QuicTokenHandler {
@@ -32,7 +34,7 @@ public interface QuicTokenHandler {
    * @return {@code true} if a token was written and so validation should happen, {@code false}
    *     otherwise.
    */
-  boolean writeToken(ByteBuf out, ByteBuf dcid, InetSocketAddress address);
+  boolean writeToken(ByteBuf out, ConnectionId dcid, InetSocketAddress address);
 
   /**
    * Validate the token and return the offset, {@code -1} is returned if the token is not valid.
@@ -41,7 +43,7 @@ public interface QuicTokenHandler {
    * @param address the {@link InetSocketAddress} of the sender.
    * @return the start index after the token or {@code -1} if the token was not valid.
    */
-  int validateToken(ByteBuf token, InetSocketAddress address);
+  Optional<ConnectionId> validateToken(ByteBuf token, InetSocketAddress address);
 
   /**
    * Return the maximal token length.

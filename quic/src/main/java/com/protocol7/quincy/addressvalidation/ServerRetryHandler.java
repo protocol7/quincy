@@ -5,7 +5,6 @@ import static java.util.Objects.requireNonNull;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.State;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.packets.InitialPacket;
 import com.protocol7.quincy.protocol.packets.Packet;
@@ -37,7 +36,7 @@ public class ServerRetryHandler implements InboundHandler {
           if (initialPacket.getToken().isPresent()) {
             final ByteBuf token = Unpooled.wrappedBuffer(initialPacket.getToken().get());
             try {
-              if (tokenHandler.get().validateToken(token, ctx.getPeerAddress()) != -1) {
+              if (tokenHandler.get().validateToken(token, ctx.getPeerAddress()).isPresent()) {
                 // good to go
               } else {
                 // send retry
@@ -67,8 +66,7 @@ public class ServerRetryHandler implements InboundHandler {
     final ByteBuf tokenBB = Unpooled.buffer();
     tokenHandler
         .get()
-        .writeToken(
-            tokenBB, initialPacket.getSourceConnectionId().asByteBuffer(), ctx.getPeerAddress());
+        .writeToken(tokenBB, initialPacket.getSourceConnectionId(), ctx.getPeerAddress());
 
     final byte[] retryToken = Bytes.drainToArray(tokenBB);
 

@@ -1,9 +1,9 @@
 package com.protocol7.quincy.netty;
 
 import com.protocol7.quincy.Configuration;
+import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.NettyPacketSender;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
 import com.protocol7.quincy.server.Connections;
 import com.protocol7.quincy.server.PacketRouter;
 import com.protocol7.quincy.streams.StreamHandler;

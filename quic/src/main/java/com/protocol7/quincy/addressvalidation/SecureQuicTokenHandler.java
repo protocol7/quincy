@@ -1,9 +1,9 @@
-package com.protocol7.quincy.netty2.impl;
+package com.protocol7.quincy.addressvalidation;
 
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Varint;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
+import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.tls.ConstantTimeEquals;
 import com.protocol7.quincy.utils.Bytes;
 import com.protocol7.quincy.utils.Ticker;
@@ -14,6 +14,7 @@ import java.net.InetSocketAddress;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.PrivateKey;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -47,7 +48,7 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
 
   @Override
   public boolean writeToken(
-      final ByteBuf out, final ByteBuf dcid, final InetSocketAddress address) {
+      final ByteBuf out, final ConnectionId dcid, final InetSocketAddress address) {
     requireNonNull(address);
 
     final ByteBuf bb = Unpooled.buffer();
@@ -56,6 +57,9 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
       bb.writeByte(addressBytes.length);
       bb.writeBytes(addressBytes);
       Varint.write(ticker.milliTime() + ttlMs, bb); // write deadline
+
+      bb.writeByte(dcid.getLength());
+      bb.writeBytes(dcid.asBytes());
 
       final byte[] data = Bytes.peekToArray(bb);
 
@@ -69,7 +73,8 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
   }
 
   @Override
-  public int validateToken(final ByteBuf token, final InetSocketAddress address) {
+  public Optional<ConnectionId> validateToken(
+      final ByteBuf token, final InetSocketAddress address) {
     requireNonNull(token);
     requireNonNull(address);
 
@@ -81,13 +86,17 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
       token.readBytes(addressBytes);
 
       if (!ConstantTimeEquals.isEqual(addressBytes, address.getAddress().getAddress())) {
-        return -1;
+        return Optional.empty();
       }
 
       final long deadline = Varint.readAsLong(token);
       if (deadline < ticker.milliTime()) {
-        return -1;
+        return Optional.empty();
       }
+
+      final int cidLen = token.readByte();
+      final byte[] cid = new byte[cidLen];
+      token.readBytes(cid);
 
       final byte[] data = new byte[token.readerIndex()];
       token.getBytes(bbOffset, data);
@@ -97,13 +106,13 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
       final byte[] expectedHmac = hmac(data);
 
       if (!ConstantTimeEquals.isEqual(expectedHmac, actualHmac)) {
-        return -1;
+        return Optional.empty();
       }
 
-      return token.readerIndex() - bbOffset;
+      return Optional.of(new ConnectionId(cid));
     } catch (final IndexOutOfBoundsException | NegativeArraySizeException e) {
       // invalid token
-      return -1;
+      return Optional.empty();
     }
   }
 

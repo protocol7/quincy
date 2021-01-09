@@ -1,11 +1,10 @@
 package com.protocol7.quincy.addressvalidation;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import com.protocol7.quincy.netty2.impl.SecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.utils.Ticker;
@@ -43,50 +42,46 @@ public class SecureQuicTokenHandlerTest {
   @Test
   public void roundtripV4() {
     final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId.asByteBuffer(), addressV4));
+    assertTrue(rt.writeToken(token, destConnId, addressV4));
 
-    final int expectedLength = token.writerIndex();
-    System.out.println(expectedLength);
-    assertEquals(expectedLength, rt.validateToken(token, addressV4));
+    assertTrue(rt.validateToken(token, addressV4).isPresent());
   }
 
   @Test
   public void roundtripV6() {
     final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId.asByteBuffer(), addressV6));
+    assertTrue(rt.writeToken(token, destConnId, addressV6));
 
-    final int expectedLength = token.writerIndex();
-    System.out.println(expectedLength);
-    assertEquals(expectedLength, rt.validateToken(token, addressV6));
+    assertTrue(rt.validateToken(token, addressV6).isPresent());
   }
 
   @Test
   public void roundtripFailTtl() {
     final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId.asByteBuffer(), addressV4));
+    assertTrue(rt.writeToken(token, destConnId, addressV4));
 
     when(ticker.milliTime()).thenReturn(999L);
 
-    assertEquals(-1, rt.validateToken(token, addressV4));
+    assertFalse(rt.validateToken(token, addressV4).isPresent());
   }
 
   @Test
   public void roundtripFailAddress() throws UnknownHostException {
     final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId.asByteBuffer(), addressV4));
+    assertTrue(rt.writeToken(token, destConnId, addressV4));
 
-    assertEquals(
-        -1,
-        rt.validateToken(token, new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 9999)));
+    assertFalse(
+        rt.validateToken(token, new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 9999))
+            .isPresent());
   }
 
   @Test
   public void roundtripFailHmac() {
     final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId.asByteBuffer(), addressV4));
+    assertTrue(rt.writeToken(token, destConnId, addressV4));
 
     final int pos = token.writerIndex() - 1;
     token.setByte(pos, token.getByte(pos) + 1); // invalidate HMAC
-    assertEquals(-1, rt.validateToken(token, addressV4));
+    assertFalse(rt.validateToken(token, addressV4).isPresent());
   }
 }

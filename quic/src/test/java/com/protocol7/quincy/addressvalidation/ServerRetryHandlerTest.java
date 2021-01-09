@@ -12,8 +12,6 @@ import static org.mockito.Mockito.when;
 import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.connection.State;
-import com.protocol7.quincy.netty2.api.QuicTokenHandler;
-import com.protocol7.quincy.netty2.impl.InsecureQuicTokenHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
 import com.protocol7.quincy.protocol.Version;
@@ -65,7 +63,7 @@ public class ServerRetryHandlerTest {
   public void withToken() {
     final ConnectionId destConnId = ConnectionId.random();
     final ByteBuf tokenBB = Unpooled.buffer();
-    tokenHandler.writeToken(tokenBB, destConnId.asByteBuffer(), address);
+    tokenHandler.writeToken(tokenBB, destConnId, address);
     final Optional<byte[]> token = Optional.of(Bytes.drainToArray(tokenBB));
 
     final InitialPacket initialPacket = p(destConnId, token);

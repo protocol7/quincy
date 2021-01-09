@@ -18,20 +18,20 @@ public class QuicheClientTest {
 
   public static final String ALPN = "http/0.9";
 
-  private final EventLoopGroup workerGroup = new NioEventLoopGroup();
-  private final Bootstrap b = new Bootstrap();
+  private EventLoopGroup workerGroup;
+  private Bootstrap b;
 
   @Before
   public void setUp() {
+    workerGroup = new NioEventLoopGroup();
+
+    b = new Bootstrap();
     b.group(workerGroup);
     b.channel(NioDatagramChannel.class);
   }
 
   @Test
   public void get() throws InterruptedException {
-    final Bootstrap b = new Bootstrap();
-    b.group(workerGroup);
-    b.channel(NioDatagramChannel.class);
     b.handler(
         new QuicBuilder()
             .withApplicationProtocols(ALPN)
@@ -47,6 +47,8 @@ public class QuicheClientTest {
     final QuicheContainer quiche =
         (QuicheContainer)
             new QuicheContainer(false)
+                .withEnv("RUST_BACKTRACE", "1")
+                .withEnv("RUST_LOG", "debug")
                 .withCommand(
                     "/usr/local/bin/quiche-client",
                     "--connect-to=192.168.65.2:4444",
@@ -57,7 +59,51 @@ public class QuicheClientTest {
                     new Consumer<OutputFrame>() {
                       @Override
                       public void accept(final OutputFrame outputFrame) {
-                        System.out.println(outputFrame.getUtf8String());
+                        events.add(outputFrame.getUtf8String());
+                      }
+                    });
+    quiche.start();
+
+    while (true) {
+      final String msg = events.poll(10000, TimeUnit.MILLISECONDS);
+
+      if (msg.contains("1/1 response(s) received in")) {
+        break;
+      }
+    }
+
+    quiche.stop();
+  }
+
+  @Test
+  public void verneg() throws InterruptedException {
+    b.handler(
+        new QuicBuilder()
+            .withApplicationProtocols(ALPN)
+            .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
+            .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
+            .withStreamHandler((stream, data, finished) -> stream.write("PONG".getBytes(), true))
+            .serverChannelInitializer());
+
+    b.bind("0.0.0.0", 4444).awaitUninterruptibly();
+
+    final BlockingQueue<String> events = new ArrayBlockingQueue<>(1000);
+
+    final QuicheContainer quiche =
+        (QuicheContainer)
+            new QuicheContainer(false)
+                .withEnv("RUST_BACKTRACE", "1")
+                .withEnv("RUST_LOG", "debug")
+                .withCommand(
+                    "/usr/local/bin/quiche-client",
+                    "--connect-to=192.168.65.2:4444",
+                    "--wire-version=deadbeef",
+                    "--no-verify",
+                    "https://example.org:4444/")
+                .withLogConsumer(
+                    new Consumer<OutputFrame>() {
+                      @Override
+                      public void accept(final OutputFrame outputFrame) {
                         events.add(outputFrame.getUtf8String());
                       }
                     });

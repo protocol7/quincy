@@ -13,20 +13,21 @@
  * License for the specific language governing permissions and limitations
  * under the License.
  */
-package com.protocol7.quincy.netty2.impl;
+package com.protocol7.quincy.addressvalidation;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.lessThanOrEqualTo;
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
+import com.protocol7.quincy.netty2.impl.AbstractQuicTest;
 import com.protocol7.quincy.protocol.ConnectionId;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.ThreadLocalRandom;
 import org.junit.Test;
 
 public class InsecureQuicTokenHandlerTest extends AbstractQuicTest {
@@ -48,9 +49,6 @@ public class InsecureQuicTokenHandlerTest extends AbstractQuicTest {
   }
 
   private static void testTokenProcessing(final boolean ipv4) throws UnknownHostException {
-    final byte[] bytes = new byte[ConnectionId.MAX_LENGTH];
-    ThreadLocalRandom.current().nextBytes(bytes);
-    final ByteBuf dcid = Unpooled.wrappedBuffer(bytes);
     final ByteBuf out = Unpooled.buffer();
     try {
       final InetSocketAddress validAddress;
@@ -73,16 +71,15 @@ public class InsecureQuicTokenHandlerTest extends AbstractQuicTest {
                 9999);
       }
 
-      InsecureQuicTokenHandler.INSTANCE.writeToken(out, dcid, validAddress);
+      InsecureQuicTokenHandler.INSTANCE.writeToken(out, ConnectionId.random(), validAddress);
       assertThat(
           out.readableBytes(),
           lessThanOrEqualTo(InsecureQuicTokenHandler.INSTANCE.maxTokenLength()));
-      assertNotEquals(-1, InsecureQuicTokenHandler.INSTANCE.validateToken(out, validAddress));
+      assertTrue(InsecureQuicTokenHandler.INSTANCE.validateToken(out, validAddress).isPresent());
 
       // Use another address and check that the validate fails.
-      assertEquals(-1, InsecureQuicTokenHandler.INSTANCE.validateToken(out, invalidAddress));
+      assertFalse(InsecureQuicTokenHandler.INSTANCE.validateToken(out, invalidAddress).isPresent());
     } finally {
-      dcid.release();
       out.release();
     }
   }
