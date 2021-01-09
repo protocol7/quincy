@@ -8,8 +8,6 @@ import static org.mockito.Mockito.when;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.utils.Ticker;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -41,24 +39,21 @@ public class SecureQuicTokenHandlerTest {
 
   @Test
   public void roundtripV4() {
-    final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId, addressV4));
+    final byte[] token = rt.writeToken(destConnId, addressV4);
 
     assertTrue(rt.validateToken(token, addressV4).isPresent());
   }
 
   @Test
   public void roundtripV6() {
-    final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId, addressV6));
+    final byte[] token = rt.writeToken(destConnId, addressV6);
 
     assertTrue(rt.validateToken(token, addressV6).isPresent());
   }
 
   @Test
   public void roundtripFailTtl() {
-    final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId, addressV4));
+    final byte[] token = rt.writeToken(destConnId, addressV4);
 
     when(ticker.milliTime()).thenReturn(999L);
 
@@ -67,8 +62,7 @@ public class SecureQuicTokenHandlerTest {
 
   @Test
   public void roundtripFailAddress() throws UnknownHostException {
-    final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId, addressV4));
+    final byte[] token = rt.writeToken(destConnId, addressV4);
 
     assertFalse(
         rt.validateToken(token, new InetSocketAddress(InetAddress.getByName("127.0.0.2"), 9999))
@@ -77,11 +71,9 @@ public class SecureQuicTokenHandlerTest {
 
   @Test
   public void roundtripFailHmac() {
-    final ByteBuf token = Unpooled.buffer();
-    assertTrue(rt.writeToken(token, destConnId, addressV4));
+    final byte[] token = rt.writeToken(destConnId, addressV4);
 
-    final int pos = token.writerIndex() - 1;
-    token.setByte(pos, token.getByte(pos) + 1); // invalidate HMAC
+    token[token.length - 1]++; // invalidate HMAC
     assertFalse(rt.validateToken(token, addressV4).isPresent());
   }
 }

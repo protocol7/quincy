@@ -10,6 +10,7 @@ import com.protocol7.quincy.FrameSender;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.OutboundHandler;
 import com.protocol7.quincy.PipelineContext;
+import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.frames.AckFrame;
 import com.protocol7.quincy.protocol.frames.AckRange;
 import com.protocol7.quincy.protocol.frames.Frame;
@@ -61,8 +62,10 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
         new TimerTask() {
           @Override
           public void run(final Timeout timeout) {
-            resend();
-            timeout.timer().newTimeout(this, RESEND_DELAY, MILLISECONDS);
+            if (frameSender.isOpen()) {
+              resend();
+              timeout.timer().newTimeout(this, RESEND_DELAY, MILLISECONDS);
+            }
           }
         };
 
@@ -131,7 +134,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
 
       handleAcks(packet);
 
-      if (shouldFlush(packet)) {
+      if (shouldFlush(packet) && ctx.getState() != State.Closed) {
         log.debug("Directly acking packet");
         final EncryptionLevel level = getEncryptionLevel(packet);
         flushAcks(level, ctx);
@@ -192,7 +195,7 @@ public class PacketBufferManager implements InboundHandler, OutboundHandler {
   }
 
   private void flushAcks(final EncryptionLevel level, final FrameSender sender) {
-    System.out.println("Flushing acks at " + level);
+    log.debug("Flushing acks at " + level);
 
     final Pair<List<AckRange>, Long> drained = drainAcks(level);
     final List<AckRange> ranges = drained.getFirst();

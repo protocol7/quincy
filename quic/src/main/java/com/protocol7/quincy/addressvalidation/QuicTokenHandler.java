@@ -28,13 +28,12 @@ public interface QuicTokenHandler {
    * to {@code out}. If no token should be generated and so no token validation should take place at
    * all this method should return {@code false}.
    *
-   * @param out {@link ByteBuf} into which the token will be written.
    * @param dcid the destination connection id.
    * @param address the {@link InetSocketAddress} of the sender.
    * @return {@code true} if a token was written and so validation should happen, {@code false}
    *     otherwise.
    */
-  boolean writeToken(ByteBuf out, ConnectionId dcid, InetSocketAddress address);
+  byte[] writeToken(ConnectionId dcid, InetSocketAddress address);
 
   /**
    * Validate the token and return the offset, {@code -1} is returned if the token is not valid.
@@ -43,7 +42,7 @@ public interface QuicTokenHandler {
    * @param address the {@link InetSocketAddress} of the sender.
    * @return the start index after the token or {@code -1} if the token was not valid.
    */
-  Optional<ConnectionId> validateToken(ByteBuf token, InetSocketAddress address);
+  Optional<ConnectionId> validateToken(byte[] token, InetSocketAddress address);
 
   /**
    * Return the maximal token length.

@@ -9,7 +9,6 @@ import com.protocol7.quincy.tls.ClientTlsManager;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
-import java.util.Optional;
 import org.slf4j.MDC;
 
 public class ClientConnection extends AbstractConnection {
@@ -40,8 +39,7 @@ public class ClientConnection extends AbstractConnection {
         true,
         flowControlHandler,
         configuration,
-        timer,
-        Optional.empty());
+        timer);
   }
 
   public void handshake(final Promise promise) {

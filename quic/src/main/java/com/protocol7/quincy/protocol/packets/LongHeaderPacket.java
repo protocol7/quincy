@@ -149,7 +149,7 @@ public abstract class LongHeaderPacket implements FullPacket {
     return packetType == that.packetType
         && Objects.equals(destinationConnectionId, that.destinationConnectionId)
         && Objects.equals(sourceConnectionId, that.sourceConnectionId)
-        && version == that.version
+        && Objects.equals(version, that.version)
         && Objects.equals(packetNumber, that.packetNumber)
         && Objects.equals(payload, that.payload);
   }

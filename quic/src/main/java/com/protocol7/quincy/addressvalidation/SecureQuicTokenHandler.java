@@ -47,8 +47,7 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
   }
 
   @Override
-  public boolean writeToken(
-      final ByteBuf out, final ConnectionId dcid, final InetSocketAddress address) {
+  public byte[] writeToken(final ConnectionId dcid, final InetSocketAddress address) {
     requireNonNull(address);
 
     final ByteBuf bb = Unpooled.buffer();
@@ -65,8 +64,7 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
 
       bb.writeBytes(hmac(data));
 
-      out.writeBytes(bb);
-      return true;
+      return Bytes.peekToArray(bb);
     } finally {
       bb.release();
     }
@@ -74,13 +72,15 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
 
   @Override
   public Optional<ConnectionId> validateToken(
-      final ByteBuf token, final InetSocketAddress address) {
-    requireNonNull(token);
+      final byte[] tokenBytes, final InetSocketAddress address) {
+    requireNonNull(tokenBytes);
     requireNonNull(address);
 
-    final int bbOffset = token.readerIndex();
+    final ByteBuf token = Unpooled.wrappedBuffer(tokenBytes);
 
     try {
+      final int bbOffset = token.readerIndex();
+
       final int addressLen = token.readByte();
       final byte[] addressBytes = new byte[addressLen];
       token.readBytes(addressBytes);
@@ -113,6 +113,8 @@ public class SecureQuicTokenHandler implements QuicTokenHandler {
     } catch (final IndexOutOfBoundsException | NegativeArraySizeException e) {
       // invalid token
       return Optional.empty();
+    } finally {
+      token.release();
     }
   }
 

@@ -15,6 +15,7 @@ public class ServerStateMachine extends StateMachine {
         final InitialPacket initialPacket = (InitialPacket) packet;
 
         if (initialPacket.getToken().isPresent()) {
+          // TODO remove?
           connection.setRemoteConnectionId(packet.getSourceConnectionId());
         }
       }

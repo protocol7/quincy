@@ -44,6 +44,11 @@ public class HandshakePacket extends LongHeaderPacket {
 
     return new HalfParsedPacket<>() {
       @Override
+      public PacketType getType() {
+        return PacketType.Handshake;
+      }
+
+      @Override
       public Optional<Version> getVersion() {
         return Optional.of(version);
       }
@@ -56,6 +61,11 @@ public class HandshakePacket extends LongHeaderPacket {
       @Override
       public Optional<ConnectionId> getSourceConnectionId() {
         return Optional.of(srcConnId);
+      }
+
+      @Override
+      public Optional<byte[]> getRetryToken() {
+        return Optional.empty();
       }
 
       @Override

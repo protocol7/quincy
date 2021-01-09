@@ -196,16 +196,31 @@ public class PacketBufferManagerTest {
 
   @Test
   public void resend() throws Exception {
+    when(frameSender.isOpen()).thenReturn(true);
+
     final Packet pingPacket = packet(2, PingFrame.INSTANCE);
     buffer.beforeSendPacket(pingPacket, ctx);
     assertBuffered(2);
 
-    // move time forward
+    // move time forward so that packet is valid for resend
     when(ticker.nanoTime()).thenReturn(3000_0000_0000L);
 
     resendTask.run(timeout);
 
     verify(frameSender).send(EncryptionLevel.OneRtt, PingFrame.INSTANCE);
+  }
+
+  @Test
+  public void resendClosed() throws Exception {
+    when(frameSender.isOpen()).thenReturn(false);
+
+    final Packet pingPacket = packet(2, PingFrame.INSTANCE);
+    buffer.beforeSendPacket(pingPacket, ctx);
+    assertBuffered(2);
+
+    resendTask.run(timeout);
+
+    verify(frameSender, never()).send(EncryptionLevel.OneRtt, PingFrame.INSTANCE);
   }
 
   private Packet packet(final long pn, final Frame... frames) {

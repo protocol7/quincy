@@ -32,51 +32,15 @@ public class QuicheClientTest {
 
   @Test
   public void get() throws InterruptedException {
-    b.handler(
-        new QuicBuilder()
-            .withApplicationProtocols(ALPN)
-            .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
-            .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
-            .withStreamHandler((stream, data, finished) -> stream.write("PONG".getBytes(), true))
-            .serverChannelInitializer());
-
-    b.bind("0.0.0.0", 4444).awaitUninterruptibly();
-
-    final BlockingQueue<String> events = new ArrayBlockingQueue<>(1000);
-
-    final QuicheContainer quiche =
-        (QuicheContainer)
-            new QuicheContainer(false)
-                .withEnv("RUST_BACKTRACE", "1")
-                .withEnv("RUST_LOG", "debug")
-                .withCommand(
-                    "/usr/local/bin/quiche-client",
-                    "--connect-to=192.168.65.2:4444",
-                    "--wire-version=ff00001d",
-                    "--no-verify",
-                    "https://example.org:4444/")
-                .withLogConsumer(
-                    new Consumer<OutputFrame>() {
-                      @Override
-                      public void accept(final OutputFrame outputFrame) {
-                        events.add(outputFrame.getUtf8String());
-                      }
-                    });
-    quiche.start();
-
-    while (true) {
-      final String msg = events.poll(10000, TimeUnit.MILLISECONDS);
-
-      if (msg.contains("1/1 response(s) received in")) {
-        break;
-      }
-    }
-
-    quiche.stop();
+    assertGet("ff00001d");
   }
 
   @Test
   public void verneg() throws InterruptedException {
+    assertGet("deadbeef");
+  }
+
+  private void assertGet(final String hexVersion) throws InterruptedException {
     b.handler(
         new QuicBuilder()
             .withApplicationProtocols(ALPN)
@@ -87,17 +51,17 @@ public class QuicheClientTest {
 
     b.bind("0.0.0.0", 4444).awaitUninterruptibly();
 
-    final BlockingQueue<String> events = new ArrayBlockingQueue<>(1000);
+    final BlockingQueue<String> events = new ArrayBlockingQueue<>(10000);
 
     final QuicheContainer quiche =
         (QuicheContainer)
             new QuicheContainer(false)
                 .withEnv("RUST_BACKTRACE", "1")
-                .withEnv("RUST_LOG", "debug")
+                .withEnv("RUST_LOG", "trace")
                 .withCommand(
                     "/usr/local/bin/quiche-client",
                     "--connect-to=192.168.65.2:4444",
-                    "--wire-version=deadbeef",
+                    "--wire-version=" + hexVersion,
                     "--no-verify",
                     "https://example.org:4444/")
                 .withLogConsumer(
@@ -112,7 +76,7 @@ public class QuicheClientTest {
     while (true) {
       final String msg = events.poll(10000, TimeUnit.MILLISECONDS);
 
-      if (msg.contains("1/1 response(s) received in")) {
+      if (msg.contains("1/1 responses received")) {
         break;
       }
     }

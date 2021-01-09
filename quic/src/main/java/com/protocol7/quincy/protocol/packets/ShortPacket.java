@@ -9,6 +9,7 @@ import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import java.security.GeneralSecurityException;
 import java.util.Arrays;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ShortPacket implements FullPacket {
@@ -32,6 +33,11 @@ public class ShortPacket implements FullPacket {
 
     return new HalfParsedPacket<>() {
       @Override
+      public PacketType getType() {
+        return null; // TODO fix
+      }
+
+      @Override
       public Optional<Version> getVersion() {
         return Optional.empty();
       }
@@ -43,6 +49,11 @@ public class ShortPacket implements FullPacket {
 
       @Override
       public Optional<ConnectionId> getSourceConnectionId() {
+        return Optional.empty();
+      }
+
+      @Override
+      public Optional<byte[]> getRetryToken() {
         return Optional.empty();
       }
 
@@ -151,6 +162,7 @@ public class ShortPacket implements FullPacket {
 
     byte b = 0;
     b = (byte) (b | 0x40); // reserved must be 1
+
     if (keyPhase) {
       b = (byte) (b | 0x4);
     }
@@ -215,6 +227,25 @@ public class ShortPacket implements FullPacket {
   @Override
   public Payload getPayload() {
     return payload;
+  }
+
+  @Override
+  public boolean equals(final Object o) {
+    if (this == o) return true;
+    if (o == null || getClass() != o.getClass()) return false;
+    final ShortPacket packet = (ShortPacket) o;
+    return keyPhase == packet.keyPhase
+        && packetNumber == packet.packetNumber
+        && Objects.equals(destinationConnectionId, packet.destinationConnectionId)
+        &&
+        // exclude scid from comparision
+        Objects.equals(payload, packet.payload);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(
+        keyPhase, destinationConnectionId, sourceConnectionId, packetNumber, payload);
   }
 
   @Override

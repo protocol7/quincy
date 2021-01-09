@@ -10,8 +10,12 @@ import io.netty.channel.Channel;
 import io.netty.channel.socket.DatagramPacket;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class NettyPacketSender implements PacketSender {
+
+  private final Logger log = LoggerFactory.getLogger(NettyPacketSender.class);
 
   private final Channel channel;
   private final InetSocketAddress peerAddress;
@@ -28,7 +32,7 @@ public class NettyPacketSender implements PacketSender {
     final ByteBuf bb = Unpooled.buffer();
     packet.write(bb, aead);
 
-    System.out.println("writeAndFlush");
+    log.debug("Sending datagram for packet {}", packet);
     return channel.writeAndFlush(new DatagramPacket(bb, peerAddress));
   }
 

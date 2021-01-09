@@ -3,7 +3,6 @@ package com.protocol7.quincy.server;
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
-import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
@@ -29,26 +28,23 @@ public class Connections {
   private final PrivateKey privateKey;
   private final Map<ConnectionId, Connection> connections =
       new ConcurrentHashMap<>(); // dcid -> connection
-  private final Map<ConnectionId, ConnectionId> scidMap = new ConcurrentHashMap<>(); // scid -> dcid
   private final Timer timer;
-  private final QuicTokenHandler tokenHandler;
 
   public Connections(
       final Configuration configuration,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
-      final Timer timer,
-      final QuicTokenHandler tokenHandler) {
+      final Timer timer) {
     this.configuration = configuration;
     this.certificates = certificates;
     this.privateKey = privateKey;
     this.timer = timer;
-    this.tokenHandler = tokenHandler;
   }
 
-  public Connection get(
+  public Connection create(
       final ConnectionId dcid,
       final Optional<ConnectionId> scid,
+      final ConnectionId originalRemoteConnectionId,
       final StreamHandler streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
@@ -56,19 +52,6 @@ public class Connections {
     requireNonNull(streamHandler);
     requireNonNull(packetSender);
     requireNonNull(peerAddress);
-
-    // TODO reconsider
-    Optional<ConnectionId> originalRemoteConnectionId = Optional.empty();
-    if (scid.isPresent()) {
-      final ConnectionId oldDcid = scidMap.get(scid.get());
-
-      if (oldDcid != null && !oldDcid.equals(dcid)) {
-
-        originalRemoteConnectionId = Optional.of(oldDcid);
-      }
-
-      scidMap.put(scid.get(), dcid);
-    }
 
     Connection conn = connections.get(dcid);
     if (conn == null) {
@@ -86,8 +69,7 @@ public class Connections {
               new DefaultFlowControlHandler(
                   configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
               peerAddress,
-              timer,
-              tokenHandler);
+              timer);
       final Connection existingConn = connections.putIfAbsent(dcid, conn);
       if (existingConn != null) {
         conn = existingConn;

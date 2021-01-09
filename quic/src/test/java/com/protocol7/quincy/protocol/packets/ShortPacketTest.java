@@ -13,10 +13,10 @@ import org.junit.Test;
 
 public class ShortPacketTest {
 
-  private ConnectionId dest = ConnectionId.random();
-  private long pn = 650000;
+  private final ConnectionId dest = ConnectionId.random();
+  private final long pn = 650000;
 
-  private AEAD aead = TestAEAD.create();
+  private final AEAD aead = TestAEAD.create();
 
   @Test
   public void roundtrip() {

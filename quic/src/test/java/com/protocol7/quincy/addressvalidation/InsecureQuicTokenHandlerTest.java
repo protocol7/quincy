@@ -23,8 +23,6 @@ import static org.junit.Assert.assertTrue;
 
 import com.protocol7.quincy.netty2.impl.AbstractQuicTest;
 import com.protocol7.quincy.protocol.ConnectionId;
-import io.netty.buffer.ByteBuf;
-import io.netty.buffer.Unpooled;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -49,38 +47,33 @@ public class InsecureQuicTokenHandlerTest extends AbstractQuicTest {
   }
 
   private static void testTokenProcessing(final boolean ipv4) throws UnknownHostException {
-    final ByteBuf out = Unpooled.buffer();
-    try {
-      final InetSocketAddress validAddress;
-      final InetSocketAddress invalidAddress;
-      if (ipv4) {
-        validAddress =
-            new InetSocketAddress(InetAddress.getByAddress(new byte[] {10, 10, 10, 1}), 9999);
-        invalidAddress =
-            new InetSocketAddress(InetAddress.getByAddress(new byte[] {10, 10, 10, 10}), 9999);
-      } else {
-        validAddress =
-            new InetSocketAddress(
-                InetAddress.getByAddress(
-                    new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 1}),
-                9999);
-        invalidAddress =
-            new InetSocketAddress(
-                InetAddress.getByAddress(
-                    new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}),
-                9999);
-      }
-
-      InsecureQuicTokenHandler.INSTANCE.writeToken(out, ConnectionId.random(), validAddress);
-      assertThat(
-          out.readableBytes(),
-          lessThanOrEqualTo(InsecureQuicTokenHandler.INSTANCE.maxTokenLength()));
-      assertTrue(InsecureQuicTokenHandler.INSTANCE.validateToken(out, validAddress).isPresent());
-
-      // Use another address and check that the validate fails.
-      assertFalse(InsecureQuicTokenHandler.INSTANCE.validateToken(out, invalidAddress).isPresent());
-    } finally {
-      out.release();
+    final InetSocketAddress validAddress;
+    final InetSocketAddress invalidAddress;
+    if (ipv4) {
+      validAddress =
+          new InetSocketAddress(InetAddress.getByAddress(new byte[] {10, 10, 10, 1}), 9999);
+      invalidAddress =
+          new InetSocketAddress(InetAddress.getByAddress(new byte[] {10, 10, 10, 10}), 9999);
+    } else {
+      validAddress =
+          new InetSocketAddress(
+              InetAddress.getByAddress(
+                  new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 1}),
+              9999);
+      invalidAddress =
+          new InetSocketAddress(
+              InetAddress.getByAddress(
+                  new byte[] {10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10, 10}),
+              9999);
     }
+
+    final byte[] token =
+        InsecureQuicTokenHandler.INSTANCE.writeToken(ConnectionId.random(), validAddress);
+    assertThat(token.length, lessThanOrEqualTo(InsecureQuicTokenHandler.INSTANCE.maxTokenLength()));
+
+    assertTrue(InsecureQuicTokenHandler.INSTANCE.validateToken(token, validAddress).isPresent());
+
+    // Use another address and check that the validate fails.
+    assertFalse(InsecureQuicTokenHandler.INSTANCE.validateToken(token, invalidAddress).isPresent());
   }
 }

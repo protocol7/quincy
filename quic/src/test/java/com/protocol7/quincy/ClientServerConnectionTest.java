@@ -9,7 +9,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.Connection;
@@ -105,15 +104,14 @@ public class ClientServerConnectionTest {
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             srcConnectionId,
             destConnectionId,
-            java.util.Optional.of(destConnectionId),
+            destConnectionId,
             serverListener,
             serverSender,
             certificates,
             privateKey,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            scheduler,
-            InsecureQuicTokenHandler.INSTANCE);
+            scheduler);
 
     clientSender.setPeer(serverConnection);
     serverSender.setPeer(clientConnection);

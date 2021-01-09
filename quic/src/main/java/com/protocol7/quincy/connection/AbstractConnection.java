@@ -6,8 +6,6 @@ import static java.util.Optional.of;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
-import com.protocol7.quincy.addressvalidation.ServerRetryHandler;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.logging.LoggingHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
@@ -49,15 +47,14 @@ public class AbstractConnection implements Connection {
       final Configuration configuration,
       final ConnectionId localConnectionId,
       final ConnectionId remoteConnectionId,
-      final Optional<ConnectionId> originalRemoteConnectionId,
+      final ConnectionId originalRemoteConnectionId,
       final StreamHandler streamListener,
       final PacketSender packetSender,
       final List<byte[]> certificates,
       final PrivateKey privateKey,
       final FlowControlHandler flowControlHandler,
       final InetSocketAddress peerAddress,
-      final Timer timer,
-      final QuicTokenHandler tokenHandler) {
+      final Timer timer) {
     return new AbstractConnection(
         configuration.getVersion(),
         peerAddress,
@@ -76,8 +73,7 @@ public class AbstractConnection implements Connection {
         false,
         flowControlHandler,
         configuration,
-        timer,
-        Optional.of(tokenHandler));
+        timer);
   }
 
   private final Version version;
@@ -85,14 +81,14 @@ public class AbstractConnection implements Connection {
   private final InetSocketAddress peerAddress;
 
   private ConnectionId remoteConnectionId;
-  private ConnectionId localConnectionId;
+  private final ConnectionId localConnectionId;
 
   protected final TlsManager tlsManager;
   protected final StateMachine stateMachine;
   private final PacketSender packetSender;
-  protected final StreamManager streamManager;
+  private final StreamManager streamManager;
 
-  protected final Pipeline pipeline;
+  private final Pipeline pipeline;
 
   private final boolean isClient;
 
@@ -112,8 +108,7 @@ public class AbstractConnection implements Connection {
       final boolean isClient,
       final InboundHandler flowControlHandler,
       final Configuration configuration,
-      final Timer timer,
-      final Optional<QuicTokenHandler> tokenHandler) {
+      final Timer timer) {
     this.version = version;
     this.peerAddress = peerAddress;
     this.localConnectionId = localConnectionId;
@@ -139,7 +134,6 @@ public class AbstractConnection implements Connection {
         new Pipeline(
             List.of(
                 logger,
-                new ServerRetryHandler(tokenHandler),
                 tlsManager,
                 packetBuffer,
                 streamManager,
@@ -151,6 +145,11 @@ public class AbstractConnection implements Connection {
   public void onPacket(final Packet packet) {
     stateMachine.handlePacket(this, packet);
     pipeline.onPacket(this, packet);
+  }
+
+  @Override
+  public boolean isOpen() {
+    return getState() != Closed;
   }
 
   public Packet sendPacket(final Packet p) {
@@ -238,7 +237,7 @@ public class AbstractConnection implements Connection {
   }
 
   private long nextSendPacketNumber() {
-    return sendPacketNumber.updateAndGet(packetNumber -> PacketNumber.next(packetNumber));
+    return sendPacketNumber.updateAndGet(PacketNumber::next);
   }
 
   private void resetSendPacketNumber() {

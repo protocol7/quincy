@@ -59,6 +59,11 @@ public class Pipeline {
           }
 
           @Override
+          public boolean isOpen() {
+            return connection.isOpen();
+          }
+
+          @Override
           public Packet sendPacket(final Packet p) {
             return connection.sendPacket(p);
           }
@@ -115,6 +120,11 @@ public class Pipeline {
           @Override
           public void setState(final State state) {
             connection.setState(state);
+          }
+
+          @Override
+          public boolean isOpen() {
+            return connection.isOpen();
           }
 
           @Override

@@ -25,7 +25,6 @@ public class QuicServerHandler extends ChannelDuplexHandler {
 
   private final Connections connections;
   private final PacketRouter router;
-  private final StreamHandler streamHandler;
 
   public QuicServerHandler(
       final Configuration configuration,
@@ -33,10 +32,9 @@ public class QuicServerHandler extends ChannelDuplexHandler {
       final PrivateKey privateKey,
       final QuicTokenHandler tokenHandler,
       final StreamHandler streamHandler) {
-    this.streamHandler = streamHandler;
-    this.connections =
-        new Connections(configuration, certificates, privateKey, timer, tokenHandler);
-    this.router = new PacketRouter(configuration.getVersion(), connections, this.streamHandler);
+    this.connections = new Connections(configuration, certificates, privateKey, timer);
+    this.router =
+        new PacketRouter(configuration.getVersion(), connections, streamHandler, tokenHandler);
   }
 
   @Override
@@ -64,9 +62,8 @@ public class QuicServerHandler extends ChannelDuplexHandler {
 
       final Optional<Connection> connection = connections.get(qp.getLocalConnectionId());
 
-      if (connection.isPresent()) {
-        connection.get().openStream().write(data, true);
-      }
+      connection.ifPresent(value -> value.openStream().write(data, true));
+
     } else if (msg instanceof DatagramPacket) {
       ctx.write(msg, promise);
     } else {

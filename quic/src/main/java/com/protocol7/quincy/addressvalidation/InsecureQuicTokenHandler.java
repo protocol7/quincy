@@ -16,6 +16,7 @@
 package com.protocol7.quincy.addressvalidation;
 
 import com.protocol7.quincy.protocol.ConnectionId;
+import com.protocol7.quincy.utils.Bytes;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.CharsetUtil;
@@ -45,44 +46,53 @@ public final class InsecureQuicTokenHandler implements QuicTokenHandler {
   public static final InsecureQuicTokenHandler INSTANCE = new InsecureQuicTokenHandler();
 
   @Override
-  public boolean writeToken(
-      final ByteBuf out, final ConnectionId dcid, final InetSocketAddress address) {
-    final byte[] addr = address.getAddress().getAddress();
-    out.writeBytes(SERVER_NAME_BYTES)
-        .writeByte(addr.length)
-        .writeBytes(addr)
-        .writeByte(dcid.getLength())
-        .writeBytes(dcid.asBytes());
-    return true;
+  public byte[] writeToken(final ConnectionId dcid, final InetSocketAddress address) {
+    final ByteBuf out = Unpooled.buffer();
+    try {
+      final byte[] addr = address.getAddress().getAddress();
+      out.writeBytes(SERVER_NAME_BYTES)
+          .writeByte(addr.length)
+          .writeBytes(addr)
+          .writeByte(dcid.getLength())
+          .writeBytes(dcid.asBytes());
+      return Bytes.peekToArray(out);
+    } finally {
+      out.release();
+    }
   }
 
   @Override
   public Optional<ConnectionId> validateToken(
-      final ByteBuf token, final InetSocketAddress address) {
+      final byte[] tokenBytes, final InetSocketAddress address) {
     final byte[] addr = address.getAddress().getAddress();
 
-    if (token.readableBytes() <= SERVER_NAME_BYTES.length + addr.length + 1 + 1) {
-      return Optional.empty();
+    final ByteBuf token = Unpooled.wrappedBuffer(tokenBytes);
+    try {
+      if (token.readableBytes() <= SERVER_NAME_BYTES.length + addr.length + 1 + 1) {
+        return Optional.empty();
+      }
+
+      final byte[] name = new byte[SERVER_NAME_BYTES.length];
+      token.readBytes(name);
+      if (!Arrays.equals(SERVER_NAME_BYTES, name)) {
+        return Optional.empty();
+      }
+
+      final int addrLen = token.readByte();
+      final byte[] tokenAddr = new byte[addrLen];
+      token.readBytes(tokenAddr);
+      if (!Arrays.equals(tokenAddr, addr)) {
+        return Optional.empty();
+      }
+
+      final int cidLen = token.readByte();
+      final byte[] cid = new byte[cidLen];
+      token.readBytes(cid);
+
+      return Optional.of(new ConnectionId(cid));
+    } finally {
+      token.release();
     }
-
-    final byte[] name = new byte[SERVER_NAME_BYTES.length];
-    token.readBytes(name);
-    if (!Arrays.equals(SERVER_NAME_BYTES, name)) {
-      return Optional.empty();
-    }
-
-    final int addrLen = token.readByte();
-    final byte[] tokenAddr = new byte[addrLen];
-    token.readBytes(tokenAddr);
-    if (!Arrays.equals(tokenAddr, addr)) {
-      return Optional.empty();
-    }
-
-    final int cidLen = token.readByte();
-    final byte[] cid = new byte[cidLen];
-    token.readBytes(cid);
-
-    return Optional.of(new ConnectionId(cid));
   }
 
   @Override

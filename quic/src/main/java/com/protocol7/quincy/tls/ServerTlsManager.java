@@ -31,7 +31,7 @@ public class ServerTlsManager implements TlsManager {
 
   public ServerTlsManager(
       final ConnectionId localConnectionId,
-      final Optional<ConnectionId> originalLocalConnectionId,
+      final ConnectionId originalLocalConnectionId,
       final List<String> applicationProtocol,
       final TransportParameters transportParameters,
       final PrivateKey privateKey,
@@ -42,9 +42,7 @@ public class ServerTlsManager implements TlsManager {
             .withInitialSourceConnectionId(localConnectionId.asBytes())
             .withRetrySourceConnectionId(localConnectionId.asBytes());
 
-    if (originalLocalConnectionId.isPresent()) {
-      tps.withOriginalDestinationConnectionId(originalLocalConnectionId.get().asBytes());
-    }
+    tps.withOriginalDestinationConnectionId(originalLocalConnectionId.asBytes());
 
     this.tlsSession =
         new ServerTlsSession(

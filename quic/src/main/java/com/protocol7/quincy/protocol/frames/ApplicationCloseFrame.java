@@ -54,7 +54,7 @@ public class ApplicationCloseFrame extends Frame {
 
   @Override
   public String toString() {
-    return "ConnectionCloseFrame{"
+    return "ApplicationCloseFrame{"
         + ", errorCode="
         + errorCode
         + ", reasonPhrase='"

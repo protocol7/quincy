@@ -43,7 +43,7 @@ public class ServerTlsManagerTest {
   private final ServerTlsManager manager =
       new ServerTlsManager(
           localConnectionId,
-          of(remoteConnectionId),
+          remoteConnectionId,
           List.of("http/0.9"),
           tps,
           KeyUtil.getPrivateKey("src/test/resources/server.der"),

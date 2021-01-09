@@ -62,6 +62,11 @@ public class InitialPacket extends LongHeaderPacket {
 
     return new HalfParsedPacket<>() {
       @Override
+      public PacketType getType() {
+        return PacketType.Initial;
+      }
+
+      @Override
       public Optional<Version> getVersion() {
         return Optional.of(version);
       }
@@ -74,6 +79,11 @@ public class InitialPacket extends LongHeaderPacket {
       @Override
       public Optional<ConnectionId> getSourceConnectionId() {
         return Optional.of(srcConnId);
+      }
+
+      @Override
+      public Optional<byte[]> getRetryToken() {
+        return token;
       }
 
       @Override
@@ -194,8 +204,12 @@ public class InitialPacket extends LongHeaderPacket {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     if (!super.equals(o)) return false;
-    final InitialPacket that = (InitialPacket) o;
-    return Objects.equals(token, that.token);
+    final InitialPacket packet = (InitialPacket) o;
+    if (token.isPresent() && packet.token.isPresent()) {
+      return Arrays.equals(token.get(), packet.token.get());
+    } else {
+      return token.isPresent() == packet.token.isPresent();
+    }
   }
 
   @Override

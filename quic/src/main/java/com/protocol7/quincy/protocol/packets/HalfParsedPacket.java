@@ -7,11 +7,15 @@ import java.util.Optional;
 
 public interface HalfParsedPacket<P extends Packet> {
 
+  PacketType getType();
+
   Optional<Version> getVersion();
 
   ConnectionId getDestinationConnectionId();
 
   Optional<ConnectionId> getSourceConnectionId();
+
+  Optional<byte[]> getRetryToken();
 
   P complete(AEADProvider aeadProvider);
 }

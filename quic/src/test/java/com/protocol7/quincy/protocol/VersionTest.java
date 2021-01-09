@@ -42,4 +42,10 @@ public class VersionTest {
 
     assertEquals(Version.DRAFT_29, parsed);
   }
+
+  @Test
+  public void equals() {
+    assertEquals(Version.DRAFT_29, Version.DRAFT_29);
+    assertEquals(new Version(Version.DRAFT_29.asBytes()), Version.DRAFT_29);
+  }
 }

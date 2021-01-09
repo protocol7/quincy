@@ -38,6 +38,11 @@ public class VersionNegotiationPacket implements Packet {
     return new HalfParsedPacket<>() {
 
       @Override
+      public PacketType getType() {
+        return null;
+      }
+
+      @Override
       public Optional<Version> getVersion() {
         return Optional.of(version);
       }
@@ -50,6 +55,11 @@ public class VersionNegotiationPacket implements Packet {
       @Override
       public Optional<ConnectionId> getSourceConnectionId() {
         return Optional.of(srcConnId);
+      }
+
+      @Override
+      public Optional<byte[]> getRetryToken() {
+        return Optional.empty();
       }
 
       @Override

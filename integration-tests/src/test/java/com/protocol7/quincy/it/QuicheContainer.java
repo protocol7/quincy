@@ -6,6 +6,7 @@ import java.io.File;
 import java.net.InetSocketAddress;
 import org.testcontainers.containers.BindMode;
 import org.testcontainers.containers.GenericContainer;
+import org.testcontainers.containers.startupcheck.OneShotStartupCheckStrategy;
 import org.testcontainers.containers.wait.strategy.Wait;
 import org.testcontainers.images.builder.ImageFromDockerfile;
 
@@ -18,6 +19,8 @@ public class QuicheContainer extends GenericContainer {
 
     if (wait) {
       waitingFor(Wait.forLogMessage(".*listening on.*", 1));
+    } else {
+      withStartupCheckStrategy(new OneShotStartupCheckStrategy());
     }
     withFileSystemBind(
         new File("src/test/resources").getAbsolutePath(), "/keys", BindMode.READ_ONLY);

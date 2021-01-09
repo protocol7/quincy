@@ -52,6 +52,11 @@ public class RetryPacket implements Packet {
     return new HalfParsedPacket<>() {
 
       @Override
+      public PacketType getType() {
+        return PacketType.Retry;
+      }
+
+      @Override
       public Optional<Version> getVersion() {
         return Optional.of(version);
       }
@@ -67,7 +72,12 @@ public class RetryPacket implements Packet {
       }
 
       @Override
-      public RetryPacket complete(final AEADProvider aeadProvider) {
+      public Optional<byte[]> getRetryToken() {
+        return Optional.empty();
+      }
+
+      @Override
+      public RetryPacket complete(final AEADProvider notUsed) {
         return new RetryPacket(
             version,
             destConnId,
@@ -84,7 +94,7 @@ public class RetryPacket implements Packet {
   private final ConnectionId sourceConnectionId;
   private final Optional<ConnectionId> originalConnectionId;
   private final byte[] retryToken;
-  private final Optional<byte[]> retryTokenIntegrityTag;
+  private final byte[] retryTokenIntegrityTag;
 
   private RetryPacket(
       final Version version,
@@ -98,7 +108,9 @@ public class RetryPacket implements Packet {
     this.sourceConnectionId = requireNonNull(sourceConnectionId);
     this.originalConnectionId = requireNonNull(originalConnectionId);
     this.retryToken = requireNonNull(retryToken);
-    this.retryTokenIntegrityTag = requireNonNull(retryTokenIntegrityTag);
+    this.retryTokenIntegrityTag =
+        retryTokenIntegrityTag.orElseGet(
+            () -> calculateTokenIntegrityTag(originalConnectionId.get()));
   }
 
   public Version getVersion() {
@@ -110,11 +122,7 @@ public class RetryPacket implements Packet {
   }
 
   @Override
-  public void write(final ByteBuf bb, final AEAD aead) {
-    if (!originalConnectionId.isPresent()) {
-      throw new IllegalStateException("Can't write retry packet without originalConnectionId");
-    }
-
+  public void write(final ByteBuf bb, final AEAD notUsed) {
     int b = (PACKET_TYPE_MASK | PacketType.Retry.getType() << 4) & 0xFF;
     b = b | 0x40; // fixed
     bb.writeByte(b);
@@ -126,11 +134,10 @@ public class RetryPacket implements Packet {
 
     bb.writeBytes(retryToken);
 
-    bb.writeBytes(calculateTokenIntegrityTag(bb, originalConnectionId.get()));
+    bb.writeBytes(retryTokenIntegrityTag);
   }
 
-  private byte[] calculateTokenIntegrityTag(
-      final ByteBuf header, final ConnectionId originalConnectionId) {
+  private byte[] calculateTokenIntegrityTag(final ConnectionId originalConnectionId) {
 
     try {
       return TAG_AEAD.create(retryPseudoPacket(originalConnectionId));
@@ -140,12 +147,8 @@ public class RetryPacket implements Packet {
   }
 
   public void verify(final ConnectionId originalConnectionId) {
-    if (retryTokenIntegrityTag.isEmpty()) {
-      throw new IllegalStateException("Can't verify retry packet without retryTokenIntegrityTag");
-    }
-
     try {
-      TAG_AEAD.verify(retryPseudoPacket(originalConnectionId), retryTokenIntegrityTag.get());
+      TAG_AEAD.verify(retryPseudoPacket(originalConnectionId), retryTokenIntegrityTag);
     } catch (final GeneralSecurityException e) {
       throw new RuntimeException("Failed to verify tag", e);
     }

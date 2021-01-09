@@ -1,13 +1,11 @@
 package com.protocol7.quincy.server;
 
 import static java.util.Optional.empty;
-import static java.util.Optional.of;
 import static org.junit.Assert.*;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
-import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
 import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
@@ -42,16 +40,15 @@ import org.mockito.junit.MockitoJUnitRunner;
 public class ServerTest {
 
   public static final byte[] DATA = "Hello".getBytes();
-  private final ConnectionId destConnectionId = ConnectionId.random();
-  private final ConnectionId destConnectionId2 = ConnectionId.random();
-  private final ConnectionId srcConnectionId = ConnectionId.random();
+  private final ConnectionId serverConnectionId = ConnectionId.random();
+  private final ConnectionId clientConnectionId = ConnectionId.random();
   private Connection connection;
   private long packetNumber = 0;
   private final long streamId = StreamId.next(-1, true, true);
 
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
-          InitialAEAD.create(destConnectionId.asBytes(), true),
+          InitialAEAD.create(serverConnectionId.asBytes(), true),
           List.of("http/0.9"),
           new QuicBuilder().configuration().toTransportParameters(),
           new NoopCertificateValidator());
@@ -72,35 +69,29 @@ public class ServerTest {
     connection =
         AbstractConnection.forServer(
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
-            srcConnectionId,
-            destConnectionId,
-            Optional.of(destConnectionId),
+            serverConnectionId,
+            clientConnectionId,
+            serverConnectionId,
             streamListener,
             packetSender,
             certificates,
             privateKey,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            scheduler,
-            InsecureQuicTokenHandler.INSTANCE);
+            scheduler);
   }
 
   @Test
   public void handshake() throws CertificateInvalidException {
     assertEquals(State.Started, connection.getState());
-    final byte[] ch = clientTlsSession.startHandshake(destConnectionId.asBytes());
+    final byte[] ch = clientTlsSession.startHandshake(serverConnectionId.asBytes());
 
-    connection.onPacket(initialPacket(destConnectionId, empty(), new CryptoFrame(0, ch)));
+    final InitialPacket clientHello =
+        initialPacket(serverConnectionId, empty(), new CryptoFrame(0, ch));
+    connection.onPacket(clientHello);
 
-    final RetryPacket retry = (RetryPacket) captureSentPacket(1);
-    assertEquals(srcConnectionId, retry.getDestinationConnectionId());
-    assertTrue(retry.getRetryToken().length > 0);
-    final byte[] token = retry.getRetryToken();
-
-    connection.onPacket(initialPacket(destConnectionId2, of(token), new CryptoFrame(0, ch)));
-
-    final InitialPacket serverHello = (InitialPacket) captureSentPacket(2);
-    assertEquals(srcConnectionId, serverHello.getDestinationConnectionId());
+    final InitialPacket serverHello = (InitialPacket) captureSentPacket(1);
+    assertEquals(clientConnectionId, serverHello.getDestinationConnectionId());
 
     final ConnectionId newSourceConnectionId = serverHello.getSourceConnectionId();
 
@@ -111,8 +102,8 @@ public class ServerTest {
 
     clientTlsSession.handleServerHello(Unpooled.wrappedBuffer(cf.getCryptoData()));
 
-    final HandshakePacket handshake = (HandshakePacket) captureSentPacket(3);
-    assertEquals(srcConnectionId, handshake.getDestinationConnectionId());
+    final HandshakePacket handshake = (HandshakePacket) captureSentPacket(2);
+    assertEquals(clientConnectionId, handshake.getDestinationConnectionId());
     assertEquals(newSourceConnectionId, handshake.getSourceConnectionId());
     assertEquals(1, handshake.getPacketNumber());
     assertEquals(1, handshake.getPayload().getFrames().size());
@@ -120,15 +111,15 @@ public class ServerTest {
 
     final byte[] clientFin = clientTlsSession.handleHandshake(cf2.getCryptoData(), 0).get();
 
-    connection.onPacket(hp(destConnectionId2, new CryptoFrame(0, clientFin)));
+    connection.onPacket(hp(serverConnectionId, new CryptoFrame(0, clientFin)));
 
-    final ShortPacket serverDone = (ShortPacket) captureSentPacket(5);
+    final ShortPacket serverDone = (ShortPacket) captureSentPacket(4);
 
     connection.onPacket(
         ShortPacket.create(
             false,
-            destConnectionId2,
-            srcConnectionId,
+            serverConnectionId,
+            clientConnectionId,
             nextPacketNumber(),
             new AckFrame(
                 123, new AckRange(serverDone.getPacketNumber(), serverDone.getPacketNumber()))));
@@ -140,7 +131,7 @@ public class ServerTest {
   public void streamFrame() throws CertificateInvalidException {
     handshake();
 
-    connection.onPacket(packet(destConnectionId2, new StreamFrame(streamId, 0, false, DATA)));
+    connection.onPacket(packet(serverConnectionId, new StreamFrame(streamId, 0, false, DATA)));
 
     verify(streamListener).onData(any(), eq(DATA), eq(false));
   }
@@ -149,16 +140,16 @@ public class ServerTest {
   public void resetStreamFrame() throws CertificateInvalidException {
     handshake();
 
-    connection.onPacket(packet(destConnectionId2, new ResetStreamFrame(streamId, 123, 456)));
+    connection.onPacket(packet(serverConnectionId, new ResetStreamFrame(streamId, 123, 456)));
   }
 
   @Test
   public void ping() throws CertificateInvalidException {
     handshake();
 
-    connection.onPacket(packet(destConnectionId2, PingFrame.INSTANCE));
+    connection.onPacket(packet(serverConnectionId, PingFrame.INSTANCE));
 
-    assertAck(7, 5, 4, 5);
+    assertAck(6, 5, 3, 4);
   }
 
   private void assertAck(
@@ -176,22 +167,22 @@ public class ServerTest {
     // not handshaking
     assertEquals(State.Started, connection.getState());
 
-    connection.onPacket(packet(destConnectionId, PingFrame.INSTANCE));
+    connection.onPacket(packet(serverConnectionId, PingFrame.INSTANCE));
   }
 
   private InitialPacket initialPacket(
       final ConnectionId destConnId, final Optional<byte[]> token, final Frame... frames) {
     return InitialPacket.create(
-        destConnId, srcConnectionId, nextPacketNumber(), Version.DRAFT_29, token, frames);
+        destConnId, clientConnectionId, nextPacketNumber(), Version.DRAFT_29, token, frames);
   }
 
   private Packet packet(final ConnectionId destConnId, final Frame... frames) {
-    return ShortPacket.create(false, destConnId, srcConnectionId, nextPacketNumber(), frames);
+    return ShortPacket.create(false, destConnId, clientConnectionId, nextPacketNumber(), frames);
   }
 
   private Packet hp(final ConnectionId destConnId, final Frame... frames) {
     return HandshakePacket.create(
-        destConnId, srcConnectionId, nextPacketNumber(), Version.DRAFT_29, frames);
+        destConnId, clientConnectionId, nextPacketNumber(), Version.DRAFT_29, frames);
   }
 
   private long nextPacketNumber() {

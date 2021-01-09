@@ -5,6 +5,7 @@ import com.protocol7.quincy.PipelineContext;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.protocol.TransportError;
+import com.protocol7.quincy.protocol.frames.ApplicationCloseFrame;
 import com.protocol7.quincy.protocol.frames.ConnectionCloseFrame;
 import com.protocol7.quincy.protocol.frames.Frame;
 import com.protocol7.quincy.protocol.frames.FrameType;
@@ -15,8 +16,12 @@ import io.netty.util.Timer;
 import io.netty.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class TerminationManager implements InboundHandler {
+
+  private final Logger log = LoggerFactory.getLogger(TerminationManager.class);
 
   private final AtomicReference<Timeout> timeout = new AtomicReference<>(null);
   private final Connection connection;
@@ -41,17 +46,21 @@ public class TerminationManager implements InboundHandler {
     if (packet instanceof FullPacket) {
       final FullPacket fp = (FullPacket) packet;
 
+      log.debug("Looking for ConnectionCloseFrame or ApplicationCloseFrame in {}", packet);
       for (final Frame frame : fp.getPayload().getFrames()) {
-        if (frame instanceof ConnectionCloseFrame) {
+        if (frame instanceof ConnectionCloseFrame || frame instanceof ApplicationCloseFrame) {
+          log.debug("Closing connection");
           ctx.setState(State.Closing);
           connection.closeByPeer();
           ctx.setState(State.Closed);
+          log.debug("Connection closed");
         }
       }
     }
 
     // reset idle timer on any packet
     resetIdleTimer();
+    log.debug("Connection termination idle timer reset");
 
     ctx.next(packet);
   }
