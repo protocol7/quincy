@@ -28,8 +28,6 @@ public class ShortPacket implements FullPacket {
       throw new IllegalArgumentException("Reserved bit must be 1");
     }
 
-    final boolean keyPhase = (firstByte & 0x4) == 0x4;
-
     final ConnectionId destConnId = ConnectionId.read(connIdLength, bb);
 
     return new HalfParsedPacket<>() {
@@ -86,6 +84,8 @@ public class ShortPacket implements FullPacket {
           for (int i = 0; i < pnBytes.length; i++) {
             aad[pnOffset - bbOffset + i] = pnBytes[i];
           }
+
+          final boolean keyPhase = (decryptedFirstByte & 0x4) == 0x4;
 
           final Payload payload = Payload.parse(bb, bb.readableBytes(), aead, packetNumber, aad);
 

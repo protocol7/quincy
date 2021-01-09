@@ -46,6 +46,7 @@ public class ShortPacketTest {
 
     final ShortPacket parsed = ShortPacket.parse(bb, dest.getLength()).complete(level -> aead);
 
+    assertEquals(packet.isKeyPhase(), parsed.isKeyPhase());
     assertEquals(packet.getDestinationConnectionId(), parsed.getDestinationConnectionId());
     assertEquals(packet.getPacketNumber(), parsed.getPacketNumber());
     assertEquals(packet.getPayload(), parsed.getPayload());
