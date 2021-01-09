@@ -97,7 +97,7 @@ public class PacketRouter {
                     Optional.of(
                         connections.create(
                             halfParsed.getDestinationConnectionId(),
-                            halfParsed.getSourceConnectionId(),
+                            halfParsed.getSourceConnectionId().get(),
                             originalConnId.get(),
                             listener,
                             sender,

@@ -36,8 +36,7 @@ public class QuicClientInitializer extends ChannelInitializer<DatagramChannel> {
       pipeline.addLast(
           new ChannelInboundHandlerAdapter() {
             @Override
-            public void channelRead(final ChannelHandlerContext ctx, final Object msg)
-                throws Exception {}
+            public void channelRead(final ChannelHandlerContext ctx, final Object msg) {}
           });
     }
   }

@@ -42,8 +42,6 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
         new QuicServerHandler(
             configuration, certificates, privateKey, tokenHandler, streamHandler));
 
-    if (handler.isPresent()) {
-      pipeline.addLast(handler.get());
-    }
+    handler.ifPresent(pipeline::addLast);
   }
 }

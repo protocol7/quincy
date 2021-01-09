@@ -43,39 +43,39 @@ public class Connections {
 
   public Connection create(
       final ConnectionId dcid,
-      final Optional<ConnectionId> scid,
+      final ConnectionId scid,
       final ConnectionId originalRemoteConnectionId,
       final StreamHandler streamHandler,
       final PacketSender packetSender,
       final InetSocketAddress peerAddress) {
     requireNonNull(dcid);
+    requireNonNull(scid);
+    requireNonNull(originalRemoteConnectionId);
     requireNonNull(streamHandler);
     requireNonNull(packetSender);
     requireNonNull(peerAddress);
 
-    Connection conn = connections.get(dcid);
-    if (conn == null) {
-      log.debug("Creating new server connection for {}", dcid);
-      conn =
-          AbstractConnection.forServer(
-              configuration,
-              dcid,
-              scid.get(),
-              originalRemoteConnectionId,
-              streamHandler,
-              packetSender,
-              certificates,
-              privateKey,
-              new DefaultFlowControlHandler(
-                  configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
-              peerAddress,
-              timer);
-      final Connection existingConn = connections.putIfAbsent(dcid, conn);
-      if (existingConn != null) {
-        conn = existingConn;
-      }
+    if (connections.containsKey(dcid)) {
+      throw new IllegalStateException("Connection already exist");
     }
-    return conn;
+
+    log.debug("Creating new server connection for {}", dcid);
+    return connections.computeIfAbsent(
+        dcid,
+        connectionId ->
+            AbstractConnection.forServer(
+                configuration,
+                dcid,
+                scid,
+                originalRemoteConnectionId,
+                streamHandler,
+                packetSender,
+                certificates,
+                privateKey,
+                new DefaultFlowControlHandler(
+                    configuration.getInitialMaxData(), configuration.getInitialMaxStreamDataUni()),
+                peerAddress,
+                timer));
   }
 
   public Optional<Connection> get(final ConnectionId dcid) {
