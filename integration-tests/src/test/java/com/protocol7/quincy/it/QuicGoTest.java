@@ -7,7 +7,6 @@ import com.protocol7.quincy.netty.QuicBuilder;
 import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.testcontainers.quicgo.QuicGoContainer;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelHandlerContext;
@@ -50,7 +49,7 @@ public class QuicGoTest {
 
     b.handler(
         new QuicBuilder()
-            .withApplicationProtocols(ALPN.from("hq-29"))
+            .withApplicationProtocols("hq-29")
             .withVersion(new Version(dehex("51474fff")))
             .withChannelHandler(
                 new ChannelInboundHandlerAdapter() {
@@ -81,7 +80,7 @@ public class QuicGoTest {
 
     b.handler(
         new QuicBuilder()
-            .withApplicationProtocols(ALPN.from("hq-29"))
+            .withApplicationProtocols("hq-29")
             .withVersion(new Version(dehex("deadbeef"))) // invalid version
             .withChannelHandler(
                 new ChannelInboundHandlerAdapter() {

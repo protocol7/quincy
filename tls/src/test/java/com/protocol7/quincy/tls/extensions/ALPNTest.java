@@ -10,7 +10,7 @@ public class ALPNTest {
 
   @Test
   public void roundtrip() {
-    final ALPN alpn = new ALPN(ALPN.from("h3"));
+    final ALPN alpn = new ALPN("h3", "http/0.9");
 
     final ByteBuf bb = Unpooled.buffer();
 
@@ -18,15 +18,15 @@ public class ALPNTest {
 
     final ALPN parsed = ALPN.parse(bb);
 
-    assertArrayEquals(alpn.getProtocols(), parsed.getProtocols());
+    assertEquals(alpn.getProtocols(), parsed.getProtocols());
   }
 
   @Test
   public void contains() {
-    final ALPN alpn = new ALPN(ALPN.from("h3", "http/0.9"));
+    final ALPN alpn = new ALPN("h3", "http/0.9");
 
-    assertTrue(alpn.contains("h3".getBytes()));
-    assertTrue(alpn.contains("http/0.9".getBytes()));
-    assertFalse(alpn.contains("http/1.1".getBytes()));
+    assertTrue(alpn.contains("h3"));
+    assertTrue(alpn.contains("http/0.9"));
+    assertFalse(alpn.contains("http/1.1"));
   }
 }

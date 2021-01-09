@@ -2,6 +2,7 @@ package com.protocol7.quincy;
 
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
+import java.util.List;
 
 public class Configuration {
 
@@ -17,7 +18,7 @@ public class Configuration {
   private final int initialMaxStreamDataBidiRemote;
   private final int initialMaxStreamDataUni;
   private final int maxAckDelay;
-  private final byte[] applicationProtocols;
+  private final List<String> applicationProtocols;
 
   public Configuration(
       final Version version,
@@ -32,7 +33,7 @@ public class Configuration {
       final int initialMaxStreamDataBidiRemote,
       final int initialMaxStreamDataUni,
       final int maxAckDelay,
-      final byte[] applicationProtocols) {
+      final List<String> applicationProtocols) {
     this.version = version;
     this.initialMaxStreamDataBidiLocal = initialMaxStreamDataBidiLocal;
     this.initialMaxData = initialMaxData;
@@ -96,7 +97,7 @@ public class Configuration {
     return maxAckDelay;
   }
 
-  public byte[] getApplicationProtocols() {
+  public List<String> getApplicationProtocols() {
     return applicationProtocols;
   }
 

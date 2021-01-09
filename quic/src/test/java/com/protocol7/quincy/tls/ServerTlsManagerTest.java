@@ -26,9 +26,9 @@ import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.protocol.packets.ShortPacket;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.extensions.TransportParameters;
 import io.netty.buffer.Unpooled;
+import java.util.List;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -44,7 +44,7 @@ public class ServerTlsManagerTest {
       new ServerTlsManager(
           localConnectionId,
           of(remoteConnectionId),
-          "http/0.9".getBytes(),
+          List.of("http/0.9"),
           tps,
           KeyUtil.getPrivateKey("src/test/resources/server.der"),
           KeyUtil.getCertsFromCrt("src/test/resources/server.crt"));
@@ -52,7 +52,7 @@ public class ServerTlsManagerTest {
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(localConnectionId.asBytes(), true),
-          ALPN.from("http/0.9"),
+          List.of("http/0.9"),
           tps,
           new NoopCertificateValidator());
 

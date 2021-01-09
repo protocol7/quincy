@@ -24,7 +24,6 @@ import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.buffer.Unpooled;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
@@ -53,7 +52,7 @@ public class ServerTest {
   private final ClientTlsSession clientTlsSession =
       new ClientTlsSession(
           InitialAEAD.create(destConnectionId.asBytes(), true),
-          ALPN.from("http/0.9"),
+          List.of("http/0.9"),
           new QuicBuilder().configuration().toTransportParameters(),
           new NoopCertificateValidator());
 
@@ -72,7 +71,7 @@ public class ServerTest {
 
     connection =
         AbstractConnection.forServer(
-            new QuicBuilder().withApplicationProtocols("http/0.9".getBytes()).configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             srcConnectionId,
             destConnectionId,
             Optional.of(destConnectionId),

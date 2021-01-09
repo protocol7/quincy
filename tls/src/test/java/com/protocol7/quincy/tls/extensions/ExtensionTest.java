@@ -18,7 +18,7 @@ public class ExtensionTest {
   public void roundtripClientToServer() {
     final List<Extension> extensions =
         List.of(
-            new ALPN("http/0.9".getBytes()),
+            new ALPN("http/0.9"),
             TransportParameters.newBuilder().withMaxUDPPacketSize(123).build(),
             KeyShare.of(X25519, Rnd.rndBytes(16)),
             SupportedVersions.TLS13,

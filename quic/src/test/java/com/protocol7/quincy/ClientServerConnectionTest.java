@@ -26,7 +26,6 @@ import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.KeyUtil;
 import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.aead.AEAD;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.DefaultEventExecutor;
 import io.netty.util.concurrent.DefaultPromise;
@@ -88,7 +87,7 @@ public class ClientServerConnectionTest {
   public void setUp() {
     clientConnection =
         new ClientConnection(
-            new QuicBuilder().withApplicationProtocols(ALPN.from("http/0.9")).configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             destConnectionId,
             srcConnectionId,
             clientListener,
@@ -103,7 +102,7 @@ public class ClientServerConnectionTest {
 
     serverConnection =
         AbstractConnection.forServer(
-            new QuicBuilder().withApplicationProtocols("http/0.9".getBytes()).configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             srcConnectionId,
             destConnectionId,
             java.util.Optional.of(destConnectionId),

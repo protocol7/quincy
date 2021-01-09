@@ -29,8 +29,18 @@ public class QuicheTest {
 
   public static final String ALPN = "http/0.9";
 
-  @Rule public QuicheContainer quiche = (QuicheContainer) new QuicheContainer(true)
-          .withCommand("/usr/local/bin/quiche-server", "--cert", "/keys/server.crt", "--key", "/keys/server.pem", "--listen", "0.0.0.0:4433");
+  @Rule
+  public QuicheContainer quiche =
+      (QuicheContainer)
+          new QuicheContainer(true)
+              .withCommand(
+                  "/usr/local/bin/quiche-server",
+                  "--cert",
+                  "/keys/server.crt",
+                  "--key",
+                  "/keys/server.pem",
+                  "--listen",
+                  "0.0.0.0:4433");
 
   private final EventLoopGroup workerGroup = new NioEventLoopGroup();
   private final Bootstrap b = new Bootstrap();
@@ -51,7 +61,7 @@ public class QuicheTest {
 
     b.handler(
         new QuicBuilder()
-            .withApplicationProtocols(com.protocol7.quincy.tls.extensions.ALPN.from(ALPN))
+            .withApplicationProtocols(ALPN)
             .withChannelHandler(
                 new ChannelInboundHandlerAdapter() {
                   @Override
@@ -81,7 +91,7 @@ public class QuicheTest {
 
     b.handler(
         new QuicBuilder()
-            .withApplicationProtocols(com.protocol7.quincy.tls.extensions.ALPN.from(ALPN))
+            .withApplicationProtocols(ALPN)
             .withVersion(new Version(dehex("deadbeef"))) // invalid version
             .withChannelHandler(
                 new ChannelInboundHandlerAdapter() {

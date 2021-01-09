@@ -32,13 +32,13 @@ public class ClientTlsSessionTest {
   private final ClientTlsSession engine =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
-          new byte[0],
+          List.of("http/0.9"),
           TestUtil.tps(),
           new NoopCertificateValidator());
   private final ClientTlsSession started =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
-          new byte[0],
+          List.of("http/0.9"),
           TestUtil.tps(),
           new NoopCertificateValidator());
 

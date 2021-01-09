@@ -12,6 +12,8 @@ import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.DatagramChannel;
 import java.security.PrivateKey;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -33,7 +35,7 @@ public class QuicBuilder {
   private List<byte[]> certificates;
   private PrivateKey privateKey;
   private QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
-  private byte[] applicationProtocols = new byte[0];
+  private List<String> applicationProtocols = Collections.emptyList();
 
   private StreamHandler streamHandler =
       new StreamHandler() {
@@ -118,8 +120,8 @@ public class QuicBuilder {
     return this;
   }
 
-  public QuicBuilder withApplicationProtocols(final byte[] applicationProtocols) {
-    this.applicationProtocols = applicationProtocols;
+  public QuicBuilder withApplicationProtocols(final String... applicationProtocols) {
+    this.applicationProtocols = Arrays.asList(applicationProtocols);
     return this;
   }
 

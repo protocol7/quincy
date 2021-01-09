@@ -1,18 +1,29 @@
 package com.protocol7.quincy.tls.extensions;
 
-import com.protocol7.quincy.utils.Hex;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 public class ALPN implements Extension {
 
   public static ALPN parse(final ByteBuf bb) {
     final int len = bb.readShort(); // extension size
 
-    final byte[] protocols = new byte[len];
-    bb.readBytes(protocols);
+    final ByteBuf buf = bb.readBytes(len);
+    final List<String> protocols = new ArrayList<>();
+
+    while (buf.isReadable()) {
+      final int l = buf.readByte();
+      final byte[] b = new byte[l];
+
+      buf.readBytes(b);
+
+      protocols.add(new String(b, StandardCharsets.UTF_8));
+    }
 
     return new ALPN(protocols);
   }
@@ -50,9 +61,13 @@ public class ALPN implements Extension {
     }
   }
 
-  private final byte[] protocols;
+  private final List<String> protocols;
 
-  public ALPN(final byte[] protocols) {
+  public ALPN(final String... protocols) {
+    this.protocols = Arrays.asList(protocols);
+  }
+
+  public ALPN(final List<String> protocols) {
     this.protocols = protocols;
   }
 
@@ -63,31 +78,24 @@ public class ALPN implements Extension {
 
   @Override
   public void write(final ByteBuf bb, final boolean ignored) {
-    bb.writeShort(protocols.length);
-    bb.writeBytes(protocols);
+    final ByteBuf buf = Unpooled.buffer();
+    for (final String protocol : protocols) {
+      final byte[] b = protocol.getBytes(StandardCharsets.UTF_8);
+
+      buf.writeByte(b.length);
+      buf.writeBytes(b);
+    }
+
+    bb.writeShort(buf.writerIndex());
+    bb.writeBytes(buf);
   }
 
-  public byte[] getProtocols() {
+  public List<String> getProtocols() {
     return protocols;
   }
 
-  public boolean contains(final byte[] protocol) {
-    final ByteBuf bb = Unpooled.wrappedBuffer(protocols);
-
-    try {
-      while (bb.readableBytes() > 0) {
-        final byte len = bb.readByte();
-        final byte[] b = new byte[len];
-        bb.readBytes(b);
-
-        if (Arrays.equals(b, protocol)) {
-          return true;
-        }
-      }
-      return false;
-    } finally {
-      bb.release();
-    }
+  public boolean contains(final String protocol) {
+    return protocols.contains(protocol);
   }
 
   @Override
@@ -95,16 +103,16 @@ public class ALPN implements Extension {
     if (this == o) return true;
     if (o == null || getClass() != o.getClass()) return false;
     final ALPN alpn = (ALPN) o;
-    return Arrays.equals(protocols, alpn.protocols);
+    return Objects.equals(protocols, alpn.protocols);
   }
 
   @Override
   public int hashCode() {
-    return Arrays.hashCode(protocols);
+    return Objects.hash(protocols);
   }
 
   @Override
   public String toString() {
-    return "ALPN{" + Hex.hex(protocols) + '}';
+    return "ALPN{" + protocols + '}';
   }
 }

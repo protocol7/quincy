@@ -36,7 +36,7 @@ public class ServerTlsSession {
   private final AEADs aeads;
   private final KeyExchange kek;
 
-  private final byte[] applicationProtocol;
+  private final List<String> applicationProtocols;
 
   private final PrivateKey privateKey;
   private final List<byte[]> certificates;
@@ -47,13 +47,13 @@ public class ServerTlsSession {
 
   public ServerTlsSession(
       final AEAD initialAEAD,
-      final byte[] applicationProtocol,
+      final List<String> applicationProtocols,
       final TransportParameters defaultTransportParameters,
       final List<byte[]> certificates,
       final PrivateKey privateKey) {
     this.defaultTransportParameters = requireNonNull(defaultTransportParameters);
     this.aeads = new AEADs(requireNonNull(initialAEAD));
-    this.applicationProtocol = applicationProtocol;
+    this.applicationProtocols = applicationProtocols;
     this.privateKey = requireNonNull(privateKey);
     this.certificates = checkNonEmpty(certificates, "certificates");
     this.kek = KeyExchange.generate(Group.X25519);
@@ -77,12 +77,20 @@ public class ServerTlsSession {
 
       final Optional<Extension> clientALPNOpt =
           ch.getExtension(ExtensionType.APPLICATION_LAYER_PROTOCOL_NEGOTIATION);
+
+      String selectedApplicationProtocol = null;
       if (clientALPNOpt.isEmpty()) {
         throw new IllegalArgumentException("Missing ALPN");
       } else {
         final ALPN clientALPN = (ALPN) clientALPNOpt.get();
 
-        if (!clientALPN.contains(applicationProtocol)) {
+        for (final String applicationProtocol : applicationProtocols) {
+          if (clientALPN.contains(applicationProtocol)) {
+            selectedApplicationProtocol = applicationProtocol;
+          }
+        }
+
+        if (selectedApplicationProtocol == null) {
           throw new IllegalArgumentException("Client ALPN not supported");
         }
       }
@@ -99,7 +107,7 @@ public class ServerTlsSession {
       final EncryptedExtensions ee =
           new EncryptedExtensions(
               new SupportedGroups(Group.X25519),
-              new ALPN(ALPN.from(applicationProtocol)),
+              new ALPN(selectedApplicationProtocol),
               defaultTransportParameters);
       ee.write(handshakeBB);
 

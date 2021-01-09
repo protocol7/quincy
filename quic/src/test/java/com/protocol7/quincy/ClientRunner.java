@@ -5,7 +5,6 @@ import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamHandler;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
@@ -29,7 +28,7 @@ public class ClientRunner {
       b.remoteAddress(peer);
       b.handler(
           new QuicBuilder()
-              .withApplicationProtocols(ALPN.from("http/0.9"))
+              .withApplicationProtocols("http/0.9")
               .withVersion(Version.DRAFT_29)
               .withChannelHandler(
                   new ChannelInboundHandlerAdapter() {

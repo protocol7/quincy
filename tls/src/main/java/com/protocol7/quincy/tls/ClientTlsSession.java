@@ -38,7 +38,7 @@ public class ClientTlsSession {
   private final AEADs aeads;
   private final KeyExchange kek;
   private final CertificateValidator certificateValidator;
-  private final byte[] applicationProtocols;
+  private final List<String> applicationProtocols;
 
   private ReceivedDataBuffer handshakeBuffer = new ReceivedDataBuffer();
   private byte[] clientHello;
@@ -47,7 +47,7 @@ public class ClientTlsSession {
 
   public ClientTlsSession(
       final AEAD initialAEAD,
-      final byte[] applicationProtocols,
+      final List<String> applicationProtocols,
       final TransportParameters transportParametersDefaults,
       final CertificateValidator certificateValidator) {
 
@@ -72,7 +72,7 @@ public class ClientTlsSession {
 
     extensions.add(transportParameters);
 
-    if (applicationProtocols.length > 0) {
+    if (!applicationProtocols.isEmpty()) {
       extensions.add(new ALPN(applicationProtocols));
     }
 

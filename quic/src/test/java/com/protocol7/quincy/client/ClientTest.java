@@ -22,7 +22,6 @@ import com.protocol7.quincy.tls.NoopCertificateValidator;
 import com.protocol7.quincy.tls.ServerTlsSession;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.utils.Rnd;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.*;
@@ -65,7 +64,7 @@ public class ClientTest {
 
     connection =
         new ClientConnection(
-            new QuicBuilder().withApplicationProtocols(ALPN.from("http/0.9")).configuration(),
+            new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             destConnectionId,
             srcConnectionId,
             streamListener,
@@ -81,7 +80,7 @@ public class ClientTest {
     serverTlsSession =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
-            "http/0.9".getBytes(),
+            List.of("http/0.9"),
             new QuicBuilder().configuration().toTransportParameters(),
             serverCert,
             privateKey);

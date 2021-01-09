@@ -32,7 +32,7 @@ public class ServerTlsManager implements TlsManager {
   public ServerTlsManager(
       final ConnectionId localConnectionId,
       final Optional<ConnectionId> originalLocalConnectionId,
-      final byte[] applicationProtocol,
+      final List<String> applicationProtocol,
       final TransportParameters transportParameters,
       final PrivateKey privateKey,
       final List<byte[]> certificates) {

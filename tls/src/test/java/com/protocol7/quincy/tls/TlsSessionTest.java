@@ -3,7 +3,6 @@ package com.protocol7.quincy.tls;
 import com.protocol7.quincy.tls.ClientTlsSession.CertificateInvalidException;
 import com.protocol7.quincy.tls.ServerTlsSession.ServerHelloAndHandshake;
 import com.protocol7.quincy.tls.aead.InitialAEAD;
-import com.protocol7.quincy.tls.extensions.ALPN;
 import com.protocol7.quincy.tls.messages.EncryptedExtensions;
 import com.protocol7.quincy.tls.messages.Finished;
 import com.protocol7.quincy.tls.messages.ServerCertificate;
@@ -19,14 +18,14 @@ import org.junit.Test;
 
 public class TlsSessionTest {
 
-  private static final byte[] ALPN_BYTES = "http/0.9".getBytes();
+  private static final String ALPN = "http/0.9";
 
   private PrivateKey privateKey;
   private final byte[] connectionId = Rnd.rndBytes(16);
   private final ClientTlsSession client =
       new ClientTlsSession(
           InitialAEAD.create(connectionId, true),
-          ALPN.from("http/0.9".getBytes()),
+          List.of(ALPN),
           TestUtil.tps(),
           new NoopCertificateValidator());
   private ServerTlsSession server;
@@ -39,7 +38,7 @@ public class TlsSessionTest {
     server =
         new ServerTlsSession(
             InitialAEAD.create(Rnd.rndBytes(4), false),
-            ALPN_BYTES,
+            List.of(ALPN),
             TestUtil.tps(),
             List.of(serverCert),
             privateKey);

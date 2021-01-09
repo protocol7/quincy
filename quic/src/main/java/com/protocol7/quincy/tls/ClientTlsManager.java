@@ -24,6 +24,7 @@ import com.protocol7.quincy.tls.extensions.TransportParameters;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import io.netty.util.concurrent.Promise;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 
@@ -31,14 +32,14 @@ public class ClientTlsManager implements TlsManager {
 
   private ClientTlsSession tlsSession;
   private Promise<Void> promise;
-  private final byte[] applicationProtocols;
+  private final List<String> applicationProtocols;
   private final TransportParameters transportParameters;
   private final CertificateValidator certificateValidator;
   private final ConnectionId initialConnectionId;
 
   public ClientTlsManager(
       final ConnectionId initialConnectionId,
-      final byte[] applicationProtocols,
+      final List<String> applicationProtocols,
       final TransportParameters transportParameters,
       final CertificateValidator certificateValidator) {
     this.initialConnectionId = requireNonNull(initialConnectionId);
