@@ -1,14 +1,10 @@
 package com.protocol7.quincy;
 
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.streams.Stream;
-import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioDatagramChannel;
@@ -30,28 +26,22 @@ public class ClientRunner {
           new QuicBuilder()
               .withApplicationProtocols("http/0.9")
               .withVersion(Version.DRAFT_29)
-              .withChannelHandler(
-                  new ChannelInboundHandlerAdapter() {
-                    @Override
-                    public void channelActive(final ChannelHandlerContext ctx) {
-                      System.out.println("sending GET");
-
-                      ctx.channel().write(QuicPacket.of(null, 0, "GET /\r\n".getBytes(), peer));
-
-                      ctx.fireChannelActive();
-                    }
-                  })
-              .withStreamHandler(
-                  new StreamHandler() {
-                    @Override
-                    public void onData(
-                        final Stream stream, final byte[] data, final boolean finished) {
-                      System.out.println(new String(data));
-                    }
-                  })
               .clientChannelInitializer());
 
-      final Channel channel = b.connect().syncUninterruptibly().channel();
+      final Channel channel = b.connect().sync().channel();
+
+      final Connection connection =
+          Connection.newBootstrap(channel)
+              .withStreamHandler(
+                  (stream, data, finished) -> {
+                    System.out.println(new String(data));
+                  })
+              .connect()
+              .sync()
+              .getNow();
+
+      connection.openStream().write("GET /\r\n".getBytes(), true);
+
       System.out.println("Connected");
 
       Thread.sleep(1000);

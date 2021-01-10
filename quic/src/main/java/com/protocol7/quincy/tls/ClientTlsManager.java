@@ -167,10 +167,6 @@ public class ClientTlsManager implements TlsManager {
     frameSender.send(EncryptionLevel.Initial, clientHello, new PaddingFrame(len));
   }
 
-  public boolean available(final EncryptionLevel encLevel) {
-    return tlsSession.available(encLevel);
-  }
-
   public AEAD getAEAD(final EncryptionLevel level) {
     return tlsSession.getAEAD(level);
   }

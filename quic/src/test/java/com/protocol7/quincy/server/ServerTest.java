@@ -51,7 +51,7 @@ public class ServerTest {
           InitialAEAD.create(serverConnectionId.asBytes(), true),
           List.of("http/0.9"),
           new QuicBuilder().configuration().toTransportParameters(),
-          new NoopCertificateValidator());
+          NoopCertificateValidator.INSTANCE);
 
   @Mock private PacketSender packetSender;
   @Mock private StreamHandler streamListener;

@@ -9,8 +9,12 @@ import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
 import io.netty.channel.socket.DatagramChannel;
 import java.util.Optional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class QuicClientInitializer extends ChannelInitializer<DatagramChannel> {
+
+  private final Logger log = LoggerFactory.getLogger(QuicClientInitializer.class);
 
   private final Configuration configuration;
   private final Optional<ChannelHandler> handler;
@@ -37,6 +41,12 @@ public class QuicClientInitializer extends ChannelInitializer<DatagramChannel> {
           new ChannelInboundHandlerAdapter() {
             @Override
             public void channelRead(final ChannelHandlerContext ctx, final Object msg) {}
+
+            @Override
+            public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause)
+                throws Exception {
+              log.error("Unhandled exception", cause);
+            }
           });
     }
   }

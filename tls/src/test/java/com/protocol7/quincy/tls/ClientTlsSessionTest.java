@@ -34,13 +34,13 @@ public class ClientTlsSessionTest {
           InitialAEAD.create(Rnd.rndBytes(4), true),
           List.of("http/0.9"),
           TestUtil.tps(),
-          new NoopCertificateValidator());
+          NoopCertificateValidator.INSTANCE);
   private final ClientTlsSession started =
       new ClientTlsSession(
           InitialAEAD.create(Rnd.rndBytes(4), true),
           List.of("http/0.9"),
           TestUtil.tps(),
-          new NoopCertificateValidator());
+          NoopCertificateValidator.INSTANCE);
 
   @Before
   public void setUp() {

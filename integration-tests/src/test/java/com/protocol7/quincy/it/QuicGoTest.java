@@ -1,14 +1,17 @@
 package com.protocol7.quincy.it;
 
 import static com.protocol7.quincy.utils.Hex.dehex;
+import static junit.framework.TestCase.assertTrue;
+import static junit.framework.TestCase.fail;
 import static org.junit.Assert.assertEquals;
 
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.netty.QuicBuilder;
-import com.protocol7.quincy.netty.QuicPacket;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.testcontainers.quicgo.QuicGoContainer;
 import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.Channel;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import io.netty.channel.EventLoopGroup;
@@ -51,21 +54,21 @@ public class QuicGoTest {
         new QuicBuilder()
             .withApplicationProtocols("hq-29")
             .withVersion(new Version(dehex("51474fff")))
-            .withChannelHandler(
-                new ChannelInboundHandlerAdapter() {
-                  @Override
-                  public void channelActive(final ChannelHandlerContext ctx) {
-                    ctx.channel().write(QuicPacket.of(null, 0, "GET /\r\n".getBytes(), peer));
-                    ctx.fireChannelActive();
-                  }
-                })
+            .clientChannelInitializer());
+
+    final Channel channel = b.connect().sync().channel();
+
+    final Connection connection =
+        Connection.newBootstrap(channel)
             .withStreamHandler(
                 (stream, data, finished) -> {
                   responses.add(new String(data, StandardCharsets.US_ASCII));
                 })
-            .clientChannelInitializer());
+            .connect()
+            .sync()
+            .getNow();
 
-    b.connect();
+    connection.openStream().write("GET /\r\n".getBytes(), true);
 
     // wait for response
     final String response = responses.poll(10000, TimeUnit.MILLISECONDS);
@@ -93,10 +96,16 @@ public class QuicGoTest {
                 })
             .clientChannelInitializer());
 
-    b.connect();
+    final Channel channel = b.connect().sync().channel();
+
+    try {
+      Connection.newBootstrap(channel).connect().sync().getNow();
+      fail("Connection must fail");
+    } catch (final RuntimeException e) {
+    }
 
     // wait for verneg
-    responses.await(10000, TimeUnit.MILLISECONDS);
+    assertTrue(responses.await(10000, TimeUnit.MILLISECONDS));
   }
 
   @After

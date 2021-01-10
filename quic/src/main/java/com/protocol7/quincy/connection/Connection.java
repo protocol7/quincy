@@ -9,14 +9,17 @@ import com.protocol7.quincy.protocol.packets.Packet;
 import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.tls.EncryptionLevel;
 import com.protocol7.quincy.tls.aead.AEAD;
+import io.netty.channel.Channel;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 
 public interface Connection extends FrameSender {
 
-  Packet sendPacket(Packet p);
+  static ConnectionBootstrap newBootstrap(final Channel channel) {
+    return new ConnectionBootstrap(channel);
+  }
 
-  ConnectionId getLocalConnectionId();
+  Packet sendPacket(Packet p);
 
   void setRemoteConnectionId(final ConnectionId remoteConnectionId);
 
@@ -43,4 +46,10 @@ public interface Connection extends FrameSender {
   void reset(ConnectionId sourceConnectionId);
 
   void setToken(byte[] retryToken);
+
+  interface Listener {
+    void action();
+  }
+
+  void addCloseListener(Listener listener);
 }

@@ -43,6 +43,14 @@ public class ClientConnection extends AbstractConnection {
   }
 
   public void handshake(final Promise promise) {
+
+    addCloseListener(
+        () -> {
+          if (!promise.isDone()) {
+            promise.setFailure(new RuntimeException("Connection closed"));
+          }
+        });
+
     MDC.put("actor", "client");
     tlsManager.handshake(getState(), this, stateMachine::setState, promise);
   }

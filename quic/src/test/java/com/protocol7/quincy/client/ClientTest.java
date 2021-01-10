@@ -71,7 +71,7 @@ public class ClientTest {
             packetSender,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            new NoopCertificateValidator(),
+            NoopCertificateValidator.INSTANCE,
             scheduler);
 
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");

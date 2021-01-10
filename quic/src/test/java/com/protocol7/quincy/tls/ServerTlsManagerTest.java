@@ -54,7 +54,7 @@ public class ServerTlsManagerTest {
           InitialAEAD.create(localConnectionId.asBytes(), true),
           List.of("http/0.9"),
           tps,
-          new NoopCertificateValidator());
+          NoopCertificateValidator.INSTANCE);
 
   @Test
   public void handshake() throws CertificateInvalidException {

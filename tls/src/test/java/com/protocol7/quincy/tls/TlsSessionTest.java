@@ -27,7 +27,7 @@ public class TlsSessionTest {
           InitialAEAD.create(connectionId, true),
           List.of(ALPN),
           TestUtil.tps(),
-          new NoopCertificateValidator());
+          NoopCertificateValidator.INSTANCE);
   private ServerTlsSession server;
 
   @Before

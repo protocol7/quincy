@@ -10,8 +10,6 @@ import java.util.function.Consumer;
 
 public interface TlsManager extends InboundHandler {
 
-  boolean available(final EncryptionLevel encLevel);
-
   AEAD getAEAD(final EncryptionLevel level);
 
   void resetTlsSession(final ConnectionId connectionId);

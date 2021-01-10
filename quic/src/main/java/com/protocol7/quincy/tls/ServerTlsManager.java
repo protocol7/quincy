@@ -134,8 +134,4 @@ public class ServerTlsManager implements TlsManager {
       final Promise<Void> promise) {
     throw new UnsupportedOperationException();
   }
-
-  public boolean available(final EncryptionLevel level) {
-    return tlsSession.available(level);
-  }
 }

@@ -36,6 +36,7 @@ import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
 import java.net.InetSocketAddress;
 import java.security.PrivateKey;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
@@ -207,10 +208,6 @@ public class AbstractConnection implements Connection {
     return peerAddress;
   }
 
-  public ConnectionId getLocalConnectionId() {
-    return localConnectionId;
-  }
-
   public void setRemoteConnectionId(final ConnectionId remoteConnectionId) {
     this.remoteConnectionId = remoteConnectionId;
   }
@@ -234,6 +231,13 @@ public class AbstractConnection implements Connection {
 
   public void setToken(final byte[] token) {
     this.token = of(token);
+  }
+
+  private final List<Listener> closeListeners = new ArrayList<>();
+
+  @Override
+  public void addCloseListener(final Listener listener) {
+    closeListeners.add(listener);
   }
 
   private long nextSendPacketNumber() {
@@ -260,16 +264,28 @@ public class AbstractConnection implements Connection {
       final TransportError error, final FrameType frameType, final String msg) {
     stateMachine.closeImmediate(this, new ConnectionCloseFrame(error.getValue(), frameType, msg));
 
+    notifyCloseListeners();
+
     return packetSender.destroy();
   }
 
   public Future<Void> close() {
     stateMachine.closeImmediate(this);
 
+    notifyCloseListeners();
+
     return packetSender.destroy();
   }
 
   public void closeByPeer() {
+    notifyCloseListeners();
+
     packetSender.destroy().awaitUninterruptibly(); // TOOD fix
+  }
+
+  private void notifyCloseListeners() {
+    for (final Listener listener : closeListeners) {
+      listener.action();
+    }
   }
 }

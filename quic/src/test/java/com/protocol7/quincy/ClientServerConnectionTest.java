@@ -93,7 +93,7 @@ public class ClientServerConnectionTest {
             clientSender,
             flowControlHandler,
             TestUtil.getTestAddress(),
-            new NoopCertificateValidator(),
+            NoopCertificateValidator.INSTANCE,
             scheduler);
 
     final List<byte[]> certificates = KeyUtil.getCertsFromCrt("src/test/resources/server.crt");
