@@ -6,7 +6,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
-import com.protocol7.quincy.connection.ClientConnection;
+import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
 import com.protocol7.quincy.flowcontrol.FlowControlHandler;
@@ -41,7 +41,7 @@ public class ClientTest {
   private static final byte[] DATA = "Hello".getBytes();
   private static final byte[] DATA2 = "world".getBytes();
 
-  private ClientConnection connection;
+  private Connection connection;
   private ServerTlsSession serverTlsSession;
 
   private final ConnectionId destConnectionId = ConnectionId.random();
@@ -63,7 +63,7 @@ public class ClientTest {
         .thenReturn(new DefaultPromise<Void>(GlobalEventExecutor.INSTANCE).setSuccess(null));
 
     connection =
-        new ClientConnection(
+        Connection.forClient(
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             destConnectionId,
             srcConnectionId,

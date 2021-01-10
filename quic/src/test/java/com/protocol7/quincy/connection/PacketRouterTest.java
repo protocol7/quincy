@@ -1,6 +1,7 @@
-package com.protocol7.quincy.server;
+package com.protocol7.quincy.connection;
 
 import static java.util.Optional.empty;
+import static java.util.Optional.of;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -11,8 +12,6 @@ import static org.mockito.Mockito.when;
 import com.protocol7.quincy.TestUtil;
 import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
 import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
-import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.frames.PaddingFrame;
@@ -26,7 +25,9 @@ import com.protocol7.quincy.tls.aead.TestAEAD;
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
 import java.net.InetSocketAddress;
+import java.security.PrivateKey;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import org.junit.Before;
@@ -51,6 +52,8 @@ public class PacketRouterTest {
   @Mock private Connection connection;
   @Mock private StreamHandler listener;
   @Mock private PacketSender sender;
+  @Mock private PrivateKey privateKey;
+  private final List<byte[]> certificates = Collections.emptyList();
   private final InetSocketAddress peerAddress = TestUtil.getTestAddress();
 
   private final QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
@@ -61,9 +64,17 @@ public class PacketRouterTest {
   public void setUp() {
     token = tokenHandler.writeToken(originalDestConnId, peerAddress);
 
-    router = new PacketRouter(Version.DRAFT_29, connections, listener, tokenHandler);
+    router =
+        new PacketRouter(
+            Version.DRAFT_29,
+            connections,
+            listener,
+            tokenHandler,
+            of(certificates),
+            of(privateKey));
 
-    when(connections.create(any(), any(), any(), any(), any(), any())).thenReturn(connection);
+    when(connections.create(any(), any(), any(), any(), any(), any(), any(), any()))
+        .thenReturn(connection);
 
     when(connection.getAEAD(any())).thenReturn(aead);
   }

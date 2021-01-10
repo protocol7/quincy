@@ -1,10 +1,8 @@
-package com.protocol7.quincy.server;
+package com.protocol7.quincy.connection;
 
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
-import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.Version;
 import com.protocol7.quincy.protocol.packets.FullPacket;
@@ -16,6 +14,9 @@ import com.protocol7.quincy.protocol.packets.VersionNegotiationPacket;
 import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.buffer.ByteBuf;
 import java.net.InetSocketAddress;
+import java.security.PrivateKey;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,24 +28,33 @@ public class PacketRouter {
 
   private final Version version;
   private final Connections connections;
-  private final StreamHandler listener;
+  private final StreamHandler streamHandler;
   private final QuicTokenHandler tokenHandler;
+  private final Optional<List<byte[]>> certificates;
+  private final Optional<PrivateKey> privateKey;
 
   public PacketRouter(
       final Version version,
       final Connections connections,
-      final StreamHandler listener,
-      final QuicTokenHandler tokenHandler) {
+      final StreamHandler streamHandler,
+      final QuicTokenHandler tokenHandler,
+      final Optional<List<byte[]>> certificates,
+      final Optional<PrivateKey> privateKey) {
     this.version = version;
     this.connections = connections;
-    this.listener = listener;
+    this.streamHandler = streamHandler;
     this.tokenHandler = tokenHandler;
+    this.certificates = certificates;
+    this.privateKey = privateKey;
   }
 
   private boolean validateVersion(final HalfParsedPacket<?> halfParsed, final PacketSender sender) {
 
     if (halfParsed.getVersion().isPresent()) {
-      if (halfParsed.getVersion().get() != version) {
+      if (halfParsed.getVersion().get().equals(Version.VERSION_NEGOTIATION)) {
+        // always allow verneg packets
+        return true;
+      } else if (!halfParsed.getVersion().get().equals(version)) {
         final VersionNegotiationPacket verNeg =
             new VersionNegotiationPacket(
                 halfParsed.getSourceConnectionId().get(),
@@ -58,11 +68,17 @@ public class PacketRouter {
     return true;
   }
 
-  public void route(
+  public void putConnection(final ConnectionId dcid, final Connection connection) {
+    connections.putConnection(dcid, connection);
+  }
+
+  public List<Packet> route(
       final ByteBuf bb, final PacketSender sender, final InetSocketAddress peerAddress) {
     requireNonNull(bb);
     requireNonNull(sender);
     requireNonNull(peerAddress);
+
+    final List<Packet> packets = new ArrayList<>();
 
     while (bb.isReadable()) {
       final HalfParsedPacket<?> halfParsed = Packet.parse(bb, ConnectionId.LENGTH);
@@ -91,17 +107,25 @@ public class PacketRouter {
 
               if (originalConnId.isPresent()) {
                 // validation succeeded, create connection
-                log.debug("Retry token validated, creating new connection");
+                if (certificates.isPresent() && privateKey.isPresent()) {
 
-                connection =
-                    Optional.of(
-                        connections.create(
-                            halfParsed.getDestinationConnectionId(),
-                            halfParsed.getSourceConnectionId().get(),
-                            originalConnId.get(),
-                            listener,
-                            sender,
-                            peerAddress));
+                  log.debug("Retry token validated, creating new connection");
+
+                  connection =
+                      Optional.of(
+                          connections.create(
+                              halfParsed.getDestinationConnectionId(),
+                              halfParsed.getSourceConnectionId().get(),
+                              originalConnId.get(),
+                              streamHandler,
+                              sender,
+                              peerAddress,
+                              certificates.get(),
+                              privateKey.get()));
+                } else {
+                  throw new IllegalStateException(
+                      "Can not create new connection without certificates and private key");
+                }
               } else {
                 // token validation failed, drop
                 log.warn("Invalid retry token, dropping packet");
@@ -138,6 +162,8 @@ public class PacketRouter {
 
           final Packet packet = halfParsed.complete(conn::getAEAD);
 
+          packets.add(packet);
+
           MDC.put("actor", "server");
           if (packet instanceof FullPacket) {
             MDC.put("packetnumber", Long.toString(((FullPacket) packet).getPacketNumber()));
@@ -155,5 +181,7 @@ public class PacketRouter {
         break;
       }
     }
+
+    return packets;
   }
 }

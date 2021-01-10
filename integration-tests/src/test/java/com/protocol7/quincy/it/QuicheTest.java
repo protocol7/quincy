@@ -62,7 +62,7 @@ public class QuicheTest {
   public void get() throws InterruptedException {
     final BlockingQueue<String> responses = new ArrayBlockingQueue<>(10);
 
-    b.handler(new QuicBuilder().withApplicationProtocols(ALPN).clientChannelInitializer());
+    b.handler(new QuicBuilder().withApplicationProtocols(ALPN).channelInitializer());
 
     final Channel channel = b.connect().sync().channel();
 
@@ -102,7 +102,7 @@ public class QuicheTest {
                     }
                   }
                 })
-            .clientChannelInitializer());
+            .channelInitializer());
 
     final Channel channel = b.connect().sync().channel();
 

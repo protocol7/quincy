@@ -4,8 +4,6 @@ import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.tls.EncryptionLevel;
 import java.util.concurrent.atomic.AtomicReference;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class AEADs {
 

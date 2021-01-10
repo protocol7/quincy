@@ -6,11 +6,8 @@ import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.addressvalidation.InsecureQuicTokenHandler;
 import com.protocol7.quincy.addressvalidation.QuicTokenHandler;
 import com.protocol7.quincy.protocol.Version;
-import com.protocol7.quincy.streams.Stream;
 import com.protocol7.quincy.streams.StreamHandler;
 import io.netty.channel.ChannelHandler;
-import io.netty.channel.ChannelInitializer;
-import io.netty.channel.socket.DatagramChannel;
 import java.security.PrivateKey;
 import java.util.Arrays;
 import java.util.Collections;
@@ -37,11 +34,7 @@ public class QuicBuilder {
   private QuicTokenHandler tokenHandler = InsecureQuicTokenHandler.INSTANCE;
   private List<String> applicationProtocols = Collections.emptyList();
 
-  private StreamHandler streamHandler =
-      new StreamHandler() {
-        @Override
-        public void onData(final Stream stream, final byte[] data, final boolean finished) {}
-      };
+  private StreamHandler streamHandler = (stream, data, finished) -> {};
 
   public QuicBuilder withVersion(final Version version) {
     this.version = version;
@@ -152,24 +145,16 @@ public class QuicBuilder {
         applicationProtocols);
   }
 
-  public ChannelHandler serverChannelInitializer() {
-    requireNonNull(certificates);
-    requireNonNull(privateKey);
+  public ChannelHandler channelInitializer() {
     requireNonNull(streamHandler);
+    requireNonNull(tokenHandler);
 
-    return new QuicServerInitializer(
+    return new QuicInitializer(
         configuration(),
         Optional.ofNullable(channelHandler),
-        certificates,
-        privateKey,
+        Optional.ofNullable(certificates),
+        Optional.ofNullable(privateKey),
         tokenHandler,
         streamHandler);
-  }
-
-  public ChannelInitializer<DatagramChannel> clientChannelInitializer() {
-    requireNonNull(streamHandler);
-
-    return new QuicClientInitializer(
-        configuration(), Optional.ofNullable(channelHandler), streamHandler);
   }
 }

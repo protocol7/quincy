@@ -6,7 +6,6 @@ import static java.util.Optional.of;
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.InboundHandler;
 import com.protocol7.quincy.Pipeline;
-import com.protocol7.quincy.flowcontrol.FlowControlHandler;
 import com.protocol7.quincy.logging.LoggingHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.protocol.PacketNumber;
@@ -28,54 +27,21 @@ import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.streams.StreamManager;
 import com.protocol7.quincy.termination.TerminationManager;
 import com.protocol7.quincy.tls.EncryptionLevel;
-import com.protocol7.quincy.tls.ServerTlsManager;
 import com.protocol7.quincy.tls.TlsManager;
 import com.protocol7.quincy.tls.aead.AEAD;
 import com.protocol7.quincy.utils.Ticker;
 import io.netty.util.Timer;
 import io.netty.util.concurrent.Future;
+import io.netty.util.concurrent.Promise;
 import java.net.InetSocketAddress;
-import java.security.PrivateKey;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
+import org.slf4j.MDC;
 
-public class AbstractConnection implements Connection {
-
-  public static AbstractConnection forServer(
-      final Configuration configuration,
-      final ConnectionId localConnectionId,
-      final ConnectionId remoteConnectionId,
-      final ConnectionId originalRemoteConnectionId,
-      final StreamHandler streamListener,
-      final PacketSender packetSender,
-      final List<byte[]> certificates,
-      final PrivateKey privateKey,
-      final FlowControlHandler flowControlHandler,
-      final InetSocketAddress peerAddress,
-      final Timer timer) {
-    return new AbstractConnection(
-        configuration.getVersion(),
-        peerAddress,
-        localConnectionId,
-        remoteConnectionId,
-        new ServerTlsManager(
-            localConnectionId,
-            originalRemoteConnectionId,
-            configuration.getApplicationProtocols(),
-            configuration.toTransportParameters(),
-            privateKey,
-            certificates),
-        new ServerStateMachine(),
-        packetSender,
-        streamListener,
-        false,
-        flowControlHandler,
-        configuration,
-        timer);
-  }
+public class DefaultConnection implements Connection {
 
   private final Version version;
 
@@ -97,20 +63,19 @@ public class AbstractConnection implements Connection {
 
   private final AtomicReference<Long> sendPacketNumber = new AtomicReference<>(-1L);
 
-  protected AbstractConnection(
-      final Version version,
-      final InetSocketAddress peerAddress,
-      final ConnectionId localConnectionId,
+  protected DefaultConnection(
+      final boolean isClient,
+      final Configuration configuration,
       final ConnectionId remoteConnectionId,
-      final TlsManager tlsManager,
+      final ConnectionId localConnectionId,
+      final InetSocketAddress peerAddress,
       final StateMachine stateMachine,
       final PacketSender packetSender,
       final StreamHandler streamHandler,
-      final boolean isClient,
+      final TlsManager tlsManager,
       final InboundHandler flowControlHandler,
-      final Configuration configuration,
       final Timer timer) {
-    this.version = version;
+    this.version = configuration.getVersion();
     this.peerAddress = peerAddress;
     this.localConnectionId = localConnectionId;
     this.remoteConnectionId = remoteConnectionId;
@@ -141,6 +106,19 @@ public class AbstractConnection implements Connection {
                 flowControlHandler,
                 terminationManager),
             List.of(packetBuffer, logger));
+  }
+
+  public void handshake(final Promise promise) {
+
+    addCloseListener(
+        () -> {
+          if (!promise.isDone()) {
+            promise.setFailure(new RuntimeException("Connection closed"));
+          }
+        });
+
+    MDC.put("actor", "client");
+    tlsManager.handshake(getState(), this, stateMachine::setState, promise);
   }
 
   public void onPacket(final Packet packet) {

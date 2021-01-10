@@ -26,7 +26,7 @@ public class ClientRunner {
           new QuicBuilder()
               .withApplicationProtocols("http/0.9")
               .withVersion(Version.DRAFT_29)
-              .clientChannelInitializer());
+              .channelInitializer());
 
       final Channel channel = b.connect().sync().channel();
 

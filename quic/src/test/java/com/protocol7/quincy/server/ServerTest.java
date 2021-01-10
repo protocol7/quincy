@@ -6,7 +6,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.protocol7.quincy.TestUtil;
-import com.protocol7.quincy.connection.AbstractConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
@@ -67,7 +66,7 @@ public class ServerTest {
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     connection =
-        AbstractConnection.forServer(
+        Connection.forServer(
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             serverConnectionId,
             clientConnectionId,

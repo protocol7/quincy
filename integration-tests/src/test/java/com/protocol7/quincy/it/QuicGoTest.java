@@ -54,7 +54,7 @@ public class QuicGoTest {
         new QuicBuilder()
             .withApplicationProtocols("hq-29")
             .withVersion(new Version(dehex("51474fff")))
-            .clientChannelInitializer());
+            .channelInitializer());
 
     final Channel channel = b.connect().sync().channel();
 
@@ -94,7 +94,7 @@ public class QuicGoTest {
                     }
                   }
                 })
-            .clientChannelInitializer());
+            .channelInitializer());
 
     final Channel channel = b.connect().sync().channel();
 

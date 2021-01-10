@@ -15,22 +15,22 @@ import java.util.Optional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
+public class QuicInitializer extends ChannelInitializer<DatagramChannel> {
 
-  private final Logger log = LoggerFactory.getLogger(QuicServerInitializer.class);
+  private final Logger log = LoggerFactory.getLogger(QuicInitializer.class);
 
   private final Configuration configuration;
   private final Optional<ChannelHandler> handler;
-  private final List<byte[]> certificates;
-  private final PrivateKey privateKey;
+  private final Optional<List<byte[]>> certificates;
+  private final Optional<PrivateKey> privateKey;
   private final QuicTokenHandler tokenHandler;
   private final StreamHandler streamHandler;
 
-  public QuicServerInitializer(
+  public QuicInitializer(
       final Configuration configuration,
       final Optional<ChannelHandler> handler,
-      final List<byte[]> certificates,
-      final PrivateKey privateKey,
+      final Optional<List<byte[]>> certificates,
+      final Optional<PrivateKey> privateKey,
       final QuicTokenHandler tokenHandler,
       final StreamHandler streamHandler) {
     this.configuration = configuration;
@@ -45,8 +45,7 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
   protected void initChannel(final DatagramChannel ch) {
     final ChannelPipeline pipeline = ch.pipeline();
     pipeline.addLast(
-        new QuicServerHandler(
-            configuration, certificates, privateKey, tokenHandler, streamHandler));
+        new QuicHandler(configuration, certificates, privateKey, tokenHandler, streamHandler));
 
     if (handler.isPresent()) {
       pipeline.addLast(handler.get());
@@ -57,8 +56,7 @@ public class QuicServerInitializer extends ChannelInitializer<DatagramChannel> {
             public void channelRead(final ChannelHandlerContext ctx, final Object msg) {}
 
             @Override
-            public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause)
-                throws Exception {
+            public void exceptionCaught(final ChannelHandlerContext ctx, final Throwable cause) {
               log.error("Unhandled exception", cause);
             }
           });

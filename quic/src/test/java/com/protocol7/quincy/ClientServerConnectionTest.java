@@ -9,8 +9,6 @@ import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.verify;
 
-import com.protocol7.quincy.connection.AbstractConnection;
-import com.protocol7.quincy.connection.ClientConnection;
 import com.protocol7.quincy.connection.Connection;
 import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.connection.State;
@@ -46,7 +44,7 @@ public class ClientServerConnectionTest {
   private static final byte[] PING = "ping".getBytes();
   private static final byte[] PONG = "pong".getBytes();
 
-  private ClientConnection clientConnection;
+  private Connection clientConnection;
   private Connection serverConnection;
 
   private final ConnectionId destConnectionId = ConnectionId.random();
@@ -85,7 +83,7 @@ public class ClientServerConnectionTest {
   @Before
   public void setUp() {
     clientConnection =
-        new ClientConnection(
+        Connection.forClient(
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             destConnectionId,
             srcConnectionId,
@@ -100,7 +98,7 @@ public class ClientServerConnectionTest {
     final PrivateKey privateKey = KeyUtil.getPrivateKey("src/test/resources/server.der");
 
     serverConnection =
-        AbstractConnection.forServer(
+        Connection.forServer(
             new QuicBuilder().withApplicationProtocols("http/0.9").configuration(),
             srcConnectionId,
             destConnectionId,

@@ -21,14 +21,13 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
-import com.protocol7.quincy.netty2.impl.AbstractQuicTest;
 import com.protocol7.quincy.protocol.ConnectionId;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import org.junit.Test;
 
-public class InsecureQuicTokenHandlerTest extends AbstractQuicTest {
+public class InsecureQuicTokenHandlerTest {
 
   @Test
   public void testMaxTokenLength() {

@@ -1,11 +1,8 @@
-package com.protocol7.quincy.server;
+package com.protocol7.quincy.connection;
 
 import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
-import com.protocol7.quincy.connection.AbstractConnection;
-import com.protocol7.quincy.connection.Connection;
-import com.protocol7.quincy.connection.PacketSender;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.streams.StreamHandler;
@@ -24,20 +21,12 @@ public class Connections {
   private final Logger log = LoggerFactory.getLogger(Connections.class);
 
   private final Configuration configuration;
-  private final List<byte[]> certificates;
-  private final PrivateKey privateKey;
   private final Map<ConnectionId, Connection> connections =
       new ConcurrentHashMap<>(); // dcid -> connection
   private final Timer timer;
 
-  public Connections(
-      final Configuration configuration,
-      final List<byte[]> certificates,
-      final PrivateKey privateKey,
-      final Timer timer) {
+  public Connections(final Configuration configuration, final Timer timer) {
     this.configuration = configuration;
-    this.certificates = certificates;
-    this.privateKey = privateKey;
     this.timer = timer;
   }
 
@@ -47,13 +36,17 @@ public class Connections {
       final ConnectionId originalRemoteConnectionId,
       final StreamHandler streamHandler,
       final PacketSender packetSender,
-      final InetSocketAddress peerAddress) {
+      final InetSocketAddress peerAddress,
+      final List<byte[]> certificates,
+      final PrivateKey privateKey) {
     requireNonNull(dcid);
     requireNonNull(scid);
     requireNonNull(originalRemoteConnectionId);
     requireNonNull(streamHandler);
     requireNonNull(packetSender);
     requireNonNull(peerAddress);
+    requireNonNull(certificates);
+    requireNonNull(privateKey);
 
     if (connections.containsKey(dcid)) {
       throw new IllegalStateException("Connection already exist");
@@ -63,7 +56,7 @@ public class Connections {
     return connections.computeIfAbsent(
         dcid,
         connectionId ->
-            AbstractConnection.forServer(
+            Connection.forServer(
                 configuration,
                 dcid,
                 scid,
@@ -80,5 +73,10 @@ public class Connections {
 
   public Optional<Connection> get(final ConnectionId dcid) {
     return Optional.ofNullable(connections.get(dcid));
+  }
+
+  public void putConnection(final ConnectionId dcid, final Connection connection) {
+    log.debug("Adding connection for {}", dcid);
+    connections.putIfAbsent(dcid, connection);
   }
 }

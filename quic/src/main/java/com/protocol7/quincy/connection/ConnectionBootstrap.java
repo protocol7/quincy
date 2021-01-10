@@ -4,7 +4,7 @@ import static java.util.Objects.requireNonNull;
 
 import com.protocol7.quincy.Configuration;
 import com.protocol7.quincy.flowcontrol.DefaultFlowControlHandler;
-import com.protocol7.quincy.netty.QuicClientHandler;
+import com.protocol7.quincy.netty.QuicHandler;
 import com.protocol7.quincy.protocol.ConnectionId;
 import com.protocol7.quincy.streams.StreamHandler;
 import com.protocol7.quincy.tls.CertificateValidator;
@@ -38,18 +38,20 @@ public class ConnectionBootstrap {
   }
 
   public Future<Connection> connect() {
-    final QuicClientHandler clientHandler = channel.pipeline().get(QuicClientHandler.class);
+    final QuicHandler clientHandler = channel.pipeline().get(QuicHandler.class);
 
     if (clientHandler != null) {
       final Configuration configuration = clientHandler.getConfiguration();
       final InetSocketAddress peerAddress = (InetSocketAddress) channel.remoteAddress();
       final Timer timer = clientHandler.getTimer();
 
-      final ClientConnection connection =
-          new ClientConnection(
+      final ConnectionId localConnectionId = ConnectionId.random();
+
+      final Connection connection =
+          Connection.forClient(
               configuration,
               ConnectionId.random(),
-              ConnectionId.random(),
+              localConnectionId,
               streamHandler,
               new NettyPacketSender(channel, peerAddress),
               new DefaultFlowControlHandler(
@@ -61,7 +63,7 @@ public class ConnectionBootstrap {
       final Promise<Void> connectFuture = channel.newPromise();
       final Promise<Connection> connectionFuture = new DefaultPromise<>(channel.eventLoop());
 
-      clientHandler.putConnection(connection);
+      clientHandler.putConnection(localConnectionId, connection);
 
       connectFuture.addListener(
           future -> {
@@ -76,7 +78,7 @@ public class ConnectionBootstrap {
 
       return connectionFuture;
     } else {
-      throw new IllegalStateException("Channel missing QuicClientHandler");
+      throw new IllegalStateException("Channel missing QuicServerHandler");
     }
   }
 }

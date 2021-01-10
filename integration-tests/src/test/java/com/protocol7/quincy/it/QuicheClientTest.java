@@ -47,7 +47,7 @@ public class QuicheClientTest {
             .withCertificates(KeyUtil.getCertsFromCrt("src/test/resources/server.crt"))
             .withPrivateKey(KeyUtil.getPrivateKey("src/test/resources/server.der"))
             .withStreamHandler((stream, data, finished) -> stream.write("PONG".getBytes(), true))
-            .serverChannelInitializer());
+            .channelInitializer());
 
     b.bind("0.0.0.0", 4444).awaitUninterruptibly();
 

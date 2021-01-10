@@ -34,7 +34,7 @@ public class ServerRunner {
                       stream.write("PONG".getBytes(), true);
                     }
                   })
-              .serverChannelInitializer());
+              .channelInitializer());
 
       b.bind("0.0.0.0", 4444).awaitUninterruptibly();
       System.out.println("Bound");
